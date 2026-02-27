@@ -10,6 +10,7 @@ export interface Instance {
 export interface DotNet {
     withDiagnosticTracing: (enabled: boolean) => DotNet;
     withApplicationArgumentsFromQuery: () => DotNet;
+    withApplicationArguments: (args: string) => DotNet;
     create: () => Promise<{
         setModuleImports: (name: string, imports: any) => void;
         getAssemblyExports: (name: string) => Promise<any>;

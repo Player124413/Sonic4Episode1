@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_WIN_DRAW_WORK
+    internal class AOS_WIN_DRAW_WORK
     {
         public int type;
         public NNS_TEXLIST texlist;

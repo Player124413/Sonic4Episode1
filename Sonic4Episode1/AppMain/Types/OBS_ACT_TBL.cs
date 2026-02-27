@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_ACT_TBL
+    internal class OBS_ACT_TBL
     {
         public ushort act_id;
         public byte time;

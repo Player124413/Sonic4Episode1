@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static int GME_BOSS4_LIFE_H => GMM_BOSS4_STAGE(3, 4);
 

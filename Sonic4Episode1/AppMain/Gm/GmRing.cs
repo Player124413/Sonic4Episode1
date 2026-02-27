@@ -1,9 +1,74 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
+    public const int GMD_RING_ROT_FRONT = 49152;
+    public const int GMD_RING_SE_PLAY_MAX_PER_FRAME = 1;
+    public const int GMD_RING_SE_PLAY_WAIT_FRAME = 3;
+    public const int GMD_RING_SYS_FLAG_NODISP = 1;
+    public const int GMD_RING_SYS_FLAG_GET_SE_FLIP = 8;
+    public const int GMD_RING_DEF_SIZE = 20;
+    public const int GMD_RING_DAMAGE_NUM = 32;
+    public const int GMD_RING_MAX_NUM = 96;
+    public const int GMD_RING_FALL_ACC = 288;
+    public const int GMD_RING_MAGNET_ACC = 1024;
+    public const int GMD_RING_MAGNET_MSPD = 126976;
+    public const int GMD_RING_DUCT_ACC = 256;
+    public const int GMD_RING_DUCT_MSPD = 32768;
+    public const uint GMD_RING_SYS_FLAG_DAMAGE_CHK_P1 = 16777216;
+    public const uint GMD_RING_SYS_FLAG_DAMAGE_CHK_P2 = 33554432;
+    public const int GMD_RING_DIE_DEF_OFFSET = 72;
+    public const int GMD_RING_MOVE_DIE_OFFSET = 196;
+    public const int GMD_RING_SLOT_DIE_OFFSET = 512;
+    public const int GMD_RING_MAGNET_PLAYER = 1;
+    public const int GMD_RING_MAGNET_PLAYER_MASK = 1;
+    public const int GMD_RING_FLAG_B = 2;
+    public const int GMD_RING_REVERSE = 4;
+    public const int GMD_RING_DAMAGE = 8;
+    public const int GMD_RING_DAMAGE_PLAYER = 16;
+    public const int GMD_RING_DAMAGE_PLAYER_SHIFT = 4;
+    public const int GMD_RING_HIT_LEFT = -9;
+    public const int GMD_RING_HIT_TOP = -9;
+    public const int GMD_RING_HIT_RIGHT = 9;
+    public const int GMD_RING_HIT_BOTTOM = 9;
+    public const int GMD_RING_HIT_BACK = -8;
+    public const int GMD_RING_HIT_FRONT = 8;
+    public const int GMD_RING_HIT_HEIGHT = 18;
+    public const int GMD_RING_HIT_WIDTH = 18;
+    public const int GMD_RING_ROLL_UV_POS_U = 0;
+    public const int GMD_RING_ROLL_UV_POS_V = 1;
+    public const int GMD_RING_ROLL_UV_POS_UV = 2;
+    public const int GMD_RING_ROLL_UV_POS_NUM = 16;
+    public const int GMD_RING_ROLL_UV_FRAME_WAIT = 4;
+    public const int GMD_RING_ROLL_UV_FRAME_MAX = 64;
+    public const int GMD_RING_ROT_SPD = (0x10000 * 4 / 360);
+    public const float GMD_RING_ROLL_UV_SIZE = 0.25f;
+    public const int GMD_RING_SLOT_SPD = 24576;
+    public const int GMD_RING_SLOT_DIST = 1048576;
+    public const int GMD_RING_SLOT_DIR_SPD = 2048;
+    public const int GMD_RING_SLOT_INT_TIME = 4;
+    public const int GMD_RING_TIMER = 256;
+    public const int GMD_RING_NOHIT_TIMER = 216;
+    public const int GMD_RING_BLINK_TIMER = 32;
+    public const int GMD_RING_DAMAGE_NUM_MAX = 4;
+
+    private const bool RING_AS_MODEL = false;
+
+    public static GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_common = new GMS_GAMEDAT_LOAD_DATA[]
+    {
+        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 2),
+        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 3),
+        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 4),
+        new GMS_GAMEDAT_LOAD_DATA("G_COM/CPIT/CPIT_MAIN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostCockpit, -1)
+    };
+
+    public static GMS_GAMEDAT_LOAD_INFO[] gm_gamedat_tbl_common_info_tbl = new GMS_GAMEDAT_LOAD_INFO[]
+    {
+        new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_common, gm_gamedat_tbl_common.Length)
+    };
+
     public static void GmRingBuild()
     {
         gm_ring_obj_3d = new OBS_ACTION3D_NN_WORK();
-        ObjAction3dNNModelLoad(gm_ring_obj_3d, null, null, 0, readAMBFile((AMS_FS)ObjDataGet(2).pData), null, readAMBFile((AMS_FS)ObjDataGet(3).pData), 0U);
+        ObjAction3dNNModelLoad(gm_ring_obj_3d, null, null, 0, readAMBFile((AMS_FS)ObjDataGet(GMD_DWORK_NO_RING_MODEL).pData), null, readAMBFile((AMS_FS)ObjDataGet(GMD_DWORK_NO_RING_TEX).pData), 0U);
     }
 
     public static GMS_RING_SYS_WORK GmRingGetWork()
@@ -23,7 +88,8 @@
 
     public static void GmRingFlush()
     {
-        ObjAction3dNNMotionRelease(gm_ring_obj_3d);
+        if (!RING_AS_MODEL)
+            ObjAction3dNNMotionRelease(gm_ring_obj_3d);
         ObjAction3dNNModelRelease(gm_ring_obj_3d);
     }
 
@@ -31,8 +97,11 @@
     {
         if (!ObjAction3dNNModelLoadCheck(gm_ring_obj_3d))
             return 0;
-        if (gm_ring_obj_3d.mat_mtn[0] == null)
-            ObjAction3dNNMaterialMotionLoad(gm_ring_obj_3d, 0, null, null, 0, readAMBFile(ObjDataGet(4).pData));
+        if (!RING_AS_MODEL)
+        {
+            if (gm_ring_obj_3d.mat_mtn[0] == null)
+                ObjAction3dNNMaterialMotionLoad(gm_ring_obj_3d, 0, null, null, 0, readAMBFile(ObjDataGet(GMD_DWORK_NO_RING_MAT).pData));
+        }
         return 1;
     }
 
@@ -131,14 +200,20 @@
         gm_ring_sys_work.col_func = new _ring_work_func_delegate_(gmRingMoveCollsion);
         gm_ring_sys_work.ref_spd_base = 8192;
         gm_ring_sys_work.ring_draw_func = new _ring_work_func_delegate_(gmRingDrawFuncRing3D);
-        gm_ring_sys_work.se_wait = 0;
-        gm_ring_sys_work.color = uint.MaxValue;
-        if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
-            gm_ring_sys_work.color = 4292927743U;
-        else if (g_gs_main_sys_info.stage_id == 14)
-            gm_ring_sys_work.color = 3233857791U;
-        gm_ring_sys_work.dir = 49152;
-        ObjDrawAction3dActionSet3DNNMaterial(gm_ring_obj_3d, 0);
+
+
+        if (!RING_AS_MODEL)
+        {
+            gm_ring_sys_work.se_wait = 0;
+            gm_ring_sys_work.color = uint.MaxValue;
+            if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
+                gm_ring_sys_work.color = 4292927743U;
+            else if (g_gs_main_sys_info.stage_id == 14)
+                gm_ring_sys_work.color = 3233857791U;
+            gm_ring_sys_work.dir = 49152;
+            ObjDrawAction3dActionSet3DNNMaterial(gm_ring_obj_3d, 0);
+        }
+
     }
 
     private static void gmRingMain(MTS_TASK_TCB tcb)
@@ -148,141 +223,212 @@
         if (((int)gm_ring_sys_work.flag & 1) != 0 && !(betterSfx || modernSfx))
         {
             gm_ring_sys_work.ring_se_cnt = 0;
+            return;
         }
-        else
-        {
-            if (g_obj.glb_camera_id >= 0)
-                ObjDraw3DNNSetCamera(g_obj.glb_camera_id, g_obj.glb_camera_type);
-            if (gm_ring_sys_work.se_wait > 0)
-                --gm_ring_sys_work.se_wait;
-            gmRingDrawBegin();
-            if (ObjObjectPauseCheck(0U) != 0U)
-            {
-                GMS_RING_WORK gmsRingWork1 = gm_ring_sys_work.ring_list_start;
-                while (gmsRingWork1 != null)
-                {
-                    GMS_RING_WORK gms_ring_work = gmsRingWork1;
-                    gmsRingWork1 = gms_ring_work.post_ring;
-                    gm_ring_sys_work.ring_draw_func(gms_ring_work);
-                }
-                GMS_RING_WORK gmsRingWork2 = gm_ring_sys_work.damage_ring_list_start;
-                while (gmsRingWork2 != null)
-                {
-                    GMS_RING_WORK gms_ring_work = gmsRingWork2;
-                    gmsRingWork2 = gms_ring_work.post_ring;
-                    if (gms_ring_work.timer > 32 || (gms_ring_work.timer & 2) != 0)
-                        gm_ring_sys_work.ring_draw_func(gms_ring_work);
-                }
-                GMS_RING_WORK gmsRingWork3 = gm_ring_sys_work.slot_ring_list_start;
-                while (gmsRingWork3 != null)
-                {
-                    GMS_RING_WORK gms_ring_work = gmsRingWork3;
-                    gmsRingWork3 = gms_ring_work.post_ring;
-                    gm_ring_sys_work.ring_draw_func(gms_ring_work);
-                }
-                gmRingDrawEnd();
 
-                if (!(betterSfx || modernSfx))
-                    gm_ring_sys_work.ring_se_cnt = 0;
+        if (g_obj.glb_camera_id >= 0)
+            ObjDraw3DNNSetCamera(g_obj.glb_camera_id, g_obj.glb_camera_type);
+
+        if (gm_ring_sys_work.se_wait > 0)
+            --gm_ring_sys_work.se_wait;
+        gmRingDrawBegin();
+
+        if (ObjObjectPauseCheck(0U) != 0U)
+        {
+
+#if HAS_INLINING
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+            static void DrawRingList(GMS_RING_WORK root)
+            {
+                GMS_RING_WORK ring_next, ring_work;
+                for (ring_next = root; ring_next != null;)
+                {
+                    ring_work = ring_next;
+                    ring_next = ring_work.post_ring;
+                    gm_ring_sys_work.ring_draw_func(ring_work);
+                }
+            }
+
+            DrawRingList(gm_ring_sys_work.ring_list_start);
+            DrawRingList(gm_ring_sys_work.damage_ring_list_start);
+            DrawRingList(gm_ring_sys_work.slot_ring_list_start);
+
+            gmRingDrawEnd();
+
+            if (!(betterSfx || modernSfx))
+                gm_ring_sys_work.ring_se_cnt = 0;
+
+            return;
+        }
+
+        for (int index = 0; index < gm_ring_sys_work.player_num; ++index)
+        {
+            GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[index];
+            OBS_RECT_WORK rect_work = ply_work.rect_work[2];
+
+            ply_rect[index].pos.x = ply_work.obj_work.pos.x;
+            ply_rect[index].pos.y = ply_work.obj_work.pos.y;
+            ply_rect[index].pos.z = ply_work.obj_work.pos.z;
+            short temp1;
+            short temp2;
+            if (((int)ply_work.obj_work.disp_flag & OBD_DISP_HFLIP ^ (int)rect_work.flag & OBD_DISP_HFLIP) != 0)
+            {
+                temp1 = (short)-rect_work.rect.right;
+                temp2 = (short)-rect_work.rect.left;
             }
             else
             {
-                for (int index = 0; index < gm_ring_sys_work.player_num; ++index)
+                temp1 = rect_work.rect.left;
+                temp2 = rect_work.rect.right;
+            }
+            if (ply_work.obj_work.scale.x != FX32_ONE)
+            {
+                temp1 = (short)FX_Mul(temp1, ply_work.obj_work.scale.x);
+                temp2 = (short)FX_Mul(temp2, ply_work.obj_work.scale.x);
+            }
+            ply_rect[index].left = temp1;
+            ply_rect[index].right = temp2;
+
+            if (((int)ply_work.obj_work.disp_flag & 2 ^ (int)rect_work.flag & 2) != 0)
+            {
+                temp1 = (short)-rect_work.rect.bottom;
+                temp2 = (short)-rect_work.rect.top;
+            }
+            else
+            {
+                temp1 = rect_work.rect.top;
+                temp2 = rect_work.rect.bottom;
+            }
+            if (ply_work.obj_work.scale.y != 4096)
+            {
+                temp1 = (short)FX_Mul(temp1, ply_work.obj_work.scale.y);
+                temp2 = (short)FX_Mul(temp2, ply_work.obj_work.scale.y);
+            }
+
+            ply_rect[index].top = temp1;
+            ply_rect[index].bottom = temp2;
+            ply_rect[index].back = 0;
+            ply_rect[index].front = 0;
+        }
+
+        ring_rect.left = GMD_RING_HIT_LEFT;
+        ring_rect.top = GMD_RING_HIT_TOP;
+        ring_rect.right = GMD_RING_HIT_RIGHT;
+        ring_rect.bottom = GMD_RING_HIT_BOTTOM;
+        ring_rect.back = GMD_RING_HIT_BACK;
+        ring_rect.front = GMD_RING_HIT_FRONT;
+
+        if (RING_AS_MODEL)
+        {
+            gm_ring_sys_work.dir += GMD_RING_ROT_SPD;
+            var motion_flag = OBD_DISP_REPEAT;
+            ObjDrawAction3DNNMaterialUpdate(gm_ring_obj_3d, ref motion_flag);
+        }
+        else
+        {
+            if (++gm_ring_sys_work.draw_ring_uv_frame >= 64)
+                gm_ring_sys_work.draw_ring_uv_frame = 0;
+        }
+
+        if (((int)g_gm_main_system.ply_work[0].player_flag & GMD_PLF_TRUCK_RIDE) != 0)
+        {
+            gm_ring_fall_acc_x = (short)FX_Mul(-288, mtMathSin(g_gm_main_system.ply_work[0].obj_work.dir_fall));
+            gm_ring_fall_acc_y = (short)FX_Mul(288, mtMathCos(g_gm_main_system.ply_work[0].obj_work.dir_fall));
+        }
+
+        if (gm_ring_sys_work.wait_slot_ring_num != 0)
+        {
+            --gm_ring_sys_work.slot_ring_timer;
+            if (gm_ring_sys_work.slot_ring_timer <= 0)
+            {
+                if (gm_ring_sys_work.wait_slot_ring_num >= 2)
                 {
-                    GMS_PLAYER_WORK gmsPlayerWork = g_gm_main_system.ply_work[index];
-                    OBS_RECT_WORK obsRectWork = gmsPlayerWork.rect_work[2];
-                    ply_rect[index].pos.x = gmsPlayerWork.obj_work.pos.x;
-                    ply_rect[index].pos.y = gmsPlayerWork.obj_work.pos.y;
-                    ply_rect[index].pos.z = gmsPlayerWork.obj_work.pos.z;
-                    short num1;
-                    short num2;
-                    if (((int)gmsPlayerWork.obj_work.disp_flag & 1 ^ (int)obsRectWork.flag & 1) != 0)
-                    {
-                        num1 = (short)-obsRectWork.rect.right;
-                        num2 = (short)-obsRectWork.rect.left;
-                    }
-                    else
-                    {
-                        num1 = obsRectWork.rect.left;
-                        num2 = obsRectWork.rect.right;
-                    }
-                    if (gmsPlayerWork.obj_work.scale.x != 4096)
-                    {
-                        num1 = (short)FX_Mul(num1, gmsPlayerWork.obj_work.scale.x);
-                        num2 = (short)FX_Mul(num2, gmsPlayerWork.obj_work.scale.x);
-                    }
-                    ply_rect[index].left = num1;
-                    ply_rect[index].right = num2;
-                    short num3;
-                    short num4;
-                    if (((int)gmsPlayerWork.obj_work.disp_flag & 2 ^ (int)obsRectWork.flag & 2) != 0)
-                    {
-                        num3 = (short)-obsRectWork.rect.bottom;
-                        num4 = (short)-obsRectWork.rect.top;
-                    }
-                    else
-                    {
-                        num3 = obsRectWork.rect.top;
-                        num4 = obsRectWork.rect.bottom;
-                    }
-                    if (gmsPlayerWork.obj_work.scale.y != 4096)
-                    {
-                        num3 = (short)FX_Mul(num3, gmsPlayerWork.obj_work.scale.y);
-                        num4 = (short)FX_Mul(num4, gmsPlayerWork.obj_work.scale.y);
-                    }
-                    ply_rect[index].top = num3;
-                    ply_rect[index].bottom = num4;
-                    ply_rect[index].back = 0;
-                    ply_rect[index].front = 0;
+                    GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, GMD_RING_SLOT_DIST, gm_ring_sys_work.slot_ring_create_dir);
+                    GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, GMD_RING_SLOT_DIST, (ushort)(gm_ring_sys_work.slot_ring_create_dir + 32768 - 2048));
+                    gm_ring_sys_work.wait_slot_ring_num -= 2;
                 }
-                ring_rect.left = -9;
-                ring_rect.top = -9;
-                ring_rect.right = 9;
-                ring_rect.bottom = 9;
-                ring_rect.back = -8;
-                ring_rect.front = 8;
-                if (++gm_ring_sys_work.draw_ring_uv_frame >= 64)
-                    gm_ring_sys_work.draw_ring_uv_frame = 0;
-                if (((int)g_gm_main_system.ply_work[0].player_flag & 262144) != 0)
+                else
                 {
-                    gm_ring_fall_acc_x = (short)FX_Mul(-288, mtMathSin(g_gm_main_system.ply_work[0].obj_work.dir_fall));
-                    gm_ring_fall_acc_y = (short)FX_Mul(288, mtMathCos(g_gm_main_system.ply_work[0].obj_work.dir_fall));
+                    GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, GMD_RING_SLOT_DIST, gm_ring_sys_work.slot_ring_create_dir);
+                    --gm_ring_sys_work.wait_slot_ring_num;
                 }
-                if (gm_ring_sys_work.wait_slot_ring_num != 0)
+                gm_ring_sys_work.slot_ring_create_dir -= 2048;
+                gm_ring_sys_work.slot_ring_timer = 4;
+            }
+        }
+
+        GMS_RING_WORK gmsRingWork1 = gm_ring_sys_work.ring_list_start;
+        while (gmsRingWork1 != null)
+        {
+            GMS_RING_WORK gmsRingWork2 = gmsRingWork1;
+            gmsRingWork1 = gmsRingWork2.post_ring;
+            if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, gm_ring_die_offset, 0, 0, 0, 0) != 0)
+            {
+                if (gmsRingWork2.eve_rec != null)
+                    gmsRingWork2.eve_rec.pos_x = (byte)(gmsRingWork2.pos.x >> 12 & byte.MaxValue);
+                gmRingDetachRingList(gmsRingWork2);
+                gmRingFreeRingWork(gmsRingWork2);
+            }
+            else
+            {
+                gm_ring_sys_work.ring_draw_func(gmsRingWork2);
+                ring_rect.pos.z = 0;
+                int index = 0;
+                int num = 0;
+                for (; index < gm_ring_sys_work.player_num; ++index)
                 {
-                    --gm_ring_sys_work.slot_ring_timer;
-                    if (gm_ring_sys_work.slot_ring_timer <= 0)
+                    GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[index];
+                    if ((ply_work.player_flag & 1024) == 0)
                     {
-                        if (gm_ring_sys_work.wait_slot_ring_num >= 2)
+                        ring_rect.pos.x = gmsRingWork2.pos.x;
+                        ring_rect.pos.y = gmsRingWork2.pos.y;
+                        if (gm_ring_sys_work.rec_func(ply_rect[index], ring_rect) != 0)
                         {
-                            GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, 1048576, gm_ring_sys_work.slot_ring_create_dir);
-                            GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, 1048576, (ushort)(gm_ring_sys_work.slot_ring_create_dir + 32768 - 2048));
-                            gm_ring_sys_work.wait_slot_ring_num -= 2;
+                            num = 1;
+                            GmPlayerRingGet(ply_work, 1);
+                            GmComEfctCreateRing(ring_rect.pos.x, ring_rect.pos.y);
                         }
-                        else
-                        {
-                            GmRingCreateSlotRing(gm_ring_sys_work.slot_target_obj, 1048576, gm_ring_sys_work.slot_ring_create_dir);
-                            --gm_ring_sys_work.wait_slot_ring_num;
-                        }
-                        gm_ring_sys_work.slot_ring_create_dir -= 2048;
-                        gm_ring_sys_work.slot_ring_timer = 4;
                     }
                 }
-                GMS_RING_WORK gmsRingWork1 = gm_ring_sys_work.ring_list_start;
-                while (gmsRingWork1 != null)
+                if (num != 0)
                 {
-                    GMS_RING_WORK gmsRingWork2 = gmsRingWork1;
-                    gmsRingWork1 = gmsRingWork2.post_ring;
-                    if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, gm_ring_die_offset, 0, 0, 0, 0) != 0)
+                    gmsRingWork2.timer = 0;
+                    gmRingDetachRingList(gmsRingWork2);
+                    gmRingFreeRingWork(gmsRingWork2);
+                }
+            }
+        }
+        GMS_RING_WORK gmsRingWork3 = gm_ring_sys_work.damage_ring_list_start;
+        while (gmsRingWork3 != null)
+        {
+            GMS_RING_WORK gmsRingWork2 = gmsRingWork3;
+            gmsRingWork3 = gmsRingWork2.post_ring;
+            if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, 196, 0, 0, 0, 0) != 0)
+            {
+                gmRingDetachDamageRingList(gmsRingWork2);
+                gmRingFreeRingWork(gmsRingWork2);
+            }
+            else
+            {
+                gmsRingWork2.pos.x += gmsRingWork2.spd_x;
+                if ((gmsRingWork2.flag & 4) != 0)
+                    gmsRingWork2.pos.y -= gmsRingWork2.spd_y;
+                else
+                    gmsRingWork2.pos.y += gmsRingWork2.spd_y;
+                gmsRingWork2.spd_x += gm_ring_fall_acc_x;
+                gmsRingWork2.spd_y += gm_ring_fall_acc_y;
+                gm_ring_sys_work.col_func(gmsRingWork2);
+                --gmsRingWork2.timer;
+                if (gmsRingWork2.timer == 0)
+                {
+                    gmRingDetachDamageRingList(gmsRingWork2);
+                    gmRingFreeRingWork(gmsRingWork2);
+                }
+                else
+                {
+                    if (gmsRingWork2.timer <= 216)
                     {
-                        if (gmsRingWork2.eve_rec != null)
-                            gmsRingWork2.eve_rec.pos_x = (byte)(gmsRingWork2.pos.x >> 12 & byte.MaxValue);
-                        gmRingDetachRingList(gmsRingWork2);
-                        gmRingFreeRingWork(gmsRingWork2);
-                    }
-                    else
-                    {
-                        gm_ring_sys_work.ring_draw_func(gmsRingWork2);
                         ring_rect.pos.z = 0;
                         int index = 0;
                         int num = 0;
@@ -296,141 +442,83 @@
                                 if (gm_ring_sys_work.rec_func(ply_rect[index], ring_rect) != 0)
                                 {
                                     num = 1;
+                                    short ringStageNum = ply_work.ring_stage_num;
                                     GmPlayerRingGet(ply_work, 1);
+                                    if (ringStageNum < 999)
+                                        --ply_work.ring_stage_num;
                                     GmComEfctCreateRing(ring_rect.pos.x, ring_rect.pos.y);
+                                    if (((int)gm_ring_sys_work.flag & 16777216 << index) != 0)
+                                        gm_ring_sys_work.flag &= (uint)~(16777216 << index);
                                 }
                             }
                         }
                         if (num != 0)
                         {
                             gmsRingWork2.timer = 0;
-                            gmRingDetachRingList(gmsRingWork2);
-                            gmRingFreeRingWork(gmsRingWork2);
-                        }
-                    }
-                }
-                GMS_RING_WORK gmsRingWork3 = gm_ring_sys_work.damage_ring_list_start;
-                while (gmsRingWork3 != null)
-                {
-                    GMS_RING_WORK gmsRingWork2 = gmsRingWork3;
-                    gmsRingWork3 = gmsRingWork2.post_ring;
-                    if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, 196, 0, 0, 0, 0) != 0)
-                    {
-                        gmRingDetachDamageRingList(gmsRingWork2);
-                        gmRingFreeRingWork(gmsRingWork2);
-                    }
-                    else
-                    {
-                        gmsRingWork2.pos.x += gmsRingWork2.spd_x;
-                        if ((gmsRingWork2.flag & 4) != 0)
-                            gmsRingWork2.pos.y -= gmsRingWork2.spd_y;
-                        else
-                            gmsRingWork2.pos.y += gmsRingWork2.spd_y;
-                        gmsRingWork2.spd_x += gm_ring_fall_acc_x;
-                        gmsRingWork2.spd_y += gm_ring_fall_acc_y;
-                        gm_ring_sys_work.col_func(gmsRingWork2);
-                        --gmsRingWork2.timer;
-                        if (gmsRingWork2.timer == 0)
-                        {
                             gmRingDetachDamageRingList(gmsRingWork2);
                             gmRingFreeRingWork(gmsRingWork2);
                         }
-                        else
-                        {
-                            if (gmsRingWork2.timer <= 216)
-                            {
-                                ring_rect.pos.z = 0;
-                                int index = 0;
-                                int num = 0;
-                                for (; index < gm_ring_sys_work.player_num; ++index)
-                                {
-                                    GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[index];
-                                    if ((ply_work.player_flag & 1024) == 0)
-                                    {
-                                        ring_rect.pos.x = gmsRingWork2.pos.x;
-                                        ring_rect.pos.y = gmsRingWork2.pos.y;
-                                        if (gm_ring_sys_work.rec_func(ply_rect[index], ring_rect) != 0)
-                                        {
-                                            num = 1;
-                                            short ringStageNum = ply_work.ring_stage_num;
-                                            GmPlayerRingGet(ply_work, 1);
-                                            if (ringStageNum < 999)
-                                                --ply_work.ring_stage_num;
-                                            GmComEfctCreateRing(ring_rect.pos.x, ring_rect.pos.y);
-                                            if (((int)gm_ring_sys_work.flag & 16777216 << index) != 0)
-                                                gm_ring_sys_work.flag &= (uint)~(16777216 << index);
-                                        }
-                                    }
-                                }
-                                if (num != 0)
-                                {
-                                    gmsRingWork2.timer = 0;
-                                    gmRingDetachDamageRingList(gmsRingWork2);
-                                    gmRingFreeRingWork(gmsRingWork2);
-                                }
-                            }
-                            if (gmsRingWork2.timer > 32 || (gmsRingWork2.timer & 2) != 0)
-                                gm_ring_sys_work.ring_draw_func(gmsRingWork2);
-                        }
                     }
-                }
-                if (gm_ring_sys_work.damage_ring_list_start == null)
-                {
-                    for (int index = 0; index < gm_ring_sys_work.player_num; ++index)
-                    {
-                        if (((int)gm_ring_sys_work.flag & 16777216 << index) != 0)
-                        {
-                            gm_ring_sys_work.damage_num[index] = 0;
-                            gm_ring_sys_work.flag &= (uint)~(16777216 << index);
-                        }
-                    }
-                }
-                GMS_RING_WORK gmsRingWork4 = gm_ring_sys_work.slot_ring_list_start;
-                while (gmsRingWork4 != null)
-                {
-                    GMS_RING_WORK gmsRingWork2 = gmsRingWork4;
-                    gmsRingWork4 = gmsRingWork2.post_ring;
-                    if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, 512, 0, 0, 0, 0) != 0)
-                    {
-                        gmRingDetachSlotRingList(gmsRingWork2);
-                        gmRingFreeRingWork(gmsRingWork2);
-                    }
-                    else
-                    {
-                        gmsRingWork2.pos.x += gmsRingWork2.spd_x;
-                        gmsRingWork2.pos.y += gmsRingWork2.spd_y;
+                    if (gmsRingWork2.timer > 32 || (gmsRingWork2.timer & 2) != 0)
                         gm_ring_sys_work.ring_draw_func(gmsRingWork2);
-                        ring_rect.pos.z = 0;
-                        int index = 0;
-                        int num = 0;
-                        for (; index < gm_ring_sys_work.player_num; ++index)
-                        {
-                            GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[index];
-                            if ((ply_work.player_flag & 1024) == 0)
-                            {
-                                ring_rect.pos.x = gmsRingWork2.pos.x;
-                                ring_rect.pos.y = gmsRingWork2.pos.y;
-                                if (gm_ring_sys_work.rec_func(ply_rect[index], ring_rect) != 0)
-                                {
-                                    num = 1;
-                                    GmPlayerRingGet(ply_work, 1);
-                                    GmComEfctCreateRing(ring_rect.pos.x, ring_rect.pos.y);
-                                }
-                            }
-                        }
-                        if (num != 0)
-                        {
-                            gmsRingWork2.timer = 0;
-                            gmRingDetachSlotRingList(gmsRingWork2);
-                            gmRingFreeRingWork(gmsRingWork2);
-                        }
-                    }
                 }
-                gmRingDrawEnd();
-                if (!(betterSfx || modernSfx))
-                    gm_ring_sys_work.ring_se_cnt = 0;
             }
         }
+        if (gm_ring_sys_work.damage_ring_list_start == null)
+        {
+            for (int index = 0; index < gm_ring_sys_work.player_num; ++index)
+            {
+                if (((int)gm_ring_sys_work.flag & 16777216 << index) != 0)
+                {
+                    gm_ring_sys_work.damage_num[index] = 0;
+                    gm_ring_sys_work.flag &= (uint)~(16777216 << index);
+                }
+            }
+        }
+        GMS_RING_WORK gmsRingWork4 = gm_ring_sys_work.slot_ring_list_start;
+        while (gmsRingWork4 != null)
+        {
+            GMS_RING_WORK gmsRingWork2 = gmsRingWork4;
+            gmsRingWork4 = gmsRingWork2.post_ring;
+            if (ObjViewOutCheck(gmsRingWork2.pos.x, gmsRingWork2.pos.y, 512, 0, 0, 0, 0) != 0)
+            {
+                gmRingDetachSlotRingList(gmsRingWork2);
+                gmRingFreeRingWork(gmsRingWork2);
+            }
+            else
+            {
+                gmsRingWork2.pos.x += gmsRingWork2.spd_x;
+                gmsRingWork2.pos.y += gmsRingWork2.spd_y;
+                gm_ring_sys_work.ring_draw_func(gmsRingWork2);
+                ring_rect.pos.z = 0;
+                int index = 0;
+                int num = 0;
+                for (; index < gm_ring_sys_work.player_num; ++index)
+                {
+                    GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[index];
+                    if ((ply_work.player_flag & 1024) == 0)
+                    {
+                        ring_rect.pos.x = gmsRingWork2.pos.x;
+                        ring_rect.pos.y = gmsRingWork2.pos.y;
+                        if (gm_ring_sys_work.rec_func(ply_rect[index], ring_rect) != 0)
+                        {
+                            num = 1;
+                            GmPlayerRingGet(ply_work, 1);
+                            GmComEfctCreateRing(ring_rect.pos.x, ring_rect.pos.y);
+                        }
+                    }
+                }
+                if (num != 0)
+                {
+                    gmsRingWork2.timer = 0;
+                    gmRingDetachSlotRingList(gmsRingWork2);
+                    gmRingFreeRingWork(gmsRingWork2);
+                }
+            }
+        }
+        gmRingDrawEnd();
+        if (!(betterSfx || modernSfx))
+            gm_ring_sys_work.ring_se_cnt = 0;
     }
 
     private static void gmRingFreeRingWork(GMS_RING_WORK ring_work)
@@ -446,82 +534,108 @@
 
     private static void gmRingDrawBegin()
     {
+        if (RING_AS_MODEL)
+            return;
+
         gm_ring_sys_work.draw_ring_count = 0;
+        return;
     }
 
     private static void gmRingDrawEnd()
     {
         if (gm_ring_sys_work.draw_ring_count <= 0 || !GmMainIsDrawEnable())
             return;
-        VecU16 vecU16 = new VecU16();
-        vecU16.x = 0;
-        vecU16.y = gm_ring_sys_work.dir;
-        vecU16.z = GmMainGetObjectRotation();
-        GMS_RING_SYS_WORK gmRingSysWork = gm_ring_sys_work;
-        uint drawRingCount = gm_ring_sys_work.draw_ring_count;
-        SNNS_VECTOR disp_pos;
-        ObjCameraDispPosGet(0, out disp_pos);
-        float s1;
-        float c1;
-        nnSinCos(vecU16.z - 8192, out s1, out c1);
-        s1 *= 13.57638f;
-        float num1 = c1 * 13.57638f;
-        float s2;
-        float c2;
-        nnSinCos(vecU16.z - 24576, out s2, out c2);
-        float num2 = s2 * 13.57638f;
-        float num3 = c2 * 13.57638f;
-        VecFx32 vecFx32 = new VecFx32(gmRingSysWork.draw_ring_pos[0]);
-        SNNS_MATRIX snnsMatrix = new SNNS_MATRIX();
-        nnMakeUnitMatrix(ref snnsMatrix);
-        nnTranslateMatrix(ref snnsMatrix, ref snnsMatrix, FX_FX32_TO_F32(vecFx32.x), -FX_FX32_TO_F32(vecFx32.y), FX_FX32_TO_F32(vecFx32.z));
-        _AMS_PARAM_DRAW_PRIMITIVE.type = 1;
-        _AMS_PARAM_DRAW_PRIMITIVE.count = 6 * (int)drawRingCount - 2;
-        _AMS_PARAM_DRAW_PRIMITIVE.ablend = 0;
-        _AMS_PARAM_DRAW_PRIMITIVE.bldSrc = 768;
-        _AMS_PARAM_DRAW_PRIMITIVE.bldDst = 774;
-        _AMS_PARAM_DRAW_PRIMITIVE.bldMode = 32774;
-        _AMS_PARAM_DRAW_PRIMITIVE.aTest = 1;
-        _AMS_PARAM_DRAW_PRIMITIVE.zMask = 0;
-        _AMS_PARAM_DRAW_PRIMITIVE.zTest = 1;
-        _AMS_PARAM_DRAW_PRIMITIVE.noSort = 1;
-        _AMS_PARAM_DRAW_PRIMITIVE.texlist = gm_ring_obj_3d.texlist;
-        _AMS_PARAM_DRAW_PRIMITIVE.texId = 0;
-        _AMS_PARAM_DRAW_PRIMITIVE.uwrap = 1;
-        _AMS_PARAM_DRAW_PRIMITIVE.vwrap = 1;
-        uint color = gm_ring_sys_work.color;
-        _AMS_PARAM_DRAW_PRIMITIVE.vtxPCT3D = amDrawAlloc_NNS_PRIM3D_PCT(_AMS_PARAM_DRAW_PRIMITIVE.count);
-        NNS_PRIM3D_PCT[] buffer = _AMS_PARAM_DRAW_PRIMITIVE.vtxPCT3D.buffer;
-        int offset = _AMS_PARAM_DRAW_PRIMITIVE.vtxPCT3D.offset;
-        _AMS_PARAM_DRAW_PRIMITIVE.format3D = 4;
-        for (int index1 = 0; index1 < drawRingCount; ++index1)
+
+        VecU16 dir;
+        dir.x = 0;
+        dir.y = gm_ring_sys_work.dir;
+        dir.z = GmMainGetObjectRotation();
+
+
+        if (RING_AS_MODEL)
         {
-            int index2 = offset + 6 * index1;
-            ushort num4 = (ushort)(gm_ring_sys_work.draw_ring_uv_frame / 4U);
-            buffer[index2].Tex.u = buffer[index2 + 1].Tex.u = gm_ring_roll_uv[0][num4];
-            buffer[index2 + 2].Tex.u = buffer[index2 + 3].Tex.u = gm_ring_roll_uv[0][num4] + 0.25f;
-            buffer[index2].Tex.v = buffer[index2 + 2].Tex.v = gm_ring_roll_uv[1][num4];
-            buffer[index2 + 1].Tex.v = buffer[index2 + 3].Tex.v = gm_ring_roll_uv[1][num4] + 0.25f;
-            buffer[index2].Col = color;
-            buffer[index2 + 1].Col = buffer[index2 + 2].Col = buffer[index2 + 3].Col = buffer[index2].Col;
-            buffer[index2].Pos.x = s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-            buffer[index2 + 1].Pos.x = num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-            buffer[index2 + 2].Pos.x = -num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-            buffer[index2 + 3].Pos.x = -s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-            buffer[index2].Pos.y = num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-            buffer[index2 + 1].Pos.y = num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-            buffer[index2 + 2].Pos.y = -num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-            buffer[index2 + 3].Pos.y = -num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-            buffer[index2].Pos.z = buffer[index2 + 1].Pos.z = buffer[index2 + 2].Pos.z = buffer[index2 + 3].Pos.z = FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].z - vecFx32.z) - 1f;
-            if (index1 != 0)
-                buffer[index2 - 1] = buffer[index2];
-            if (index1 + 1 < drawRingCount)
-                buffer[index2 + 4] = buffer[index2 + 3];
+            VecFx32 scale;
+            uint disp_flag = OBD_DISP_STOP;
+
+            scale.x = FX32_ONE;
+            scale.y = FX32_ONE;
+            scale.z = FX32_ONE;
+
+            //	model draw
+            for (int i = 0; i < gm_ring_sys_work.draw_ring_count; ++i)
+            {
+                ObjDrawAction3DNN(gm_ring_obj_3d, gm_ring_sys_work.draw_ring_pos[i], dir, scale, ref disp_flag);
+            }
         }
-        _AMS_PARAM_DRAW_PRIMITIVE.sortZ = nnDistanceVector(ref buffer[offset].Pos, ref disp_pos);
-        amMatrixPush(ref snnsMatrix);
-        ObjDraw3DNNDrawPrimitive(_AMS_PARAM_DRAW_PRIMITIVE);
-        amMatrixPop();
+        else
+        {
+            GMS_RING_SYS_WORK gmRingSysWork = gm_ring_sys_work;
+            uint drawRingCount = gm_ring_sys_work.draw_ring_count;
+            SNNS_VECTOR disp_pos;
+            ObjCameraDispPosGet(0, out disp_pos);
+            float s1;
+            float c1;
+            nnSinCos(dir.z - 8192, out s1, out c1);
+            s1 *= 13.57638f;
+            float num1 = c1 * 13.57638f;
+            float s2;
+            float c2;
+            nnSinCos(dir.z - 24576, out s2, out c2);
+            float num2 = s2 * 13.57638f;
+            float num3 = c2 * 13.57638f;
+            VecFx32 vecFx32 = new VecFx32(gmRingSysWork.draw_ring_pos[0]);
+            SNNS_MATRIX snnsMatrix = new SNNS_MATRIX();
+            nnMakeUnitMatrix(ref snnsMatrix);
+            nnTranslateMatrix(ref snnsMatrix, ref snnsMatrix, FX_FX32_TO_F32(vecFx32.x), -FX_FX32_TO_F32(vecFx32.y), FX_FX32_TO_F32(vecFx32.z));
+            var dat = _AMS_PARAM_DRAW_PRIMITIVE;
+            dat.type = 1;
+            dat.count = 6 * (int)drawRingCount - 2;
+            dat.ablend = 0;
+            dat.bldSrc = 768;
+            dat.bldDst = 774;
+            dat.bldMode = 32774;
+            dat.aTest = 1;
+            dat.zMask = 0;
+            dat.zTest = 1;
+            dat.noSort = 1;
+            dat.texlist = gm_ring_obj_3d.texlist;
+            dat.texId = 0;
+            dat.uwrap = 1;
+            dat.vwrap = 1;
+            uint color = gm_ring_sys_work.color;
+            dat.vtxPCT3D = amDrawAlloc_NNS_PRIM3D_PCT(dat.count);
+            NNS_PRIM3D_PCT[] buffer = dat.vtxPCT3D.buffer;
+            int offset = dat.vtxPCT3D.offset;
+            dat.format3D = 4;
+            for (int index1 = 0; index1 < drawRingCount; ++index1)
+            {
+                int index2 = offset + 6 * index1;
+                ushort num4 = (ushort)(gm_ring_sys_work.draw_ring_uv_frame / 4U);
+                buffer[index2].Tex.u = buffer[index2 + 1].Tex.u = gm_ring_roll_uv[0][num4];
+                buffer[index2 + 2].Tex.u = buffer[index2 + 3].Tex.u = gm_ring_roll_uv[0][num4] + 0.25f;
+                buffer[index2].Tex.v = buffer[index2 + 2].Tex.v = gm_ring_roll_uv[1][num4];
+                buffer[index2 + 1].Tex.v = buffer[index2 + 3].Tex.v = gm_ring_roll_uv[1][num4] + 0.25f;
+                buffer[index2].Col = color;
+                buffer[index2 + 1].Col = buffer[index2 + 2].Col = buffer[index2 + 3].Col = buffer[index2].Col;
+                buffer[index2].Pos.x = s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+                buffer[index2 + 1].Pos.x = num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+                buffer[index2 + 2].Pos.x = -num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+                buffer[index2 + 3].Pos.x = -s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+                buffer[index2].Pos.y = num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+                buffer[index2 + 1].Pos.y = num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+                buffer[index2 + 2].Pos.y = -num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+                buffer[index2 + 3].Pos.y = -num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+                buffer[index2].Pos.z = buffer[index2 + 1].Pos.z = buffer[index2 + 2].Pos.z = buffer[index2 + 3].Pos.z = FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].z - vecFx32.z) - 1f;
+                if (index1 != 0)
+                    buffer[index2 - 1] = buffer[index2];
+                if (index1 + 1 < drawRingCount)
+                    buffer[index2 + 4] = buffer[index2 + 3];
+            }
+            dat.sortZ = nnDistanceVector(ref buffer[offset].Pos, ref disp_pos);
+            amMatrixPush(ref snnsMatrix);
+            ObjDraw3DNNDrawPrimitive(dat);
+            amMatrixPop();
+        }
     }
 
     private static void gmRingDest(MTS_TASK_TCB tcb)
@@ -693,16 +807,25 @@
 
     private static void gmRingDrawFuncRing3D(GMS_RING_WORK ring_work)
     {
-        VecU16 vecU16 = new VecU16();
-        vecU16.x = 0;
-        vecU16.y = gm_ring_sys_work.dir;
         OBS_CAMERA obsCamera = ObjCameraGet(g_obj.glb_camera_id);
-        vecU16.z = (ushort)-obsCamera.roll;
-        int drawRingCount = gm_ring_sys_work.draw_ring_count;
-        gm_ring_sys_work.draw_ring_pos[drawRingCount].x = ring_work.pos.x;
-        gm_ring_sys_work.draw_ring_pos[drawRingCount].y = ring_work.pos.y;
-        gm_ring_sys_work.draw_ring_pos[drawRingCount].z = ring_work.pos.z;
-        ++gm_ring_sys_work.draw_ring_count;
+        VecU16 dir = new VecU16();
+        dir.x = 0;
+        dir.y = gm_ring_sys_work.dir;
+        dir.z = (ushort)-obsCamera.roll;
+
+        if (RING_AS_MODEL)
+        {
+            uint disp_flag = 0;
+            ObjDrawAction3DNN(gm_ring_obj_3d, ring_work.pos, dir, ring_work.scale, ref disp_flag);
+        }
+        else
+        {
+            int drawRingCount = gm_ring_sys_work.draw_ring_count;
+            gm_ring_sys_work.draw_ring_pos[drawRingCount].x = ring_work.pos.x;
+            gm_ring_sys_work.draw_ring_pos[drawRingCount].y = ring_work.pos.y;
+            gm_ring_sys_work.draw_ring_pos[drawRingCount].z = ring_work.pos.z;
+            ++gm_ring_sys_work.draw_ring_count;
+        }
     }
 
     private static void GmRingGetSE()

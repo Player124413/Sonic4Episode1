@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct CLocalBtnBase_EAct
+    internal struct CLocalBtnBase_EAct
     {
         public enum Type
         {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_SHADER_PROFILE
+    internal class NNS_SHADER_PROFILE
     {
         private int[] TexCoord = New<int>(8);
         private int bLighting;

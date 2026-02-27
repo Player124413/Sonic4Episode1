@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void SyInitEvtSys(
      SYS_EVT_DATA[] evt_data,
@@ -32,7 +32,7 @@ public partial class AppMain
         sy_evt_tcb = null;
     }
 
-    private static SYS_EVT_INFO SyGetEvtInfo()
+    public static SYS_EVT_INFO SyGetEvtInfo()
     {
         return sy_evt_info;
     }

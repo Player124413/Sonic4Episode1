@@ -1,6 +1,6 @@
 using er;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private class DMS_STGSLCT_MAIN_WORK
     {

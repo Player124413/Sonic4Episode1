@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static GMS_BOSS1_MGR_WORK GMM_BOSS1_MGR(GMS_BOSS1_BODY_WORK work)
     {

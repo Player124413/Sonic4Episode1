@@ -7,7 +7,7 @@
 using System;
 using mpp;
 
-public class GLNormalData : GLVector3Data, OpenGL.GLVertexData
+internal class GLNormalData : GLVector3Data, OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
     {

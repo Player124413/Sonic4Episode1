@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLY_EFCT_TRAIL_SETTING
+    internal class GMS_PLY_EFCT_TRAIL_SETTING
     {
         public float start_size;
         public float end_size;

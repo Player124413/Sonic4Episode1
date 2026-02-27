@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIALNAMELIST
+    internal class NNS_MATERIALNAMELIST
     {
         public NNE_MATERIALNAME_SORTTYPE SortType;
         public int nMaterial;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_KAMA_FADE_ANIME_PAT
+    internal class GMS_ENE_KAMA_FADE_ANIME_PAT
     {
         public readonly NNS_RGB col;
         public float intensity;

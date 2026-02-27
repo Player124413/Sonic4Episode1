@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework.Graphics;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_PARAM_LOAD_TEXTURE_IMAGE
+    internal struct AMS_PARAM_LOAD_TEXTURE_IMAGE
     {
         public Texture2D texture;
         public int size;

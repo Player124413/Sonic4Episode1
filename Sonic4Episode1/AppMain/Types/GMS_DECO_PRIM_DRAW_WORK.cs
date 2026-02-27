@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECO_PRIM_DRAW_WORK
+    internal class GMS_DECO_PRIM_DRAW_WORK
     {
         public readonly GMS_DECO_PRIM_DRAW_STACK[] stack = New<GMS_DECO_PRIM_DRAW_STACK>(128);
         public AOS_TEXTURE tex;

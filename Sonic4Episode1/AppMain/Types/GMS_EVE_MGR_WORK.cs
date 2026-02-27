@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EVE_MGR_WORK
+    internal class GMS_EVE_MGR_WORK
     {
         public float[] prev_pos = new float[2];
         public ushort[] map_size = new ushort[2];

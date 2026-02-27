@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private float amTimerGetFrame(ref AMS_TIMER timer)
     {

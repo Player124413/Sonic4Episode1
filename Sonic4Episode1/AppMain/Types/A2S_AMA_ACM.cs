@@ -1,6 +1,6 @@
 using System;
 
-public class A2S_AMA_ACM
+internal class A2S_AMA_ACM
 {
     public uint flag;
     public uint acm_key_num;

@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public const int GMD_DWORK_NO_DUMMY = 0;
     public const int GMD_DWORK_NO_FIX_START = 1;

@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_ACTION3D_NN_WORK
+    internal class OBS_ACTION3D_NN_WORK
     {
         public readonly object[] mtn = new object[4];
         public readonly OBS_DATA_WORK[] mtn_data_work = new OBS_DATA_WORK[4];
@@ -97,7 +97,7 @@ public partial class AppMain
             }
         }
 
-        public class CMPLT_Wrapper
+        internal class CMPLT_Wrapper
         {
             public GMS_BS_CMN_CNM_NODE_INFO[] m_pInfos;
             public ushort reg_node_cnt;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_SCALE_TBL
+    internal class OBS_SCALE_TBL
     {
         public VecFx32 scale = new VecFx32();
         public byte time;

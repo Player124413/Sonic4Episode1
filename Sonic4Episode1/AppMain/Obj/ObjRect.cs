@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static bool OBM_LINE_AND_LINE(int x0, int w0, int x1, int w1)
     {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_RECT : IClearable
+    internal class OBS_RECT : IClearable
     {
         public VecFx32 pos = new VecFx32();
         public short left;

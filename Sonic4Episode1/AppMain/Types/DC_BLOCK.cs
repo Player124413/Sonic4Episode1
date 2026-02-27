@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct DC_BLOCK
+    internal struct DC_BLOCK
     {
         public ushort dc_num;
     }

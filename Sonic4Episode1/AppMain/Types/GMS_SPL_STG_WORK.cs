@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SPL_STG_WORK
+    internal class GMS_SPL_STG_WORK
     {
         public readonly NNS_VECTOR light_vec = GlobalPool<NNS_VECTOR>.Alloc();
         public uint counter;

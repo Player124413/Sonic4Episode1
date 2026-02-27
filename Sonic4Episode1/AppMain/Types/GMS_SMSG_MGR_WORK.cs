@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SMSG_MGR_WORK : IClearable
+    internal class GMS_SMSG_MGR_WORK : IClearable
     {
         public GMS_SMSG_2D_OBJ_WORK[] ama_2d_work = new GMS_SMSG_2D_OBJ_WORK[GMD_SMSG_AMA_ACT_MAX];
         public GMS_SMSG_2D_OBJ_WORK[] ama_2d_work_act = new GMS_SMSG_2D_OBJ_WORK[GMD_SMSG_AMA_ACT_ACTION_MAX];

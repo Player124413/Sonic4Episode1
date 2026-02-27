@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public struct _last_key
+internal struct _last_key
 {
     public int trs;
     public int mtn;

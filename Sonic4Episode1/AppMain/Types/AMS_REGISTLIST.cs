@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_REGISTLIST
+    internal class AMS_REGISTLIST
     {
         public int command_id;
         public object param;

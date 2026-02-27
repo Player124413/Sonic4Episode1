@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_LIGHT
+    internal class OBS_LIGHT
     {
         private readonly NNS_LIGHT_TARGET_DIRECTIONAL light_data_ = new NNS_LIGHT_TARGET_DIRECTIONAL();
         public const int ELT_LIGHT_PARALLEL = 0;

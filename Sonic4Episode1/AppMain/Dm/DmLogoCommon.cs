@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private MTS_TASK_TCB DmLogoComLoadFileCreate(
         Reference<MTS_TASK_TCB> load_tcb_addr)

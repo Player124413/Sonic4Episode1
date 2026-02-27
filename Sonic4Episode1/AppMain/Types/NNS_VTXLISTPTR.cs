@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_VTXLISTPTR
+    internal class NNS_VTXLISTPTR
     {
         public uint fType;
         public object pVtxList;

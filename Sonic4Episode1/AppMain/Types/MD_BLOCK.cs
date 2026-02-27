@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct MD_BLOCK
+    internal struct MD_BLOCK
     {
         public sbyte ofst_x;
         public sbyte ofst_y;

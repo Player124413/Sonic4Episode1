@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_EGG_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS4_EGG_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_BOSS4_DIRECTION dir_work = new GMS_BOSS4_DIRECTION();
         public readonly GMS_BOSS4_NODE_MATRIX node_work = new GMS_BOSS4_NODE_MATRIX();

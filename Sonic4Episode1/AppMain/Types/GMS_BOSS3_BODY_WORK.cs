@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS3_BODY_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS3_BODY_WORK : IOBS_OBJECT_WORK
     {
         public OBS_OBJECT_WORK[] parts_objs = new OBS_OBJECT_WORK[2];
         public VecFx32 start_pos = new VecFx32();

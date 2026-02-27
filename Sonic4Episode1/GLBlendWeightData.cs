@@ -8,7 +8,7 @@ using System;
 using Microsoft.Xna.Framework;
 using mpp;
 
-public class GLBlendWeightData : OpenGL.GLVertexData
+internal class GLBlendWeightData : OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
     {

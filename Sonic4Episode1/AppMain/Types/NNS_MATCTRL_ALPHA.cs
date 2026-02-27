@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATCTRL_ALPHA
+    internal class NNS_MATCTRL_ALPHA
     {
         public int mode;
         public float alpha;

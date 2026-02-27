@@ -1,4 +1,6 @@
-﻿public partial class AppMain
+﻿using System.Diagnostics;
+
+internal partial class AppMain
 {
     public static OBS_OBJECT_WORK GMM_EFFECT_CREATE_WORK(
       TaskWorkFactoryDelegate work_size,
@@ -152,54 +154,107 @@
       uint pos_type,
       uint init_flag)
     {
-        OBS_OBJECT_WORK obsObjectWork = (OBS_OBJECT_WORK)efct_3des;
-        OBS_ACTION3D_ES_WORK obj3des = obsObjectWork.obj_3des;
-        efct_3des.saved_pos_type = pos_type;
-        efct_3des.saved_init_flag = init_flag;
-        switch (pos_type)
-        {
-            case 0:
-                obj3des.flag &= 4294967294U;
-                obj3des.flag &= 4294967293U;
-                break;
-            case 1:
-                obj3des.flag |= 1U;
-                obj3des.flag &= 4294967293U;
-                break;
-            case 2:
-                obj3des.flag |= 1U;
-                obj3des.flag |= 2U;
-                break;
-            default:
-                mppAssertNotImpl();
-                break;
-        }
-        if (((int)init_flag & 1) != 0)
-            obsObjectWork.disp_flag |= 4194304U;
-        else
-            obsObjectWork.disp_flag &= 4290772991U;
-        if (((int)init_flag & 2) != 0)
-            obsObjectWork.flag |= 1024U;
-        else
-            obsObjectWork.flag &= 4294966271U;
-        if (((int)init_flag & 4) != 0)
-            obj3des.flag |= 8U;
-        else
-            obj3des.flag &= 4294967287U;
-        if (((int)init_flag & 16) != 0)
-            obsObjectWork.disp_flag &= 4294967039U;
-        else
-            obsObjectWork.disp_flag |= 256U;
-        if (((int)init_flag & 64) != 0)
-            obj3des.flag |= 16U;
-        else
-            obj3des.flag &= 4294967279U;
-        if (((int)init_flag & 32) != 0)
-            obsObjectWork.flag &= 4294443007U;
-        else
-            obsObjectWork.flag |= 524288U;
-        obsObjectWork.ppFunc = _GmEffectDefaultMainFuncDeleteAtEnd;
-    }
+		OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)efct_3des;
+		OBS_ACTION3D_ES_WORK obj_3des;
+
+		MTM_ASSERT(obj_work);
+
+		obj_3des = obj_work.obj_3des;
+		MTM_ASSERT(obj_3des);
+
+		// 初期化時パラメータを保存
+		efct_3des.saved_pos_type = pos_type;
+		efct_3des.saved_init_flag = init_flag;
+
+		/* 配置タイプを反映 */
+
+		switch (pos_type)
+		{
+			case GME_EFFECT_3DES_POS_TYPE_MTX:
+				obj_3des.flag &= ~OBD_ACTFLAG_3D_ES_POSITION_EMITTER;
+				obj_3des.flag &= ~OBD_ACTFLAG_3D_ES_PARTICLE_DEPEND;
+				break;
+			case GME_EFFECT_3DES_POS_TYPE_EMT:
+				obj_3des.flag |= OBD_ACTFLAG_3D_ES_POSITION_EMITTER;
+				obj_3des.flag &= ~OBD_ACTFLAG_3D_ES_PARTICLE_DEPEND;
+				break;
+			case GME_EFFECT_3DES_POS_TYPE_EMT_DEPEND:
+				obj_3des.flag |= OBD_ACTFLAG_3D_ES_POSITION_EMITTER;
+				obj_3des.flag |= OBD_ACTFLAG_3D_ES_PARTICLE_DEPEND;
+				break;
+			default:
+				Debug.Assert(false, "gmEffect.cpp::GmEffect3DESSetupBase() Error! Invalid pos_type.\n");
+				break;
+		}
+
+		/* 初期化フラグ反映 */
+
+		// フリップ有効・無効設定
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_NOFLIP) != 0)
+		{
+			obj_work.disp_flag |= OBD_DISP_NODIRFLIP;
+		}
+		else
+		{
+			obj_work.disp_flag &= ~OBD_DISP_NODIRFLIP;
+		}
+
+		// 親付随設定
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_STICKPARENT) != 0)
+		{
+			MTM_ASSERT(obj_work.parent_obj);
+			obj_work.flag |= OBD_OBJECT_PARENT_FIX;
+		}
+		else
+		{
+			obj_work.flag &= ~OBD_OBJECT_PARENT_FIX;
+		}
+
+		// スケール方法設定
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_SCALE_BY_MTX) != 0)
+		{
+			obj_3des.flag |= OBD_ACTFLAG_3D_ES_SCALE_BY_MTX;
+		}
+		else
+		{
+			obj_3des.flag &= ~OBD_ACTFLAG_3D_ES_SCALE_BY_MTX;
+		}
+
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_ENABLE_DIR) != 0)
+		{
+			obj_work.disp_flag &= ~OBD_DISP_NODIR;
+		}
+		else
+		{
+			obj_work.disp_flag |= OBD_DISP_NODIR;
+		}
+
+		// ESデータ側のRotation反映設定
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_EMT_USE_DATA_ROT) != 0)
+		{
+			MTM_ASSERT(OBD_ACTFLAG_3D_ES_POSITION_EMITTER & obj_3des.flag);
+			obj_3des.flag |= OBD_ACTFLAG_3D_ES_EMT_USE_DATA_ROT;
+		}
+		else
+		{
+			obj_3des.flag &= ~OBD_ACTFLAG_3D_ES_EMT_USE_DATA_ROT;
+		}
+
+		// 親のNODISP反映設定
+		if ((init_flag & GMD_EFFECT_3DES_FLAG_COPY_NODISP) != 0)
+		{
+			obj_work.flag &= ~OBD_OBJECT_PARENT_FIX_NODISP;
+		}
+		else
+		{
+			obj_work.flag |= OBD_OBJECT_PARENT_FIX_NODISP;
+		}
+
+
+		// デフォルト処理関数設定
+		MTM_ASSERT(obj_work.ppFunc == null);
+		obj_work.ppFunc = _GmEffectDefaultMainFuncDeleteAtEnd;  // ENDフラグが立ったら消去
+	}
 
     private static void GmEffect3DESChangeBase(
       GMS_EFFECT_3DES_WORK efct_3des,

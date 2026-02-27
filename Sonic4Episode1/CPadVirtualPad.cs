@@ -1,7 +1,7 @@
 ﻿using accel;
 using Microsoft.Xna.Framework.Input.Touch;
 
-public class CPadVirtualPad
+internal class CPadVirtualPad
 {
     private bool[] m_flag = new bool[1];
     private readonly bool[] m_focus = new bool[4];
@@ -125,6 +125,9 @@ public class CPadVirtualPad
             // no touchy
             return false;
         }
+
+        this.m_area.left += ((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f;
+        this.m_area.right += ((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f; 
 
         this.Release();
         this.m_flag[0] = true;

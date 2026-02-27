@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class16
+    internal class NNS_MOTION_KEY_Class16
     {
         public short Frame;
         public NNS_ROTATE_A16 Value;

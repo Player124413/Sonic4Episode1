@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_START_DEMO_MGR : IClearable
+    internal class GMS_START_DEMO_MGR : IClearable
     {
         public MTS_TASK_TCB main_tcb;
 

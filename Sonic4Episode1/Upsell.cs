@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 
-public class Upsell
+internal class Upsell
 {
     public static bool showUpsell = false;
     public static int ss_num = 1;
@@ -88,7 +88,7 @@ public class Upsell
             if (buy_scr_work != null)
             {
                 buy_scr_work.result[0] = 2;
-                AppMain.DmSndBgmPlayerPlayBgm(0);
+                AppMain.DmSndBgmPlayerPlayBgm(AppMain.DME_SND_BGM_PLAYER_IDX_MENU);
             }
             else
             {
@@ -160,7 +160,7 @@ public class Upsell
                 if (buy_scr_work != null)
                 {
                     buy_scr_work.result[0] = 2;
-                    AppMain.DmSndBgmPlayerPlayBgm(0);
+                    AppMain.DmSndBgmPlayerPlayBgm(AppMain.DME_SND_BGM_PLAYER_IDX_MENU);
                     break;
                 }
                 AppMain.SyDecideEvtCase(1);
@@ -235,7 +235,7 @@ public class Upsell
         if (buy_scr_work != null)
         {
             buy_scr_work.result[0] = 0;
-            AppMain.DmSndBgmPlayerPlayBgm(0);
+            AppMain.DmSndBgmPlayerPlayBgm(AppMain.DME_SND_BGM_PLAYER_IDX_MENU);
         }
         else
         {
@@ -249,27 +249,27 @@ public class Upsell
     {
         if (!showUpsell)
             return;
-        SpriteBatch spriteBatch = LiveFeature.GAME.spriteBatch;
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-        spriteBatch.Draw(bg, Vector2.Zero, Color.White);
-        spriteBatch.Draw(hl_buttons[1] ? button2hl : button2, rects[1], Color.White);
-        spriteBatch.Draw(hl_buttons[0] ? button1hl : button1, rects[0], Color.White);
-        spriteBatch.Draw(cursor1, rects[2], Color.White);
-        spriteBatch.Draw(cursor1, rects[3], new Rectangle?(), Color.White, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
-        spriteBatch.Draw(screenshot, rects[4], Color.White);
-        int y1 = 5;
-        int y2 = y1 + LiveFeature._drawWrapText("Download full Game!", 335, y1, 300, Color.White, true, LiveFeature.GAME.fnts[1], spriteBatch, 0.8f);
-        int y3 = y2 + LiveFeature._drawWrapText("- 17 diverse stages", 195, y2, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
-        int y4 = y3 + LiveFeature._drawWrapText("- Two exclusive stages!", 195, y3, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
-        int y5 = y4 + LiveFeature._drawWrapText("- 7 special stages with tilt control!", 195, y4, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
-        int num1 = y5 + LiveFeature._drawWrapText("- Collect all 7 Chaos Emeralds to Unlock Super Sonic!", 195, y5, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
-        if (anm_progress != -1)
-        {
-            int num2 = Math.Abs(anm_progress);
-            spriteBatch.Draw(screenshot, Vector2.Zero, new Color(num2, num2, num2, num2));
-        }
-        LiveFeature.GAME.spriteBatch.End();
-        updateUpsellScreen();
+        //SpriteBatch spriteBatch = LiveFeature.GAME.spriteBatch;
+        //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        //spriteBatch.Draw(bg, Vector2.Zero, Color.White);
+        //spriteBatch.Draw(hl_buttons[1] ? button2hl : button2, rects[1], Color.White);
+        //spriteBatch.Draw(hl_buttons[0] ? button1hl : button1, rects[0], Color.White);
+        //spriteBatch.Draw(cursor1, rects[2], Color.White);
+        //spriteBatch.Draw(cursor1, rects[3], new Rectangle?(), Color.White, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
+        //spriteBatch.Draw(screenshot, rects[4], Color.White);
+        //int y1 = 5;
+        //int y2 = y1 + LiveFeature._drawWrapText("Download full Game!", 335, y1, 300, Color.White, true, LiveFeature.GAME.fnts[1], spriteBatch, 0.8f);
+        //int y3 = y2 + LiveFeature._drawWrapText("- 17 diverse stages", 195, y2, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
+        //int y4 = y3 + LiveFeature._drawWrapText("- Two exclusive stages!", 195, y3, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
+        //int y5 = y4 + LiveFeature._drawWrapText("- 7 special stages with tilt control!", 195, y4, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
+        //int num1 = y5 + LiveFeature._drawWrapText("- Collect all 7 Chaos Emeralds to Unlock Super Sonic!", 195, y5, 300, Color.White, false, LiveFeature.GAME.fnts[0], spriteBatch, 0.8f);
+        //if (anm_progress != -1)
+        //{
+        //    int num2 = Math.Abs(anm_progress);
+        //    spriteBatch.Draw(screenshot, Vector2.Zero, new Color(num2, num2, num2, num2));
+        //}
+        //LiveFeature.GAME.spriteBatch.End();
+        //updateUpsellScreen();
     }
 
     public static void disposeUpsellScreen()

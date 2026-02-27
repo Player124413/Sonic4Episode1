@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_BOSS3_PILLAR_MANAGER_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_BOSS3_PILLAR_MANAGER_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_OBJECT_WORK[] obj_work_pillar = new OBS_OBJECT_WORK[26];
         public readonly OBS_OBJECT_WORK[] obj_work_wall = new OBS_OBJECT_WORK[2];

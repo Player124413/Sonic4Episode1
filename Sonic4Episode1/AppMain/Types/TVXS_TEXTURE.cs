@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct TVXS_TEXTURE
+    internal struct TVXS_TEXTURE
     {
         public int tex_id;
         public uint vtx_num;

@@ -6,7 +6,7 @@
 
 using mpp;
 
-public class GLPositionData : GLVector3Data, OpenGL.GLVertexData
+internal class GLPositionData : GLVector3Data, OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1];
 

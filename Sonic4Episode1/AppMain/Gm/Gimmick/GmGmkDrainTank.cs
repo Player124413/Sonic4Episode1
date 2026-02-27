@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static int GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH => OBD_LCD_X + 256;
 

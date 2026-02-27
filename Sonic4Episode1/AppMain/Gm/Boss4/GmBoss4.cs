@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static AMS_AMB_HEADER GMD_BOSS4_ARC => g_gm_gamedat_enemy_arc;
 
@@ -294,8 +294,8 @@
                 gm_boss4_n_offset_x = -(gm_boss4_n_scroll_end - gm_boss4_n_scroll_start) + (int)gm_boss4_f_scroll_spd;
                 gm_boss4_n_scroll_pt_x -= gm_boss4_n_scroll_end - gm_boss4_n_scroll_start;
             }
-            g_gm_main_system.map_fcol.left = gm_boss4_n_scroll_pt_x - (int)(AMD_SCREEN_2D_WIDTH / 2f * 0.674383342266083) - 48;
-            g_gm_main_system.map_fcol.right = gm_boss4_n_scroll_pt_x + (int)(AMD_SCREEN_2D_WIDTH / 2f * 0.674383342266083);
+            g_gm_main_system.map_fcol.left = gm_boss4_n_scroll_pt_x - (int)((float)(AMD_SCREEN_2D_WIDTH / 2) * GMD_CAMERA_SCALE) - GMD_BOSS4_SCROLL_LIMIT_OFFSET_X;//180;
+            g_gm_main_system.map_fcol.right = gm_boss4_n_scroll_pt_x + (int)((float)(AMD_SCREEN_2D_WIDTH / 2) * GMD_CAMERA_SCALE);//180;
             GlobalPool<NNS_VECTOR>.Release(nnsVector);
         }
     }

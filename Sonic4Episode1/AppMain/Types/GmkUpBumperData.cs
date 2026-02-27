@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkUpBumperData
+    internal class GmkUpBumperData
     {
         public static readonly short[][] tbl_gm_gmk_upbumper_rect = new short[2][]
         {

@@ -8,7 +8,7 @@ using System;
 using Microsoft.Xna.Framework;
 using mpp;
 
-public class GLColorData : OpenGL.GLVertexData
+internal class GLColorData : OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
     {

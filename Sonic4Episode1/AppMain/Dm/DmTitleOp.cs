@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     public DMS_TITLEOP_OBJ_3DNN_WORK DMM_TITLEOP_CREATE_3D_OBJ(
@@ -36,7 +36,8 @@
             AoTexBuild(dmTitleopAosTex[index], amsAmbHeaderArray[index]);
             AoTexLoad(dmTitleopAosTex[index]);
         }
-        ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
+        ObjInit(GMD_TASK_GROUP_OBJSYS, GMD_TASK_PRIO_OBJSYS, GMD_TASK_PAUSE_LEVEL_OBJSYS,
+                    GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_HEIGHT, GSD_DISP_HEIGHT);
         ObjDataAlloc(10);
         ObjDrawSetNNCommandStateTbl(0U, 0U, true);
         ObjDrawSetNNCommandStateTbl(1U, 1U, true);
@@ -378,6 +379,24 @@
         obj_work.ppOut = dmTitleOpObjRockDraw;
         titleopObj3DnnWork.rock_setting = dm_titleop_rock_setting[(int)type];
         titleopObj3DnnWork.rock_setting_num = dm_titleop_rock_setting_num[(int)type];
+
+        var top3d_work = DMM_TITLEOP_CREATE_3D_OBJ(DMD_TITLEOP_TASK_PRIO_FAR_ROCK_B, DMD_TITLEOP_TASK_GROUP_FAR_ROCK_B,
+                        () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_ROCKB");
+        obj_work = (OBS_OBJECT_WORK)top3d_work;
+        obj_work.obj_type = DMD_TITLEOP_OBJTYPE_MAPFAR;
+        // モデルロード
+        ObjObjectCopyAction3dNNModel(obj_work,
+                        dm_titleop_obj_3d_list[IDB_MAPFAR_ZONE1_MDL_Z1_ROCK_A_T_D_INO + type],
+                        top3d_work.obj_3d);
+        obj_work.obj_3d.command_state = DMD_TITLEOP_DRAW_CMD_STATE_MAPFAR_B;
+        //obj_work.disp_flag |= OBD_DISP_NODIRFLIP | OBD_DISP_NOSCALE | OBD_DISP_NODRAWSCALE;
+        obj_work.disp_flag |= OBD_DISP_NODIRFLIP | OBD_DISP_NODRAWSCALE;
+        //obj_work.pos = *pos;
+        // 描画処理変更
+        obj_work.ppOut = dmTitleOpObjRockDraw;
+        // 設定情報取得
+        top3d_work.rock_setting = dm_titleop_rock_setting[type];
+        top3d_work.rock_setting_num = dm_titleop_rock_setting_num[type];
     }
 
     private void dmTitleOpCreateObjFarSea()

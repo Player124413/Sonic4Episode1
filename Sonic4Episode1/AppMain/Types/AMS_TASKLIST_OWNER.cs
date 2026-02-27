@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TASKLIST_OWNER
+    internal class AMS_TASKLIST_OWNER
     {
         public uint uflag;
         public string name;

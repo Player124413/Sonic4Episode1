@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameFramework
 {
-    public class TextObject : SpriteObject
+    internal class TextObject : SpriteObject
     {
         private SpriteFont _font;
         private string _text;

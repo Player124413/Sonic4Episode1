@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_TITLEOP_ROCK_SETTING
+    internal class DMS_TITLEOP_ROCK_SETTING
     {
         public VecFx32 pos = new VecFx32();
         public VecFx32 scale = new VecFx32();

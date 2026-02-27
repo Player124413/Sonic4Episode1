@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static uint _mt_math_rand;
 

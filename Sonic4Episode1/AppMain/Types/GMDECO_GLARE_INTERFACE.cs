@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMDECO_GLARE_INTERFACE : IClearable
+    internal class GMDECO_GLARE_INTERFACE : IClearable
     {
         public AMS_AMB_HEADER amb_header;
         public NNS_TEXFILELIST tex_buf;

@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_BINCNK_NOF0HEADER
+    internal class NNS_BINCNK_NOF0HEADER
     {
         public uint Id;
         public int OfsNextId;

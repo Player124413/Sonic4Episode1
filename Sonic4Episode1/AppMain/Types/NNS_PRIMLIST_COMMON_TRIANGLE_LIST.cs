@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIMLIST_COMMON_TRIANGLE_LIST
+    internal class NNS_PRIMLIST_COMMON_TRIANGLE_LIST
     {
         public uint fType;
         public int nIndexSetSize;

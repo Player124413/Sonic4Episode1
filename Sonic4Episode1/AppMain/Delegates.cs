@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public delegate int _obj_block_collision_func_delegate(OBS_COL_CHK_DATA data);
 

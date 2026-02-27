@@ -1,7 +1,7 @@
 using System.IO;
 using mpp;
 
-public class NNS_VECTOR : IClearable
+internal class NNS_VECTOR : IClearable
 {
     public float x;
     public float y;

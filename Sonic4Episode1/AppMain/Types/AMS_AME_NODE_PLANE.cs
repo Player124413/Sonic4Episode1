@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_NODE_PLANE : AMS_AME_NODE_TR_ROT
+    internal class AMS_AME_NODE_PLANE : AMS_AME_NODE_TR_ROT
     {
         public readonly NNS_VECTOR4D rotate_axis = GlobalPool<NNS_VECTOR4D>.Alloc();
         public float z_bias;

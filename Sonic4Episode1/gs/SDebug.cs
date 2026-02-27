@@ -1,6 +1,6 @@
 ﻿namespace gs.backup
 {
-    public class SDebug : SBase
+    internal class SDebug : SBase
     {
         private Sonic4Save save;
 

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_BODY_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS4_BODY_WORK : IOBS_OBJECT_WORK
     {
         public readonly uint[] flag = new uint[1];
         public readonly ushort[] reserved = new ushort[1];

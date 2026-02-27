@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GAMEDAT_LOAD_DATA
+    internal class GMS_GAMEDAT_LOAD_DATA
     {
         public string path;
         public _alloc_ alloc;

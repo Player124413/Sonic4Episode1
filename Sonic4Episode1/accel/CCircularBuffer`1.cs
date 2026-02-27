@@ -6,7 +6,7 @@
 
 namespace accel
 {
-    public class CCircularBuffer<T> where T : new()
+    internal class CCircularBuffer<T> where T : new()
     {
         private readonly T[] m_data;
         private int m_begin;

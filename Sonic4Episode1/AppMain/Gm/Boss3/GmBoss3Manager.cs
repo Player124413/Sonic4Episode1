@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static int gmBoss3MgrCheckSetupComplete(GMS_BOSS3_MGR_WORK mgr_work)
     {

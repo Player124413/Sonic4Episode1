@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_PRESSWALL_PARTS : IOBS_OBJECT_WORK
+    internal class GMS_GMK_PRESSWALL_PARTS : IOBS_OBJECT_WORK
     {
         public readonly GMS_EFFECT_3DNN_WORK eff_work;
         public int ofst_y;

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATRIXSTACK
+    internal class NNS_MATRIXSTACK
     {
         private readonly NNS_MATRIX identity = NNS_MATRIX.CreateIdentity();
         private List<NNS_MATRIX> stack;

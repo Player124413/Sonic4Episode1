@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_SAVE_MAIN_WORK
+    internal class DMS_SAVE_MAIN_WORK
     {
         public readonly AMS_FS[] arc_cmn_amb_fs = new AMS_FS[2];
         public readonly AMS_AMB_HEADER[] arc_cmn_amb = new AMS_AMB_HEADER[2];

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_FOG_RANGE
+    internal class AMS_DRAWSTATE_FOG_RANGE
     {
         public float fnear;
         public float ffar;

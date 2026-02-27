@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS1_CHAIN_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS1_CHAIN_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_BS_CMN_BMCB_MGR bmcb_mgr = new GMS_BS_CMN_BMCB_MGR();
         public readonly GMS_BS_CMN_SNM_WORK snm_work = new GMS_BS_CMN_SNM_WORK();

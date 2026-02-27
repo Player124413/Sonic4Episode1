@@ -1,7 +1,7 @@
 
 using Microsoft.Xna.Framework;
 
-public struct SNNS_VECTOR
+internal struct SNNS_VECTOR
 {
     public float x;
     public float y;

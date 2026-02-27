@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_BOUNDING
+    internal class AMS_AME_BOUNDING
     {
         public readonly NNS_VECTOR4D center = GlobalPool<NNS_VECTOR4D>.Alloc();
         public float radius;

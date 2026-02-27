@@ -1,8 +1,8 @@
 using er;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_TITLE_MAIN_WORK
+    internal class DMS_TITLE_MAIN_WORK
     {
         public readonly AMS_FS[] arc_cmn_amb_fs = new AMS_FS[4];
         public readonly AMS_AMB_HEADER[] arc_cmn_amb = new AMS_AMB_HEADER[4];
@@ -58,6 +58,8 @@ public partial class AppMain
         public int slct_menu_num;
         public uint disp_flag;
         public uint flag_prev;
+
+        public bool iphone_menus;
 
         public delegate void _proc_(DMS_TITLE_MAIN_WORK work);
     }

@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_AMA_MTN
+    internal class A2S_AMA_MTN
     {
         public uint flag;
         public uint mtn_key_num;

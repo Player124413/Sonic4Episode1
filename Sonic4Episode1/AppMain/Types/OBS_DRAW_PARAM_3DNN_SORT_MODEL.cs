@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class OBS_DRAW_PARAM_3DNN_SORT_MODEL
     {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AOS_ACT_COL : IClearable
+    internal struct AOS_ACT_COL : IClearable
     {
         public byte a;
         public byte b;

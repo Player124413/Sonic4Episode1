@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GmGmkCamScrLimitInit(
       GMS_EVE_RECORD_EVENT eve_rec,
@@ -169,12 +169,15 @@ public partial class AppMain
         int num2 = -FXM_FLOAT_TO_FX32(obsCamera.pos.y) >> 12;
         int num3 = 1;
         int num4 = 1;
-        int num5 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * obsCamera.scale) >> 12;
-        int num6 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * obsCamera.scale) >> 12;
+        //int lcd_width = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * obsCamera.scale) >> 12;
+        //int lcd_height = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * obsCamera.scale) >> 12;
+
+        int lcd_width = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_WIDTH / 2) * obsCamera.scale) >> FX32_SHIFT;
+        int lcd_height = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_HEIGHT / 2) * obsCamera.scale) >> FX32_SHIFT;
         byte num7 = 1;
         if ((Convert.ToInt32(obj_work.user_flag) & 1) != 0 && g_gm_main_system.map_fcol.left != gmkCamScrLimitWork.limit_setting.limit_rect[0])
         {
-            int num8 = num1 - num5;
+            int num8 = num1 - lcd_width;
             if (num8 > gmkCamScrLimitWork.limit_setting.limit_rect[0])
             {
                 g_gm_main_system.map_fcol.left = gmkCamScrLimitWork.limit_setting.limit_rect[0];
@@ -192,7 +195,7 @@ public partial class AppMain
         }
         if ((Convert.ToInt32(obj_work.user_flag) & 4) != 0 && g_gm_main_system.map_fcol.right != gmkCamScrLimitWork.limit_setting.limit_rect[2])
         {
-            int num8 = num1 + num5;
+            int num8 = num1 + lcd_width;
             if (num8 < gmkCamScrLimitWork.limit_setting.limit_rect[2])
             {
                 g_gm_main_system.map_fcol.right = gmkCamScrLimitWork.limit_setting.limit_rect[2];
@@ -210,7 +213,7 @@ public partial class AppMain
         }
         if ((Convert.ToInt32(obj_work.user_flag) & 2) != 0 && g_gm_main_system.map_fcol.top != gmkCamScrLimitWork.limit_setting.limit_rect[1])
         {
-            int num8 = num2 - num6;
+            int num8 = num2 - lcd_height;
             if (num8 > gmkCamScrLimitWork.limit_setting.limit_rect[1])
             {
                 g_gm_main_system.map_fcol.top = gmkCamScrLimitWork.limit_setting.limit_rect[1];
@@ -228,7 +231,7 @@ public partial class AppMain
         }
         if ((Convert.ToInt32(obj_work.user_flag) & 8) != 0 && g_gm_main_system.map_fcol.bottom != gmkCamScrLimitWork.limit_setting.limit_rect[3])
         {
-            int num8 = num2 + num6;
+            int num8 = num2 + lcd_height;
             if (num8 < gmkCamScrLimitWork.limit_setting.limit_rect[3])
             {
                 g_gm_main_system.map_fcol.bottom = gmkCamScrLimitWork.limit_setting.limit_rect[3];

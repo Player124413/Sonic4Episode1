@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TRAIL_PARTS
+    internal class AMS_TRAIL_PARTS
     {
         public readonly NNS_VECTOR pos = GlobalPool<NNS_VECTOR>.Alloc();
         public readonly NNS_VECTOR sub_pos = GlobalPool<NNS_VECTOR>.Alloc();

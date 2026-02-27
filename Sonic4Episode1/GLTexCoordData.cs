@@ -7,7 +7,7 @@
 using Microsoft.Xna.Framework;
 using mpp;
 
-public class GLTexCoordData : OpenGL.GLVertexData
+internal class GLTexCoordData : OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
     {

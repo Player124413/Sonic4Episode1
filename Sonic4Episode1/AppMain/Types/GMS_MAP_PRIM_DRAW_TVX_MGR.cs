@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_PRIM_DRAW_TVX_MGR
+    internal class GMS_MAP_PRIM_DRAW_TVX_MGR
     {
         public ushort motion_id;
         public ushort time;

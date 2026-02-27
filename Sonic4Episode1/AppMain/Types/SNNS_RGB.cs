@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct SNNS_RGB
+    internal struct SNNS_RGB
     {
         public float r;
         public float g;

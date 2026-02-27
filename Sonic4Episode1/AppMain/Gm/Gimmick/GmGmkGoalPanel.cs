@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static int __initial_y;
     private static int __initial_spd_m;

@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private struct GSS_TASK_SYS
     {

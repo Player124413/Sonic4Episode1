@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkSeesawData
+    internal class GmkSeesawData
     {
         public const int GME_GMK_RECT_DATA_COL_WIDTH = 0;
         public const int GME_GMK_RECT_DATA_COL_HEIGHT = 1;

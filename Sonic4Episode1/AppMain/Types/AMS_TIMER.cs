@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TIMER
+    internal class AMS_TIMER
     {
         public ulong count_start;
         public ulong count_end;

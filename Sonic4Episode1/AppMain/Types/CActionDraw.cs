@@ -1,8 +1,8 @@
 using accel;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class CActionDraw
+    internal class CActionDraw
     {
         public CCircularBuffer<AOS_ACTION> m_action_array = new CCircularBuffer<AOS_ACTION>(100);
 

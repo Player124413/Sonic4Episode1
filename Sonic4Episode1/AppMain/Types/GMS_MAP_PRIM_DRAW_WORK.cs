@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_PRIM_DRAW_WORK
+    internal class GMS_MAP_PRIM_DRAW_WORK
     {
         public GMS_MAP_PRIM_DRAW_STACK[] stack = New<GMS_MAP_PRIM_DRAW_STACK>(byte.MaxValue);
         public int tex_id;

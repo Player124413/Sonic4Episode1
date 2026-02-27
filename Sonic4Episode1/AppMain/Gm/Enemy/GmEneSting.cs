@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GmEneStingInit(
       GMS_EVE_RECORD_EVENT eve_rec,

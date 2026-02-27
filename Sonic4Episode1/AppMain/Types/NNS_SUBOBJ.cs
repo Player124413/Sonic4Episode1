@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_SUBOBJ
+    internal class NNS_SUBOBJ
     {
         public uint fType;
         public int nMeshset;

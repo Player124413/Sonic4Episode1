@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_TITLEOP_MGR_WORK
+    internal class DMS_TITLEOP_MGR_WORK
     {
         public OBS_OBJECT_WORK[] obj_work = new OBS_OBJECT_WORK[5];
         public AOS_ACTION[] act = new AOS_ACTION[7];

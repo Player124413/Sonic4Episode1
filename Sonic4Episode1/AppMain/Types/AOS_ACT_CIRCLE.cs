@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AOS_ACT_CIRCLE
+    internal struct AOS_ACT_CIRCLE
     {
         public float center_x;
         public float center_y;

@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIM3D_PCT_TexCoordData : OpenGL.GLVertexData
+    internal class NNS_PRIM3D_PCT_TexCoordData : OpenGL.GLVertexData
     {
         protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
         {

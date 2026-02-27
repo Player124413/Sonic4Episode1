@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_ACT_HIT
+    internal class AOS_ACT_HIT
     {
         public AOE_ACT_HIT type;
         public float center_x;

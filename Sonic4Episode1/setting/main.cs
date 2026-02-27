@@ -6,7 +6,7 @@
 
 namespace setting
 {
-    public class main
+    internal class main
     {
         public const uint c_draw_state = 4;
         public const uint c_task_priority = 28928;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_DIFF_COLLISION
+    internal class OBS_DIFF_COLLISION
     {
         public readonly MP_BLOCK[][] block_map_datap = new MP_BLOCK[2][];
         public DF_BLOCK[] cl_diff_datap;

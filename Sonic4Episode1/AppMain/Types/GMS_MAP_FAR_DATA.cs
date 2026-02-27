@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_FAR_DATA
+    internal class GMS_MAP_FAR_DATA
     {
         public readonly OBS_OBJECT_WORK[] obj_work = new OBS_OBJECT_WORK[16];
         public readonly NNS_VECTOR pos = GlobalPool<NNS_VECTOR>.Alloc();

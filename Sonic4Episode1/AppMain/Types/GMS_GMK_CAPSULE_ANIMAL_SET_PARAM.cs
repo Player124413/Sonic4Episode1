@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private struct GMS_GMK_CAPSULE_ANIMAL_SET_PARAM
     {

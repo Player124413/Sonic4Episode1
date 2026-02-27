@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class VecFx16
+    internal class VecFx16
     {
         public short x;
         public short y;

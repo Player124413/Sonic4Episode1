@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-public class NNS_MATRIX : IClearable
+internal class NNS_MATRIX : IClearable
 {
     public float M00;
     public float M01;

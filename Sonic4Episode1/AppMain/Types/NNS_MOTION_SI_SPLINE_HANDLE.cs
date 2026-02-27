@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_SI_SPLINE_HANDLE
+    internal class NNS_MOTION_SI_SPLINE_HANDLE
     {
         public float In;
         public float Out;

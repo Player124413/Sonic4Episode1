@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMAP_PARAM_WATER
+    internal class DMAP_PARAM_WATER
     {
         public float[] frame = new float[2];
         public float draw_u;

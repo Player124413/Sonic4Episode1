@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_BMCB_LINK : IClearable
+    internal class GMS_BS_CMN_BMCB_LINK : IClearable
     {
         public GMS_BS_CMN_BMCB_LINK next;
         public GMS_BS_CMN_BMCB_LINK prev;

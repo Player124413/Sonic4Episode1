@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void gmGmkSlot_ReelControl(GMS_GMK_SLOT_REEL_STATUS_WORK preel)
     {

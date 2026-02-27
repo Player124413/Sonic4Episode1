@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void DmLoadingBuild(AMS_FS arc_amb)
     {

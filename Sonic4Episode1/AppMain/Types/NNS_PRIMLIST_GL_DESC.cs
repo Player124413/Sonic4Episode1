@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIMLIST_GL_DESC
+    internal class NNS_PRIMLIST_GL_DESC
     {
         public uint Mode;
         public int[] pCounts;

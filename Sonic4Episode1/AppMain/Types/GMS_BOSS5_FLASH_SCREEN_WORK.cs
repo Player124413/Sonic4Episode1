@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_FLASH_SCREEN_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_FLASH_SCREEN_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_CMN_FLASH_SCR_WORK flash_work = new GMS_CMN_FLASH_SCR_WORK();
         public readonly GMS_EFFECT_COM_WORK efct_com;

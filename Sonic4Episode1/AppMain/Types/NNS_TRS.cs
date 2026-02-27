@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TRS
+    internal class NNS_TRS
     {
         public NNS_VECTORFAST Translation;
         public NNS_QUATERNION Rotation;

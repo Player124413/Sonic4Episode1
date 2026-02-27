@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_PRIM_DRAW_TVX_UV_WORK
+    internal class GMS_MAP_PRIM_DRAW_TVX_UV_WORK
     {
         public int mgr_index_tbl_num;
         public DoubleType<uint[], GMS_MAP_PRIM_DRAW_TVX_MGR_INDEX[]> mgr_index_tbl_addr;

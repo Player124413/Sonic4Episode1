@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class HGS_TROPHY_CHECK_INFO
+    internal class HGS_TROPHY_CHECK_INFO
     {
         public int trophy_type;
         public uint trophy_id;

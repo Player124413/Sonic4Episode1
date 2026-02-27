@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DI_BLOCK
+    internal class DI_BLOCK
     {
         public byte[][] di;
 

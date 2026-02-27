@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS2_BODY_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS2_BODY_WORK : IOBS_OBJECT_WORK
     {
         public OBS_OBJECT_WORK[] parts_objs = new OBS_OBJECT_WORK[2];
         public readonly OBS_RECT_WORK rect_work_arm = new OBS_RECT_WORK();

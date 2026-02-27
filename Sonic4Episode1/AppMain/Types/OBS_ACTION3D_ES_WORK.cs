@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_ACTION3D_ES_WORK
+    internal class OBS_ACTION3D_ES_WORK
     {
         public VecU16 disp_rot = new VecU16();
         public readonly NNS_VECTOR4D disp_ofst = new NNS_VECTOR4D();

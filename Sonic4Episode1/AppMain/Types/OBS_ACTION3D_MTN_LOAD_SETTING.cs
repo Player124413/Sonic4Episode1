@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_ACTION3D_MTN_LOAD_SETTING
+    internal class OBS_ACTION3D_MTN_LOAD_SETTING
     {
         public bool enable;
         public bool marge;

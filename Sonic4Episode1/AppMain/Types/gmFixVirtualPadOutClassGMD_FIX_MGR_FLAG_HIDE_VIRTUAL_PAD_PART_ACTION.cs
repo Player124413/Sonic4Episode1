@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class gmFixVirtualPadOutClassGMD_FIX_MGR_FLAG_HIDE_VIRTUAL_PAD_PART_ACTION
     {

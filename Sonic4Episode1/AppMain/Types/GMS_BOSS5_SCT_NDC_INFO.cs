@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_SCT_NDC_INFO
+    internal class GMS_BOSS5_SCT_NDC_INFO
     {
         public int part_idx;
         public uint delay_time;

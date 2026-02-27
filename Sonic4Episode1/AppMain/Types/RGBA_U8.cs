@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct RGBA_U8
+    internal struct RGBA_U8
     {
         public byte r;
         public byte g;

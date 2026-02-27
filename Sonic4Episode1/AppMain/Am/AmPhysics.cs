@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static void _amApplyGravity(
       AMS_AME_ECB ecb,

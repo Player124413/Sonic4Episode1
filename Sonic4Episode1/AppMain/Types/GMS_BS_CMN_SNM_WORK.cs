@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_SNM_WORK
+    internal class GMS_BS_CMN_SNM_WORK
     {
         public readonly GMS_BS_CMN_BMCB_LINK bmcb_link = new GMS_BS_CMN_BMCB_LINK();
         public uint[] reserved = new uint[3];

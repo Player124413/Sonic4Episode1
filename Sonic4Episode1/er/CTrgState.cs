@@ -11,7 +11,7 @@ using accel;
 
 namespace er
 {
-    public class CTrgState
+    internal class CTrgState
     {
         private static int[] takeover = new int[4] { 14, 15, 16, 17 };
         private const int c_counter_none = -1;
@@ -349,7 +349,7 @@ namespace er
             c_repeat_interval_default.second = 6;
         }
 
-        public class EState
+        internal class EState
         {
             public const int On = 0;
             public const int Prev = 1;
@@ -373,7 +373,7 @@ namespace er
             public const int None = 19;
         }
 
-        public class BState : EState
+        internal class BState : EState
         {
         }
 
@@ -394,7 +394,7 @@ namespace er
             public const int None = 3;
         }
 
-        public class CBitset
+        internal class CBitset
         {
             private BitArray imp = new BitArray(18);
 

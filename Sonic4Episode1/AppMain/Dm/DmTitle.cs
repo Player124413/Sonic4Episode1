@@ -6,8 +6,336 @@ using gs.backup;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.GamerServices;
 
-public partial class AppMain
+internal partial class AppMain
 {
+    public const int DMD_TITLE_TASK_PAUSELEVEL = 0;
+    public const int DMD_TITLE_TASK_PRIO_MAIN = 8192;
+    public const int DMD_TITLE_TASK_GROUP_MAIN = 10;
+    public const int DMD_TITLE_DRAW_PRIO_ACT = 33792;
+    public const int DMD_TITLE_DRAW_PRIO_WIN = 34816;
+    public const int DMD_TITLE_DRAW_PRIO_WIN_FIX = 35840;
+    public const int DMD_TITLE_FILE_PATH_NUM_MAX = 60;
+    public const int DMD_TITLE_IDLE_DISP_TIME = 40;
+    public const int DMD_TITLE_IDLE_NONE_TIME = 30;
+    public const int DMD_TITLE_DECIDE_EFCT_TIME = 60;
+    public const int DMD_TITLE_DECIDE_BLINK_TIME = 4;
+    public const int DMD_TITLE_AMA_DATA_ARC_ID = 0;
+    public const int DMD_TITLE_AMB_DATA_ARC_ID = 1;
+
+    public const float DMD_TITLE_CRSR_DFLT_POS_X = 304f;
+    public const int DMD_TITLE_SLCT_MENU_NUM_FIRST = 3;
+    public const int DMD_TITLE_SLCT_MENU_NUM_PLAYED = 4;
+    public const int DMD_TITLE_SLCT_MENU_NUM_TRIAL = 3;
+
+    public const float DMD_TITLE_CRSR_MOVE_TIME = 8f;
+
+    public const int DMD_TITLE_DRAW_STATE_ID = 10;
+
+    public const float DMD_TITLE_SIZE_WIDTH = 960.0f;
+    public const float DMD_TITLE_SIZE_HEIGHT = 720.0f;
+    public const float DMD_TITLE_SIZE_HALF_WIDTH = 480.0f;
+    public const float DMD_TITLE_SIZE_HALF_HEIGHT = 360.0f;
+
+    public const float DMD_TITLE_WIN_EFCT_TIME = 8.0f;
+    public const float DMD_TITLE_WINDOW_SIZE_H = 180.0f;
+    public const float DMD_TITLE_WIN_DEF_RATE = 1.0f;
+
+    public const int DMD_TITLE_PUSH_START_DISP_TIME = 3600;
+    public const int DMD_TITLE_END_GAME_WAIT_TIME = 60;
+
+    private const float DMD_TITLE_WINDOW_SIZE_W_PC = 380.0f;
+    private const float DMD_TITLE_WINDOW_SIZE_W_IOS = 420.0f;
+
+    private const float DMD_TITLE_DISP_SCALE_TEXT_PC = 1.0f;
+    private const float DMD_TITLE_DISP_SCALE_TEXT_IOS = 1.5f * 1.125f;
+
+    private const float DMD_TITLE_MMENU_WIN_SIZE_W_PC = 486.0f;
+    private const float DMD_TITLE_MMENU_WIN_SIZE_H_PC = 138.0f;
+
+    private const float DMD_TITLE_MMENU_WIN_SIZE_W_IOS = 800.0f;
+    private const float DMD_TITLE_MMENU_WIN_SIZE_H_IOS = 540.0f;
+    private const float DMD_TITLE_MMENU_WIN_SIZE_W_2 = DMD_TITLE_MMENU_WIN_SIZE_W_IOS;
+    private const float DMD_TITLE_MMENU_WIN_SIZE_H_2 = DMD_TITLE_MMENU_WIN_SIZE_H_IOS - 180.0f;
+
+    private const float DMD_TITLE_MMENU_WIN_SIZE_W_OTHER = 486.0f;
+
+    public const float DMD_TITLE_FADEIN_TIME = 32f;
+    public const float DMD_TITLE_FADEOUT_TIME = 32f;
+
+    public const int DMD_TITLE_BGM_FADEIN_TIME = 32;
+    public const int DMD_TITLE_BGM_FADEOUT_TIME = 32;
+
+    public const uint DMD_TITLE_FLAG_EXIT = 1;
+    public const uint DMD_TITLE_FLAG_CANCEL = 2;
+    public const uint DMD_TITLE_FLAG_DECIDE = 4;
+    public const uint DMD_TITLE_FLAG_DISP_TEXT = 8;
+    public const uint DMD_TITLE_FLAG_DECIDE_EFCT = 16;
+    public const uint DMD_TITLE_FLAG_GAME_START = 32;
+    public const uint DMD_TITLE_FLAG_MENU_UP_INPUT = 64;
+    public const uint DMD_TITLE_FLAG_MENU_DOWN_INPUT = 128;
+    public const uint DMD_TITLE_FLAG_MENU_CRSR_EFCT = 256;
+    public const uint DMD_TITLE_FLAG_DISP_TITLE = 512;
+    public const uint DMD_TITLE_FLAG_DISP_MAINMENU = 1024;
+    public const uint DMD_TITLE_FLAG_BUY_COMP = 2048;
+    public const uint DMD_TITLE_FLAG_EXIST_SAVE_DATA = 4096;
+    public const uint DMD_TITLE_FLAG_BACK_DEL_SAVE = 8192;
+    public const uint DMD_TITLE_FLAG_DEL_SAVE_DATA = 16384;
+    public const uint DMD_TITLE_FLAG_NEW_GAME_START = 32768;
+    public const uint DMD_TITLE_FLAG_WIN_EFCT_END = 65536;
+    public const uint DMD_TITLE_FLAG_WIN_DRAW_START = 131072;
+    public const uint DMD_TITLE_FLAG_COMP_NO_DISP_END = 262144;
+    public const uint DMD_TITLE_FLAG_DEMO_SND_END = 524288;
+    public const uint DMD_TITLE_FLAG_DISP_LOOP_END = 1048576;
+    public const uint DMD_TITLE_FLAG_DISP_MMENU_WIN = 2097152;
+    public const uint DMD_TITLE_FLAG_MMENU_WIN_EFCT_END = 4194304;
+    public const uint DMD_TITLE_FLAG_DEL_DATA_BACK_TITLE = 8388608;
+    public const uint DMD_TITLE_FLAG_DEL_DATA_BACK_MMENU = 16777216;
+    public const uint DMD_TITLE_FLAG_DEL_DATA_INIT_START = 33554432;
+    public const uint DMD_TITLE_FLAG_DEL_DATA_GAME_END = 67108864;
+    public const uint DME_TITLE_FLAG_NEXT_EVT_TITLE = 1073741824;
+    public const uint DMD_TITLE_FLAG_SIGN_OUT_EXIT = 2147483648;
+
+    public const uint DMD_TITLE_DISP_FLAG_WIN_ACT = 1;
+    public const uint DMD_TITLE_DISP_FLAG_ALL_ACTION = 2;
+
+
+    public const int IDA_D_TITLE_ACT_BTN_L = 0;
+    public const int IDA_D_TITLE_ACT_BTN_C = 1;
+    public const int IDA_D_TITLE_ACT_BTN_R = 2;
+    public const int IDA_D_TITLE_ACT_BTN02_L = 3;
+    public const int IDA_D_TITLE_ACT_BTN02_C = 4;
+    public const int IDA_D_TITLE_ACT_GAME_BTN_L = 5;
+    public const int IDA_D_TITLE_ACT_GAME_BTN_C = 6;
+    public const int IDA_D_TITLE_JP_ACT_TEX_HAZIME = 0;
+    public const int IDA_D_TITLE_JP_ACT_TEX_TUZUKI = 1;
+    public const int IDA_D_TITLE_JP_ACT_TEX_OPTION = 2;
+    public const int IDA_D_TITLE_JP_ACT_TEX_KANZENBAN = 3;
+    public const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG1 = 4;
+    public const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG2 = 5;
+    public const int IDA_D_TITLE_JP_ACT_TEX_START = 6;
+    public const int IDA_D_TITLE_JP_ACT_TEX_MODORU = 7;
+    public const int IDA_D_TITLE_JP_ACT_TEX_GAME = 8;
+    public const int IDA_D_TITLE_JP_ACT_TEX_ACHIEVEMENTS = 9;
+    public const int IDA_D_TITLE_JP_ACT_TEX_LEADERBOARDS = 10;
+    public const int IDA_D_TITLE_OP_ACT_LOGO01 = 0;
+    public const int IDA_D_TITLE_OP_ACT_LOGO02_YUBI = 1;
+    public const int IDA_D_TITLE_OP_ACT_LOGO03 = 2;
+    public const int IDA_D_TITLE_OP_ACT_LOGO04 = 3;
+    public const int IDA_D_TITLE_OP_ACT_SEGALOGO = 4;
+
+    const int IDA_D_TITLE_JP_ACT_TEX_HAZIME_PC = 0; // tex_hazime
+    const int IDA_D_TITLE_JP_ACT_TEX_HAZIME2_PC = 1; // tex_hazime2
+    const int IDA_D_TITLE_JP_ACT_TEX_TUZUKI_PC = 2; // tex_tuzuki
+    const int IDA_D_TITLE_JP_ACT_TEX_TUZUKI2_PC = 3; // tex_tuzuki2
+    const int IDA_D_TITLE_JP_ACT_TEX_OPTION_PC = 4; // tex_option
+    const int IDA_D_TITLE_JP_ACT_TEX_OPTION2_PC = 5; // tex_option2
+    const int IDA_D_TITLE_JP_ACT_TEX_RANKING_PC = 6; // tex_ranking
+    const int IDA_D_TITLE_JP_ACT_TEX_RANKING2_PC = 7; // tex_ranking2
+    const int IDA_D_TITLE_JP_ACT_TEX_ZISSEKI_PC = 8; // tex_zisseki
+    const int IDA_D_TITLE_JP_ACT_TEX_ZISSEKI2_PC = 9; // tex_zisseki2
+    const int IDA_D_TITLE_JP_ACT_TEX_LIBRARY_PC = 10; // tex_library
+    const int IDA_D_TITLE_JP_ACT_TEX_LIBRARY2_PC = 11; // tex_library2
+    const int IDA_D_TITLE_JP_ACT_TEX_KANZENBAN_PC = 12; // tex_kanzenban
+    const int IDA_D_TITLE_JP_ACT_TEX_KANZENBAN2_PC = 13; // tex_kanzenban2
+    const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG1_PC = 14; // tex_win_msg1
+    const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG2_PC = 15; // tex_win_msg2
+    const int IDA_D_TITLE_JP_ACT_TEX_START_PC = 16; // tex_start
+    const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG3_PC = 17; // tex_win_msg3
+
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_PC = 0; // tex_back
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC = 1; // tex_ok
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_YES_PC = 2; // tex_yes
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_NO_PC = 3; // tex_no
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_WINTITLE_PC = 4; // tex_wintitle
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_STGSLCT_PC = 5; // tex_back_stgslct
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_OPT_PC = 6; // tex_back_opt
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_RANK_PC = 7; // tex_back_rank
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG01_PC = 8; // tex_msg01
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG02_PC = 9; // tex_msg02
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG03_PC = 10; // tex_msg03
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG04_PC = 11; // tex_msg04
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG05_PC = 12; // tex_msg05
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_FILESLCT_PC = 13; // tex_back_fileslct
+
+    const int IDA_D_CMN_WIN_ACT_WIN_LINE = 0;
+
+    const int IDA_D_TITLE_ACT_CURSOR_PC = 0;
+
+
+    private static readonly string[] dm_title_file_lng_amb_name_tbl = new string[]
+    {
+        "DEMO/TITLE/D_TITLE_JP.AMB",
+        "DEMO/TITLE/D_TITLE_US.AMB",
+        "DEMO/TITLE/D_TITLE_FR.AMB",
+        "DEMO/TITLE/D_TITLE_IT.AMB",
+        "DEMO/TITLE/D_TITLE_GE.AMB",
+        "DEMO/TITLE/D_TITLE_SP.AMB",
+        "DEMO/TITLE/D_TITLE_FI.AMB",
+        "DEMO/TITLE/D_TITLE_PT.AMB",
+        "DEMO/TITLE/D_TITLE_RU.AMB",
+        "DEMO/TITLE/D_TITLE_CN.AMB",
+        "DEMO/TITLE/D_TITLE_HK.AMB"
+    };
+    private static readonly string[] dm_title_menu_cmn_amb_name_tbl = new string[]
+    {
+        g_dm_buy_screen_btn_amb_path,
+        "DEMO/CMN/D_CMN_OBI.AMB",
+        DMD_MANUAL_CMN_DATA_FILENAME
+    };
+    private static readonly string[] dm_title_menu_cmn_lng_amb_name_tbl = new string[]
+    {
+        "DEMO/CMN/D_CMN_MSG_JP.AMB",
+        "DEMO/CMN/D_CMN_MSG_US.AMB",
+        "DEMO/CMN/D_CMN_MSG_FR.AMB",
+        "DEMO/CMN/D_CMN_MSG_IT.AMB",
+        "DEMO/CMN/D_CMN_MSG_GE.AMB",
+        "DEMO/CMN/D_CMN_MSG_SP.AMB",
+        "DEMO/CMN/D_CMN_MSG_FI.AMB",
+        "DEMO/CMN/D_CMN_MSG_PT.AMB",
+        "DEMO/CMN/D_CMN_MSG_RU.AMB",
+        "DEMO/CMN/D_CMN_MSG_CN.AMB",
+        "DEMO/CMN/D_CMN_MSG_CN.AMB"
+    };
+
+    private static readonly string[] dm_title_file_lng_amb_name_tbl_pc = new string[]
+    {
+        "DEMO/TITLE/PC/D_TITLE_JP.AMB",
+        "DEMO/TITLE/PC/D_TITLE_US.AMB",
+        "DEMO/TITLE/PC/D_TITLE_FR.AMB",
+        "DEMO/TITLE/PC/D_TITLE_IT.AMB",
+        "DEMO/TITLE/PC/D_TITLE_GE.AMB",
+        "DEMO/TITLE/PC/D_TITLE_SP.AMB",
+        "DEMO/TITLE/PC/D_TITLE_FI.AMB",
+        "DEMO/TITLE/PC/D_TITLE_PT.AMB",
+        "DEMO/TITLE/PC/D_TITLE_RU.AMB",
+        "DEMO/TITLE/PC/D_TITLE_CN.AMB",
+        "DEMO/TITLE/PC/D_TITLE_HK.AMB"
+    };
+
+    private static readonly string[] dm_title_menu_cmn_lng_amb_name_tbl_pc = new string[]
+    {
+        "DEMO/CMN/PC/D_CMN_MSG_JP.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_US.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_FR.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_IT.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_GE.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_SP.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_FI.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_PT.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_RU.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_CN.AMB",
+        "DEMO/CMN/PC/D_CMN_MSG_CN.AMB"
+    };
+
+    private static readonly float[] dm_title_crsr_pos_y_tbl = new float[]
+    {
+        372f,
+        50f
+    };
+
+    private static readonly float[] dm_title_crsr_trial_pos_y_tbl = new float[]
+    {
+        445f,
+        495f,
+        545f
+    };
+
+    private static readonly float[,] dm_title_win_act_pos_tbl_iphone = new float[,]
+    {
+        {DMD_TITLE_SIZE_HALF_WIDTH + 42.0f, 280.0f},
+        {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f - 60.0f},	// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f - 60.0f},	// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f - 60.0f},	// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH - 80.0f, 274.0f},	// タイトルテキスト
+	    {DMD_TITLE_SIZE_HALF_WIDTH - 176.0f, 420.0f},	// YES
+	    {DMD_TITLE_SIZE_HALF_WIDTH + 176.0f, 420.0f},	// NO
+    };
+
+    private static readonly float[,] dm_title_win_act_pos_tbl_pc = new float[,]
+    {
+        {DMD_TITLE_SIZE_HALF_WIDTH + 42.0f, 280.0f},
+        {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f},			// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f},			// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH, 336.0f},			// メッセージ
+	    {DMD_TITLE_SIZE_HALF_WIDTH - 80.0f, 274.0f},	// タイトルテキスト
+	    {DMD_TITLE_SIZE_HALF_WIDTH - 88.0f, 420.0f},	// YES
+	    {DMD_TITLE_SIZE_HALF_WIDTH + 88.0f, 420.0f},	// NO
+    };
+
+    public static readonly uint[] dm_title_g_dm_act_id_tbl_iphone = new uint[]
+    {
+        0U,
+        1U,
+        2U,
+        0U,
+        1U,
+        2U,
+        0U,
+        1U,
+        2U,
+        0U,
+        1U,
+        2U,
+        0U,
+        1U,
+        2U,
+        3U,
+        4U,
+        5U,
+        6U,
+        6U,
+        0U,
+        1U,
+        2U,
+        3U,
+        9U,
+        10U,
+        7U,
+        8U,
+        4U,
+        5U,
+        1U,
+        10U,
+        0U,
+        1U,
+        2U,
+        0U,
+        1U,
+        2U,
+        1U,
+        2U,
+        0U
+    };
+
+    public static readonly uint[] dm_title_g_dm_act_id_tbl_pc = new uint[]
+    {
+        IDA_D_TITLE_ACT_CURSOR_PC,
+        IDA_D_TITLE_JP_ACT_TEX_START_PC,
+        IDA_D_TITLE_JP_ACT_TEX_HAZIME_PC,
+        IDA_D_TITLE_JP_ACT_TEX_HAZIME2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_TUZUKI_PC,
+        IDA_D_TITLE_JP_ACT_TEX_TUZUKI2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_OPTION_PC,
+        IDA_D_TITLE_JP_ACT_TEX_OPTION2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_LIBRARY_PC,
+        IDA_D_TITLE_JP_ACT_TEX_LIBRARY2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_KANZENBAN_PC,
+        IDA_D_TITLE_JP_ACT_TEX_KANZENBAN2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_WIN_MSG1_PC,
+        IDA_D_TITLE_JP_ACT_TEX_WIN_MSG2_PC,
+        IDA_D_TITLE_JP_ACT_TEX_WIN_MSG3_PC,
+        IDA_D_CMN_BTN_ACT_BACK_BTN,
+        IDA_D_CMN_BTN_ACT_BTN_X_TITLE,
+        IDA_D_CMN_WIN_ACT_WIN_LINE,
+        IDA_D_CMN_MSG_JP_ACT_TEX_WINTITLE_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_YES_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_NO_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_BACK_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC
+    };
+
+    private static bool dm_title_is_title_start = false;
+
     private void DmTitleStart(object arg)
     {
         dm_title_is_title_start = true;
@@ -34,35 +362,65 @@ public partial class AppMain
             AoAccountClearCurrentId();
         work.is_jp_region = GeEnvGetDecideKey() == GSE_DECIDE_KEY.GSD_DECIDE_KEY_O;
         work.proc_update = this.dmTitleLoadFontData;
+#if IOS || ANDROID
+        work.iphone_menus = true;
+#else
+        work.iphone_menus = false;
+#endif
     }
 
     private void dmTitleSetInitDispData(DMS_TITLE_MAIN_WORK main_work)
     {
-        switch (SyGetEvtInfo().old_evt_id)
+        var tmp_prev_evt = (GSE_EVT_ID)SyGetEvtInfo().old_evt_id;
+
+        switch (tmp_prev_evt)
         {
-            case 5:
-                main_work.cur_slct_menu = 1;
+            case GSE_EVT_ID.GSD_EVT_ID_MAINGAME:
+                main_work.cur_slct_menu = (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_START;
                 break;
-            case 6:
-                main_work.cur_slct_menu = 0;
+            case GSE_EVT_ID.GSD_EVT_ID_MAP:
+                main_work.cur_slct_menu = (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_TUDUKI;
                 break;
-            case 8:
-                main_work.cur_slct_menu = !GsMainSysIsStageClear(0) || GsTrialIsTrial() ? 1 : 2;
+            case GSE_EVT_ID.GSD_EVT_ID_OPTION:
+                if (!GsMainSysIsStageClear(GSD_MAIN_STAGE_ID_1_1)
+                    || GsTrialIsTrial())
+                {
+                    main_work.cur_slct_menu = (int)(DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_OPTION - 1);
+                }
+                else
+                {
+                    main_work.cur_slct_menu = (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_OPTION;
+                }
+
                 break;
-            case 10:
-                main_work.cur_slct_menu = 1;
+            case GSE_EVT_ID.GSD_EVT_ID_STAFFROLL:
+                main_work.cur_slct_menu = (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_TUDUKI;
                 break;
             default:
-                main_work.cur_slct_menu = 0;
+                main_work.cur_slct_menu = (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_START;
                 break;
         }
 
-        main_work.disp_flag |= 2U;
+        // 体験版でゲームプレイ後は必ずカーソルを完全版購入へ
+        //if (tmp_prev_evt == GSE_EVT_ID.GSD_EVT_ID_BUYSCREEN
+        // && GsTrialIsTrial()) {
+        // main_work.cur_slct_menu = DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_BUY - 1;
+        //}
+
+
+        // タイトル全体表示フラグON(これがOFFになるときは完全版購入画面の表示時のみ)
+        main_work.disp_flag |= DMD_TITLE_DISP_FLAG_ALL_ACTION;
+
+        // カーソルを初期表示位置に設定
         if (GsTrialIsTrial())
+        {
             main_work.cur_crsr_pos_y = dm_title_crsr_trial_pos_y_tbl[main_work.cur_slct_menu];
+        }
         else
-            main_work.cur_crsr_pos_y =
-                main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1] + dm_title_crsr_pos_y_tbl[0];
+        {
+            main_work.cur_crsr_pos_y = main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1]
+                                               + dm_title_crsr_pos_y_tbl[0];
+        }
     }
 
     private void dmTitleProcMain(MTS_TASK_TCB tcb)
@@ -106,6 +464,7 @@ public partial class AppMain
 
     private void dmTitleDest(MTS_TASK_TCB tcb)
     {
+        UNREFERENCED_PARAMETER(tcb);
     }
 
     private void dmTitleSetNextEvent(DMS_TITLE_MAIN_WORK main_work)
@@ -161,12 +520,12 @@ public partial class AppMain
                     break;
                 case 3:
                     evt_case1 = 2;
-                    LiveFeature.getInstance().ShowAchievements();
+                    //LiveFeature.getInstance().ShowAchievements();
                     dm_opt_show_xboxlive = true;
                     break;
                 case 4:
                     evt_case1 = 2;
-                    LiveFeature.getInstance().ShowLeaderboards();
+                    //LiveFeature.getInstance().ShowLeaderboards();
                     dm_opt_show_xboxlive = true;
                     break;
             }
@@ -191,11 +550,18 @@ public partial class AppMain
 
     private void dmTitleLoadRequest(DMS_TITLE_MAIN_WORK main_work)
     {
-        main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/TITLE/D_TITLE.AMB");
-        main_work.arc_amb_fs[1] = amFsReadBackground(dm_title_file_lng_amb_name_tbl[GsEnvGetLanguage()]);
+        if (main_work.iphone_menus)
+        {
+            main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/TITLE/D_TITLE.AMB");
+        }
+        else
+        {
+            main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/TITLE/PC/D_TITLE.AMB");
+        }
+        main_work.arc_amb_fs[1] = amFsReadBackground((main_work.iphone_menus ? dm_title_file_lng_amb_name_tbl : dm_title_file_lng_amb_name_tbl_pc)[GsEnvGetLanguage()]);
         for (int index = 0; index < 3; ++index)
             main_work.arc_cmn_amb_fs[index] = amFsReadBackground(dm_title_menu_cmn_amb_name_tbl[index]);
-        main_work.arc_cmn_amb_fs[3] = amFsReadBackground(dm_title_menu_cmn_lng_amb_name_tbl[GsEnvGetLanguage()]);
+        main_work.arc_cmn_amb_fs[3] = amFsReadBackground((main_work.iphone_menus ? dm_title_menu_cmn_lng_amb_name_tbl : dm_title_menu_cmn_lng_amb_name_tbl_pc)[GsEnvGetLanguage()]);
         this.DmTitleOpLoad();
         main_work.proc_update = (this.dmTitleProcLoadWait);
     }
@@ -204,143 +570,19 @@ public partial class AppMain
     {
         if (!this.dmTitleIsDataLoad(main_work))
             return;
+
         for (int index1 = 0; index1 < 2; ++index1)
         {
             main_work.arc_amb[index1] = readAMBFile(main_work.arc_amb_fs[index1]);
             main_work.ama[index1] = readAMAFile(amBindGet(main_work.arc_amb[index1], 0));
-            if (index1 == 0)
-            {
-                main_work.ama[index1].act_tbl[0].ofst.top = 50f;
-                main_work.ama[index1].act_tbl[0].ofst.bottom = -50f;
-                main_work.ama[index1].act_tbl[1].ofst.top = 50f;
-                main_work.ama[index1].act_tbl[1].ofst.bottom = -50f;
-                main_work.ama[index1].act_tbl[1].hit.hit_tbl[0].rect.top = -50f;
-                main_work.ama[index1].act_tbl[1].hit.hit_tbl[0].rect.bottom = 50f;
-                main_work.ama[index1].act_tbl[2].ofst.top = 50f;
-                main_work.ama[index1].act_tbl[2].ofst.bottom = -50f;
-            }
-
-            if (index1 == 1)
-            {
-                main_work.ama[index1].act_num += 2U;
-                A2S_AMA_ACT[] a2SAmaActArray = new A2S_AMA_ACT[(int)main_work.ama[index1].act_num];
-                Array.Copy(main_work.ama[index1].act_tbl, a2SAmaActArray, (int)main_work.ama[index1].act_num - 2);
-                uint num = main_work.ama[index1].act_num - 2U;
-                a2SAmaActArray[(int)num] = new A2S_AMA_ACT();
-                a2SAmaActArray[(int)num].Assign(a2SAmaActArray[0]);
-                a2SAmaActArray[(int)(num + 1U)] = new A2S_AMA_ACT();
-                a2SAmaActArray[(int)(num + 1U)].Assign(a2SAmaActArray[1]);
-                a2SAmaActArray[(int)num].anm.anm_tbl[0].tex_id = 9;
-                a2SAmaActArray[(int)(num + 1U)].anm.anm_tbl[0].tex_id = 10;
-                main_work.ama[index1].act_tbl = a2SAmaActArray;
-            }
 
             string sPath;
             main_work.amb[index1] = readAMBFile(amBindGet(main_work.arc_amb[index1], 1, out sPath));
             main_work.amb[index1].dir = sPath;
             amFsClearRequest(main_work.arc_amb_fs[index1]);
             main_work.arc_amb_fs[index1] = null;
+
             AoTexBuild(main_work.tex[index1], main_work.amb[index1]);
-            if (index1 == 1)
-            {
-                main_work.tex[index1].txb.texfilelist.nTex += 2;
-                NNS_TEXFILE[] nnsTexfileArray = New<NNS_TEXFILE>(main_work.tex[index1].txb.texfilelist.nTex);
-                for (int index2 = 0; index2 < main_work.tex[index1].txb.texfilelist.nTex; ++index2)
-                {
-                    int index3 = index2 < main_work.tex[index1].txb.texfilelist.nTex - 2
-                        ? index2
-                        : main_work.tex[index1].txb.texfilelist.nTex - 2 - 1;
-                    nnsTexfileArray[index2].Bank = main_work.tex[index1].txb.texfilelist.pTexFileList[index3].Bank;
-                    nnsTexfileArray[index2].fType = main_work.tex[index1].txb.texfilelist.pTexFileList[index3].fType;
-                    nnsTexfileArray[index2].Filename =
-                        main_work.tex[index1].txb.texfilelist.pTexFileList[index3].Filename;
-                    nnsTexfileArray[index2].MinFilter =
-                        main_work.tex[index1].txb.texfilelist.pTexFileList[index3].MinFilter;
-                    nnsTexfileArray[index2].MagFilter =
-                        main_work.tex[index1].txb.texfilelist.pTexFileList[index3].MagFilter;
-                    nnsTexfileArray[index2].GlobalIndex =
-                        main_work.tex[index1].txb.texfilelist.pTexFileList[index3].GlobalIndex;
-                }
-
-                switch (GsEnvGetLanguage())
-                {
-                    case 0:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_JP.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_JP.PNG";
-                        break;
-                    case 1:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_US.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_US.PNG";
-                        break;
-                    case 2:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_FR.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_FR.PNG";
-                        break;
-                    case 3:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_IT.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_IT.PNG";
-                        break;
-                    case 4:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_GE.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_GE.PNG";
-                        break;
-                    case 5:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_SP.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_SP.PNG";
-                        break;
-                    case 6:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_FI.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_FI.PNG";
-                        break;
-                    case 7:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_PT.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_PT.PNG";
-                        break;
-                    case 8:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_RU.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_RU.PNG";
-                        break;
-                    case 9:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_CN.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_CN.PNG";
-                        break;
-                    case 10:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_HK.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_HK.PNG";
-                        break;
-                    default:
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 2].Filename =
-                            "D_TITLE_TEX_TROPHY_US.PNG";
-                        nnsTexfileArray[main_work.tex[index1].txb.texfilelist.nTex - 1].Filename =
-                            "D_TITLE_TEX_LB_US.PNG";
-                        break;
-                }
-
-                main_work.tex[index1].txb.texfilelist.pTexFileList = nnsTexfileArray;
-            }
-
             AoTexLoad(main_work.tex[index1]);
         }
 
@@ -362,80 +604,95 @@ public partial class AppMain
         main_work.proc_update = (this.dmTitleProcTexBuildWait);
     }
 
-    private void dmTitleProcTexBuildWait(DMS_TITLE_MAIN_WORK main_work)
+    void dmTitleProcTexBuildWait(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (!this.dmTitleIsTexLoad(main_work) || !DmSndBgmPlayerIsSndSysBuild())
-            return;
-        for (int index = 0; index < 41; ++index)
+        var dm_title_g_dm_act_id_tbl = main_work.iphone_menus ? dm_title_g_dm_act_id_tbl_iphone : dm_title_g_dm_act_id_tbl_pc;
+        // テクスチャ構築完了判定
+        if (dmTitleIsTexLoad(main_work)
+            && DmSndBgmPlayerIsSndSysBuild())
         {
-            int num1 = 38;
-            int num2 = 32;
-            A2S_AMA_HEADER ama;
-            AOS_TEXTURE tex;
-            if (index >= num1)
+            int ACT_NUM = main_work.iphone_menus ? (int)dm_title_g_dm_act_id_tbl_iphone.Length : (int)DME_TITLE_ACT_REG.ACT_NUM;
+
+            for (int i = 0; i < ACT_NUM; i++)
             {
-                ama = main_work.cmn_ama[3];
-                tex = main_work.cmn_tex[3];
-            }
-            else if (index >= num2)
-            {
-                ama = main_work.cmn_ama[2];
-                tex = main_work.cmn_tex[2];
-            }
-            else if (index >= 30)
-            {
-                ama = main_work.cmn_ama[0];
-                tex = main_work.cmn_tex[0];
-            }
-            else if (index < 19)
-            {
-                ama = main_work.ama[0];
-                tex = main_work.tex[0];
-            }
-            else
-            {
-                ama = main_work.ama[1];
-                tex = main_work.tex[1];
-                switch (index)
+                A2S_AMA_HEADER ama = null;
+                AOS_TEXTURE tex = null;
+
+                int ACT_TEX_WINTITLE = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_YES : (int)DME_TITLE_ACT_REG.ACT_TEX_WINTITLE;
+                int ACT_WIN_LINE = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_L : (int)DME_TITLE_ACT_REG.ACT_WIN_LINE;
+                int ACT_BTN_CANCEL = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_BTN_CANCEL : (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL;
+                int ACT_LANG = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_LANG : (int)DME_TITLE_ACT_REG.ACT_LANG;
+
+                if (i >= ACT_TEX_WINTITLE)
                 {
-                    case 20:
-                        ama.act_tbl[(int)dm_title_g_dm_act_id_tbl[index]].mtn.trs_tbl[0].trs_y = 195f;
-                        break;
-                    case 21:
-                        ama.act_tbl[(int)dm_title_g_dm_act_id_tbl[index]].mtn.trs_tbl[0].trs_y = 305f;
-                        break;
-                    case 22:
-                        ama.act_tbl[(int)dm_title_g_dm_act_id_tbl[index]].mtn.trs_tbl[0].trs_y = 415f;
-                        break;
-                    case 24:
-                        ama.act_tbl[(int)dm_title_g_dm_act_id_tbl[index]].mtn.trs_tbl[0].trs_y = 525f;
-                        break;
-                    case 25:
-                        ama.act_tbl[(int)dm_title_g_dm_act_id_tbl[index]].mtn.trs_tbl[0].trs_y = 635f;
-                        break;
+                    ama = main_work.cmn_ama[3];
+                    tex = main_work.cmn_tex[3];
+                }
+                else if (i >= ACT_WIN_LINE)
+                {
+                    ama = main_work.cmn_ama[2];
+                    tex = main_work.cmn_tex[2];
+                }
+                else if (i >= ACT_BTN_CANCEL)
+                {
+                    ama = main_work.cmn_ama[0];
+                    tex = main_work.cmn_tex[0];
+                }
+
+                else if (i < ACT_LANG)
+                {
+                    ama = main_work.ama[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_CMN_DATA];
+                    tex = main_work.tex[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_CMN_DATA];
+                }
+                else
+                {
+                    ama = main_work.ama[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_LANG_DATA];
+                    tex = main_work.tex[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_LANG_DATA];
+                }
+
+                // 構築
+                AoActSetTexture(AoTexGetTexList(tex));
+                main_work.act[i] = AoActCreate(ama, dm_title_g_dm_act_id_tbl[i]);
+            }
+
+            if (main_work.iphone_menus)
+            {
+                {   //選択肢
+                    int[] c_act_id_table = { (int)DME_TITLE_ACT.ACT_BTN_C, (int)DME_TITLE_ACT.ACT_BTN_C2, (int)DME_TITLE_ACT.ACT_BTN_C3 };
+                    for (int i = 0, max = arrayof(c_act_id_table); i < max; ++i)
+                    {
+                        main_work.trg_slct[i] = new CTrgAoAction();
+                        main_work.trg_slct[i].Create(main_work.act[c_act_id_table[i]]);
+                    }
+                }
+                {   //ウインドウ・はい/いいえ
+                    int[] c_act_id_table = { (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_C, (int)DME_TITLE_ACT.ACT_WIN_YES_BTN_C };
+                    for (int i = 0, max = arrayof(c_act_id_table); i < max; ++i)
+                    {
+                        main_work.trg_answer[i] = new CTrgAoAction();
+                        main_work.trg_answer[i].Create(main_work.act[c_act_id_table[i]]);
+                    }
+                }
+                {   //戻る
+                    int c_act_id = (int)DME_TITLE_ACT.ACT_BACK_BTN_R;
+                    main_work.trg_return.Create(main_work.act[c_act_id]);
+                }
+                {   //他のゲーム		
+                    int c_act_id = (int)DME_TITLE_ACT.ACT_GAME_BTN_R;
+                    main_work.trg_game.Create(main_work.act[c_act_id]);
                 }
             }
 
-            AoActSetTexture(AoTexGetTexList(tex));
-            main_work.act[index] = AoActCreate(ama, dm_title_g_dm_act_id_tbl[index]);
-        }
 
-        int[] numArray1 = new int[5] { 1, 4, 7, 10, 13 };
-        int index1 = 0;
-        for (int length = numArray1.Length; index1 < length; ++index1)
-            main_work.trg_slct[index1].Create(main_work.act[numArray1[index1]]);
-        int[] numArray2 = new int[2] { 33, 36 };
-        int index2 = 0;
-        for (int length = numArray2.Length; index2 < length; ++index2)
-            main_work.trg_answer[index2].Create(main_work.act[numArray2[index2]]);
-        int index3 = 16;
-        main_work.trg_return.Create(main_work.act[index3]);
-        int index4 = 18;
-        main_work.trg_game.Create(main_work.act[index4]);
-        main_work.proc_update = (this.dmTitleProcCheckLoadingEnd);
-        this.DmTitleOpInit();
-        AoActSysSetDrawState(10U);
-        AoActSysSetDrawStateEnable(true);
+            main_work.proc_update = dmTitleProcCheckLoadingEnd;
+
+            DmTitleOpInit();
+
+            // オープニング側の初期化内にObjInitがあり、そこでSTATE上書きされるので、再度設定
+            AoActSysSetDrawState(DMD_TITLE_DRAW_STATE_ID);
+            AoActSysSetDrawStateEnable(true);
+
+        }
     }
 
     private void dmTitleProcCheckLoadingEnd(DMS_TITLE_MAIN_WORK main_work)
@@ -580,7 +837,7 @@ public partial class AppMain
             if (GsMainSysIsStageClear(0))
             {
                 main_work.is_init_play = false;
-                main_work.slct_menu_num = 3;
+                main_work.slct_menu_num = 4;
                 main_work.cur_slct_menu = 1;
             }
             else
@@ -730,7 +987,7 @@ public partial class AppMain
             main_work.proc_input = null;
             main_work.timer = 0.0f;
             main_work.flag |= 262144U;
-            Upsell.launchUpsellScreen(main_work.buy_scr_work);
+            //Upsell.launchUpsellScreen(main_work.buy_scr_work);
             main_work.flag &= 4294965247U;
         }
         else
@@ -757,7 +1014,7 @@ public partial class AppMain
         if (IzFadeIsEnd())
         {
             main_work.proc_update = (this.dmTitleProcMainMenuCompBuyIdle);
-            Upsell.launchUpsellScreen(main_work.buy_scr_work);
+            //Upsell.launchUpsellScreen(main_work.buy_scr_work);
             main_work.flag &= int.MaxValue;
             main_work.disp_flag &= 4294967293U;
         }
@@ -772,8 +1029,8 @@ public partial class AppMain
 
     private void dmTitleProcMainMenuCompBuyIdle(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (Upsell.showUpsell)
-            return;
+        //if (Upsell.showUpsell)
+        //    return;
         if (DmBuyScreenGetResult(main_work.buy_scr_work) == 0)
         {
             if (!GsTrialIsTrial())
@@ -849,7 +1106,21 @@ public partial class AppMain
                 main_work.flag &= 4294967039U;
         }
 
-        int curSlctMenu = main_work.cur_slct_menu;
+        int curSlctMenu = 0;
+
+        // 体験版・初期データ・データありで項目を切り替える
+        if (main_work.cur_slct_menu > 0)
+        {
+            if (GsTrialIsTrial()
+                || main_work.is_init_play)
+            {
+                curSlctMenu = main_work.cur_slct_menu + 1;
+            }
+            else
+            {
+                curSlctMenu = main_work.cur_slct_menu;
+            }
+        }
         if (main_work.timer > 15.0)
         {
             if (curSlctMenu == 4 && (GsTrialIsTrial() || XBOXLive.signinStatus == XBOXLive.SigninStatus.UpdateNeeded ||
@@ -1211,7 +1482,7 @@ public partial class AppMain
         if (amTpIsTouchPush(0) || stand != -1)
         {
             AoAccountSetCurrentIdStart(stand != -1 ? (uint)stand : 0);
-            main_work.flag |= 32U;
+            main_work.flag |= DMD_TITLE_FLAG_GAME_START;
         }
 
         if (!isBackKeyPressed())
@@ -1225,6 +1496,74 @@ public partial class AppMain
         int length = main_work.trg_slct.Length;
         if (!LiveFeature.isInterrupted())
         {
+            int now_slct_menu = 0;
+            int cur_edge_menu_top = 0;
+            int cur_edge_menu_bottom = 0;
+
+            // 体験版・初期データ・データありで項目を切り替える
+            if (main_work.cur_slct_menu > 0)
+            {
+                if (GsTrialIsTrial()
+                    || main_work.is_init_play)
+                {
+                    now_slct_menu = main_work.cur_slct_menu + 1;
+                }
+                else
+                {
+                    now_slct_menu = main_work.cur_slct_menu;
+                }
+            }
+
+            // キャンセル処理
+            if (AoPad.AoPadMStand().HasFlag(ControllerConsts.CANCEL))
+            {
+                main_work.flag |= DMD_TITLE_FLAG_CANCEL;
+
+                return;
+            }
+
+            // 決定処理
+            if (AoPad.AoPadMStand().HasFlag(ControllerConsts.CONFIRM) || AoPad.AoPadMStand().HasFlag(ControllerConsts.START))
+            {
+                main_work.flag |= DMD_TITLE_FLAG_DECIDE;
+
+                return;
+            }
+
+
+            // 体験版時の上下の端に当たるメニュー項目
+            if (GsTrialIsTrial())
+            {
+                cur_edge_menu_top = main_work.slct_menu_num - 1;
+                cur_edge_menu_bottom = main_work.slct_menu_num - 2;
+            }
+            // 製品版時の上下の端に当たるメニュー項目
+            else
+            {
+                cur_edge_menu_top = 0;
+                cur_edge_menu_bottom = main_work.slct_menu_num - 1;
+            }
+
+            // 十字キー操作
+            if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.UP))
+            {
+                if (AoPad.AoPadMStand().HasFlag(ControllerConsts.UP)
+                    || main_work.cur_slct_menu != cur_edge_menu_top)
+                {
+                    // 選択ZONE切り替え
+                    main_work.flag |= DMD_TITLE_FLAG_MENU_UP_INPUT;
+                }
+            }
+            else if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.DOWN))
+            {
+                if (AoPad.AoPadMStand().HasFlag(ControllerConsts.DOWN)
+                    || main_work.cur_slct_menu != cur_edge_menu_bottom)
+                {
+                    // 選択ZONE切り替え
+                    main_work.flag |= DMD_TITLE_FLAG_MENU_DOWN_INPUT;
+                }
+            }
+
             for (int index = 0; index < length; ++index)
             {
                 CTrgAoAction ctrgAoAction = main_work.trg_slct[index];
@@ -1236,36 +1575,20 @@ public partial class AppMain
                 }
             }
 
-            var pad = AoPad.AoPadMStand();
-            if (pad.HasFlag(ControllerConsts.UP))
-            {
-                main_work.flag |= 64U;
-            }
-
-            if (pad.HasFlag(ControllerConsts.DOWN))
-            {
-                main_work.flag |= 128U;
-            }
-
-            if (pad.HasFlag(ControllerConsts.CONFIRM))
-            {
-                main_work.flag |= 4U;
-            }
-
             CTrgAoAction trgReturn = main_work.trg_return;
             if (trgReturn.GetState(0U)[10] && trgReturn.GetState(0U)[1] || isBackKeyPressed() ||
-                pad.HasFlag(ControllerConsts.B))
+                AoPad.AoPadMStand().HasFlag(ControllerConsts.B))
             {
                 setBackKeyRequest(false);
-                if (LiveFeature.isInterrupted())
-                    LiveFeature.endInterrupt();
-                else
+                //if (LiveFeature.isInterrupted())
+                //    LiveFeature.endInterrupt();
+                //else
                     main_work.flag |= 2U;
             }
 
 
             CTrgAoAction trgGame = main_work.trg_game;
-            if (trgGame.GetState(0U)[10] && trgGame.GetState(0U)[1] || pad.HasFlag(ControllerConsts.Y))
+            if (trgGame.GetState(0U)[10] && trgGame.GetState(0U)[1] || AoPad.AoPadMStand().HasFlag(ControllerConsts.Y))
             {
                 string url = GsEnvGetLanguage() != 0 ? c_url : "http://sega.jp/kt/microsoft/smart/";
                 DmSoundPlaySE("Ok");
@@ -1279,17 +1602,6 @@ public partial class AppMain
         CTrgAoAction[] trgAnswer = main_work.trg_answer;
 
         var pad = AoPad.AoPadMStand();
-        if (pad.HasFlag(ControllerConsts.LEFT))
-        {
-            main_work.win_cur_slct = main_work.win_cur_slct == 0 ? 1 : 0;
-            DmSoundPlaySE("Cursol");
-        }
-
-        if (pad.HasFlag(ControllerConsts.RIGHT))
-        {
-            main_work.win_cur_slct = main_work.win_cur_slct == 1 ? 0 : 1;
-            DmSoundPlaySE("Cursol");
-        }
 
         if (pad.HasFlag(ControllerConsts.CANCEL))
         {
@@ -1301,6 +1613,29 @@ public partial class AppMain
         {
             main_work.win_cur_slct = main_work.win_cur_slct == 0 ? 1 : 0;
             main_work.flag |= 4U;
+        }
+
+        if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.LEFT))
+        {
+            if (main_work.win_cur_slct != 0)
+            {
+                // Select ZONE Switch
+                main_work.win_cur_slct = 0;
+
+                // Cursor SE Play
+                DmSoundPlaySE("Cursol");
+            }
+        }
+        else if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.RIGHT))
+        {
+            if (main_work.win_cur_slct != 1)
+            {
+                // Select ZONE Switch
+                main_work.win_cur_slct = 1;
+
+                // Cursor SE Play
+                DmSoundPlaySE("Cursol");
+            }
         }
 
         for (int i = 0; i < 2; i++)
@@ -1315,63 +1650,144 @@ public partial class AppMain
         }
     }
 
+    // ==========================================================================
+    // dmTitleDrawSetProcDispData
+    /*!
+        表示設定処理
+     */
+    // ==========================================================================
     private void dmTitleDrawSetProcDispData(DMS_TITLE_MAIN_WORK main_work)
     {
-        float num = 0.0f;
-        if (((int)main_work.disp_flag & 2) != 0)
+        float tmp_win_size = 0;
+
+        // 描画フラグONならば
+        if ((main_work.disp_flag & DMD_TITLE_DISP_FLAG_ALL_ACTION) == DMD_TITLE_DISP_FLAG_ALL_ACTION)
         {
-            AoActSysSetDrawTaskPrio(32768U);
-            this.DmTitleOpDraw2D();
+            // 共通描画設定部
+            AoActSysSetDrawTaskPrio(0x8000);
+            DmTitleOpDraw2D();
+
             AoActSortExecute();
             AoActSortDraw();
             AoActSortUnregAll();
-            if (((int)main_work.flag & 512) != 0 && this.DmTitleOpIsLogoActFinish())
-                this.dmTitleDrawProcTitle(main_work);
-            if (((int)main_work.flag & 2097152) != 0)
+
+            // 場面別描画設定部
+            if ((main_work.flag & DMD_TITLE_FLAG_DISP_TITLE) == DMD_TITLE_FLAG_DISP_TITLE
+                && DmTitleOpIsLogoActFinish())
             {
-                AoActSysSetDrawTaskPrio(35840U);
-                if (main_work.mmenu_win_size_rate[0] >= 0.9 || AoAccountIsCurrentEnable())
-                {
-                    int[] numArray = new int[2] { 800, 340 };
-                    GsTrialIsTrial();
-                    bool flag = !main_work.is_init_play;
-                    AoWinSysDrawState(0, AoTexGetTexList(main_work.cmn_tex[2]), 0U, 480f, 307f,
-                        numArray[0] * main_work.mmenu_win_size_rate[0],
-                        (float)(numArray[1] * (double)main_work.mmenu_win_size_rate[1] * 0.899999976158142) + num,
-                        10U);
-                }
+                dmTitleDrawProcTitle(main_work);
             }
 
-            if (((int)main_work.flag & 1024) != 0)
+            // メインメニュー用ウインドウ
+            if ((main_work.flag & DMD_TITLE_FLAG_DISP_MMENU_WIN) == DMD_TITLE_FLAG_DISP_MMENU_WIN)
             {
-                if (((int)main_work.flag_prev & 1024) == 0)
+                // ウインドウ用AO描画プライオリティ設定
+                AoActSysSetDrawTaskPrio(DMD_TITLE_DRAW_PRIO_WIN_FIX);
+
+                if (!GsTrialIsTrial() && main_work.is_init_play)
                 {
-                    main_work.trg_return.ResetState();
-                    int index1 = 15;
-                    for (int index2 = 17; index1 < index2; ++index1)
-                        AoActSetFrame(main_work.act[index1], 0.0f);
-                    main_work.trg_game.ResetState();
-                    int index3 = 17;
-                    for (int index2 = 19; index3 < index2; ++index3)
-                        AoActSetFrame(main_work.act[index3], 0.0f);
+                    tmp_win_size = -50;
+                }
+                else
+                {
+                    tmp_win_size = 0;
                 }
 
-                this.dmTitleDrawProcMainMenu(main_work);
-            }
+                // サインアウト中に開閉演出中だった場合はウインドウを非表示
+                if (main_work.mmenu_win_size_rate[0] < 0.9
+                    && !AoAccountIsCurrentEnable())
+                {
+                    // 空処理
+                }
+                else
+                {
+                    // ウインドウ描画
+                    if (!main_work.iphone_menus)
+                    {
+                        AoWinSysDrawState(AOD_WIN_TYPE_A
+                                         , AoTexGetTexList(main_work.cmn_tex[2])          // ◆
+                                         , 0
+                                         , DMD_TITLE_SIZE_WIDTH / 2.0f          // ウインドウ中心X
+                                         , DMD_TITLE_SIZE_HEIGHT / 2.0f + 130.0f         // ウインドウ中心Y
+                                         , DMD_TITLE_MMENU_WIN_SIZE_W_PC * main_work.mmenu_win_size_rate[0]                   // ウインドウ横サイズ
+                                         , DMD_TITLE_MMENU_WIN_SIZE_H_PC * main_work.mmenu_win_size_rate[1] + tmp_win_size    // ウインドウ縦サイズ
+                                         , DMD_TITLE_DRAW_STATE_ID              // 描画STATE
+                                         );
+                    }
+                    else
+                    {
+                        float[] win_size = { DMD_TITLE_MMENU_WIN_SIZE_W_IOS, DMD_TITLE_MMENU_WIN_SIZE_H_IOS };
+                        bool is_trial = GsTrialIsTrial();
+                        bool has_save_data = !main_work.is_init_play;
+                        bool is_disp_2nd_elm = ((is_trial) ? true : has_save_data); //for SONIC4_TRIAL_EXIBITION set it false
+                        if (!is_disp_2nd_elm)
+                        {
+                            win_size[AMD_X] = DMD_TITLE_MMENU_WIN_SIZE_W_2;
+                            win_size[AMD_Y] = DMD_TITLE_MMENU_WIN_SIZE_H_2;
+                        }
+                        {//black bg rect
+                            AoWinSysDrawState(AOD_WIN_TYPE_A
+                                         , AoTexGetTexList(main_work.cmn_tex[2])          // ◆
+                                         , 0
+                                         , DMD_TITLE_SIZE_WIDTH / 2.0f          // ウインドウ中心X
+                                         , 311.0f                                        // ウインドウ中心Y
+                                         , win_size[AMD_X] * main_work.mmenu_win_size_rate[0]                  // ウインドウ横サイズ
+                                         , win_size[AMD_Y] * main_work.mmenu_win_size_rate[1] + tmp_win_size   // ウインドウ縦サイズ
+                                         , DMD_TITLE_DRAW_STATE_ID              // 描画STATE
+                                         );
+                        }
 
-            if (((int)main_work.flag & 131072) != 0)
-                this.dmTitleWinSelectDraw(main_work);
+
+                    }
+                }
+                {
+                    if ((main_work.flag & DMD_TITLE_FLAG_DISP_MAINMENU) == DMD_TITLE_FLAG_DISP_MAINMENU)
+                    {
+                        if (main_work.iphone_menus)
+                        {
+                            if ((main_work.flag_prev & DMD_TITLE_FLAG_DISP_MAINMENU) == 0)
+                            {
+                                //DMD_TITLE_FLAG_DISP_MAINMENUのONエッジ					
+                                main_work.trg_return.ResetState();
+                                for (int k = (int)DME_TITLE_ACT.ACT_BACK_BTN_L, max = (int)DME_TITLE_ACT.ACT_BACK_BTN_R + 1; k < max; ++k)
+                                {
+                                    AoActSetFrame(main_work.act[k], 0.0f);
+                                }
+                                //戻るボタンの演出を戻す	
+                                main_work.trg_game.ResetState();
+                                for (int k = (int)DME_TITLE_ACT.ACT_GAME_BTN_L, max = (int)DME_TITLE_ACT.ACT_GAME_BTN_R + 1; k < max; ++k)
+                                {
+                                    AoActSetFrame(main_work.act[k], 0.0f);
+                                }
+                            }
+                        }
+                        dmTitleDrawProcMainMenu(main_work);//draw softkeys and menu items
+                    }
+                }
+
+                if ((main_work.flag & DMD_TITLE_FLAG_WIN_DRAW_START) == DMD_TITLE_FLAG_WIN_DRAW_START)
+                {
+                    // ウインドウ描画
+                    dmTitleWinSelectDraw(main_work);
+                }
+            }
         }
 
-        amDrawMakeTask(new TaskProc(this.dmTitleTaskDraw), 32768, 0U);
+        // 描画タスク生成
+        amDrawMakeTask(dmTitleTaskDraw, 0x8000, 0);
     }
 
     private void dmTitleDrawProcTitle(DMS_TITLE_MAIN_WORK main_work)
     {
+        var ACT_TEX_START = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_START : (int)DME_TITLE_ACT_REG.ACT_TEX_START;
+
         AoActSysSetDrawTaskPrio(33792U);
         AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
-        if (((int)main_work.flag & 8) != 0)
-            AoActSortRegAction(main_work.act[19]);
+        if ((main_work.flag & DMD_TITLE_FLAG_DISP_TEXT) == DMD_TITLE_FLAG_DISP_TEXT)
+        {
+            AoActSortRegAction(main_work.act[ACT_TEX_START]);
+        }
+
         if (((int)main_work.flag & 16) != 0)
         {
             if (main_work.disp_timer >= 4.0)
@@ -1392,11 +1808,12 @@ public partial class AppMain
             ++main_work.disp_timer;
 
         if (GeEnvGetDecideKey() == GSE_DECIDE_KEY.GSD_DECIDE_KEY_O)
-            AoActSetFrame(main_work.act[19], 0.0f);
+            AoActSetFrame(main_work.act[ACT_TEX_START], 0.0f);
         else
-            AoActSetFrame(main_work.act[19], 1f);
+            AoActSetFrame(main_work.act[ACT_TEX_START], 1f);
+
         AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
-        AoActUpdate(main_work.act[19], 0.0f);
+        AoActUpdate(main_work.act[ACT_TEX_START], 0.0f);
         AoActSortExecute();
         AoActSortDraw();
         AoActSortUnregAll();
@@ -1404,10 +1821,301 @@ public partial class AppMain
 
     private void dmTitleDrawProcMainMenu(DMS_TITLE_MAIN_WORK main_work)
     {
-        bool is_trial = GsTrialIsTrial();
-        bool has_save_data = !main_work.is_init_play;
-        this.dmTitleDrawProcMainMenuIphone(main_work, has_save_data, is_trial);
+        if (main_work.iphone_menus)
+        {
+            bool is_trial = GsTrialIsTrial();
+            bool has_save_data = !main_work.is_init_play;
+            this.dmTitleDrawProcMainMenuIphone(main_work, has_save_data, is_trial);
+        }
+        else
+        {
+            float init_slct_dist = 0.0f;
+            int init_dst_menu_data = 0;
+
+            AoActSysSetDrawTaskPrio(DMD_TITLE_DRAW_PRIO_ACT);
+
+            AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
+
+            AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_MENU_CRSR]);
+
+            AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+
+            if (GsTrialIsTrial())
+            {
+                dmTitleDrawProcMainMenuTrial(main_work);
+            }
+
+            else if (main_work.is_init_play)
+            {
+                dmTitleDrawProcMainMenuFirst(main_work);
+            }
+
+            else
+            {
+                dmTitleDrawProcMainMenuPlayed(main_work);
+            }
+
+
+            for (int i = (int)DME_TITLE_ACT_REG.ACT_TEX_GAME; i < (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL; i++)
+            {
+                if (main_work.act[i] != null)
+                    AoActSetFrame(main_work.act[i], 1.0f);
+            }
+
+            // 決定演出用フレーム設定
+            AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L]
+                          , main_work.decide_menu_frm[(int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_START]);
+            AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION_L]
+                          , main_work.decide_menu_frm[(int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_OPTION]);
+
+
+            AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
+
+            AoActAcmPush();
+            AoActAcmInit();
+            AoActAcmApplyTrans(DMD_TITLE_CRSR_DFLT_POS_X
+                               , main_work.cur_crsr_pos_y
+                               , 0.0f
+                               );
+
+            if (!GsTrialIsTrial() && main_work.is_init_play)
+            {
+                AoActAcmApplyTrans(0.0f, 85.0f, 0.0f);
+            }
+            else
+            {
+                AoActAcmApplyTrans(0.0f, 60.0f, 0.0f);
+            }
+
+            AoActUpdate(main_work.act[(int)DME_TITLE_ACT_REG.ACT_MENU_CRSR], 0.0f);
+            AoActAcmPop();
+
+            //#if _PC || _XBOX
+            AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[0]));
+            AoActUpdate(main_work.act[(int)DME_TITLE_ACT_REG.ACT_BTN_X], 0.0f);
+            //#endif
+
+            AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+
+            // ここでPFごとの表示アクションを設定
+#if _PC || _XBOX
+    init_dst_menu_data = ACT_TEX_BUY_L;
+#elif _PS3
+    init_dst_menu_data = ACT_TEX_ZISSEKI_L;
+#elif _WII
+    init_dst_menu_data = ACT_TEX_RANK_L;
+#endif
+            init_dst_menu_data = (int)DME_TITLE_ACT_REG.ACT_TEX_BUY_L;
+
+            if (GsTrialIsTrial())
+            {
+                AoActAcmPush();
+
+                for (int i = (int)DME_TITLE_ACT_REG.ACT_TEX_GAME; i < (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL; i++)
+                {
+                    AoActAcmInit();
+
+                    if (i == (int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L
+                        || i == (int)DME_TITLE_ACT_REG.ACT_TEX_GAME)
+                    {
+                        init_slct_dist = 50.0f;
+                    }
+                    else
+                    {
+                        init_slct_dist = 0.0f;
+                    }
+
+                    AoActAcmApplyTrans(0.0f, init_slct_dist, 0.0f);
+                    AoActUpdate(main_work.act[i], 0.0f);
+                }
+                AoActAcmPop();
+            }
+            else if (GsTrialIsTrial() || main_work.is_init_play)
+            {
+                AoActAcmPush();
+
+                for (int i = (int)DME_TITLE_ACT_REG.ACT_TEX_GAME; i < (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL; i++)
+                {
+                    AoActAcmInit();
+                    if (i >= (int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY && i <= init_dst_menu_data)
+                    {
+                        init_slct_dist = -50.0f;
+                    }
+                    else if (i >= (int)DME_TITLE_ACT_REG.ACT_TEX_OPTION && i <= init_dst_menu_data)
+                    {
+                        init_slct_dist = 0.0f;
+                    }
+                    else
+                    {
+                        init_slct_dist = 50.0f;
+                    }
+
+                    AoActAcmApplyTrans(0.0f, init_slct_dist, 0.0f);
+
+                    if (!GsTrialIsTrial() && main_work.is_init_play)
+                    {
+                        AoActAcmApplyTrans(0.0f, 35.0f, 0.0f);
+                    }
+
+                    AoActUpdate(main_work.act[i], 0.0f);
+                }
+                AoActAcmPop();
+            }
+            else
+            {
+                AoActAcmPush();
+                for (int i = (int)DME_TITLE_ACT_REG.ACT_TEX_GAME; i < (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL; i++)
+                {
+                    AoActAcmInit();
+                    if (i >= (int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY && i <= init_dst_menu_data)
+                    {
+                        init_slct_dist = 0.0f;
+                    }
+                    else
+                    {
+                        init_slct_dist = 50.0f;
+                    }
+
+                    AoActAcmApplyTrans(0.0f, init_slct_dist, 0.0f);
+                    AoActAcmApplyTrans(0.0f, 10.0f, 0.0f);
+                    AoActUpdate(main_work.act[i], 0.0f);
+                }
+                AoActAcmPop();
+            }
+
+            // ソート描画
+            AoActSortExecute();
+            AoActSortDraw();
+            AoActSortUnregAll();
+        }
     }
+
+
+
+    // ==========================================================================
+    // dmTitleDrawProcMainMenuTrial
+    /*!
+        メインメニュー時表示設定処理
+     */
+    // ==========================================================================
+    void dmTitleDrawProcMainMenuTrial(DMS_TITLE_MAIN_WORK main_work)
+    {
+        AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+
+        switch (main_work.cur_slct_menu)
+        {
+            case 0:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                //AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME], 0.0f);
+                break;
+            case 1:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION_L]);
+                //AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION_L], 0.0f);
+                break;
+            case 2:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                //AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY], 0.0f);
+                break;
+            case 3:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                //AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+
+    // ==========================================================================
+    // dmTitleDrawProcMainMenuFirst
+    /*!
+        メインメニュー時表示設定処理
+     */
+    // ==========================================================================
+    void dmTitleDrawProcMainMenuFirst(DMS_TITLE_MAIN_WORK main_work)
+    {
+        AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+
+        switch (main_work.cur_slct_menu)
+        {
+            case 0:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME], 0.0f);
+                break;
+            case 1:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION], 0.0f);
+                break;
+            case 2:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY_L]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY], 0.0f);
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    // ==========================================================================
+    // dmTitleDrawProcMainMenuPlayed
+    /*!
+        メインメニュー時表示設定処理
+     */
+    // ==========================================================================
+    void dmTitleDrawProcMainMenuPlayed(DMS_TITLE_MAIN_WORK main_work)
+    {
+        AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+
+        switch (main_work.cur_slct_menu)
+        {
+            case 0:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_TUDUKI]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME_L], 0.0f);
+                break;
+            case 1:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_TUDUKI_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION], 0.0f);
+                break;
+            case 2:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_TUDUKI]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION_L]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION], 0.0f);
+                break;
+            case 3:
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_GAME]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_TUDUKI]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_OPTION]);
+                AoActSortRegAction(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY_L]);
+                AoActSetFrame(main_work.act[(int)DME_TITLE_ACT_REG.ACT_TEX_LIBRARY], 0.0f);
+                break;
+            default:
+                break;
+        }
+
+    }
+
 
     private void CLocalBtnBase_Update(
         AOS_ACTION src,
@@ -1516,12 +2224,14 @@ public partial class AppMain
 
         if (!LiveFeature.isInterrupted())
         {
+            var dm_title_g_dm_act_id_tbl = main_work.iphone_menus ? dm_title_g_dm_act_id_tbl_iphone : dm_title_g_dm_act_id_tbl_pc;
+
             if (!flag)
             {
                 main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[20]].mtn.trs_tbl[0].trs_y = 250f;
                 main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[22]].mtn.trs_tbl[0].trs_y = 360f;
-                main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[24]].mtn.trs_tbl[0].trs_y = 470f;
-                main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[25]].mtn.trs_tbl[0].trs_y = 580f;
+                //main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[24]].mtn.trs_tbl[0].trs_y = 470f;
+                //main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[25]].mtn.trs_tbl[0].trs_y = 580f;
             }
             else
                 main_work.ama[1].act_tbl[(int)dm_title_g_dm_act_id_tbl[21]].mtn.trs_tbl[0].trs_y = 305f;
@@ -1607,80 +2317,260 @@ public partial class AppMain
 
     private void dmTitleWinSelectDraw(DMS_TITLE_MAIN_WORK main_work)
     {
-        AoActSysSetDrawTaskPrio(35840U);
-        AoWinSysDrawState(0, AoTexGetTexList(main_work.cmn_tex[2]), 0U, 480f, 356f,
-            708.75f * main_work.win_size_rate[0], (float)(303.75 * main_work.win_size_rate[1] * 0.899999976158142),
-            10U);
-        if (((int)main_work.disp_flag & 1) == 0)
-            return;
-        AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[2]));
-        AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
-        switch (main_work.win_mode)
-        {
-            case 0:
-                int index1 = 32;
-                for (int index2 = 38; index1 < index2; ++index1)
-                    AoActSortRegAction(main_work.act[index1]);
-                AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
-                AoActSortRegAction(main_work.act[28]);
-                AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
-                AoActSortRegAction(main_work.act[38]);
-                AoActSortRegAction(main_work.act[39]);
-                break;
-            case 1:
-                int index3 = 32;
-                for (int index2 = 38; index3 < index2; ++index3)
-                    AoActSortRegAction(main_work.act[index3]);
-                AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
-                AoActSortRegAction(main_work.act[29]);
-                AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
-                AoActSortRegAction(main_work.act[38]);
-                AoActSortRegAction(main_work.act[39]);
-                break;
-        }
+        var dm_title_win_act_pos_tbl = main_work.iphone_menus ? dm_title_win_act_pos_tbl_iphone : dm_title_win_act_pos_tbl_pc;
+        var ACT_WIN_NO_BTN_L = (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_L;
+        var ACT_WIN_YES_BTN_R = (int)DME_TITLE_ACT.ACT_WIN_YES_BTN_R;
+        var ACT_TEX_YES = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_YES : (int)DME_TITLE_ACT_REG.ACT_TEX_YES;
+        var ACT_TEX_NO = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_NO : (int)DME_TITLE_ACT_REG.ACT_TEX_NO;
+        var ACT_WIN_TEX_MSG1 = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_WIN_TEX_MSG1 : (int)DME_TITLE_ACT_REG.ACT_WIN_TEX_MSG1;
+        var ACT_WIN_TEX_MSG2 = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_WIN_TEX_MSG2 : (int)DME_TITLE_ACT_REG.ACT_WIN_TEX_MSG2;
+        var ACT_WIN_TEX_MSG3 = main_work.iphone_menus ? 0 : (int)DME_TITLE_ACT_REG.ACT_WIN_TEX_MSG3;
+        var ACT_WIN_LINE = main_work.iphone_menus ? 0 : (int)DME_TITLE_ACT_REG.ACT_WIN_LINE;
+        var ACT_TEX_WINTITLE = main_work.iphone_menus ? 0 : (int)DME_TITLE_ACT_REG.ACT_TEX_WINTITLE;
 
-        AoActAcmPush();
-        for (int index2 = 0; index2 < 3; ++index2)
-        {
-            AoActAcmInit();
-            AoActAcmApplyTrans(dm_title_win_act_pos_tbl[index2 + 1, 0], dm_title_win_act_pos_tbl[index2 + 1, 1], 0.0f);
-            if (index2 <= 1)
-                AoActAcmApplyScale(27f / 16f, 27f / 16f);
-            AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
-            AoActUpdate(main_work.act[28 + index2], 0.0f);
-        }
+        // ウインドウ用AO描画プライオリティ設定
+        AoActSysSetDrawTaskPrio(DMD_TITLE_DRAW_PRIO_WIN_FIX);
 
-        for (int index2 = 1; index2 < 3; ++index2)
+        // ウインドウ描画
+        AoWinSysDrawState(AOD_WIN_TYPE_A
+                         , AoTexGetTexList(main_work.cmn_tex[2])          // ◆
+                         , 0
+                         , DMD_TITLE_SIZE_WIDTH / 2.0f          // ウインドウ中心X
+                         , DMD_TITLE_SIZE_HEIGHT / 2.0f         // ウインドウ中心Y
+                         , DMD_TITLE_WINDOW_SIZE_W_PC * DMD_TITLE_DISP_SCALE_TEXT_PC * main_work.win_size_rate[0]            // ウインドウ横サイズ
+                         , DMD_TITLE_WINDOW_SIZE_H * DMD_TITLE_DISP_SCALE_TEXT_PC * main_work.win_size_rate[1]            // ウインドウ縦サイズ
+                         , DMD_TITLE_DRAW_STATE_ID              // 描画STATE
+                         );
+
+
+        // ウインドウ内の項目描画
+        if ((main_work.disp_flag & DMD_TITLE_DISP_FLAG_WIN_ACT) == DMD_TITLE_DISP_FLAG_WIN_ACT)
         {
-            int num = 37;
-            AoActAcmInit();
-            AoActAcmApplyTrans(dm_title_win_act_pos_tbl[index2 + 4, 0], dm_title_win_act_pos_tbl[index2 + 4, 1], 0.0f);
-            AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
-            AoActUpdate(main_work.act[num + index2], 0.0f);
-            main_work.act[num + index2].sprite.center_y += 5f;
+            // 共通ウインドウACT登録
             AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[2]));
-            int[,] numArray1 = new int[3, 2]
-            {
-                {0, -1}, {35, 37}, {32, 34}
-            };
-            AoActUpdate(main_work.act[numArray1[index2, 0] + 1], 0.0f);
-            int[] numArray2 = new int[3] { -1, 1, 0 };
-            CTrgAoAction ctrgAoAction = main_work.trg_answer[numArray2[index2]];
-            if (0 <= numArray2[index2])
-                ctrgAoAction.Update();
-            float frame = ctrgAoAction.GetState(0U)[0] ? 1f : 0.0f;
-            int index4 = numArray1[index2, 0];
-            for (int index5 = numArray1[index2, 1] + 1; index4 < index5; ++index4)
-            {
-                AoActSetFrame(main_work.act[index4], frame);
-                AoActUpdate(main_work.act[index4], 0.0f);
-            }
-        }
+            //		AoActSortRegAction(main_work.act[ACT_WIN_LINE]);
 
-        AoActAcmPop();
-        AoActSortExecute();
-        AoActSortDraw();
-        AoActSortUnregAll();
+            AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+            //		AoActSortRegAction(main_work.act[ACT_TEX_WINTITLE]);
+
+            switch ((DME_TITLE_WIN_TYPE)main_work.win_mode)
+            {
+                case DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA1:
+                    // アクション登録
+                    if (main_work.iphone_menus)
+                    {
+                        for (int i = ACT_WIN_NO_BTN_L, max = ACT_WIN_YES_BTN_R + 1; i < max; ++i)
+                        {
+                            AoActSortRegAction(main_work.act[i]);
+                        }
+                    }
+
+                    AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+                    AoActSortRegAction(main_work.act[ACT_WIN_TEX_MSG1]);
+                    //			AoActSortRegAction(main_work.act[ACT_WIN_TEX_MSG2]);
+
+                    AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+                    AoActSortRegAction(main_work.act[ACT_TEX_YES]);
+                    AoActSortRegAction(main_work.act[ACT_TEX_NO]);
+
+                    if (!main_work.iphone_menus)
+                    {
+                        // 初期表示フレーム設定
+                        if (main_work.win_cur_slct == 0)
+                        {
+                            AoActSetFrame(main_work.act[ACT_TEX_YES], 0.0f);
+                            AoActSetFrame(main_work.act[ACT_TEX_NO], 1.0f);
+                        }
+
+                        else
+                        {
+                            AoActSetFrame(main_work.act[ACT_TEX_YES], 1.0f);
+                            AoActSetFrame(main_work.act[ACT_TEX_NO], 0.0f);
+                        }
+                    }
+
+                    break;
+
+                case DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA2:
+                    // アクション登録
+                    if (main_work.iphone_menus)
+                    {
+                        for (int i = ACT_WIN_NO_BTN_L, max = ACT_WIN_YES_BTN_R + 1; i < max; ++i)
+                        {
+                            AoActSortRegAction(main_work.act[i]);
+                        }
+                    }
+                    AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+                    AoActSortRegAction(main_work.act[ACT_WIN_TEX_MSG2]);
+
+                    AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+                    AoActSortRegAction(main_work.act[ACT_TEX_YES]);
+                    AoActSortRegAction(main_work.act[ACT_TEX_NO]);
+                    if (!main_work.iphone_menus)
+                    {
+                        // 初期表示フレーム設定
+                        if (main_work.win_cur_slct == 0)
+                        {
+                            AoActSetFrame(main_work.act[ACT_TEX_YES], 0.0f);
+                            AoActSetFrame(main_work.act[ACT_TEX_NO], 1.0f);
+                        }
+
+                        else
+                        {
+                            AoActSetFrame(main_work.act[ACT_TEX_YES], 1.0f);
+                            AoActSetFrame(main_work.act[ACT_TEX_NO], 0.0f);
+                        }
+                    }
+
+                    break;
+                case DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA3:
+                    AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+                    AoActSortRegAction(main_work.act[ACT_WIN_TEX_MSG3]);
+
+                    AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+                    AoActSortRegAction(main_work.act[ACT_TEX_YES]);
+                    AoActSortRegAction(main_work.act[ACT_TEX_NO]);
+
+                    // 初期表示フレーム設定
+                    if (main_work.win_cur_slct == 0)
+                    {
+                        AoActSetFrame(main_work.act[ACT_TEX_YES], 0.0f);
+                        AoActSetFrame(main_work.act[ACT_TEX_NO], 1.0f);
+                    }
+
+                    else
+                    {
+                        AoActSetFrame(main_work.act[ACT_TEX_YES], 1.0f);
+                        AoActSetFrame(main_work.act[ACT_TEX_NO], 0.0f);
+                    }
+
+                    break;
+
+                case DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA4:
+                case DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA5:
+                    AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+                    AoActSortRegAction(main_work.act[ACT_WIN_TEX_MSG3]);
+
+                    AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+                    AoActSortRegAction(main_work.act[ACT_TEX_YES]);
+                    AoActSortRegAction(main_work.act[ACT_TEX_NO]);
+
+                    // 初期表示フレーム設定
+                    if (main_work.win_cur_slct == 0)
+                    {
+                        AoActSetFrame(main_work.act[ACT_TEX_YES], 0.0f);
+                        AoActSetFrame(main_work.act[ACT_TEX_NO], 1.0f);
+                    }
+
+                    else
+                    {
+                        AoActSetFrame(main_work.act[ACT_TEX_YES], 1.0f);
+                        AoActSetFrame(main_work.act[ACT_TEX_NO], 0.0f);
+                    }
+
+                    break;
+                default:
+                    // 例外
+                    MTM_ASSERT(0);
+                    break;
+            }
+
+            if (!main_work.iphone_menus)
+            {
+                // ACCUMURATEでトランスさせる
+                AoActAcmPush();
+
+                AoActAcmInit();
+                AoActAcmApplyTrans(dm_title_win_act_pos_tbl[0, 0]
+                                   , dm_title_win_act_pos_tbl[0, 1]
+                                   , 0
+                                   );
+
+                AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[2]));
+
+                // フレーム更新はSetFrameのみで行う
+                AoActUpdate(main_work.act[ACT_WIN_LINE], 0.0f);
+
+                AoActAcmPop();
+            }
+
+
+            AoActAcmPush();
+
+            for (int i = 0; i < 3; i++)
+            {
+                AoActAcmInit();
+                AoActAcmApplyTrans(dm_title_win_act_pos_tbl[i + 1, 0]
+                                   , dm_title_win_act_pos_tbl[i + 1, 1]
+                                   , 0
+                                   );
+
+                if (main_work.iphone_menus)
+                {
+                    if (i <= ACT_WIN_TEX_MSG2 - ACT_WIN_TEX_MSG1)
+                    {
+                        AoActAcmApplyScale(DMD_TITLE_DISP_SCALE_TEXT_IOS, DMD_TITLE_DISP_SCALE_TEXT_IOS);
+                    }
+                }
+
+                // フレーム更新はSetFrameのみで行う
+                AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
+                AoActUpdate(main_work.act[ACT_WIN_TEX_MSG1 + i], 0.0f);
+            }
+
+#if !_IPHONE
+            for (int i = 0; i < 3; i++)
+            {
+#else //!_IPHONE
+		    for (int i = 1; i < 3; i++) {
+			    const int ACT_TEX_WINTITLE = ACT_TEX_YES - 1; //ループが1から始まるのでYES/NOが表示される様に相殺する
+#endif //!_IPHONE
+                AoActAcmInit();
+                AoActAcmApplyTrans(dm_title_win_act_pos_tbl[i + 4, 0]
+                                   , dm_title_win_act_pos_tbl[i + 4, 1]
+                                   , 0
+                                   );
+
+                // フレーム更新はSetFrameのみで行う
+                AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[3]));
+                AoActUpdate(main_work.act[ACT_TEX_WINTITLE + i], 0.0f);
+
+                if (main_work.iphone_menus)
+                {
+                    //        AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[2]));
+                    //        const int c_btn_base_table[3][2] = {
+                    //            { 0, -1}
+                    //, { ACT_WIN_YES_BTN_L, ACT_WIN_YES_BTN_R}
+                    //, { ACT_WIN_NO_BTN_L, ACT_WIN_NO_BTN_R}
+                    //        }
+                    //        ;
+                    //        AoActUpdate(main_work.act[c_btn_base_table[i][0] + 1], 0.0f); //当たり判定更新
+                    //        const int c_btn_trg[3] = { -1, 1, 0 };
+                    //        er::CTrgAoAction & answer = main_work.trg_answer[c_btn_trg[i]];
+                    //        if (0 <= c_btn_trg[i])
+                    //        {
+                    //            answer.Update();
+                    //        }
+                    //        float set_frame = ((answer.GetState(0)[er::CTrgState::EState::On]) ? 1.0f : 0.0f);
+                    //        for (int k = c_btn_base_table[i][0], max = c_btn_base_table[i][1] + 1; k < max; ++k)
+                    //        {
+                    //            AoActSetFrame(main_work.act[k], set_frame);
+                    //            AoActUpdate(main_work.act[k], 0.0f);
+                    //        }
+                }
+            }
+
+            AoActAcmPop();
+
+            // ソート実行
+            AoActSortExecute();
+
+            // ソートバッファ描画
+            AoActSortDraw();
+
+            // ソートバッファ全解除
+            AoActSortUnregAll();
+        }
     }
 
     private void dmTitleTaskDraw(AMS_TCB tcb)
@@ -1887,6 +2777,7 @@ public partial class AppMain
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         uint num = 0;
+
         SOption instance1 = SOption.CreateInstance();
         int volumeBgm = (int)instance1.GetVolumeBgm();
         int volumeSe = (int)instance1.GetVolumeSe();
@@ -1894,7 +2785,8 @@ public partial class AppMain
         mainSysInfo.se_volume = volumeSe / 10;
         DmSoundSetVolumeBGM(mainSysInfo.bgm_volume);
         DmSoundSetVolumeSE(mainSysInfo.se_volume);
-        mainSysInfo.game_flag |= 64U;
+
+        mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_PAD_VIB_ENABLE;
         SSpecial instance2 = SSpecial.CreateInstance();
         for (int index = 0; index < 7; ++index)
         {
@@ -1903,9 +2795,10 @@ public partial class AppMain
         }
 
         if (num == (uint)sbyte.MaxValue)
-            mainSysInfo.game_flag |= 32U;
+            mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_7_CHAOS_EMERALD;
         else
-            mainSysInfo.game_flag &= 4294967263U;
+            mainSysInfo.game_flag &= ~GSD_MAINSYS_GAME_FLAG_7_CHAOS_EMERALD;
+
         SSystem instance3 = SSystem.CreateInstance();
         mainSysInfo.rest_player_num = instance3.PlayerStock;
         mainSysInfo.ene_kill_count = instance3.Killed;
@@ -1913,16 +2806,16 @@ public partial class AppMain
         switch (SOption.CreateInstance().GetControl())
         {
             case SOption.EControl.Type.VirtualPadDown:
-                mainSysInfo.game_flag &= 4294966783U;
-                mainSysInfo.game_flag |= 1U;
+                mainSysInfo.game_flag &= ~GSD_MAINSYS_GAME_FLAG_INPUT_IS_FLICK;
+                mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC;
                 break;
             case SOption.EControl.Type.VirtualPadUp:
-                mainSysInfo.game_flag |= 512U;
-                mainSysInfo.game_flag |= 1U;
+                mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_INPUT_IS_FLICK;
+                mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC;
                 break;
             default:
-                mainSysInfo.game_flag &= 4294966783U;
-                mainSysInfo.game_flag &= 4294967294U;
+                mainSysInfo.game_flag &= ~GSD_MAINSYS_GAME_FLAG_INPUT_IS_FLICK;
+                mainSysInfo.game_flag &= ~GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC;
                 break;
         }
 
@@ -1941,9 +2834,11 @@ public partial class AppMain
         DmSoundSetVolumeBGM(mainSysInfo.bgm_volume);
         DmSoundSetVolumeSE(mainSysInfo.se_volume);
         instance.IsVibration();
-        mainSysInfo.game_flag |= 64U;
-        mainSysInfo.game_flag &= 4294967263U;
-        mainSysInfo.rest_player_num = 3U;
+        mainSysInfo.game_flag |= GSD_MAINSYS_GAME_FLAG_PAD_VIB_ENABLE;
+        mainSysInfo.game_flag &= GSD_MAINSYS_GAME_FLAG_7_CHAOS_EMERALD;
+        mainSysInfo.rest_player_num = GSD_MAINSYS_PLAYER_REST_DEF;
+        mainSysInfo.ene_kill_count = 0;
+        mainSysInfo.final_clear_count = 0;
         mainSysInfo.is_spe_clear = false;
         mainSysInfo.is_first_play = false;
     }
@@ -1952,17 +2847,17 @@ public partial class AppMain
     {
         if (GsTrialIsTrial())
         {
-            main_work.slct_menu_num = 3;
+            main_work.slct_menu_num = DMD_TITLE_SLCT_MENU_NUM_TRIAL;
             main_work.is_init_play = true;
         }
-        else if (!GsMainSysIsStageClear(0))
+        else if (!GsMainSysIsStageClear(GSD_MAIN_STAGE_ID_1_1))
         {
-            main_work.slct_menu_num = 3;
+            main_work.slct_menu_num = DMD_TITLE_SLCT_MENU_NUM_FIRST;
             main_work.is_init_play = true;
         }
         else
         {
-            main_work.slct_menu_num = 3;
+            main_work.slct_menu_num = DMD_TITLE_SLCT_MENU_NUM_PLAYED;
             main_work.is_init_play = false;
         }
     }
@@ -1971,7 +2866,7 @@ public partial class AppMain
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         SSystem instance = SSystem.CreateInstance();
-        mainSysInfo.rest_player_num = 3U;
+        mainSysInfo.rest_player_num = GSD_MAINSYS_PLAYER_REST_DEF;
         instance.PlayerStock = mainSysInfo.rest_player_num;
         this.dmTitleSetLoadSysData(main_work);
     }

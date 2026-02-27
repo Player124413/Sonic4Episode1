@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static AMS_AME_HEADER readAMEfile(string filename)
     {

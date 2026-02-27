@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_TEXCOORD : IClearable
+    internal struct NNS_TEXCOORD : IClearable
     {
         public float u;
         public float v;

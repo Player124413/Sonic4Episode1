@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public class NNS_ROTATE
+internal class NNS_ROTATE
 {
     public float x;
     public float y;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_STFRL_RING_WORK : IOBS_OBJECT_WORK
+    internal class DMS_STFRL_RING_WORK : IOBS_OBJECT_WORK
     {
         public readonly VecFx32[] pos = new VecFx32[6];
         public readonly int[] spd_x = new int[6];

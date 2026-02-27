@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_COMMON_WEIGHT2
+    internal class NNS_COMMON_WEIGHT2
     {
         public int Index0;
         public int Index1;

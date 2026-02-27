@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class CProcCount : CProc
+    internal class CProcCount : CProc
     {
         private uint m_counter;
 

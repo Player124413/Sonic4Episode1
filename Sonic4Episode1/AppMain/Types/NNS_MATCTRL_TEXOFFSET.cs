@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATCTRL_TEXOFFSET
+    internal class NNS_MATCTRL_TEXOFFSET
     {
         public NNS_TEXCOORD offset = new NNS_TEXCOORD();
         public int mode;

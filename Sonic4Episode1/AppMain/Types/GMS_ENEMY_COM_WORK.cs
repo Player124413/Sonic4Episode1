@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENEMY_COM_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENEMY_COM_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_RECT_WORK[] rect_work = New<OBS_RECT_WORK>(3);
         public readonly OBS_COLLISION_WORK col_work = new OBS_COLLISION_WORK();

@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EVE_DATA_EV_HEADER
+    internal class GMS_EVE_DATA_EV_HEADER
     {
         public ushort width;
         public ushort height;

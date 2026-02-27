@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private void AoWinSysDraw(
          int type,
@@ -40,7 +40,7 @@
         aoWinSysMakeCommandA(state, texlist, tex_id, x, y, w, h, z);
     }
 
-    private static void AoWinSysDrawTask(
+    public static void AoWinSysDrawTask(
       int type,
       NNS_TEXLIST texlist,
       uint tex_id,

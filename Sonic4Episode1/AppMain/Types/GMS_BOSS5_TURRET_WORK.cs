@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_TURRET_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_TURRET_WORK : IOBS_OBJECT_WORK
     {
         public NNS_QUATERNION disp_quat = new NNS_QUATERNION();
         public VecFx32 vul_fire_pos = new VecFx32();

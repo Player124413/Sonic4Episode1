@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_ALARM
+    internal class AMS_ALARM
     {
         public int delete_flag;
         public uint alarm_id;

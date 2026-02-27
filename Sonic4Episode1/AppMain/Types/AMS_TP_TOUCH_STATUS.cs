@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TP_TOUCH_STATUS
+    internal class AMS_TP_TOUCH_STATUS
     {
         public AMS_TP_TOUCH_CORE core = new AMS_TP_TOUCH_CORE();
         public ushort[] on = new ushort[2];

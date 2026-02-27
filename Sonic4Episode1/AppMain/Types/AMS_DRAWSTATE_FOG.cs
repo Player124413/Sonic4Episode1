@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_FOG
+    internal class AMS_DRAWSTATE_FOG
     {
         public int flag;
 

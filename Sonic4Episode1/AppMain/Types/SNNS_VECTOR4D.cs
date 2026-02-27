@@ -1,5 +1,5 @@
 
-public struct SNNS_VECTOR4D
+internal struct SNNS_VECTOR4D
 {
     public float x;
     public float y;

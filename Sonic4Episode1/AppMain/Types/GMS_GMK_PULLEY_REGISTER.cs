@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_PULLEY_REGISTER
+    internal class GMS_GMK_PULLEY_REGISTER
     {
         public ushort type;
         public ushort flip;

@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private enum tag_IZE_FADE_SET_TYPE
     {

@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_NODE
+    internal class NNS_NODE
     {
         public readonly NNS_VECTOR Translation = GlobalPool<NNS_VECTOR>.Alloc();
         public readonly NNS_VECTOR Scaling = GlobalPool<NNS_VECTOR>.Alloc();

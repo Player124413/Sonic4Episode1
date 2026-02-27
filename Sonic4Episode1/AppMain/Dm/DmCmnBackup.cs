@@ -1,6 +1,6 @@
 ﻿using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void DmCmnBackupLoad()
     {

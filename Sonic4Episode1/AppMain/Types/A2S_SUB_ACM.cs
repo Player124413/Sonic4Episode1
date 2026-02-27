@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct A2S_SUB_ACM
+    internal struct A2S_SUB_ACM
     {
         public float trs_scl_x;
         public float trs_scl_y;

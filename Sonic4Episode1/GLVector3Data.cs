@@ -7,7 +7,7 @@
 using Microsoft.Xna.Framework;
 using mpp;
 
-public abstract class GLVector3Data
+internal abstract class GLVector3Data
 {
     protected readonly Vector3[] data_;
 

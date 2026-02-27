@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class SimplePool<T> where T : class, new()
+internal class SimplePool<T> where T : class, new()
 {
     private List<T> cache_;
 

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_DMG_FLICKER_WORK : IClearable
+    internal class GMS_BS_CMN_DMG_FLICKER_WORK : IClearable
     {
         public int is_active;
         public uint cycles;

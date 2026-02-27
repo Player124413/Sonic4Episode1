@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_SLOT_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_SLOT_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_GMK_SLOT_REEL_STATUS_WORK[] reel_status = New<GMS_GMK_SLOT_REEL_STATUS_WORK>(3);
         public readonly short[] prob = new short[5];

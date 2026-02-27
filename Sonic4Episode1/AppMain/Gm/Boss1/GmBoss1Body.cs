@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static AMS_AMB_HEADER GMD_BOSS1_ARC => g_gm_gamedat_enemy_arc;
 

@@ -20,7 +20,7 @@ using System.Runtime.InteropServices.JavaScript;
 #if WASM
         PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified,
 #else
-        PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+        PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified,
 #endif
         GenerationMode = JsonSourceGenerationMode.Default)]
 internal partial class Sonic4SerializerContext : JsonSerializerContext { }

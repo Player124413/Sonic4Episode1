@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DISPLAYLIST_MANAGER
+    internal class AMS_DISPLAYLIST_MANAGER
     {
         public readonly AMS_DRAW_SORT[] sortlist = New<AMS_DRAW_SORT>(512);
         public readonly AMS_DISPLAYLIST[] displaylist = New<AMS_DISPLAYLIST>(4);

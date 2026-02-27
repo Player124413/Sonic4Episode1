@@ -1,8 +1,8 @@
 using er;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_MANUAL_MAIN_WORK
+    internal class DMS_MANUAL_MAIN_WORK
     {
         public A2S_AMA_HEADER[] ama = new A2S_AMA_HEADER[2];
         public AMS_AMB_HEADER[] amb = new AMS_AMB_HEADER[2];

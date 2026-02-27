@@ -3,11 +3,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public static short GMD_OBJ_LCD_X => (short)(0.674383342266083 * GSD_DISP_WIDTH);
+    public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f;
+    public const float GMD_CAMERA_UP_SCALE_MAX = 0.3371917f;
+#if true
+    public const float GMD_CAMERA_SCALE = (0.078125f * 2.19089f * GMD_OBJ_DRAW_SCALE);
+#else
+    public const float GMD_CAMERA_SCALE = 0.6743833f;
+#endif
 
-    public static short GMD_OBJ_LCD_Y => (short)(0.674383342266083 * GSD_DISP_HEIGHT);
+    public const short GMD_OBJ_CLIP_LCD_X = 383;
+    public const short GMD_OBJ_CLIP_LCD_Y = 215;
+
+    public static short GMD_OBJ_LCD_X => (short)(GMD_CAMERA_SCALE * GSD_DISP_WIDTH);
+
+    public static short GMD_OBJ_LCD_Y => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT);
 
     public static bool GMM_MAIN_STAGE_IS_BOSS()
     {
@@ -49,13 +60,13 @@ public partial class AppMain
         g_gs_main_sys_info.game_flag &= 3758096383U;
     }
 
-    private static void GmMainGSInit()
+    public static void GmMainGSInit()
     {
         g_gs_main_sys_info.game_flag &= 4294967009U;
         g_gs_main_sys_info.clear_ring = 0U;
         g_gs_main_sys_info.clear_score = 0U;
         g_gs_main_sys_info.clear_time = 0;
-        
+
         AoPresenceSet();
     }
 
@@ -67,7 +78,7 @@ public partial class AppMain
         g_gs_main_sys_info.clear_ring = 0U;
         g_gs_main_sys_info.clear_score = 0U;
         g_gs_main_sys_info.clear_time = 0;
-        
+
         AoPresenceSet();
     }
 
@@ -82,9 +93,15 @@ public partial class AppMain
         if (((int)g_gs_main_sys_info.game_flag & 4) == 0)
             gmMainSysInit();
         if (g_gs_main_sys_info.stage_id == 9)
+        {
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, (short)(GMD_OBJ_LCD_X * 1.42), (short)(GMD_OBJ_LCD_X * 1.42), GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
+            ObjObjectClipLCDSet((short)(GMD_OBJ_CLIP_LCD_X * 1.42), (short)(GMD_OBJ_CLIP_LCD_X * 1.42));
+        }
         else
+        {
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
+            ObjObjectClipLCDSet(GMD_OBJ_CLIP_LCD_X, GMD_OBJ_CLIP_LCD_Y);
+        }
         ObjDataAlloc(994);
         ObjDrawESEffectSystemInit(0, 20480U, 5U);
         amTrailEFInitialize();
@@ -112,7 +129,7 @@ public partial class AppMain
             gmMainLoad(0);
         else
             gmMainRebuild();
-        
+
         //AoPresenceSet((AOE_PRESENCE)GsGetMainSysInfo().stage_id, false);
     }
 
@@ -142,7 +159,7 @@ public partial class AppMain
         GmSoundExit();
         GmMapFarExit();
         GmDecoExit();
-        GmWaterSurfaceExit(); 
+        GmWaterSurfaceExit();
         GmEventMgrExit();
         ObjDrawESEffectSystemExit();
         GmClearDemoExit();
@@ -710,7 +727,7 @@ public partial class AppMain
             SaveState.resumeMapData();
         }
         amIPhoneTouchCanceled();
-        CPadVirtualPad.CreateInstance().Create(new float[4] { -120f, 166f, 232f, 318f });
+        CPadVirtualPad.CreateInstance().Create(new float[4] { -120f, 134f, 232f, 286f });
         CPadPolarHandle instance = CPadPolarHandle.CreateInstance();
         if (g_gs_main_sys_info.stage_id == 9)
             instance.Create(0.0f, 0.0f, (float)(AMD_SCREEN_2D_WIDTH * 4.0 / 5.0), AMD_SCREEN_2D_HEIGHT);
@@ -753,7 +770,7 @@ public partial class AppMain
         g_obj.ppObjPre = new OBJECT_WORK_Delegate(GmObjObjPreFunc);
         g_obj.ppObjPost = new OBJECT_WORK_Delegate(GmObjObjPostFunc);
         g_obj.ppRegRecAuto = new OBJECT_WORK_Delegate(GmObjRegistRectAuto);
-        g_obj.draw_scale.x = g_obj.draw_scale.y = g_obj.draw_scale.z = 13107;
+        g_obj.draw_scale.x = g_obj.draw_scale.y = g_obj.draw_scale.z = GMD_OBJ_DRAW_SCALE_FX;
         g_obj.inv_draw_scale.x = g_obj.inv_draw_scale.y = g_obj.inv_draw_scale.z = FX_Div(4096, g_obj.draw_scale.x);
         g_obj.depth = 128;
         ObjDebugRectActionInit();
@@ -906,30 +923,33 @@ public partial class AppMain
         gGmMainSystem.polar_diff = gGmMainSystem.polar_now - polarNow;
         if (!gmMainIsUseWaitUpCamera())
             return;
-        if (GmPlayerIsStateWait(gGmMainSystem.ply_work[0]))
+        if (false)
         {
-            if (gGmMainSystem.camscale_state == GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_NON)
-                gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_ZOOM;
-        }
-        else
-        {
-            gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_NON;
-            gGmMainSystem.camera_scale = 0.6743833f;
-        }
-        if (gGmMainSystem.camscale_state == GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_ZOOM)
-        {
-            gGmMainSystem.camera_scale -= 0.01f;
-            if (gGmMainSystem.camera_scale < 0.337191671133041)
+            if (GmPlayerIsStateWait(gGmMainSystem.ply_work[0]))
             {
-                gGmMainSystem.camera_scale = 0.3371917f;
-                gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_UP;
+                if (gGmMainSystem.camscale_state == GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_NON)
+                    gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_ZOOM;
             }
-        }
-        for (int cam_id = 0; cam_id < 7; ++cam_id)
-        {
-            OBS_CAMERA obsCamera = ObjCameraGet(cam_id);
-            if (obsCamera != null)
-                obsCamera.scale = gGmMainSystem.camera_scale;
+            else
+            {
+                gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_NON;
+                gGmMainSystem.camera_scale = GMD_CAMERA_SCALE;
+            }
+            if (gGmMainSystem.camscale_state == GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_ZOOM)
+            {
+                gGmMainSystem.camera_scale -= GMD_CAMERA_UP_SCALE_ADD;
+                if (gGmMainSystem.camera_scale < GMD_CAMERA_UP_SCALE_MAX)
+                {
+                    gGmMainSystem.camera_scale = GMD_CAMERA_UP_SCALE_MAX;
+                    gGmMainSystem.camscale_state = GME_MAIN_CAMSCALE_STATE.GMD_MAIN_CAMSCALE_STATE_UP;
+                }
+            }
+            for (int cam_id = 0; cam_id < 7; ++cam_id)
+            {
+                OBS_CAMERA obsCamera = ObjCameraGet(cam_id);
+                if (obsCamera != null)
+                    obsCamera.scale = gGmMainSystem.camera_scale;
+            }
         }
     }
 

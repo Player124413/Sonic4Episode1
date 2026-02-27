@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_SUB_HIT
+    internal class A2S_SUB_HIT
     {
         public uint flag;
         public uint type;

@@ -8,7 +8,7 @@ using accel;
 
 namespace er
 {
-    public class CTrgStateEx : CTrgState
+    internal class CTrgStateEx : CTrgState
     {
         public readonly CCircularBuffer<IntPair> m_pos_history = new CCircularBuffer<IntPair>(6);
         public const int c_pos_history = 6;

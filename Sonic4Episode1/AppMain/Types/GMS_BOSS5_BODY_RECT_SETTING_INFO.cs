@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_BODY_RECT_SETTING_INFO
+    internal class GMS_BOSS5_BODY_RECT_SETTING_INFO
     {
         public GMS_BOSS5_RECTPOINT_SETTING_INFO[] point_setting_info = New<GMS_BOSS5_RECTPOINT_SETTING_INFO>(3);
         public int is_invincible;

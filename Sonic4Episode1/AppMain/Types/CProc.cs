@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class CProc
+    internal class CProc
     {
         private ITaskAsv.FProc m_proc;
         private object m_it;

@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class Pool<T> where T : class, new()
+    internal class Pool<T> where T : class, new()
     {
         private T[] freeObjects_ = new T[1024];
         private T[] usedObjects_ = new T[1024];

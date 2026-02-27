@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECO_MGR : IClearable
+    internal class GMS_DECO_MGR : IClearable
     {
         public int[] common_frame_motion = new int[3];
         public int[] motion_frame_loop = new int[12];

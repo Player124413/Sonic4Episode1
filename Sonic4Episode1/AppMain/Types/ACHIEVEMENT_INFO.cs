@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class ACHIEVEMENT_INFO
+    internal class ACHIEVEMENT_INFO
     {
         public string id;
         public string name;

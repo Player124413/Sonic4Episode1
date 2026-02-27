@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_TEXOFFSET
+    internal class AMS_DRAWSTATE_TEXOFFSET
     {
         public int mode;
         public float u;

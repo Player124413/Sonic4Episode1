@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLAYER_WORK : IOBS_OBJECT_WORK
+    internal class GMS_PLAYER_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_NN_WORK[] obj_3d = new OBS_ACTION3D_NN_WORK[4];
         public readonly OBS_ACTION3D_NN_WORK[] obj_3d_work = New<OBS_ACTION3D_NN_WORK>(8);

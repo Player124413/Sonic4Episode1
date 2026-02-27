@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_VECTOR3I
+    internal class AMS_VECTOR3I
     {
         public int x;
         public int y;

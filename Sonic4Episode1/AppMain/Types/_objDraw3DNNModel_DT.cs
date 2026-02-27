@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class _objDraw3DNNModel_DT
     {

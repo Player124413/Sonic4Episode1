@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static int dm_logo_sega_com_file_num => dm_logo_sega_com_fileinfo_list.Length;
 
@@ -121,7 +121,8 @@
         NNS_RGBA col = new NNS_RGBA(1f, 1f, 1f, 1f);
         NNS_VECTOR nnsVector = GlobalPool<NNS_VECTOR>.Alloc();
         NNS_VECTOR pos = new NNS_VECTOR(0.0f, 0.0f, 50f);
-        ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
+        ObjInit(GMD_TASK_GROUP_OBJSYS, GMD_TASK_PRIO_OBJSYS, GMD_TASK_PAUSE_LEVEL_OBJSYS,
+                    GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_HEIGHT, GSD_DISP_HEIGHT);
         ObjDataAlloc(10);
         ObjDrawESEffectSystemInit(0, 20480U, 0U);
         ObjDrawSetNNCommandStateTbl(0U, 0U, true);
@@ -133,8 +134,10 @@
         g_obj.ppObjPre = null;
         g_obj.ppObjPost = null;
         g_obj.ppRegRecAuto = null;
-        g_obj.draw_scale.x = g_obj.draw_scale.y = g_obj.draw_scale.z = 29127;
-        g_obj.inv_draw_scale.x = g_obj.inv_draw_scale.y = g_obj.inv_draw_scale.z = FX_Div(4096, g_obj.draw_scale.x);
+        g_obj.draw_scale.x = g_obj.draw_scale.y = g_obj.draw_scale.z =
+                    (int)(((3.2f/* *3.2で64dot扱い */) * (1.0f / DMD_LOGO_SEGA_CAMERA_SCALE * 2)) * FX32_ONE);
+        // 逆数保存
+        g_obj.inv_draw_scale.x = g_obj.inv_draw_scale.y = g_obj.inv_draw_scale.z = FX_Div(FX32_ONE, g_obj.draw_scale.x);
         g_obj.depth = 128;
         g_obj.ambient_color.r = 0.8f;
         g_obj.ambient_color.g = 0.8f;
@@ -145,11 +148,14 @@
         nnNormalizeVector(nnsVector, nnsVector);
         ObjDrawSetParallelLight(NNE_LIGHT_0, ref col, 1f, nnsVector);
         GlobalPool<NNS_VECTOR>.Release(nnsVector);
-        ObjCameraInit(0, pos, 0, 0, 6144);
-        ObjCamera3dInit(0);
-        g_obj.glb_camera_id = 0;
-        g_obj.glb_camera_type = 1;
-        OBS_CAMERA obsCamera = ObjCameraGet(0);
+        ObjCameraInit(DMD_LOGO_SEGA_CAMERA_ID, pos,
+                        DMD_LOGO_SEGA_TASK_GROUP_CAMERA,
+                        DMD_LOGO_SEGA_TASK_PAUSELEVEL_DEF,
+                        DMD_LOGO_SEGA_TASK_PRIO_CAMERA);
+        ObjCamera3dInit(DMD_LOGO_SEGA_CAMERA_ID);
+        g_obj.glb_camera_id = DMD_LOGO_SEGA_CAMERA_ID;
+        g_obj.glb_camera_type = NNE_PROJECTION_TYPE_ORTHO;
+        var obsCamera = ObjCameraGet(DMD_LOGO_SEGA_CAMERA_ID);
         obsCamera.user_func = new OBJF_CAMERA_USER_FUNC(this.dmLogoSegaCamera);
         obsCamera.command_state = 0U;
         obsCamera.scale = 0.9f;

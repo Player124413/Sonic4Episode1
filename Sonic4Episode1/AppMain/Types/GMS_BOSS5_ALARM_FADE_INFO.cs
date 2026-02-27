@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_ALARM_FADE_INFO
+    internal class GMS_BOSS5_ALARM_FADE_INFO
     {
         public uint fo_frame;
         public uint on_frame;

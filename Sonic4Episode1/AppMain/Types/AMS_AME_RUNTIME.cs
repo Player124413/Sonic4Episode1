@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_RUNTIME : AMS_AME_LIST
+    internal class AMS_AME_RUNTIME : AMS_AME_LIST
     {
         public readonly AMS_AME_LIST child_head = new AMS_AME_LIST();
         public readonly AMS_AME_LIST child_tail = new AMS_AME_LIST();

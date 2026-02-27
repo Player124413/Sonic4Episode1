@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_LIGHT_STANDARD_GL
+    internal class NNS_LIGHT_STANDARD_GL
     {
         public readonly NNS_VECTOR4D Position = new NNS_VECTOR4D();
         public readonly NNS_VECTOR SpotDirection = GlobalPool<NNS_VECTOR>.Alloc();

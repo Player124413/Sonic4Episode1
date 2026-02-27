@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_VECTOR4I
+    internal struct AMS_VECTOR4I
     {
         public int x;
         public int y;

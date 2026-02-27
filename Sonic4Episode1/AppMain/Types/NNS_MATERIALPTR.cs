@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIALPTR
+    internal class NNS_MATERIALPTR
     {
         public uint fType;
         public object pMaterial;

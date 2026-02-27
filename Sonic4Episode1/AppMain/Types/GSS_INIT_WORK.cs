@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GSS_INIT_WORK
+    internal class GSS_INIT_WORK
     {
         public int count;
         public AMS_FS fs;

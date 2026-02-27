@@ -6,7 +6,7 @@
 
 namespace gs.backup
 {
-    public class SSave : SBase
+    internal class SSave : SBase
     {
         private Sonic4Save save;
         private SSystem[] m_system = new SSystem[1];

@@ -6,7 +6,7 @@
 
 namespace er.web
 {
-    public class erWeb
+    internal class erWeb
     {
         public static void StartWeb(string url)
         {

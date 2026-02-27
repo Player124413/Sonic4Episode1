@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MESHSET
+    internal class NNS_MESHSET
     {
         public readonly NNS_VECTOR Center = GlobalPool<NNS_VECTOR>.Alloc();
         public float Radius;

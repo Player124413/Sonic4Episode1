@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TCB_FOOTER
+    internal class AMS_TCB_FOOTER
     {
         public int wkend;
         public uint cpu_cnt;

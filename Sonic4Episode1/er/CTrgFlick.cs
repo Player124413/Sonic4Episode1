@@ -8,7 +8,7 @@ using accel;
 
 namespace er
 {
-    public class CTrgFlick : CTrgBase<CTrgStateEx>
+    internal class CTrgFlick : CTrgBase<CTrgStateEx>
     {
         private bool[] m_flag = new bool[1];
         private CArray2<int> m_pos;

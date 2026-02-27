@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MORPHTARGETNAMELIST
+    internal class NNS_MORPHTARGETNAMELIST
     {
         public NNE_MORPHTARGETNAME_SORTTYPE SortType;
         public int nMorphTarget;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_ECB : AMS_AME_LIST
+    internal class AMS_AME_ECB : AMS_AME_LIST
     {
         public readonly NNS_VECTOR4D translate = new NNS_VECTOR4D();
         public readonly AMS_AME_BOUNDING bounding = new AMS_AME_BOUNDING();

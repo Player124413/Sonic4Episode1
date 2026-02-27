@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using gs.backup;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -12,9 +13,9 @@ using Microsoft.Xna.Framework.Media;
 using MediaPlayer = Microsoft.Xna.Framework.Media.WasmMediaPlayer;
 #endif
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GSS_SND_SYS_MAIN_INFO
+    internal class GSS_SND_SYS_MAIN_INFO
     {
         public uint flag;
         public float system_cnt_vol;
@@ -28,7 +29,7 @@ public partial class AppMain
         }
     }
 
-    public class GSS_SND_CTRL_PARAM : IClearable
+    internal class GSS_SND_CTRL_PARAM : IClearable
     {
         public uint fade_state;
         public int fade_frame_max;
@@ -47,7 +48,7 @@ public partial class AppMain
         }
     }
 
-    public class GSS_SND_SCB
+    internal class GSS_SND_SCB
     {
         public readonly GSS_SND_CTRL_PARAM snd_ctrl_param = new GSS_SND_CTRL_PARAM();
         public uint flag;
@@ -65,14 +66,14 @@ public partial class AppMain
             this.cur_pause_level = 0U;
         }
 
-        public struct error_state
+        internal struct error_state
         {
             public uint sample;
             public uint counter;
         }
     }
 
-    public class CriAuPlayer
+    internal class CriAuPlayer
     {
         public int cue = -1;
         private int activefx = -1;
@@ -107,6 +108,11 @@ public partial class AppMain
 
         public static Song m_songBGMIntro;
         public static Song m_songBGMLoop;
+
+#if MONOGAME
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Add")]
+        extern static void MediaQueue_Add(MediaQueue c, Song song);
+#endif
 
         public CriAuPlayer()
         {
@@ -524,9 +530,13 @@ public partial class AppMain
                             MediaPlayer.IsRepeating = false;
                             MediaPlayer.Play(m_songBGMIntro);
 
-#if FNA
+#if FNA || MONOGAME
                             if (m_songBGMLoop != null)
+#if FNA
                                 MediaPlayer.LoadSong(m_songBGMLoop);
+#elif MONOGAME
+                                MediaQueue_Add(MediaPlayer.Queue, m_songBGMLoop);
+#endif
 #endif
 #endif
                             this.m_stGMState = MediaState.Playing;
@@ -641,7 +651,7 @@ public partial class AppMain
         }
     }
 
-    public class AISAC_LIST
+    internal class AISAC_LIST
     {
         public int count;
         public int[] types;
@@ -655,7 +665,7 @@ public partial class AppMain
         }
     }
 
-    public class SOUND_TABLE
+    internal class SOUND_TABLE
     {
         public int cue;
         public int type;
@@ -683,14 +693,14 @@ public partial class AppMain
         }
     }
 
-    public struct AOS_SYS_GLOBAL
+    internal struct AOS_SYS_GLOBAL
     {
         public bool is_show_ui;
         public bool is_signin_changed;
         public bool is_playing_device_bgm_music;
     }
 
-    public class AMS_CRIAUDIO_INTERFACE
+    internal class AMS_CRIAUDIO_INTERFACE
     {
         public readonly CriAuPlayer[] auply;
 
@@ -839,10 +849,24 @@ public partial class AppMain
         }
     }
 
+#if MONOGAME
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "songs")]
+    extern static ref List<Song> MediaQueue_songs(MediaQueue c);
+#endif
+
     public static void MediaPlayer_ActiveSongChanged(object sender, EventArgs e)
     {
-#if FNA
+#if FNA 
         MediaPlayer.IsRepeating = MediaPlayer.Queue.ActiveSongIndex == 1;
+#endif
+#if MONOGAME 
+        if(MediaPlayer.Queue.ActiveSongIndex == 1)
+        {
+
+            MediaPlayer.IsRepeating = true;
+            MediaQueue_songs(MediaPlayer.Queue).RemoveAt(0);
+            MediaPlayer.Queue.ActiveSongIndex = 0;
+        }
 #endif
     }
 

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECO_DATA
+    internal class GMS_DECO_DATA
     {
         public readonly AOS_TEXTURE tvx_tex = new AOS_TEXTURE();
         public AMS_AMB_HEADER amb_header;

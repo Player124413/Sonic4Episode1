@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_COMMON_TEXCOORD2
+    internal class NNS_COMMON_TEXCOORD2
     {
         public readonly NNS_TEXCOORD[] Tex = New<NNS_TEXCOORD>(2);
     }

@@ -6,7 +6,6 @@ import install, { Progress } from './installer.js';
 import Accelerometer from './accelerometer.js';
 import Guide from './guide.js';
 import WasmMediaPlayer from './mediaplayer.js';
-
 // @ts-ignore
 import { dotnet } from '../_framework/dotnet.js';
 
@@ -19,7 +18,7 @@ const tapToPlay = document.querySelector('#tap-to-play')! as HTMLButtonElement;
 
 const updateProgress = (p: Progress) => {
     status.textContent = p.status;
-    progress.value = (p.progress / 3) + (p.step / 3);
+    progress.value = (p.progress / 3) + (p.step! / 3);
 }
 
 const resize = () => {
@@ -32,26 +31,48 @@ const resize = () => {
     canvas.style.marginTop = `${(height - 480 * scale) / 2}px`;
 }
 
+const onInstall = () => {
+    if ('umami' in window) {
+        (window.umami as any)?.track('App installed');
+    }
+}
+
 window.onresize = resize;
+window.addEventListener('appinstalled', onInstall);
 
 const { setModuleImports, getAssemblyExports, getConfig } = await dotnet
     .withDiagnosticTracing(false)
-    .withApplicationArgumentsFromQuery()
+    .withApplicationArguments(window.location.href)
     .create();
 
 const FS = dotnet.instance.Module.FS;
 const IDBFS = dotnet.instance.Module.IDBFS;
-const setup = await install(FS, IDBFS, updateProgress);
-
-const { version, serverVersion } = await setup.check();
-if (version != serverVersion)
-    await setup.install();
 
 const S4E1 = await getAssemblyExports("Sonic4Episode1.Wasm.dll")
 const mediaPlayer = new WasmMediaPlayer(S4E1);
 
 setModuleImports('main.js', {
     setMainLoop: (cb: any) => dotnet.instance.Module.setMainLoop(cb),
+    go: () => {
+        loader.style.display = "none";
+        tapToPlay.style.display = "none";
+        resize();
+
+        canvas.focus();
+    },
+
+    syncFS: () => new Promise<void>((res, rej) => {
+        FS.syncfs(false, (err: any) => {
+            if (err) rej(err);
+
+            res();
+        });
+    }),
+
+    reportProgress: (str: string, prog: number) => {
+        status.textContent = str;
+        progress.value = prog;
+    },
 
     MediaPlayer_GetVolume: mediaPlayer.getVolume.bind(mediaPlayer),
     MediaPlayer_SetVolume: mediaPlayer.setVolume.bind(mediaPlayer),
@@ -73,10 +94,10 @@ setModuleImports('main.js', {
     WebBrowserTask_Open: (url: string) => window.open(url, '_blank'),
 });
 
-dotnet.instance.Module.canvas = canvas;
-loader.style.display = "none";
-tapToPlay.style.display = "none";
-resize();
+FS.mkdir('/content');
+FS.mount(IDBFS, {}, '/content');
 
-canvas.focus();
-await dotnet.run();
+FS.syncfs(true, async () => {
+    dotnet.instance.Module.canvas = canvas;
+    await dotnet.run();
+});

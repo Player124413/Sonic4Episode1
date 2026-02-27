@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLY_EFCT_TRAIL_COLOR
+    internal class GMS_PLY_EFCT_TRAIL_COLOR
     {
         public readonly NNS_RGBA start_col;
         public readonly NNS_RGBA end_col;

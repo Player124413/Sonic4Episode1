@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AmbChunk
+    internal class AmbChunk
     {
         public AMS_AMB_HEADER amb;
         public byte[] array;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_UPBUMPER_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_UPBUMPER_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK gmk_work = new GMS_ENEMY_3D_WORK();
         public int obj_type;

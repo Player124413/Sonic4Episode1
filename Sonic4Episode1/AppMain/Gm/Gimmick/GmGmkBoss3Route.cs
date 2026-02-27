@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GmGmkBoss3RouteInit(
       GMS_EVE_RECORD_EVENT eve_rec,

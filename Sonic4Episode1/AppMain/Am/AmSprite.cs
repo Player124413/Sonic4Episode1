@@ -1,5 +1,5 @@
 ﻿
-public partial class AppMain
+internal partial class AppMain
 {
     private static int _amInitCircle(object p)
     {

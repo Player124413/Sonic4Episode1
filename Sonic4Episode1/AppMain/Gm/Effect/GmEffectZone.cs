@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static readonly int[] gm_efct_zone_texamb_index_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone01_create_param_tbl;

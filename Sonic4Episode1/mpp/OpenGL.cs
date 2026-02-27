@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 
 namespace mpp
 {
-    public sealed class OpenGL
+    internal sealed class OpenGL
     {
         private static int drawArraysCallsCount = 0;
         private static DrawArraysCallContext[] drawArraysCalls = new DrawArraysCallContext[256];
@@ -1228,6 +1228,7 @@ namespace mpp
             if (!m_viewportSet)
             {
                 m_graphicsDevice.Viewport = m_viewport;
+                m_graphicsDevice.ScissorRectangle = m_viewport.Bounds;
                 m_viewportSet = true;
             }
             Effect effect = m_basicEffect;
@@ -1448,6 +1449,7 @@ namespace mpp
             if (!m_viewportSet)
             {
                 m_graphicsDevice.Viewport = m_viewport;
+                m_graphicsDevice.ScissorRectangle = m_viewport.Bounds;
                 m_viewportSet = true;
             }
             Effect effect = m_basicEffect;
@@ -1486,6 +1488,7 @@ namespace mpp
             if (!m_viewportSet)
             {
                 m_graphicsDevice.Viewport = m_viewport;
+                m_graphicsDevice.ScissorRectangle = m_viewport.Bounds;
                 m_viewportSet = true;
             }
             Effect effect = m_basicEffect;
@@ -1781,9 +1784,10 @@ namespace mpp
                     m_diffuseColorAlpha = param.f3;
                     break;
                 case 4610:
-                    m_specularColor.X = param.f0;
-                    m_specularColor.Y = param.f1;
-                    m_specularColor.Z = param.f2;
+                    // TODO: this is disabled
+                    m_specularColor.X = param.f0 * 0.128f;
+                    m_specularColor.Y = param.f1 * 0.128f;
+                    m_specularColor.Z = param.f2 * 0.128f;
                     break;
                 case 5632:
                     m_emissiveColor.X = param.f0;
@@ -2080,6 +2084,7 @@ namespace mpp
         public static void glViewport(int x, int y, int width, int height)
         {
             m_viewport = new Viewport(x, y, width, height);
+            m_viewportSet = false;
             calculateInvScreenMatrix();
         }
 
@@ -3101,7 +3106,7 @@ namespace mpp
         public const ushort GL_MAX_TEXTURE_UNITS_ARB = 34018;
         #endregion
 
-        public struct glArray4f
+        internal struct glArray4f
         {
             public float f0;
             public float f1;
@@ -3140,7 +3145,7 @@ namespace mpp
             BlendIndex,
         }
 
-        public struct Vertex : IVertexType
+        internal struct Vertex : IVertexType
         {
             public static readonly VertexDeclaration VertexDeclaration = new VertexDeclaration(new VertexElement[7]
             {
@@ -3163,7 +3168,7 @@ namespace mpp
             VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
         }
 
-        public struct VertexPosTexColNorm : IVertexType
+        internal struct VertexPosTexColNorm : IVertexType
         {
             public static readonly VertexDeclaration VertexDeclaration = new VertexDeclaration(new VertexElement[4]
             {
@@ -3180,14 +3185,14 @@ namespace mpp
             VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
         }
 
-        public class BufferItem
+        internal class BufferItem
         {
             public object rawData;
             public object buffer;
             public int rawDataSize;
         }
 
-        public class VertexBufferDesc
+        internal class VertexBufferDesc
         {
             public Matrix TextureMatrix = Matrix.Identity;
             public Matrix Texture2Matrix = Matrix.Identity;

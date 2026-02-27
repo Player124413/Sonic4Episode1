@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class4
+    internal class NNS_MOTION_KEY_Class4
     {
         public float Frame;
         public NNS_TEXCOORD Value;

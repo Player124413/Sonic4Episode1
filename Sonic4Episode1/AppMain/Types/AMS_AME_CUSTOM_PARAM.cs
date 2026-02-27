@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_CUSTOM_PARAM
+    internal class AMS_AME_CUSTOM_PARAM
     {
         private object _pInitFieldFunc;
         public AmeDelegateFunc pUpdateFunc;

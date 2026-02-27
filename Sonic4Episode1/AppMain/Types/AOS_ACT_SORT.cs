@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AOS_ACT_SORT
+    internal struct AOS_ACT_SORT
     {
         public AOS_SPRITE sprite;
         public float z;

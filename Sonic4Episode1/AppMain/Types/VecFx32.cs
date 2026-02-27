@@ -1,5 +1,5 @@
 
-public struct VecFx32 : IClearable
+internal struct VecFx32 : IClearable
 {
     public int x;
     public int y;

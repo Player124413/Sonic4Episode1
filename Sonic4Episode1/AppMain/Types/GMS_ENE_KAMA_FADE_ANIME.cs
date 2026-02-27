@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_KAMA_FADE_ANIME
+    internal class GMS_ENE_KAMA_FADE_ANIME
     {
         public uint pat_num;
         public GMS_ENE_KAMA_FADE_ANIME_PAT[] anime_pat;

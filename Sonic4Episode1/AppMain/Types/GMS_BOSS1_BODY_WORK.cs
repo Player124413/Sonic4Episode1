@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS1_BODY_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS1_BODY_WORK : IOBS_OBJECT_WORK
     {
         public readonly ushort[] reserved = new ushort[1];
         public readonly GMS_BS_CMN_BMCB_MGR bmcb_mgr = new GMS_BS_CMN_BMCB_MGR();

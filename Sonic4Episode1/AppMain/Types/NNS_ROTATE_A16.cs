@@ -1,4 +1,4 @@
-public struct NNS_ROTATE_A16
+internal struct NNS_ROTATE_A16
 {
     public short x;
     public short y;

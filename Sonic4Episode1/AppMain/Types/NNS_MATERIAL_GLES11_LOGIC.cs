@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_GLES11_LOGIC
+    internal class NNS_MATERIAL_GLES11_LOGIC
     {
         public uint fFlag;
         public ushort SrcFactor;

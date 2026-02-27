@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GDBUILD_BUILD_MDL_WORK : IClearable
+    internal class GMS_GDBUILD_BUILD_MDL_WORK : IClearable
     {
         public GME_GAME_DBUILD_MDL_STATE build_state;
         public OBS_ACTION3D_NN_WORK[] obj_3d_list;

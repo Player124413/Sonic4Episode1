@@ -1,16 +1,16 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static uint IZM_FADE_COL_PAC(uint r, uint g, uint b, uint a)
     {
         return (uint)(((int)r & byte.MaxValue) << 24 | ((int)g & byte.MaxValue) << 16 | ((int)b & byte.MaxValue) << 8 | (int)a & byte.MaxValue);
     }
 
-    private static void IzFadeInitEasy(uint fade_set_type, uint fade_type, float time)
+    public static void IzFadeInitEasy(uint fade_set_type, uint fade_type, float time)
     {
         IzFadeInitEasy(fade_set_type, fade_type, time, true);
     }
 
-    private static void IzFadeInitEasy(
+    public static void IzFadeInitEasy(
       uint fade_set_type,
       uint fade_type,
       float time,
@@ -21,7 +21,7 @@
         IzFadeInit(0, 0, IZD_FADE_DT_PRIO_DEF, 18U, fade_set_type, iz_fade_color[index1][0], iz_fade_color[index1][1], iz_fade_color[index1][2], iz_fade_alpha[index2], iz_fade_color[index1][0], iz_fade_color[index1][1], iz_fade_color[index1][2], iz_fade_alpha[index2 ^ 1], time, draw_start);
     }
 
-    private static void IzFadeInitEasyTask(
+    public static void IzFadeInitEasyTask(
       uint fade_set_type,
       byte start_col_r,
       byte start_col_g,
@@ -36,7 +36,7 @@
         IzFadeInitEasyTask(fade_set_type, start_col_r, start_col_g, start_col_b, start_col_a, end_col_r, end_col_g, end_col_b, end_col_a, time, true);
     }
 
-    private static void IzFadeInitEasyTask(
+    public static void IzFadeInitEasyTask(
       uint fade_set_type,
       byte start_col_r,
       byte start_col_g,
@@ -52,7 +52,7 @@
         IzFadeInit(0, 0, IZD_FADE_DT_PRIO_DEF, 18U, fade_set_type, start_col_r, start_col_g, start_col_b, start_col_a, end_col_r, end_col_g, end_col_b, end_col_a, time, draw_start);
     }
 
-    private static void IzFadeInitEasyColor(
+    public static void IzFadeInitEasyColor(
       int group,
       ushort pause_level,
       ushort dt_prio,
@@ -67,7 +67,7 @@
         IzFadeInit(group, pause_level, dt_prio, draw_state, fade_set_type, iz_fade_color[index1][0], iz_fade_color[index1][1], iz_fade_color[index1][2], iz_fade_alpha[index2], iz_fade_color[index1][0], iz_fade_color[index1][1], iz_fade_color[index1][2], iz_fade_alpha[index2 ^ 1], time, draw_start);
     }
 
-    private static void IzFadeInit(
+    public static void IzFadeInit(
       int group,
       ushort pause_level,
       ushort dt_prio,
@@ -99,7 +99,7 @@
         IzFadeSetWork(work, dt_prio, draw_state, fade_set_type, start_col_r, start_col_g, start_col_b, start_col_a, end_col_r, end_col_g, end_col_b, end_col_a, time, draw_start, conti_state);
     }
 
-    private static void IzFadeExit()
+    public static void IzFadeExit()
     {
         if (iz_fade_tcb == null)
             return;
@@ -109,12 +109,12 @@
         iz_fade_tcb = null;
     }
 
-    private static bool IzFadeIsExe()
+    public static bool IzFadeIsExe()
     {
         return iz_fade_tcb != null;
     }
 
-    private static bool IzFadeIsEnd()
+    public static bool IzFadeIsEnd()
     {
         if (iz_fade_tcb == null)
             return true;
@@ -122,7 +122,7 @@
         return work.count >= (double)work.time;
     }
 
-    private static void IzFadeRestoreDrawSetting()
+    public static void IzFadeRestoreDrawSetting()
     {
         nnSetPrimitive2DAlphaFuncGL(519U, 16f);
         nnSetPrimitive2DDepthMaskGL(true);
@@ -130,7 +130,7 @@
         nnSetPrimitiveBlend(0);
     }
 
-    private static void IzFadeSetStopUpdate1Frame(IZS_FADE_WORK fade_work)
+    public static void IzFadeSetStopUpdate1Frame(IZS_FADE_WORK fade_work)
     {
         if (fade_work == null && iz_fade_tcb != null)
             fade_work = (IZS_FADE_WORK)iz_fade_tcb.work;
@@ -139,7 +139,7 @@
         fade_work.flag |= 2U;
     }
 
-    private static void IzFadeSetWork(
+    public static void IzFadeSetWork(
       IZS_FADE_WORK fade_work,
       ushort dt_prio,
       uint draw_state,
@@ -221,7 +221,7 @@
         }
     }
 
-    private static void IzFadeUpdate(IZS_FADE_WORK fade_work)
+    public static void IzFadeUpdate(IZS_FADE_WORK fade_work)
     {
         if (((int)fade_work.flag & 2) != 0)
         {
@@ -255,7 +255,7 @@
         }
     }
 
-    private static void IzFadeDraw(IZS_FADE_WORK fade_work)
+    public static void IzFadeDraw(IZS_FADE_WORK fade_work)
     {
         fade_work.prim_param.vtxPC2D = fade_work.vtx[fade_work.vtx_no];
         amDrawPrim2D(fade_work.draw_state, fade_work.prim_param);

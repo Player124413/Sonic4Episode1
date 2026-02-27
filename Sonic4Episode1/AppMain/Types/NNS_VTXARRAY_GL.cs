@@ -1,9 +1,9 @@
 using System.IO;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_VTXARRAY_GL
+    internal class NNS_VTXARRAY_GL
     {
         public uint Type;
         public int Size;

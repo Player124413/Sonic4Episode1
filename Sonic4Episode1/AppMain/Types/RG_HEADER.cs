@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct RG_HEADER
+    internal struct RG_HEADER
     {
         public ushort map_w;
         public ushort map_h;

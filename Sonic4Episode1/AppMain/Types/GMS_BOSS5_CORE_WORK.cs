@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_CORE_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_CORE_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_COM_WORK ene_com;
         public MPP_VOID_GMS_BOSS5_CORE_WORK proc_update;

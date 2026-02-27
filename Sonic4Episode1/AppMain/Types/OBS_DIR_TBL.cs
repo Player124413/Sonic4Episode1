@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_DIR_TBL
+    internal class OBS_DIR_TBL
     {
         public VecU16 dir = new VecU16();
         public byte time;

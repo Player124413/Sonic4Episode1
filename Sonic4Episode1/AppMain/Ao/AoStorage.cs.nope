@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void AoStorageInit()
     {

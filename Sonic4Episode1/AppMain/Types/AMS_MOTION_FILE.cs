@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_MOTION_FILE
+    internal class AMS_MOTION_FILE
     {
         public object file;
         public int motion_num;

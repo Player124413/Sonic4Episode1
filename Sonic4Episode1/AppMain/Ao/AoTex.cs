@@ -1,9 +1,10 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static void AoTexBuild(AOS_TEXTURE tex, AMS_AMB_HEADER amb)
     {
         if (tex == null || amb == null)
             return;
+
         aoTexInitTex(tex);
         tex.amb = amb;
         AmbChunk ambChunk = amBindSearchEx(amb, ".txb");
@@ -40,7 +41,7 @@
         return tex == null || tex.texlist == null || tex.reg_id >= 0 ? null : tex.txb;
     }
 
-    private static void AoTexRelease(AOS_TEXTURE tex)
+    public static void AoTexRelease(AOS_TEXTURE tex)
     {
         if (!AoTexIsLoaded(tex))
             return;
@@ -48,7 +49,7 @@
         tex.texlist = null;
     }
 
-    private static bool AoTexIsReleased(AOS_TEXTURE tex)
+    public static bool AoTexIsReleased(AOS_TEXTURE tex)
     {
         if (tex == null || tex.reg_id < 0)
             return true;

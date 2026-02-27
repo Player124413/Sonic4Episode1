@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct A2S_SUB_RECT
+    internal struct A2S_SUB_RECT
     {
         public float left;
         public float top;

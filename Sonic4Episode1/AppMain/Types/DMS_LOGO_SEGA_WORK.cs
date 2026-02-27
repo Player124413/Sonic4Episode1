@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_SEGA_WORK
+    internal class DMS_LOGO_SEGA_WORK
     {
         public AOS_ACTION[] act = new AOS_ACTION[8];
         public uint flag;

@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GMM_COCKPIT_CREATE_WORK(
       TaskWorkFactoryDelegate work_size,

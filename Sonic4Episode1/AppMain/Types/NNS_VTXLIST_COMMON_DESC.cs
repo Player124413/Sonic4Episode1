@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_VTXLIST_COMMON_DESC
+    internal class NNS_VTXLIST_COMMON_DESC
     {
         public readonly NNS_VTXLIST_COMMON_ARRAY List0 = new NNS_VTXLIST_COMMON_ARRAY();
         public readonly NNS_VTXLIST_COMMON_ARRAY List1 = new NNS_VTXLIST_COMMON_ARRAY();

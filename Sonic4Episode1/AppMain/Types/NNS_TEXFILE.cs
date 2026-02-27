@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXFILE
+    internal class NNS_TEXFILE
     {
         public uint fType;
         public string Filename;

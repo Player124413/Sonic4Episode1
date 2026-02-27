@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 #endif
 
-public class GlobalPool<T> where T : class, IClearable, new()
+internal class GlobalPool<T> where T : class, IClearable, new()
 {
     private static List<T> cache_ = new List<T>();
     internal static Func<T> factory;

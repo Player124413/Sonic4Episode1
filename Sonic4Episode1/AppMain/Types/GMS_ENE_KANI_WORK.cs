@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_KANI_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENE_KANI_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENE_NODE_MATRIX node_work = new GMS_ENE_NODE_MATRIX();
         public readonly GMS_ENEMY_3D_WORK ene_3d_work;

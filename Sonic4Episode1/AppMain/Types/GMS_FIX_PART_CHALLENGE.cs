@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_FIX_PART_CHALLENGE
+    internal class GMS_FIX_PART_CHALLENGE
     {
         public GMS_COCKPIT_2D_WORK[] sub_parts = new GMS_COCKPIT_2D_WORK[5];
         public int[] digit_list = new int[3];

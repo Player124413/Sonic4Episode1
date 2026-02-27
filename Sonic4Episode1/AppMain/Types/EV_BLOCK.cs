@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct EV_BLOCK
+    internal struct EV_BLOCK
     {
         public ushort ev_num;
     }

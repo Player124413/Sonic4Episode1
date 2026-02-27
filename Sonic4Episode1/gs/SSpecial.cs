@@ -6,7 +6,7 @@
 
 namespace gs.backup
 {
-    public class SSpecial : SBase
+    internal class SSpecial : SBase
     {
         private Sonic4Save save;
         private const uint c_size = 7;

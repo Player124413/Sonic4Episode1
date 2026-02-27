@@ -1,7 +1,7 @@
 ﻿using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public const int AMD_TRAIL_PARTSMAX = 64;
     public const int AMD_TRAIL_MAX = 8;
@@ -237,7 +237,7 @@ public partial class AppMain
         return amDraw_DMAP_PARAM_WATER_Pool.Alloc();
     }
 
-    private static NNS_PRIM3D_PCT_ARRAY amDrawAlloc_NNS_PRIM3D_PCT(int count)
+    public static NNS_PRIM3D_PCT_ARRAY amDrawAlloc_NNS_PRIM3D_PCT(int count)
     {
         ++NNS_PRIM3D_PCT_ALLOC_CNT;
         if (NNS_PRIM3D_PCT_buf_size + count >= 16384)

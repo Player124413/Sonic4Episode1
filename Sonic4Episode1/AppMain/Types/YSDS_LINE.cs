@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class YSDS_LINE
+    internal class YSDS_LINE
     {
         public uint id;
         public uint str_ofst;

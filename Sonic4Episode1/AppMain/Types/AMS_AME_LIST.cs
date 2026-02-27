@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_LIST
+    internal class AMS_AME_LIST
     {
         public AMS_AME_LIST next;
         public AMS_AME_LIST prev;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_Z_MODE
+    internal class AMS_DRAWSTATE_Z_MODE
     {
         public uint compare;
         public uint update;

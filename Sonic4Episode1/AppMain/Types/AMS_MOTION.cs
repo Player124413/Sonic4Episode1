@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_MOTION
+    internal class AMS_MOTION
     {
         public readonly AMS_MOTION_FILE[] mtnfile = New<AMS_MOTION_FILE>(4);
         public readonly AMS_MOTION_BUF[] mbuf = New<AMS_MOTION_BUF>(2);

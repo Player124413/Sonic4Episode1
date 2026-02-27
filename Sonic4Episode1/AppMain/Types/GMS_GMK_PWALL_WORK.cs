@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_PWALL_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_PWALL_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK gmk_work;
         public int master_posy;

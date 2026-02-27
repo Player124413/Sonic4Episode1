@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TCB_THREAD
+    internal class AMS_TCB_THREAD
     {
         public readonly AMS_ALARM alarm_wakeup = new AMS_ALARM();
         public int id;

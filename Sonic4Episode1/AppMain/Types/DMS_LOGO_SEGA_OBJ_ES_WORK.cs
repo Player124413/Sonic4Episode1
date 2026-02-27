@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_SEGA_OBJ_ES_WORK : IOBS_OBJECT_WORK
+    internal class DMS_LOGO_SEGA_OBJ_ES_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_ES_WORK obj_3des = new OBS_ACTION3D_ES_WORK();
         public readonly OBS_DATA_WORK data_work_texamb = new OBS_DATA_WORK();

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLY_PARAMETER
+    internal class GMS_PLY_PARAMETER
     {
         public int spd_add;
         public int spd_max;

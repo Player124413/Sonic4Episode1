@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_CAMERA : IClearable
+    internal class OBS_CAMERA : IClearable
     {
         public readonly NNS_VECTOR disp_pos = GlobalPool<NNS_VECTOR>.Alloc();
         public readonly NNS_VECTOR prev_disp_pos = GlobalPool<NNS_VECTOR>.Alloc();

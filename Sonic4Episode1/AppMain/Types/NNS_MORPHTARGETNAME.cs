@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MORPHTARGETNAME
+    internal class NNS_MORPHTARGETNAME
     {
         public int iMorphTarget;
         public string Name;

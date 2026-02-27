@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class AoPad
+internal class AoPad
 {
     internal static ControllerSource controllerSource
         = new ControllerSource();
@@ -23,7 +23,7 @@ public class AoPad
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return PAD_STAND(AppMain.AoAccountGetCurrentId());
+            return (ControllerConsts)PAD_MSTAND(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_BOSS3_PILLAR_MAIN_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_BOSS3_PILLAR_MAIN_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_NN_WORK[] obj_3d_parts = New<OBS_ACTION3D_NN_WORK>(8);
         public VecFx32 target_pos = new VecFx32();

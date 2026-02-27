@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class AMS_PARAM_DRAW_MOTION_TRS : IClearable
     {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_CLIP_PLANE
+    internal class NNS_CLIP_PLANE
     {
         public NNS_CLIP_PLANE_YZ Top = new NNS_CLIP_PLANE_YZ();
         public NNS_CLIP_PLANE_YZ Bottom = new NNS_CLIP_PLANE_YZ();

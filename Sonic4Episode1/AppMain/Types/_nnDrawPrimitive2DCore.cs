@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
 }
 

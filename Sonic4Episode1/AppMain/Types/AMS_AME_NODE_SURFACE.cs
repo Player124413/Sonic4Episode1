@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_NODE_SURFACE : AMS_AME_NODE_OMNI
+    internal class AMS_AME_NODE_SURFACE : AMS_AME_NODE_OMNI
     {
         public float width;
         public float width_variation;

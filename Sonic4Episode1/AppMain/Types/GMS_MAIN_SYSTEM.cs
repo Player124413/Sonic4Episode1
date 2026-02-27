@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAIN_SYSTEM
+    internal class GMS_MAIN_SYSTEM
     {
         public GMS_PLAYER_WORK[] ply_work = new GMS_PLAYER_WORK[1];
         public uint[] player_rest_num = new uint[1];

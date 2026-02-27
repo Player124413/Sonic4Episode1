@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFFECT_COM_WORK : IOBS_OBJECT_WORK
+    internal class GMS_EFFECT_COM_WORK : IOBS_OBJECT_WORK
     {
         public OBS_RECT_WORK[] rect_work = New<OBS_RECT_WORK>(2);
         public OBS_OBJECT_WORK obj_work;

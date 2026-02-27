@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GAMEDAT_LOAD_INFO
+    internal class GMS_GAMEDAT_LOAD_INFO
     {
         public GMS_GAMEDAT_LOAD_DATA[] data_tbl;
         public int num;

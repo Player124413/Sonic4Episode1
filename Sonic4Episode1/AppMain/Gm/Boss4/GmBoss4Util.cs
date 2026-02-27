@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static float GMM_BOSS4_PAL_SPEED(float spd)
     {

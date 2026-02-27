@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class ITaskLink : ITask
+    internal class ITaskLink : ITask
     {
         private AMS_TCB m_task_tcb;
 

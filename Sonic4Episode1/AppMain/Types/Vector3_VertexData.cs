@@ -1,9 +1,9 @@
 using Microsoft.Xna.Framework;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class Vector3_VertexData : OpenGL.GLVertexData
+    internal class Vector3_VertexData : OpenGL.GLVertexData
     {
         protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1];
         private Vector3[] data_;

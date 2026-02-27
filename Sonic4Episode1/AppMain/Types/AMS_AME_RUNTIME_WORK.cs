@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_RUNTIME_WORK : AMS_AME_LIST
+    internal class AMS_AME_RUNTIME_WORK : AMS_AME_LIST
     {
         public readonly NNS_VECTOR4D position = new NNS_VECTOR4D();
         public readonly NNS_VECTOR4D velocity = new NNS_VECTOR4D();

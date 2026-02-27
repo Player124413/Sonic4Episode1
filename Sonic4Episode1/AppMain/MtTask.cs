@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static MTS_TASK_TCB MTM_TASK_MAKE_TCB(
          GSF_TASK_PROCEDURE proc,
@@ -56,12 +56,12 @@
         return work;
     }
 
-    private static AMS_TCB mtTaskGetAmTcb(MTS_TASK_TCB tcb)
+    public static AMS_TCB mtTaskGetAmTcb(MTS_TASK_TCB tcb)
     {
         return tcb.am_tcb;
     }
 
-    private static OBS_OBJECT_WORK mtTaskGetTcbWork(MTS_TASK_TCB tcb)
+    public static OBS_OBJECT_WORK mtTaskGetTcbWork(MTS_TASK_TCB tcb)
     {
         return tcb.work is IOBS_OBJECT_WORK ? ((IOBS_OBJECT_WORK)tcb.work).Cast() : (OBS_OBJECT_WORK)tcb.work;
     }
@@ -80,7 +80,7 @@
         tcb.dest = dest;
     }
 
-    private static void mtTaskClearTcb(MTS_TASK_TCB tcb)
+    public static void mtTaskClearTcb(MTS_TASK_TCB tcb)
     {
         amTaskDelete(tcb.am_tcb);
     }

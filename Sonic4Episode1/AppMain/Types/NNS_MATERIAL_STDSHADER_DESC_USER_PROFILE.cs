@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE : NNS_MATERIAL_STDSHADER_DESC
+    internal class NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE : NNS_MATERIAL_STDSHADER_DESC
     {
         public uint UserProfile;
 

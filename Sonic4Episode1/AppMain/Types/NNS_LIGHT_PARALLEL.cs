@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_LIGHT_PARALLEL
+    internal struct NNS_LIGHT_PARALLEL
     {
         private NNS_LIGHT_TARGET_DIRECTIONAL data_;
 

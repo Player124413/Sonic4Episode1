@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_HARO_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENE_HARO_WORK : IOBS_OBJECT_WORK
     {
         public VecFx32 vvv = new VecFx32();
         public VecFx32 vec = new VecFx32();

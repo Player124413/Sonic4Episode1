@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SOUND_BGM_WIN_BOSS_MGR_WORK
+    internal class GMS_SOUND_BGM_WIN_BOSS_MGR_WORK
     {
         public int timer;
 

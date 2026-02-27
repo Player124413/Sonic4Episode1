@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFFECT_3DNN_WORK : IOBS_OBJECT_WORK
+    internal class GMS_EFFECT_3DNN_WORK : IOBS_OBJECT_WORK
     {
         public OBS_ACTION3D_NN_WORK obj_3d = new OBS_ACTION3D_NN_WORK();
         public GMS_EFFECT_COM_WORK efct_com;

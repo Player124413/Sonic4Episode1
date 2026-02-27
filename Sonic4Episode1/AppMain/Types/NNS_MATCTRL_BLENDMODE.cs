@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATCTRL_BLENDMODE
+    internal class NNS_MATCTRL_BLENDMODE
     {
         public int blendmode;
 

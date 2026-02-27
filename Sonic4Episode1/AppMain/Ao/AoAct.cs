@@ -1,8 +1,51 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
+    private static float g_ao_act_base_w = 960f;
+    private static float g_ao_act_base_h = 720f;
+    private static float g_ao_act_wide_w = 1280f;
+    private static float g_ao_act_wide_h = 720f;
+
+    private static uint g_ao_act_sys_draw_prio;
+    private static bool g_ao_act_sys_draw_state_enable;
+    private static uint g_ao_act_sys_draw_state;
+    public static float g_ao_act_sys_frame_rate;
+    private static float g_ao_act_sys_adjust_x;
+    private static float g_ao_act_sys_adjust_y;
+    private static byte[] g_ao_act_master_buf;
+    private static int g_ao_act_wide_shift;
+    private static AOS_SPRITE[] g_ao_act_spr_buf;
+    private static AOS_SPRITE[] g_ao_act_spr_ref;
+    private static uint g_ao_act_spr_alloc;
+    private static uint g_ao_act_spr_free;
+    private static uint g_ao_act_spr_buf_size;
+    private static uint g_ao_act_spr_num;
+    private static uint g_ao_act_spr_peak;
+    private static AOS_ACTION[] g_ao_act_buf;
+    private static AOS_ACTION[] g_ao_act_ref;
+    private static uint g_ao_act_alloc;
+    private static uint g_ao_act_free;
+    private static uint g_ao_act_buf_size;
+    private static uint g_ao_act_num;
+    private static uint g_ao_act_peak;
+    private static ArrayPointer<AOS_ACT_SORT> g_ao_act_sort_buf;
+    private static uint g_ao_act_sort_buf_size;
+    private static uint g_ao_act_sort_num;
+    private static uint g_ao_act_sort_peak;
+    private static ArrayPointer<AOS_ACT_ACM> g_ao_act_acm_buf;
+    private static ArrayPointer<AOS_ACT_ACM> g_ao_act_acm_cur;
+    private static uint g_ao_act_acm_buf_size;
+    private static uint g_ao_act_acm_num;
+    private static uint g_ao_act_acm_peak;
+    public static ArrayPointer<uint> g_ao_act_acm_flag_buf;
+    public static ArrayPointer<uint> g_ao_act_acm_flag_cur;
+    private static uint g_ao_act_acm_flag_buf_size;
+    private static uint g_ao_act_acm_flag_num;
+    private static uint g_ao_act_acm_flag_peak;
+    private static NNS_TEXLIST g_ao_act_texlist;
+
     public static void AoActSetTexture(NNS_TEXLIST texlist)
     {
         g_ao_act_texlist = texlist;
@@ -764,30 +807,39 @@ public partial class AppMain
       uint v_num,
       AOE_ACT_CORW type)
     {
-        switch (type)
+        if (_am_draw_video.wide_screen)
         {
-            case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
-                for (int index = 0; index < v_num; ++index)
-                    v[index].Pos.x *= 1.125f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
-                for (int index = 0; index < v_num; ++index)
-                    v[index].Pos.x += 60f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
-                float num1 = 120f;
-                for (int index = 0; index < v_num; ++index)
-                    v[index].Pos.x += num1;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
-                for (int index = 0; index < v_num; ++index)
-                    v[index].Pos.x += g_ao_act_wide_shift;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
-                float num2 = 120f - g_ao_act_wide_shift;
-                for (int index = 0; index < v_num; ++index)
-                    v[index].Pos.x += num2;
-                break;
+            switch (type)
+            {
+                case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
+                    for (int index = 0; index < v_num; ++index)
+                        v[index].Pos.x *= (g_ao_act_wide_w / g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
+                    for (int index = 0; index < v_num; ++index)
+                        v[index].Pos.x += ((g_ao_act_wide_w - g_ao_act_base_w) * 0.5f);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
+                    for (int index = 0; index < v_num; ++index)
+                        v[index].Pos.x += (g_ao_act_wide_w - g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
+                    for (int index = 0; index < v_num; ++index)
+                        v[index].Pos.x += g_ao_act_wide_shift;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
+                    for (int index = 0; index < v_num; ++index)
+                        v[index].Pos.x += ((g_ao_act_wide_w - g_ao_act_base_w) - g_ao_act_wide_shift);
+                    break;
+            }
+        }
+        else
+        {
+            float temp = (g_ao_act_wide_w - g_ao_act_base_w) * 0.5f;
+            for (int i = 0; i < v_num; ++i)
+            {
+                v[i].Pos.x += temp;
+            }
         }
     }
 
@@ -797,31 +849,48 @@ public partial class AppMain
       uint v_num,
       AOE_ACT_CORW type)
     {
-        switch (type)
+        if (_am_draw_video.wide_screen)
         {
-            case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
-                for (int index = 0; index < v_num; ++index)
-                    v[i0 + index].Pos.x *= 1.125f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
-                for (int index = 0; index < v_num; ++index)
-                    v[i0 + index].Pos.x += 60f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
-                float num1 = 120f;
-                for (int index = 0; index < v_num; ++index)
-                    v[i0 + index].Pos.x += num1;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
-                for (int index = 0; index < v_num; ++index)
-                    v[i0 + index].Pos.x += g_ao_act_wide_shift;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
-                float num2 = 120f - g_ao_act_wide_shift;
-                for (int index = 0; index < v_num; ++index)
-                    v[i0 + index].Pos.x += num2;
-                break;
+            switch (type)
+            {
+                case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
+                    for (int index = 0; index < v_num; ++index)
+                        v[i0 + index].Pos.x *= (g_ao_act_wide_w / g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
+                    for (int index = 0; index < v_num; ++index)
+                        v[i0 + index].Pos.x += ((g_ao_act_wide_w - g_ao_act_base_w) * 0.5f);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
+                    for (int index = 0; index < v_num; ++index)
+                        v[i0 + index].Pos.x += (g_ao_act_wide_w - g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
+                    for (int index = 0; index < v_num; ++index)
+                        v[i0 + index].Pos.x += g_ao_act_wide_shift;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
+                    float num2 = (g_ao_act_wide_w - g_ao_act_base_w) - g_ao_act_wide_shift;
+                    for (int index = 0; index < v_num; ++index)
+                        v[i0 + index].Pos.x += num2;
+                    break;
+            }
         }
+        else
+        {
+            float temp = (g_ao_act_wide_w - g_ao_act_base_w) * 0.5f;
+            for (int i = 0; i < v_num; ++i)
+            {
+                v[i0 + i].Pos.x += temp;
+            }
+        }
+    }
+    public static void AoActDrawCorWide(
+     NNS_PRIM3D_PCT_ARRAY array,
+     uint v_num,
+     AOE_ACT_CORW type)
+    {
+        AoActDrawCorWide(array, 0, v_num, type);
     }
 
     public static void AoActDrawCorWide(
@@ -832,30 +901,38 @@ public partial class AppMain
     {
         NNS_PRIM3D_PCT[] buffer = array.buffer;
         i0 += array.offset;
-        switch (type)
+        if (_am_draw_video.wide_screen)
         {
-            case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
-                for (int index = 0; index < v_num; ++index)
-                    buffer[i0 + index].Pos.x *= 1.125f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
-                for (int index = 0; index < v_num; ++index)
-                    buffer[i0 + index].Pos.x += 60f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
-                float num1 = 120f;
-                for (int index = 0; index < v_num; ++index)
-                    buffer[i0 + index].Pos.x += num1;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
-                for (int index = 0; index < v_num; ++index)
-                    buffer[i0 + index].Pos.x += g_ao_act_wide_shift;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
-                float num2 = 120f - g_ao_act_wide_shift;
-                for (int index = 0; index < v_num; ++index)
-                    buffer[i0 + index].Pos.x += num2;
-                break;
+            switch (type)
+            {
+                case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
+                    for (int index = 0; index < v_num; ++index)
+                        buffer[i0 + index].Pos.x *= (g_ao_act_wide_w / g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
+                    for (int index = 0; index < v_num; ++index)
+                        buffer[i0 + index].Pos.x += ((g_ao_act_wide_w - g_ao_act_base_w) * 0.5f);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
+                    float num1 = 120f;
+                    for (int index = 0; index < v_num; ++index)
+                        buffer[i0 + index].Pos.x += (g_ao_act_wide_w - g_ao_act_base_w);
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
+                    for (int index = 0; index < v_num; ++index)
+                        buffer[i0 + index].Pos.x += g_ao_act_wide_shift;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
+                    float num2 = (g_ao_act_wide_w - g_ao_act_base_w) - g_ao_act_wide_shift;
+                    for (int index = 0; index < v_num; ++index)
+                        buffer[i0 + index].Pos.x += num2;
+                    break;
+            }
+        }
+        else
+        {
+            for (int index = 0; index < v_num; ++index)
+                buffer[i0 + index].Pos.x += ((g_ao_act_wide_w - g_ao_act_base_w) * 0.5f);
         }
     }
 
@@ -863,23 +940,30 @@ public partial class AppMain
     {
         float num1 = x;
         float num2 = y;
-        switch (type)
+        if (_am_draw_video.wide_screen)
         {
-            case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
-                num1 *= 1.125f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
-                num1 += 60f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
-                num1 += 120f;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
-                num1 += g_ao_act_wide_shift;
-                break;
-            case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
-                num1 += 120f - g_ao_act_wide_shift;
-                break;
+            switch (type)
+            {
+                case AOE_ACT_CORW.AOD_ACT_CORW_NONE:
+                    num1 *= g_ao_act_wide_w / g_ao_act_base_w;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_CENTER:
+                    num1 += (g_ao_act_wide_w - g_ao_act_base_w) * 0.5f;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT:
+                    num1 += g_ao_act_wide_w - g_ao_act_base_w;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_LEFT_S:
+                    num1 += g_ao_act_wide_shift;
+                    break;
+                case AOE_ACT_CORW.AOD_ACT_CORW_RIGHT_S:
+                    num1 += (g_ao_act_wide_w - g_ao_act_base_w) - g_ao_act_wide_shift;
+                    break;
+            }
+        }
+        else
+        {
+            num1 += (g_ao_act_wide_w - g_ao_act_base_w) * 0.5f;
         }
         x = num1;
         y = num2;
@@ -887,13 +971,9 @@ public partial class AppMain
 
     public static void AoActCorReverse(ref float x, ref float y)
     {
-        float num1 = x;
-        float num2 = y;
-        float num3 = num1 * 2.25f;
-        float num4 = num2 * 2.25f;
-        float num5 = num3 * 0.8888889f;
-        x = num5;
-        y = num4;
+        x *= g_ao_act_wide_w / 480.0f;
+        y *= g_ao_act_base_h / 320.0f;
+        x *= g_ao_act_base_w / g_ao_act_wide_w;
     }
 
     public static AOS_ACTION AoActUtilGetChild(AOS_ACTION act)
@@ -915,11 +995,11 @@ public partial class AppMain
     {
         NNS_MATRIX aoActDrawPreMtx = AoActDrawPre_mtx;
         aoActDrawPreMtx.Clear();
-        nnMakeOrthoMatrix(aoActDrawPreMtx, 0.0f, 720f, 1080f, 0.0f, 1f, 3f);
+        nnMakeOrthoMatrix(aoActDrawPreMtx, 0.0f, g_ao_act_wide_h, g_ao_act_wide_w, 0.0f, 1f, 3f);
         amDrawSetProjection(aoActDrawPreMtx, 1);
         nnMakeUnitMatrix(aoActDrawPreMtx);
         nnRotateZMatrix(aoActDrawPreMtx, aoActDrawPreMtx, NNM_DEGtoA32(90f));
-        nnTranslateMatrix(aoActDrawPreMtx, aoActDrawPreMtx, 0.0f, -720f, 0.0f);
+        nnTranslateMatrix(aoActDrawPreMtx, aoActDrawPreMtx, 0.0f, -g_ao_act_wide_h, 0.0f);
         amDrawSetWorldViewMatrix(aoActDrawPreMtx);
         nnSetPrimitive3DMatrix(aoActDrawPreMtx);
     }

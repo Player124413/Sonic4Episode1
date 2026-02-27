@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_SUB_MAT
+    internal class A2S_SUB_MAT
     {
         public A2S_SUB_COL base_;
         public A2S_SUB_COL fade;

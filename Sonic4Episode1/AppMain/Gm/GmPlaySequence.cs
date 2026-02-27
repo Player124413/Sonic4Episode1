@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void GmPlySeqSetSeqState(GMS_PLAYER_WORK ply_work)
     {

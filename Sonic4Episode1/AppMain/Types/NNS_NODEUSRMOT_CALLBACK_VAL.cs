@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_NODEUSRMOT_CALLBACK_VAL
+    internal class NNS_NODEUSRMOT_CALLBACK_VAL
     {
         public int iNode;
         public float Frame;

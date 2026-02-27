@@ -1,9 +1,9 @@
 using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_AME_RUNTIME_WORK_SURFACE
+    internal struct AMS_AME_RUNTIME_WORK_SURFACE
     {
         private AMS_AME_RUNTIME_WORK rtm_work_;
 

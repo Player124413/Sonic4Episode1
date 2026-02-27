@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct DF_HEADER
+    internal struct DF_HEADER
     {
         public uint block_num;
         public DF_BLOCK[] blocks;

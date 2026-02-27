@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class YSDS_PAGE
+    internal class YSDS_PAGE
     {
         public uint time;
         public int show;

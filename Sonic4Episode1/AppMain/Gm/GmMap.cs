@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
 
     public static uint GMD_MAP_DRAW_WIDTH => gm_map_draw_size[0];
@@ -517,37 +518,119 @@ public partial class AppMain
       NNS_VECTOR dest_target_pos,
       int camera_id)
     {
+        int i;
+        GMS_MAP_SYS_WORK map_sys_work;
+        float limit_left, limit_right, limit_top, limit_bottom;
+        float cam_disp_width_half, cam_disp_height_half;
+        GMS_MAP_OTHER_MAP_STATE map_state;
+        NNS_VECTOR[] main_camera_pos = new NNS_VECTOR[2] { new NNS_VECTOR(), new NNS_VECTOR() };
+        NNS_VECTOR[] dest_camera_pos = new NNS_VECTOR[2];
+
+        MTM_ASSERT(main_disp_pos);
+        MTM_ASSERT(main_target_pos);
+        MTM_ASSERT(dest_disp_pos);
+        MTM_ASSERT(dest_target_pos);
+
         if (gm_map_tcb == null)
         {
-            mppAssertNotImpl();
+            Debug.Assert(false, "gmMap.cpp:GmMapGetAddMapCameraPos() Error map sys no init\n");
+            return;
+        }
+        map_sys_work = (GMS_MAP_SYS_WORK)gm_map_tcb.work;
+        main_camera_pos[0].Assign(main_disp_pos);
+        main_camera_pos[1].Assign(main_target_pos);
+        dest_camera_pos[0] = dest_disp_pos;
+        dest_camera_pos[1] = dest_target_pos;
+        if ((map_sys_work.flag & GMD_MAP_FLAG_ADD_MAP_MAIN_ADD_SCRL_H) == GMD_MAP_FLAG_ADD_MAP_MAIN_ADD_SCRL_H)
+        {
+            // メインカメラ位置ユーザースクロール対応
+            main_camera_pos[0].x = map_sys_work.main_cam_user_disp[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
+            main_camera_pos[1].x = map_sys_work.main_cam_user_target[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
+        }
+#if !_IPHONE
+        cam_disp_width_half = (float)(GSD_DISP_WIDTH / 2) * GMD_CAMERA_SCALE;
+        cam_disp_height_half = (float)(GSD_DISP_HEIGHT / 2) * GMD_CAMERA_SCALE;
+#else //!_IPHONE
+	    cam_disp_width_half	= (float)(AMD_SCREEN_2D_WIDTH/2) * GMD_CAMERA_SCALE;
+	    cam_disp_height_half= (float)(AMD_SCREEN_2D_HEIGHT/2) * GMD_CAMERA_SCALE;
+#endif //!_IPHONE
+        // 限界位置
+        limit_left = 0 + cam_disp_width_half;
+        limit_right = g_gm_main_system.map_size[MTD_X] - cam_disp_width_half;
+        limit_top = 0 + cam_disp_height_half;
+        limit_bottom = g_gm_main_system.map_size[MTD_Y] - cam_disp_height_half;
+
+
+        if (camera_id == GME_CAMERA_NO_SNEAR)
+        {
+            map_state = map_sys_work.map_state[0];
+        }
+        else if (camera_id >= GME_CAMERA_NO_MID1)
+        {
+            map_state = map_sys_work.map_state[(camera_id - GME_CAMERA_NO_MID1) + 2/*超近景と中景を飛ばす*/];
         }
         else
         {
-            GMS_MAP_SYS_WORK work = (GMS_MAP_SYS_WORK)gm_map_tcb.work;
-            main_camera_pos[0].Assign(main_disp_pos);
-            main_camera_pos[1].Assign(main_target_pos);
-            if (((int)work.flag & 536870912) != 0)
+            MTM_ASSERT(0);
+            map_state = map_sys_work.map_state[0];    // 仮に0番にしておく
+        }
+
+        for (i = 0; i < 2; i++)
+        {
+            if ((map_sys_work.flag & GMD_MAP_FLAG_ADD_MAP_LOOP_X) == 0)
             {
-                main_camera_pos[0].x = work.main_cam_user_disp[0] + work.main_cam_user_ofst[0];
-                main_camera_pos[1].x = work.main_cam_user_target[0] + work.main_cam_user_ofst[0];
+                // X
+                if (main_camera_pos[i].x <= limit_left)
+                {
+                    // 限界位置
+                    (dest_camera_pos[i]).x = cam_disp_width_half;
+                }
+                else if (main_camera_pos[i].x >= limit_right)
+                {
+                    // 限界位置
+                    (dest_camera_pos[i]).x = map_state.map_size[MTD_X] - cam_disp_width_half;
+                }
+                else
+                {
+                    (dest_camera_pos[i]).x = cam_disp_width_half +
+                                (main_camera_pos[i].x - cam_disp_width_half) * map_state.scrl_scale[MTD_X];
+                }
             }
-            float num1 = (float)(AMD_SCREEN_2D_WIDTH / 2f * 0.674383342266083 * 1.0);
-            float num2 = (float)(AMD_SCREEN_2D_HEIGHT / 2f * 0.674383342266083 * 1.0 * 0.899999976158142);
-            float num3 = 0.0f + num1;
-            float num4 = g_gm_main_system.map_size[0] - num1;
-            float num5 = 0.0f + num2;
-            float num6 = g_gm_main_system.map_size[1] - num2;
-            GMS_MAP_OTHER_MAP_STATE mapOtherMapState = camera_id != 2 ? (camera_id < 3 ? work.map_state[0] : work.map_state[camera_id - 3 + 2]) : work.map_state[0];
-            int index1 = 0;
-            dest_disp_pos.x = ((int)work.flag & int.MinValue) != 0 ? main_camera_pos[index1].x * mapOtherMapState.scrl_scale[0] : (main_camera_pos[index1].x > (double)num3 ? (main_camera_pos[index1].x < (double)num4 ? num1 + (main_camera_pos[index1].x - num1) * mapOtherMapState.scrl_scale[0] : mapOtherMapState.map_size[0] - num1) : num1);
-            dest_disp_pos.x += mapOtherMapState.cam_ofst[0];
-            dest_disp_pos.y = -main_camera_pos[index1].y > (double)num5 ? (-main_camera_pos[index1].y < (double)num6 ? (float)-(num2 + (-main_camera_pos[index1].y - (double)num2) * mapOtherMapState.scrl_scale[1]) : (float)-(mapOtherMapState.map_size[1] - (double)num2)) : -num2;
-            dest_disp_pos.z = main_camera_pos[index1].z;
-            int index2 = 1;
-            dest_target_pos.x = ((int)work.flag & int.MinValue) != 0 ? main_camera_pos[index2].x * mapOtherMapState.scrl_scale[0] : (main_camera_pos[index2].x > (double)num3 ? (main_camera_pos[index2].x < (double)num4 ? num1 + (main_camera_pos[index2].x - num1) * mapOtherMapState.scrl_scale[0] : mapOtherMapState.map_size[0] - num1) : num1);
-            dest_target_pos.x += mapOtherMapState.cam_ofst[0];
-            dest_target_pos.y = -main_camera_pos[index2].y > (double)num5 ? (-main_camera_pos[index2].y < (double)num6 ? (float)-(num2 + (-main_camera_pos[index2].y - (double)num2) * mapOtherMapState.scrl_scale[1]) : (float)-(mapOtherMapState.map_size[1] - (double)num2)) : -num2;
-            dest_target_pos.z = main_camera_pos[index2].z;
+            else
+            {
+                // ループあり
+                //(*dest_camera_pos[i]).x = cam_disp_width_half +
+                //			(main_camera_pos[i].x - cam_disp_width_half) * map_state.scrl_scale[MTD_X];
+                (dest_camera_pos[i]).x = main_camera_pos[i].x * map_state.scrl_scale[MTD_X];
+            }
+
+            // ユーザースクロール後のオフセット値反映
+            (dest_camera_pos[i]).x += map_state.cam_ofst[MTD_X];
+
+            {
+                // Y
+                if (-main_camera_pos[i].y <= limit_top)
+                {
+                    // 限界位置
+                    (dest_camera_pos[i]).y = -cam_disp_height_half;
+                }
+                else if (-main_camera_pos[i].y >= limit_bottom)
+                {
+                    // 限界位置
+                    (dest_camera_pos[i]).y = -(map_state.map_size[MTD_Y] - cam_disp_height_half);
+                }
+                else
+                {
+                    (dest_camera_pos[i]).y = -(cam_disp_height_half +
+                                (-main_camera_pos[i].y - cam_disp_height_half) * map_state.scrl_scale[MTD_Y]);
+                }
+            }
+
+            //// ユーザースクロール後のオフセット値反映
+            //(*dest_camera_pos[i]).y += map_state.cam_ofst[MTD_Y];
+
+            // Z
+            (dest_camera_pos[i]).z = main_camera_pos[i].z;
         }
     }
 

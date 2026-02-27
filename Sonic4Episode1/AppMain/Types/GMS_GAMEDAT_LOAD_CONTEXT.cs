@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GAMEDAT_LOAD_CONTEXT
+    internal class GMS_GAMEDAT_LOAD_CONTEXT
     {
         public GME_GAMEDAT_LOAD_STATE state;
         public string file_path;

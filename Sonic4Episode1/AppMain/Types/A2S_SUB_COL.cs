@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct A2S_SUB_COL
+    internal struct A2S_SUB_COL
     {
         public byte a;
         public byte b;

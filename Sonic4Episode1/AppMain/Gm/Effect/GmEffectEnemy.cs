@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static uint GMM_EFCT_ENE_STAGE_FLAG(int stage_no)
     {

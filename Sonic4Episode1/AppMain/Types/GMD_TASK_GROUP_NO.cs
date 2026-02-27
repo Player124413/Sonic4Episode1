@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum GMD_TASK_GROUP_NO
     {

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_FS
+    internal class AMS_FS
     {
         public string dir;
         public int count;
@@ -52,7 +52,7 @@ public partial class AppMain
         }
     }
 
-    private static bool amFsIsComplete(AMS_FS cdfsp)
+    public static bool amFsIsComplete(AMS_FS cdfsp)
     {
         return cdfsp.stat == 3;
     }
@@ -94,14 +94,14 @@ public partial class AppMain
         return amsFs;
     }
 
-    private static AMS_AMB_HEADER readAMBFile(AMS_FS fs)
+    public static AMS_AMB_HEADER readAMBFile(AMS_FS fs)
     {
         if (fs.amb_header == null)
             fs.makeAmbHeader();
         return fs.amb_header;
     }
 
-    private static AMS_AMB_HEADER readAMBFile(object data)
+    public static AMS_AMB_HEADER readAMBFile(object data)
     {
         switch (data)
         {
@@ -434,7 +434,7 @@ public partial class AppMain
         return 0;
     }
 
-    private static void amFsClearRequest(AMS_FS cdfsp)
+    public static void amFsClearRequest(AMS_FS cdfsp)
     {
         ams_fsList.Remove(cdfsp);
     }

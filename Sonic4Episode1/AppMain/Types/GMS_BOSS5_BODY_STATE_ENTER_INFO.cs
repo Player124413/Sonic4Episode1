@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_BODY_STATE_ENTER_INFO
+    internal class GMS_BOSS5_BODY_STATE_ENTER_INFO
     {
         public MPP_VOID_GMS_BOSS5_BODY_WORK enter_func;
         public int is_wrapped;

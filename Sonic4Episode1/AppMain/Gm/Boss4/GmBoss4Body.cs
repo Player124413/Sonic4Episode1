@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static float GMD_BOSS4_BODY_START_POS_Y => GMM_BOSS4_STAGE(-120f, 1480f);
 

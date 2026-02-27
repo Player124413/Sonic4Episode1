@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMAP_WATER_OBJ
+    internal class DMAP_WATER_OBJ
     {
         public AMS_MOTION motion;
         public NNS_OBJECT _object;

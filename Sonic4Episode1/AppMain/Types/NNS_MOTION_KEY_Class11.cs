@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class11
+    internal class NNS_MOTION_KEY_Class11
     {
         public float Frame;
         public int Value;

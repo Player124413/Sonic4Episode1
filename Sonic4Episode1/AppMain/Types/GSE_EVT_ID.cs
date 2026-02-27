@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    private enum GSE_EVT_ID
+    public enum GSE_EVT_ID
     {
         GSD_EVT_ID_NOP,
         GSD_EVT_ID_SYS_INIT,

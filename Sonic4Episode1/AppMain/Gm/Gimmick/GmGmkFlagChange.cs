@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GmGmkFlagChangeInit(
       GMS_EVE_RECORD_EVENT eve_rec,
@@ -89,6 +89,11 @@
             case 162:
                 if (obsObjectWork.obj_type != 1)
                     break;
+                if ((g_gs_main_sys_info.game_flag & GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC) == GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC)
+                {
+                    // クラシック操作時はループ回転カメラなし
+                    break;
+                }
                 ObjCameraGet(0).flag |= 2147483648U;
                 break;
             case 195:

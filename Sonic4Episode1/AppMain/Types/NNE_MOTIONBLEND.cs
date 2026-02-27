@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum NNE_MOTIONBLEND
     {

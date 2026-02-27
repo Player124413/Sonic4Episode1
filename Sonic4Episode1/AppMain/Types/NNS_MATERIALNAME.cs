@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIALNAME
+    internal class NNS_MATERIALNAME
     {
         public int iMaterial;
         public string Name;

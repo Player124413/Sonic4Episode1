@@ -1,27 +1,57 @@
 <Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0-browser</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>TRACE;FNA;AOT;WASM;ASYNC_IO;</DefineConstants>
-		<RunAOTCompilation>true</RunAOTCompilation>
-		<WasmStripILAfterAOT>true</WasmStripILAfterAOT>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sonic4Episode1.Shared\Sonic4Episode1.Shared.csproj" />
+    <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    
+    <BlazorWebAssemblyJiterpreter>false</BlazorWebAssemblyJiterpreter>
+    
+    <EmccLinkOptimizationFlag>-Oz</EmccLinkOptimizationFlag>
+    <EmccExtraLDFlags>-sFULL_ES3 -Oz -lidbfs.js</EmccExtraLDFlags>
+    <EmccInitialHeapSize>268435456</EmccInitialHeapSize>
+    
+    <WasmNativeDebugSymbols>false</WasmNativeDebugSymbols>
+    <WasmNativeStrip>true</WasmNativeStrip>
+    <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
+    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
+    <WasmBuildNative>true</WasmBuildNative>
+    
+    <CompressionEnabled>false</CompressionEnabled>
+    <RunAOTCompilation>true</RunAOTCompilation>
+
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantTimezone>true</InvariantTimezone>
+
+    <OptimizationPreference>Size</OptimizationPreference>
+    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <StackTraceSupport>false</StackTraceSupport>
+    <MetricsSupport>false</MetricsSupport>
+    <UseSizeOptimizedLinq>true</UseSizeOptimizedLinq>
+    <XmlResolverIsNetworkingEnabledByDefault>false</XmlResolverIsNetworkingEnabledByDefault>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
 	</PropertyGroup>
 
-	<Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
-	
-	<PropertyGroup>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>full</TrimMode>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<EmccLinkOptimizationFlag>-O1</EmccLinkOptimizationFlag>
-		<EmccExtraLDFlags>--js-library $(MSBuildProjectDirectory.Replace('\', '/'))/js/library-fixemscripten.js -sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$allocate,$ALLOC_NORMAL -sFULL_ES3 -lidbfs.js</EmccExtraLDFlags>
-		<WasmEmitSymbolMap>true</WasmEmitSymbolMap>
-		<WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
-	</PropertyGroup>
-	
 	<ItemGroup>
 		<NativeFileReference Include=".\lib\wasm\SDL2.a" />
 		<NativeFileReference Include=".\lib\wasm\FNA3D.a" />
@@ -32,13 +62,12 @@
 		<EmccExportedRuntimeMethod Include="FS" />
 		<EmccExportedRuntimeMethod Include="IDBFS" />
 		<EmccExportedRuntimeMethod Include="setMainLoop" />
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
 	</ItemGroup>
 	
-	<ItemGroup>
-	  <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <Folder Include="lib\installer\" />
-	</ItemGroup>
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<!--<Exec Command="pnpm install" WorkingDirectory="$(MSBuildProjectDirectory)\lib" />
+		<Exec Command="pnpm run build" WorkingDirectory="$(MSBuildProjectDirectory)\lib\installer" />-->
+		<Copy SourceFiles="$(MSBuildProjectDirectory)\lib\installer\dist\index.js" DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\js" />
+	</Target>
 </Project>

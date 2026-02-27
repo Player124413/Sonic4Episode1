@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_MGR_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_MGR_WORK : IOBS_OBJECT_WORK
     {
         public readonly short[] save_camera_offset = new short[2];
         public readonly GMS_BOSS5_EXPL_WORK small_expl_work = new GMS_BOSS5_EXPL_WORK();

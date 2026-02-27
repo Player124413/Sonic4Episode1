@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static void AkUtilFrame60ToTime(uint frame)
     {
@@ -102,7 +102,7 @@
         return num1;
     }
 
-    public static int AkUtilNumValueToDigits(
+    internal static int AkUtilNumValueToDigits(
       int val,
       ArrayPointer<int> digit_list,
       int digit_num)
@@ -110,7 +110,7 @@
         return AkUtilNumValueToDigits(val, digit_list, digit_num, 10);
     }
 
-    public static int AkUtilNumValueToDigits(
+    internal static int AkUtilNumValueToDigits(
       int val,
       ArrayPointer<int> digit_list,
       int digit_num,

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_MOTION_BUF
+    internal class AMS_MOTION_BUF
     {
         public int motion_id;
         public float frame;

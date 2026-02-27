@@ -1,9 +1,9 @@
 using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_RGBA8888_Buf
+    internal struct AMS_RGBA8888_Buf
     {
         private readonly byte[] data_;
         private readonly int offset_;

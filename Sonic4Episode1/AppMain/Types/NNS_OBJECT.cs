@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_OBJECT
+    internal class NNS_OBJECT
     {
         public readonly NNS_VECTOR Center = new NNS_VECTOR();
         public float Radius;
@@ -81,7 +81,7 @@ public partial class AppMain
             return this;
         }
 
-        public static NNS_OBJECT Read(BinaryReader reader, long data0Pos)
+        public static NNS_OBJECT ReadGLES11(BinaryReader reader, long data0Pos)
         {
             NNS_OBJECT nnsObject = new NNS_OBJECT();
             nnsObject.Center.x = reader.ReadSingle();

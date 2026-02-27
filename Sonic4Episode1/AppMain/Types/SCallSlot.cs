@@ -1,8 +1,8 @@
 using System.Reflection;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct SCallSlot
+    internal struct SCallSlot
     {
         public MethodInfo m_info;
         public bool m_bNoCast;

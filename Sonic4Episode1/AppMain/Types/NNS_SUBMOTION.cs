@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_SUBMOTION
+    internal class NNS_SUBMOTION
     {
         public uint fType;
         public uint fIPType;
@@ -86,19 +86,19 @@ public partial class AppMain
                 reader.BaseStream.Seek(data0Pos + num, SeekOrigin.Begin);
                 switch (motionType)
                 {
-                    case 1:
+                    case NND_MOTIONTYPE_NODE:
                         ReadNodeMotionKeyFrames(reader, submotion);
                         break;
-                    case 2:
+                    case NND_MOTIONTYPE_CAMERA:
                         ReadCameraMotionKeyFrames(reader, submotion);
                         break;
-                    case 4:
+                    case NND_MOTIONTYPE_LIGHT:
                         ReadLightMotionKeyFrames(reader, submotion);
                         break;
-                    case 8:
-                        ReadMorthMotionKeyFrames(reader, submotion);
+                    case NND_MOTIONTYPE_MORPH:
+                        ReadMorphMotionKeyFrames(reader, submotion);
                         break;
-                    case 16:
+                    case NND_MOTIONTYPE_MATERIAL:
                         ReadMaterialMotionKeyFrames(reader, submotion);
                         break;
                 }
@@ -111,18 +111,17 @@ public partial class AppMain
           BinaryReader reader,
           NNS_SUBMOTION submotion)
         {
-            uint type = submotion.fType & 3U;
-            int fType = (int)submotion.fType;
-            uint num2 = submotion.fType & 4294967040U;
-            uint interp = submotion.fIPType & 3703U;
-            if (((int)num2 & 1792) != 0)
+            uint frameType = submotion.fType & NND_SMOTTYPE_FRAME_MASK; // 16 bit integer or floating point
+            uint animType = submotion.fType & NND_SMOTTYPE_VALUETYPE_MASK;
+            uint interpType = submotion.fIPType & NND_SMOTIPTYPE_IP_MASK;
+            if (((int)animType & NND_SMOTTYPE_TRANSLATION_MASK) != 0)
             {
-                if (1U == type)
+                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
                 {
-                    switch (interp)
+                    switch (interpType)
                     {
-                        case 1:
-                        case 16:
+                        case NND_SMOTIPTYPE_SPLINE:
+                        case NND_SMOTIPTYPE_BEZIER:
                             throw new NotImplementedException("Investigation needed");
                         default:
                             submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
@@ -131,30 +130,28 @@ public partial class AppMain
                 }
                 else
                 {
-                    if (2U == type)
+                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
                         throw new NotImplementedException("Investigation needed");
                     throw new NotImplementedException("Investigation needed");
                 }
             }
-            else if (((int)num2 & 30720) != 0)
+            else if (((int)animType & NND_SMOTTYPE_ROTATION_MASK) != 0)
             {
-                if (1U == type)
+                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
                 {
                     submotion.pKeyList = NNS_MOTION_KEY_Class13.Read(reader, submotion.nKeyFrame);
-                    //Console.WriteLine("type: {0}, size: {1}, interp: {2}", type, submotion.KeySize, interp);
                 }
-                else if (2U != type)
+                else if (NND_SMOTTYPE_FRAME_SINT16 != frameType)
                 {
                     throw new NotImplementedException("Investigation needed");
                 }
-                else if (interp == 1U)
+                else if (interpType == NND_SMOTIPTYPE_SPLINE)
                 {
                     throw new NotImplementedException("Investigation needed");
                 }
-                else if (interp == 512)
+                else if (interpType == NND_SMOTIPTYPE_QUAT_LERP)
                 {
                     submotion.pKeyList = NNS_MOTION_KEY_Class16.Read(reader, submotion.nKeyFrame);
-                    // Console.WriteLine("type: {0}, size: {1}, interp: {2}", type, submotion.KeySize, interp);
                 }
                 else
                 {
@@ -162,11 +159,11 @@ public partial class AppMain
                 }
 
             }
-            else if (((int)num2 & 229376) != 0)
+            else if (((int)animType & NND_SMOTTYPE_SCALING_MASK) != 0)
             {
-                if (1U == type)
+                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
                 {
-                    switch (interp)
+                    switch (interpType)
                     {
                         case 1:
                         case 16:
@@ -178,31 +175,34 @@ public partial class AppMain
                 }
                 else
                 {
-                    if (2U == type)
+                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
                         throw new NotImplementedException("Investigation needed");
                     throw new NotImplementedException("Investigation needed");
                 }
             }
             else
             {
-                if (((int)num2 & 786432) != 0)
+                if (((int)animType & NND_SMOTTYPE_USER_MASK) != 0)
                 {
-                    if (1U == type)
+                    if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
                         throw new NotImplementedException("Investigation needed");
-                    if (2U == type)
+                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
                         throw new NotImplementedException("Investigation needed");
                     throw new NotImplementedException("Investigation needed");
                 }
-                if (((int)num2 & 1048576) == 0)
+
+                if (((int)animType & NND_SMOTIPTYPE_OFFSET) == 0)
                     throw new NotImplementedException("Investigation needed");
-                if (1U == type)
+
+                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
                 {
                     submotion.pKeyList = NNS_MOTION_KEY_Class11.Read(reader, submotion.nKeyFrame);
                 }
                 else
                 {
-                    if (2U != type)
+                    if (NND_SMOTTYPE_FRAME_SINT16 != frameType)
                         throw new NotImplementedException("Investigation needed");
+
                     if (submotion.KeySize != 8)
                         throw new NotImplementedException("Investigation needed");
                     submotion.pKeyList = NNS_MOTION_KEY_Class16.Read(reader, submotion.nKeyFrame);
@@ -232,7 +232,7 @@ public partial class AppMain
             throw new NotImplementedException();
         }
 
-        private static void ReadMorthMotionKeyFrames(
+        private static void ReadMorphMotionKeyFrames(
           BinaryReader reader,
           NNS_SUBMOTION submotion)
         {
@@ -249,13 +249,14 @@ public partial class AppMain
         {
             int fType1 = (int)submotion.fType;
             int fType2 = (int)submotion.fType;
-            uint num1 = submotion.fType & 4294967040U;
-            uint num2 = submotion.fIPType & 3703U;
-            if (((int)num1 & 256) != 0)
+            uint animType = submotion.fType & NND_SMOTTYPE_VALUETYPE_MASK;
+            uint interpType = submotion.fIPType & NND_SMOTIPTYPE_IP_MASK;
+
+            if (((int)animType & 256) != 0)
                 throw new NotImplementedException("Investigation needed");
-            if (((int)num1 & 3584) != 0)
+            if (((int)animType & NND_SMOTTYPE_DIFFUSE_MASK) != 0)
             {
-                switch (num2)
+                switch (interpType)
                 {
                     case 1:
                     case 16:
@@ -277,11 +278,11 @@ public partial class AppMain
             }
             else
             {
-                if (((int)num1 & 4096) != 0)
+                if (((int)animType & 4096) != 0)
                     throw new NotImplementedException("Investigation needed");
-                if (((int)num1 & 57344) != 0)
+                if (((int)animType & NND_SMOTTYPE_SPECULAR_MASK) != 0)
                 {
-                    switch (num2)
+                    switch (interpType)
                     {
                         case 1:
                         case 16:
@@ -293,13 +294,13 @@ public partial class AppMain
                 }
                 else
                 {
-                    if (((int)num1 & 65536) != 0)
+                    if (((int)animType & NND_MOTIONTYPE_NOREPEAT) != 0)
                         throw new NotImplementedException("Investigation needed");
-                    if (((int)num1 & 131072) != 0)
+                    if (((int)animType & NND_MOTIONTYPE_CONSTREPEAT) != 0)
                         throw new NotImplementedException("Investigation needed");
-                    if (((int)num1 & 1835008) != 0)
+                    if (((int)animType & NND_SMOTTYPE_AMBIENT_MASK) != 0)
                     {
-                        switch (num2)
+                        switch (interpType)
                         {
                             case 1:
                             case 16:
@@ -311,11 +312,11 @@ public partial class AppMain
                     }
                     else
                     {
-                        if (((int)num1 & 2097152) != 0)
+                        if (((int)animType & 2097152) != 0)
                             throw new NotImplementedException("Investigation needed");
-                        if (((int)num1 & 4194304) != 0)
+                        if (((int)animType & NND_SMOTTYPE_TEXTURE_BLEND) != 0)
                         {
-                            switch (num2)
+                            switch (interpType)
                             {
                                 case 1:
                                     break;
@@ -328,9 +329,9 @@ public partial class AppMain
                                     break;
                             }
                         }
-                        else if (((int)num1 & 25165824) != 0)
+                        else if (((int)animType & NND_SMOTTYPE_OFFSET_MASK) != 0)
                         {
-                            switch (num2)
+                            switch (interpType)
                             {
                                 case 1:
                                     throw new NotImplementedException("Investigation needed");
@@ -344,7 +345,7 @@ public partial class AppMain
                         }
                         else
                         {
-                            if (((int)num1 & 33554432) != 0)
+                            if (((int)animType & NND_SMOTTYPE_MATCLBK_USER) != 0)
                                 throw new NotImplementedException("Investigation needed");
                             throw new NotImplementedException("Investigation needed");
                         }

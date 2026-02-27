@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_CMN_FLASH_SCR_WORK : IClearable
+    internal class GMS_CMN_FLASH_SCR_WORK : IClearable
     {
         public GMS_FADE_OBJ_WORK fade_obj_work;
         public uint active_flag;

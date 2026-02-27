@@ -1,8 +1,8 @@
 using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GSS_MAIN_SYS_INFO
+    internal class GSS_MAIN_SYS_INFO
     {
         public readonly int[] char_id = new int[1];
         public readonly SSave Save = new SSave();

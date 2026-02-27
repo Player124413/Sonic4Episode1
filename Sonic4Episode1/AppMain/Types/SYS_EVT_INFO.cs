@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    private class SYS_EVT_INFO
+    internal class SYS_EVT_INFO
     {
         public sbyte[] arg = new sbyte[8];
         public SYS_EVT_DATA[] evt_data;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void ObjDispSRand(uint seed)
     {
@@ -464,7 +464,7 @@ public partial class AppMain
 
     public static short OBD_OBJ_CLIP_LCD_Y => g_obj.clip_lcd_size[1];
 
-    public static OBS_OBJECT_WORK OBM_OBJECT_TASK_DETAIL_INIT(
+    internal static OBS_OBJECT_WORK OBM_OBJECT_TASK_DETAIL_INIT(
       ushort priority,
       byte group,
       byte pause_level,
@@ -483,7 +483,7 @@ public partial class AppMain
     {
     }
 
-    public static OBS_OBJECT g_obj
+    internal static OBS_OBJECT g_obj
     {
         get
         {
@@ -625,6 +625,7 @@ public partial class AppMain
 
     private static void ObjObjectClipLCDSet(short size_x, short size_y)
     {
+        return;
         g_obj.clip_lcd_size[0] = size_x;
         g_obj.clip_lcd_size[1] = size_y;
     }

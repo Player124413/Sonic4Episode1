@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_VTXLIST_COMMON_ARRAY
+    internal class NNS_VTXLIST_COMMON_ARRAY
     {
         public uint fType;
         public int Number;

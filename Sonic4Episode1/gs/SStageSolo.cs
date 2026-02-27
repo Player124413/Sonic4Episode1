@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace gs.backup
 {
-    public class SStageSolo : SBase
+    internal class SStageSolo : SBase
     {
         private Stage stage;
         public const uint c_false = 0;
@@ -163,7 +163,7 @@ namespace gs.backup
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 1)]
-        public struct ERecordKind
+        internal struct ERecordKind
         {
             public enum Type
             {

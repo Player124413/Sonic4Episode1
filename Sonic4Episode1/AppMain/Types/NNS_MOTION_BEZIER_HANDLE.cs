@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_BEZIER_HANDLE
+    internal class NNS_MOTION_BEZIER_HANDLE
     {
         public readonly NNS_VECTOR2D In = new NNS_VECTOR2D();
         public readonly NNS_VECTOR2D Out = new NNS_VECTOR2D();

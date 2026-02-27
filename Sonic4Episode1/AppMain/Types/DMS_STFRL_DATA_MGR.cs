@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_STFRL_DATA_MGR
+    internal class DMS_STFRL_DATA_MGR
     {
         public readonly AMS_AMB_HEADER[] arc_cmn_amb = new AMS_AMB_HEADER[2];
         public AMS_AMB_HEADER arc_font_amb;

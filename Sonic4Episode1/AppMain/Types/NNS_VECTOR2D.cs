@@ -1,6 +1,6 @@
 using System.IO;
 
-public class NNS_VECTOR2D
+internal class NNS_VECTOR2D
 {
     public float x;
     public float y;

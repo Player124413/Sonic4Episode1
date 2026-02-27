@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_WATER_SURFACE_MGR
+    internal class GMS_WATER_SURFACE_MGR
     {
         public MTS_TASK_TCB tcb_water;
         public AMS_RENDER_TARGET render_target;

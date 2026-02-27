@@ -1,6 +1,6 @@
 using mpp;
 
-public class NNS_VECTOR4D : NNS_VECTOR
+internal class NNS_VECTOR4D : NNS_VECTOR
 {
     public float w;
 

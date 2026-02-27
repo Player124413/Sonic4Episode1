@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXTURE_FILTERMODE
+    internal class NNS_TEXTURE_FILTERMODE
     {
         public ushort MagFilter;
         public ushort MinFilter;

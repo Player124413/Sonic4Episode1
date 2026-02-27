@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMAP_WATER
+    internal class DMAP_WATER
     {
         public readonly DMAP_WATER_OBJ[] _object = New<DMAP_WATER_OBJ>(2);
         public readonly AOS_TEXTURE tex_color = new AOS_TEXTURE();

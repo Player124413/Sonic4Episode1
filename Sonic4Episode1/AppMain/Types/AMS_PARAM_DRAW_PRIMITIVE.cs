@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_PARAM_DRAW_PRIMITIVE : IClearable
+    internal class AMS_PARAM_DRAW_PRIMITIVE : IClearable
     {
         public NNS_MATRIX mtx;
         public int type;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MORPHTARGETLIST
+    internal class NNS_MORPHTARGETLIST
     {
         public int nMorphTarget;
         public NNS_MORPHTARGETPTR[] pMorphTargetPtrList;

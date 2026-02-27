@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     private static int objMapGetDiff(int lCol, sbyte sPix, sbyte sDelta)

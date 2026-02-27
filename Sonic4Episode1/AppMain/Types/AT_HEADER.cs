@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AT_HEADER
+    internal struct AT_HEADER
     {
         public uint block_num;
         public AT_BLOCK[] blocks;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_EFCT_GENERAL_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_EFCT_GENERAL_WORK : IOBS_OBJECT_WORK
     {
         public readonly NNS_MATRIX ofst_mtx = new NNS_MATRIX();
         public readonly GMS_BOSS5_1SHOT_TIMER se_timer = new GMS_BOSS5_1SHOT_TIMER();

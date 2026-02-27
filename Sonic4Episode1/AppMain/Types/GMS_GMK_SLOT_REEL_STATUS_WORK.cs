@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_SLOT_REEL_STATUS_WORK
+    internal class GMS_GMK_SLOT_REEL_STATUS_WORK
     {
         public short reel;
         public int reel_spd;

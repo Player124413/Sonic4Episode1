@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_DIRECTION
+    internal class GMS_BOSS4_DIRECTION
     {
         public int direction;
         public short cur_angle;

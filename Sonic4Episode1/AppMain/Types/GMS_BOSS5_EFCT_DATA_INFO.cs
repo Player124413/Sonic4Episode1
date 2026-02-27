@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_EFCT_DATA_INFO
+    internal class GMS_BOSS5_EFCT_DATA_INFO
     {
         public int use_model;
         public int ame_arc_idx;

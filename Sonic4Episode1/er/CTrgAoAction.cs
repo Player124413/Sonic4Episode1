@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace er
 {
-    public class CTrgAoAction : CTrgBase<CTrgState>
+    internal class CTrgAoAction : CTrgBase<CTrgState>
     {
         private bool[] m_flag = new bool[1];
         private AppMain.AOS_ACTION m_act;

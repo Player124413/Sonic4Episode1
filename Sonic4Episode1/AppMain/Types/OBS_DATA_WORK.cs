@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_DATA_WORK
+    internal class OBS_DATA_WORK
     {
         public object pData;
         public ushort num;

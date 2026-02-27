@@ -6,7 +6,7 @@
 
 namespace ao
 {
-    public class CProc<T>
+    internal class CProc<T>
     {
         private TypeProcedure m_proc;
         private uint m_counter;

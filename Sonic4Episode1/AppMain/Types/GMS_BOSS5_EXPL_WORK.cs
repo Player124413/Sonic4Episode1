@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_EXPL_WORK
+    internal class GMS_BOSS5_EXPL_WORK
     {
         public int[] ofst_pos = new int[2];
         public int[] area = new int[2];

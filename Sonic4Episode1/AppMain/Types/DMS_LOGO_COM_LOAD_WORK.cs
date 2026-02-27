@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_COM_LOAD_WORK
+    internal class DMS_LOGO_COM_LOAD_WORK
     {
         public readonly DMS_LOGO_COM_LOAD_CONTEXT[] context = new DMS_LOGO_COM_LOAD_CONTEXT[10];
         public Reference<MTS_TASK_TCB> load_tcb_addr;

@@ -4,7 +4,7 @@
 // MVID: 093CE2FC-33E2-4332-B0FE-1EA1E44D3AE7
 // Assembly location: C:\Users\wamwo\Documents\GitHub\Sonic4Ep1-WP7-Decompilation\XAP\Sonic4 ep I.dll
 
-public struct QuadType<I, E1, E2, E3>
+internal struct QuadType<I, E1, E2, E3>
 {
     private object Value;
 

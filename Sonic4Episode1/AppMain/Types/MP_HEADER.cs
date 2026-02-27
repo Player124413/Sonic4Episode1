@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class MP_HEADER
+    internal class MP_HEADER
     {
         public ushort map_w;
         public ushort map_h;

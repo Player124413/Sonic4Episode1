@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct DC_OFFSET
+    internal struct DC_OFFSET
     {
         public uint ofst;
     }

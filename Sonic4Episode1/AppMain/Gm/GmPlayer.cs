@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static byte[][] g_gm_player_motion_right_tbl
     {

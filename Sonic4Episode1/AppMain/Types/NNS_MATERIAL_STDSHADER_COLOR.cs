@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_STDSHADER_COLOR
+    internal class NNS_MATERIAL_STDSHADER_COLOR
     {
         public uint fFlag;
         public NNS_RGBA Ambient;
@@ -18,29 +18,29 @@ public partial class AppMain
             {
                 fFlag = reader.ReadUInt32(),
                 Ambient = {
-          r = reader.ReadSingle(),
-          g = reader.ReadSingle(),
-          b = reader.ReadSingle(),
-          a = reader.ReadSingle()
-        },
+                    r = reader.ReadSingle(),
+                    g = reader.ReadSingle(),
+                    b = reader.ReadSingle(),
+                    a = reader.ReadSingle()
+                },
                 Diffuse = {
-          r = reader.ReadSingle(),
-          g = reader.ReadSingle(),
-          b = reader.ReadSingle(),
-          a = reader.ReadSingle()
-        },
+                    r = reader.ReadSingle(),
+                    g = reader.ReadSingle(),
+                    b = reader.ReadSingle(),
+                    a = reader.ReadSingle()
+                },
                 Specular = {
-          r = reader.ReadSingle(),
-          g = reader.ReadSingle(),
-          b = reader.ReadSingle(),
-          a = reader.ReadSingle()
-        },
+                    r = reader.ReadSingle(),
+                    g = reader.ReadSingle(),
+                    b = reader.ReadSingle(),
+                    a = reader.ReadSingle()
+                },
                 Emission = {
-          r = reader.ReadSingle(),
-          g = reader.ReadSingle(),
-          b = reader.ReadSingle(),
-          a = reader.ReadSingle()
-        },
+                    r = reader.ReadSingle(),
+                    g = reader.ReadSingle(),
+                    b = reader.ReadSingle(),
+                    a = reader.ReadSingle()
+                },
                 Shininess = reader.ReadSingle(),
                 SpecularIntensity = reader.ReadSingle()
             };

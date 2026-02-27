@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_ARM_ANIM_WORK
+    internal class GMS_BOSS5_ARM_ANIM_WORK
     {
         public NNS_QUATERNION[] start_quat = New<NNS_QUATERNION>(3);
         public NNS_QUATERNION[] end_quat = New<NNS_QUATERNION>(3);

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_TEX_ANIM
+    internal class AMS_AME_TEX_ANIM
     {
         public float time;
         public int key_num;

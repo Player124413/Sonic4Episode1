@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkPistonData
+    internal class GmkPistonData
     {
         public static readonly short[][] tbl_gm_gmk_piston_col_rect = new short[2][]
         {

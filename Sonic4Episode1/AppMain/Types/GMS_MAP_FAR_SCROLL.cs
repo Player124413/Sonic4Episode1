@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_FAR_SCROLL
+    internal class GMS_MAP_FAR_SCROLL
     {
         public int pos;
         public int width;

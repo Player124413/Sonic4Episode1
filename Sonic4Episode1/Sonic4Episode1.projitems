@@ -56,11 +56,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoPresence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Delegates.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmStageSelect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_DWORK_NO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_GAME_FLAG.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLY_SEQ_STATE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_TASK_PRIO.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnConsts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive2DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive3DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnMakeRotateMatrixQuaternion.cs" />
@@ -855,10 +857,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnCalcMotionRotate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadPolarHandle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadVirtualPad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\DmStgSlct.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRGlobal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRHeaderV2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRHeaderV3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRMetadataElementV3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PVRMetadataV3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)External\PvrtcDecoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GmPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gs\SBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gs\SDebug.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gs\SRemaster.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PVRTextureLoader.cs" />
     <None Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoStorage.cs.nope" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoSys.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoTex.cs" />
@@ -869,7 +881,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmSndBgmPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmSound.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmStageSelect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmTitle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmCmnBackup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmLoading.cs" />
@@ -1130,6 +1141,5 @@
     <Folder Include="$(MSBuildThisFileDirectory)AppMain\Gm\Enemy\" />
     <Folder Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\" />
     <Folder Include="$(MSBuildThisFileDirectory)AppMain\Ak\" />
-    <Folder Include="$(MSBuildThisFileDirectory)AppMain\Nn\" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static void ObjDrawObjectSetToon(OBS_OBJECT_WORK obj_work)
     {

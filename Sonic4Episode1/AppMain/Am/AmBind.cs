@@ -1,8 +1,8 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    private static object amBindGet(AMS_AMB_HEADER header, int index)
+    public static object amBindGet(AMS_AMB_HEADER header, int index)
     {
         string sPath;
         AmbChunk buf = amBindGet(header, index, out sPath);
@@ -13,7 +13,7 @@ public partial class AppMain
         return amsAmbHeader;
     }
 
-    private static AmbChunk amBindGet(
+    public static AmbChunk amBindGet(
       AMS_AMB_HEADER header,
       int index,
       out string sPath)

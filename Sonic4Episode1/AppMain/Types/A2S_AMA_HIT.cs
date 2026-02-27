@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_AMA_HIT
+    internal class A2S_AMA_HIT
     {
         public uint flag;
         public uint hit_key_num;

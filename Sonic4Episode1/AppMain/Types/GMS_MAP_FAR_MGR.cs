@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_FAR_MGR
+    internal class GMS_MAP_FAR_MGR
     {
         public readonly GMS_MAP_FAR_CAMERA camera = new GMS_MAP_FAR_CAMERA();
         public MTS_TASK_TCB tcb_pre_draw;

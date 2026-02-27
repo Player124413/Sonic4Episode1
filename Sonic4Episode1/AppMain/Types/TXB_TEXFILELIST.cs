@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class TXB_TEXFILELIST : NNS_TEXFILELIST
+    internal class TXB_TEXFILELIST : NNS_TEXFILELIST
     {
         public int tex_list_offset;
     }

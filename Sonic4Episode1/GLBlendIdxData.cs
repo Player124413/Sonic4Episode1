@@ -8,7 +8,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using mpp;
 
-public class GLBlendIdxData : OpenGL.GLVertexData
+internal class GLBlendIdxData : OpenGL.GLVertexData
 {
     protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
     {

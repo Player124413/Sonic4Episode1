@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_LDPART_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_LDPART_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_COLLISION_WORK col_work = new OBS_COLLISION_WORK();
         public readonly int[] vib_ofst = new int[2];

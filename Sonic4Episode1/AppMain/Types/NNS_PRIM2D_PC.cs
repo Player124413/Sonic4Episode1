@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIM2D_PC : NNS_PRIM2D_P
+    internal class NNS_PRIM2D_PC : NNS_PRIM2D_P
     {
         public uint Col;
 

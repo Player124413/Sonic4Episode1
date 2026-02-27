@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFCT_ENE_CREATE_PARAM
+    internal class GMS_EFCT_ENE_CREATE_PARAM
     {
         public readonly GMS_EFFECT_CREATE_PARAM create_param;
         public int arc_dwork_no;

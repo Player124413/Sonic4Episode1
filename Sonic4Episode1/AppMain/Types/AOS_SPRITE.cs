@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_SPRITE
+    internal class AOS_SPRITE
     {
         public readonly AOS_ACT_HITP hit = new AOS_ACT_HITP();
         public uint flag;

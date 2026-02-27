@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_FIX_PART_WORK
+    internal class GMS_FIX_PART_WORK
     {
         public readonly object holder;
         public GMS_FIX_MGR_WORK parent_mgr;

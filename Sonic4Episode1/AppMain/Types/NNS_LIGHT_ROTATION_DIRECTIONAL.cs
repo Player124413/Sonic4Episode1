@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_LIGHT_ROTATION_DIRECTIONAL
+    internal struct NNS_LIGHT_ROTATION_DIRECTIONAL
     {
         private NNS_LIGHT_TARGET_DIRECTIONAL data_;
 

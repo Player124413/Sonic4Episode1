@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void nnSetPrimitive2DAlphaFuncGL(uint func, float _ref)
     {

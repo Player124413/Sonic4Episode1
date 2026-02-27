@@ -1,6 +1,6 @@
 ﻿using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void GmStartDemoBuild()
     {
@@ -218,7 +218,7 @@ public partial class AppMain
         GMS_COCKPIT_2D_WORK work = (GMS_COCKPIT_2D_WORK)GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, tcb_name);
         work.cpit_com.obj_work.disp_flag |= (uint)node_flag;
         ObjObjectAction2dAMALoadSetTexlist(work.cpit_com.obj_work, work.obj_2d, null, null, ama_id, GmGameDatGetCockpitData(), AoTexGetTexList(aos_texture), (uint)action_id, node_flag);
-        ((OBS_OBJECT_WORK)work).pos.z -= FX_F32_TO_FX32(10f);
+        //((OBS_OBJECT_WORK)work).pos.z -= FX_F32_TO_FX32(10f);
         return work;
     }
 

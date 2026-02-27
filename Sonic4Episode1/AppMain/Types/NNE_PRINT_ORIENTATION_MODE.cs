@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private enum NNE_PRINT_ORIENTATION_MODE
     {

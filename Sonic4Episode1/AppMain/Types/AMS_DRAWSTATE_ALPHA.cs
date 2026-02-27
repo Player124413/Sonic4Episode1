@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_ALPHA
+    internal class AMS_DRAWSTATE_ALPHA
     {
         public int mode;
         public float alpha;

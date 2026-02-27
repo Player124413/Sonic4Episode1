@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_BLOCK_COLLISION
+    internal class OBS_BLOCK_COLLISION
     {
         public readonly byte[][] pData = new byte[2][];
         public uint width;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_LAND_PLACEMENT_INFO
+    internal class GMS_BOSS5_LAND_PLACEMENT_INFO
     {
         public int pos_x;
         public int pos_y;

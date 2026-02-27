@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using static SDL2.SDL;
-using static SDL2.SDL.SDL_MessageBoxFlags;
-using static SDL2.SDL.SDL_MessageBoxButtonFlags;
+using static SDL3.SDL;
+using static SDL3.SDL.SDL_MessageBoxFlags;
+using static SDL3.SDL.SDL_MessageBoxButtonFlags;
 
 namespace Sonic4ep1
 {
@@ -101,7 +101,7 @@ namespace Microsoft.Xna.Framework.GamerServices
             return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
         }
 
-        public static IAsyncResult BeginShowMessageBox(PlayerIndex player, string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
+        public static unsafe IAsyncResult BeginShowMessageBox(PlayerIndex player, string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
         {
             var tcs = new TaskCompletionSource<int?>();
             var task = tcs.Task.ContinueWith(t =>
@@ -113,16 +113,16 @@ namespace Microsoft.Xna.Framework.GamerServices
             var btns = buttons.ToArray();
             var data = new SDL_MessageBoxData
             {
-                title = title,
-                message = text,
+                title = SDL3.SDL.EncodeAsUTF8(title),
+                message = SDL3.SDL.EncodeAsUTF8(text),
                 numbuttons = btns.Length,
-                buttons = new SDL_MessageBoxButtonData[btns.Length]
+                buttons = (SDL_MessageBoxButtonData*)SDL3.SDL.SDL_malloc((UIntPtr)(sizeof(SDL_MessageBoxButtonData) * btns.Length))
             };
 
             for (int i = 0; i < btns.Length; i++)
             {
-                data.buttons[i].text = btns[i];
-                data.buttons[i].buttonid = i;
+                data.buttons[i].text = EncodeAsUTF8(btns[i]);
+                data.buttons[i].buttonID = i;
                 if (i == focusButton)
                     data.buttons[i].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
             }
@@ -132,7 +132,7 @@ namespace Microsoft.Xna.Framework.GamerServices
 
             IsVisible = true;
 
-            if (SDL_ShowMessageBox(ref data, out int button) == 0)
+            if (SDL_ShowMessageBox(ref data, out int button))
             {
                 tcs.SetResult(button);
             }

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_WATER_SURFACE_DATA
+    internal class GMS_WATER_SURFACE_DATA
     {
         public AMS_AMB_HEADER amb_header;
         public bool flag_load_object;

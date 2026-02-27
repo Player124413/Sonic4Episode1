@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_PAD_DATA : IClearable
+    internal class AMS_PAD_DATA : IClearable
     {
         public readonly int[] keep_time = new int[0];
         public readonly int[] last_time = new int[0];

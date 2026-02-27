@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Discord;
 #endif
 
-public partial class AppMain
+internal partial class AppMain
 {
 #if HAS_DISCORD
     private const long g_discordClientId = 686320985669894185;
@@ -246,6 +246,12 @@ public partial class AppMain
         Console.WriteLine(activity.Details);
 
         g_discordActivity.UpdateActivity(activity, null);
+#endif
+
+#if WASM
+        Sonic4Ep1.pInstance.Window.Title = ao_presence_stage_title_tbl[presence] ?? "Sonic 4 - Episode I";
+#else
+        Sonic4Ep1.pInstance.Window.Title = ao_presence_stage_title_tbl[presence] != null ? $"{ao_presence_stage_title_tbl[presence]} | Sonic 4 - Episode I" : "Sonic 4 - Episode I";
 #endif
     }
 

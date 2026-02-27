@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android36</TargetFramework>
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <ApplicationId>org.wamwoowam.Sonic4Episode1</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);TRACE;MONOGAME;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <NoWarn>1701;1702;CA1416;</NoWarn>
+    <UseMonoRuntime>false</UseMonoRuntime>
+    <PublishAot>true</PublishAot>
+    <DisableUnsupportedError>true</DisableUnsupportedError>
+    <PublishAotUsingRuntimePack>true</PublishAotUsingRuntimePack>
+  </PropertyGroup>
+  <ItemGroup>
+    <AndroidAsset Include="..\Content\bin\DesktopGLHD\**\*.*" AssetPack="content" DeliveryType="FastFollow">
+      <Link>Assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </AndroidAsset>
+    <PackageReference Include="DdsKtxXna.MonoGame" Version="0.4.4" />
+    <PackageReference Include="MonoGame.Framework.Android" Version="3.8.*" />
+    <PackageReference Include="Xamarin.Google.Android.Play.Asset.Delivery" Version="2.3.0.5" />
+    <PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.0.1" ExcludeAssets="all" />
+    <PackageReference Include="Xamarin.AndroidX.Datastore.Preferences.Core.Jvm" Version="1.2.0.1" ExcludeAssets="all" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <AndroidPackageFormat>aab</AndroidPackageFormat>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <AndroidBundleToolExtraArgs>--local-testing</AndroidBundleToolExtraArgs>
+    <!--<EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>-->
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+  <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+</Project>

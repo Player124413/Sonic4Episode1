@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GSS_SND_SE_HANDLE : IClearable
+    internal class GSS_SND_SE_HANDLE : IClearable
     {
         public readonly GSS_SND_CTRL_PARAM snd_ctrl_param = new GSS_SND_CTRL_PARAM();
         public uint flag;

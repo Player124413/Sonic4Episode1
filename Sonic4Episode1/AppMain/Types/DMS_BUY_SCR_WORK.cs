@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_BUY_SCR_WORK
+    internal class DMS_BUY_SCR_WORK
     {
         public int[] result = new int[1];
         public object instance;

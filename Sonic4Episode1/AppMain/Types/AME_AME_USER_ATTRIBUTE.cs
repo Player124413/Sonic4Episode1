@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private enum AME_AME_USER_ATTRIBUTE : uint
     {

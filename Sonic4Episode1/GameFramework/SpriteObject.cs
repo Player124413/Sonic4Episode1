@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameFramework
 {
-    public class SpriteObject : GameObjectBase
+    internal class SpriteObject : GameObjectBase
     {
         public SpriteObject(Game game)
           : base(game)

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_NODE_MATRIX
+    internal class GMS_ENE_NODE_MATRIX
     {
         public char[] _id = new char[8];
         public readonly GMS_BS_CMN_BMCB_MGR mtn_mgr = new GMS_BS_CMN_BMCB_MGR();

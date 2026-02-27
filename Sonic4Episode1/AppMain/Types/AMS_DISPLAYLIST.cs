@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DISPLAYLIST
+    internal class AMS_DISPLAYLIST
     {
         public int counter;
         public ArrayPointer<object> command_buf;

@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_TBL_WORK
+    internal class OBS_TBL_WORK
     {
         public readonly short[] key_timer = new short[4];
         public readonly short[] move_timer = new short[4];

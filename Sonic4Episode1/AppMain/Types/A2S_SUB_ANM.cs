@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_SUB_ANM
+    internal class A2S_SUB_ANM
     {
         public int tex_id;
         public uint clamp;

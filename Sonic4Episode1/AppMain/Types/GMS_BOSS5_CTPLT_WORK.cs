@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_CTPLT_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_CTPLT_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK ene_3d;
         public MPP_VOID_GMS_BOSS5_CTPLT_WORK proc_update;

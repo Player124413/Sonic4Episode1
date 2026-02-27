@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_AMA_USR
+    internal class A2S_AMA_USR
     {
         public uint flag;
         public uint usr_key_num;

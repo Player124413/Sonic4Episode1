@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public class NNS_RGB : IClearable
+internal class NNS_RGB : IClearable
 {
     public float r;
     public float g;

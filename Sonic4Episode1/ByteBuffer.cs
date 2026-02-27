@@ -7,7 +7,7 @@
 using System;
 using mpp;
 
-public class ByteBuffer
+internal class ByteBuffer
 {
     internal byte[] data;
     internal int offset;

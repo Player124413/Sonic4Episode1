@@ -6,7 +6,7 @@
 
 namespace er
 {
-    public struct IntPair
+    internal struct IntPair
     {
         public int first;
         public int second;

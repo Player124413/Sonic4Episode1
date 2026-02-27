@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIM2D_P
+    internal class NNS_PRIM2D_P
     {
         public readonly NNS_VECTOR2D Pos = new NNS_VECTOR2D();
 

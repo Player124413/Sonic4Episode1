@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct ArrayPointer<T>
+    internal struct ArrayPointer<T>
     {
         public static readonly ArrayPointer<T> NULL = new ArrayPointer<T>();
         public T[] array;

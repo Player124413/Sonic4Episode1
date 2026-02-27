@@ -1,7 +1,7 @@
 ﻿using er;
 using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static bool GmClearDemoBuildCheck()
     {
@@ -201,7 +201,7 @@ public partial class AppMain
             {
                 if (((int) g_gm_main_system.game_flag & 65536) != 0 && !main_work.is_first_spe_clear)
                     GmPlayerStockGet(g_gm_main_system.ply_work[0], 1);
-                bool is_uploaded = LiveFeature.getInstance().saveLeaderBoardScore(main_work.stage_id - 4, (int) high_score);
+                bool is_uploaded = /*LiveFeature.getInstance().saveLeaderBoardScore(main_work.stage_id - 4, (int) high_score)*/ false;
                 special[(int) num].SetHighScoreUploaded(is_uploaded);
                 if (is_uploaded && !special[(int) num].IsScoreUploadedOnce())
                     special[(int) num].SetScoreUploadedOnce(true);
@@ -213,7 +213,7 @@ public partial class AppMain
                 bool is_uploaded = false;
                 if (((int) g_gm_main_system.game_flag & 65536) != 0)
                 {
-                    is_uploaded = LiveFeature.getInstance().saveLeaderBoardScore(main_work.stage_id - 4 + 24, mainSysInfo.clear_time);
+                    is_uploaded = /*LiveFeature.getInstance().saveLeaderBoardScore(main_work.stage_id - 4 + 24, mainSysInfo.clear_time)*/ false;
                     special[(int) num].SetFastTimeUploaded(is_uploaded);
                 }
 
@@ -246,7 +246,7 @@ public partial class AppMain
             {
                 high_score = main_work.total_score[0] < 10U ? 0U : main_work.total_score[0];
                 g_gs_main_sys_info.is_first_play = stage[(int) num].GetHighScore(false) == 0;
-                bool is_uploaded = LiveFeature.getInstance().saveLeaderBoardScore((int) num, (int) high_score);
+                bool is_uploaded = /*LiveFeature.getInstance().saveLeaderBoardScore((int) num, (int) high_score)*/ false;
                 stage[(int) num].SetHighScoreUploaded(flag, is_uploaded);
                 if (is_uploaded && !stage[(int) num].IsScoreUploadedOnce())
                     stage[(int) num].SetScoreUploadedOnce(true);
@@ -254,7 +254,7 @@ public partial class AppMain
             }
             else if (mainSysInfo.game_mode == 1 && (stage[(int) num].GetFastTime(flag) > (uint) mainSysInfo.clear_time || stage[(int) num].GetFastTime(flag) == 0))
             {
-                bool is_uploaded = LiveFeature.getInstance().saveLeaderBoardScore((int) num + 24, mainSysInfo.clear_time);
+                bool is_uploaded = /*LiveFeature.getInstance().saveLeaderBoardScore((int) num + 24, mainSysInfo.clear_time)*/ false;
                 stage[(int) num].SetFastTimeUploaded(flag, is_uploaded);
                 if (is_uploaded && !stage[(int) num].IsTimeUploadedOnce())
                     stage[(int) num].SetTimeUploadedOnce(true);

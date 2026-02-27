@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class NNS_COMPILED_SHADER_PROFILE
     {

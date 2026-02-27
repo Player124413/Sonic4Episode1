@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct A2S_SUB_CIRCLE
+    internal struct A2S_SUB_CIRCLE
     {
         public float center_x;
         public float center_y;

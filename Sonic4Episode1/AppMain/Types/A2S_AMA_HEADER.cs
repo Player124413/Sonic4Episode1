@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_AMA_HEADER
+    internal class A2S_AMA_HEADER
     {
         public uint version;
         public uint node_num;

@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public const uint GMD_GAME_FLAG_GAMESYS_RESTART = 2;
     public const uint GMD_GAME_FLAG_CLEAR = 4;

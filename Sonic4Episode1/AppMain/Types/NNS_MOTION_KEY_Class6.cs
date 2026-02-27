@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class6
+    internal class NNS_MOTION_KEY_Class6
     {
         public readonly NNS_RGB Value = new NNS_RGB();
         public float Frame;

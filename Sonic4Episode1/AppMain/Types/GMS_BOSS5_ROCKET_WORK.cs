@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_ROCKET_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_ROCKET_WORK : IOBS_OBJECT_WORK
     {
         public VecFx32 launch_pos = new VecFx32();
         public VecFx32 dest_pos = new VecFx32();

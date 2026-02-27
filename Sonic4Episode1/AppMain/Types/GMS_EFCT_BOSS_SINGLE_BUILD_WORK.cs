@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFCT_BOSS_SINGLE_BUILD_WORK
+    internal class GMS_EFCT_BOSS_SINGLE_BUILD_WORK
     {
         public int tex_reg_id;
         public int model_reg_id;

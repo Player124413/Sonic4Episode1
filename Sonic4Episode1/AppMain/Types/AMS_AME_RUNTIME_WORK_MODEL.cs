@@ -1,9 +1,9 @@
 using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_AME_RUNTIME_WORK_MODEL
+    internal struct AMS_AME_RUNTIME_WORK_MODEL
     {
         private Vector4D_Buf rotate_axis_;
         private Vector4D_Buf scale_;

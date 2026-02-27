@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TCB_REPORT
+    internal class AMS_TCB_REPORT
     {
         public string name;
         public float frame_start;

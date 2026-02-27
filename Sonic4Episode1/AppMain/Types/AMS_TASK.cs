@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TASK
+    internal class AMS_TASK
     {
         public readonly AMS_TCB tcb_head = new AMS_TCB();
         public readonly AMS_TCB tcb_tail = new AMS_TCB();

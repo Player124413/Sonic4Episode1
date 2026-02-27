@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public class A2S_AMA_ACT
+internal class A2S_AMA_ACT
 {
     public int _off;
     public uint flag;

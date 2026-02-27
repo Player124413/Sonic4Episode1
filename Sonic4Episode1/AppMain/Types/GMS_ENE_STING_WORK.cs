@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_STING_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENE_STING_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_RECT_WORK search_rect_work = new OBS_RECT_WORK();
         public readonly NNS_MATRIX jet_r_mtx = GlobalPool<NNS_MATRIX>.Alloc();

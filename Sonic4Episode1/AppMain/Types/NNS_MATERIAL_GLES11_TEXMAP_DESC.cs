@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_MATERIAL_GLES11_TEXMAP_DESC
+    internal struct NNS_MATERIAL_GLES11_TEXMAP_DESC
     {
         public uint fType;
         public int iTexIdx;

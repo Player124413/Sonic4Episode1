@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_SND_BGM_PLAYER_MAIN_WORK
+    internal class DMS_SND_BGM_PLAYER_MAIN_WORK
     {
         public _proc_ proc_update;
         public uint flag;

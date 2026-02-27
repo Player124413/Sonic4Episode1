@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     private static void gmBoss3EffDamageInit(GMS_BOSS3_BODY_WORK body_work)

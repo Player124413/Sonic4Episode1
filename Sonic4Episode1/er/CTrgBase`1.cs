@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace er
 {
-    public class CTrgBase<T> where T : CTrgState, new()
+    internal class CTrgBase<T> where T : CTrgState, new()
     {
         private bool[] m_flag = new bool[2];
         private readonly T[] m_state = AppMain.New<T>(4);

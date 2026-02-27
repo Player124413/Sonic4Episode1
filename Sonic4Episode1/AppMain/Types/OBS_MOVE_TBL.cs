@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_MOVE_TBL
+    internal class OBS_MOVE_TBL
     {
         public VecFx32 spd = new VecFx32();
         public VecFx32 spd_add = new VecFx32();

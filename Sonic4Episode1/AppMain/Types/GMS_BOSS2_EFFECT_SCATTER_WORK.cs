@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS2_EFFECT_SCATTER_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS2_EFFECT_SCATTER_WORK : IOBS_OBJECT_WORK
     {
         public NNS_QUATERNION spin_quat = new NNS_QUATERNION();
         public readonly GMS_BS_CMN_NODE_CTRL_OBJECT control_node_work;

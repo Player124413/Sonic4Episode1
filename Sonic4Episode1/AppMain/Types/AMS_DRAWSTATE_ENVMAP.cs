@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_ENVMAP
+    internal class AMS_DRAWSTATE_ENVMAP
     {
         public readonly NNS_MATRIX texmtx = GlobalPool<NNS_MATRIX>.Alloc();
         public int texsrc;

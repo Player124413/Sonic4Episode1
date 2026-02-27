@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct Vector4D_Quat
+    internal struct Vector4D_Quat
     {
         private readonly NNS_QUATERNION[] quat_;
 

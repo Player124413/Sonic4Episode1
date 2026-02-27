@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static void amObjectSetup(
       out NNS_OBJECT _object,
@@ -25,13 +25,14 @@ public partial class AppMain
             {
                 switch (bincnkDataheader.Id)
                 {
-                    case 1112492366:
+                    case NND_CHUNK_OBJECT_GLES11:
                         reader.BaseStream.Seek(data0Pos + bincnkDataheader.OfsMainData, SeekOrigin.Begin);
-                        _object = NNS_OBJECT.Read(reader, data0Pos);
+                        _object = NNS_OBJECT.ReadGLES11(reader, data0Pos);
                         break;
-                    case 1145980238:
+                    case NND_CHUNK_NEND_GLES11:
                         return;
-                    case 1280592206:
+                    case NND_CHUNK_TEXTURE_GLES11:
+                    case NND_CHUNK_TEXTURE_DXG20:
                         reader.BaseStream.Seek(data0Pos + bincnkDataheader.OfsMainData, SeekOrigin.Begin);
                         texfilelist = NNS_TEXFILELIST.Read(reader, data0Pos);
                         break;

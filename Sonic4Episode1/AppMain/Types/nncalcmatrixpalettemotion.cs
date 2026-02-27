@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     internal static class nncalcmatrixpalettemotion
     {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_COCKPIT_2D_WORK : IOBS_OBJECT_WORK
+    internal class GMS_COCKPIT_2D_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION2D_AMA_WORK obj_2d = new OBS_ACTION2D_AMA_WORK();
         public readonly GMS_COCKPIT_COM_WORK cpit_com;

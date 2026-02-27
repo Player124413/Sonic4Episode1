@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkPopSteamData
+    internal class GmkPopSteamData
     {
         public const int GME_GMK_RECT_DATA_DEF_LEFT = 0;
         public const int GME_GMK_RECT_DATA_DEF_TOP = 1;

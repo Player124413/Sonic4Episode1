@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATCTRL_RGB
+    internal class NNS_MATCTRL_RGB
     {
         public readonly NNS_RGB col = new NNS_RGB();
         public int mode;

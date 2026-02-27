@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_TURRET_SEQ_VUL_SHOT_INFO
+    internal class GMS_BOSS5_TURRET_SEQ_VUL_SHOT_INFO
     {
         public int life_threshold;
         public uint wait_time;

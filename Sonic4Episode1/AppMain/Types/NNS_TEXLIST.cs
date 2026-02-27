@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXLIST
+    internal class NNS_TEXLIST
     {
         public int nTex;
         public NNS_TEXINFO[] pTexInfoList;

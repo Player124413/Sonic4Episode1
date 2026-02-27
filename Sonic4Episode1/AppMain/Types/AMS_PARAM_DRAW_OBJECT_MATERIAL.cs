@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class AMS_PARAM_DRAW_OBJECT_MATERIAL : AMS_PARAM_DRAW_OBJECT
     {

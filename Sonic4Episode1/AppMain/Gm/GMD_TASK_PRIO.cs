@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public const ushort GMD_TASK_PRIO_OBJSYS = 61435;
     public const ushort GMD_TASK_PRIO_INIT = 16;

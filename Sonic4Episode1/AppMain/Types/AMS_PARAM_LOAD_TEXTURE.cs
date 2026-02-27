@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework.Graphics;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_PARAM_LOAD_TEXTURE
+    internal class AMS_PARAM_LOAD_TEXTURE
     {
         public NNS_TEXINFO pTexInfo;
         public Texture2D tex;

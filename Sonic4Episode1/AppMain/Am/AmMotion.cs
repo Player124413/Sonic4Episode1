@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private int amMotionId(int file_id, int motion_id)
     {
@@ -367,8 +367,8 @@ public partial class AppMain
 
     public static void amMotionMaterialCalc(AMS_MOTION motion)
     {
-        //if (!AppMain.amThreadCheckDraw())
-        //    return;
+        // if (!AppMain.amThreadCheckDraw())
+        //     return;
         nnCalcMaterialMotion(motion.mmobject, motion._object, motion.mmtn[motion.mmotion_id], motion.mmotion_frame);
     }
 

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_STFRL_BOSS_EGG_WORK : IOBS_OBJECT_WORK
+    internal class DMS_STFRL_BOSS_EGG_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_OBJECT_WORK obj_work;
         public uint flag;

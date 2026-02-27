@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum OBE_BLOCK_COL_ID
     {

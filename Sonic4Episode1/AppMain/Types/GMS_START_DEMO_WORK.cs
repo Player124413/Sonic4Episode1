@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_START_DEMO_WORK
+    internal class GMS_START_DEMO_WORK
     {
         public GMS_COCKPIT_2D_WORK[] action_obj_work_cmn = new GMS_COCKPIT_2D_WORK[4];
         public GMS_COCKPIT_2D_WORK[] action_obj_work_zone = new GMS_COCKPIT_2D_WORK[1];

@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void GmBoss2Build()
     {
@@ -1252,7 +1252,7 @@
         VecFx32 dest_pos = new VecFx32(obj_work.pos.x, obj_work.pos.y - 409600, obj_work.pos.z);
         gmBoss2BodyInitMoveNormal(body_work, dest_pos, 60f);
         body_work.proc_update = new MPP_VOID_GMS_BOSS2_BODY_WORK(gmBoss2BodyStatePreBallUpdateRise);
-        GmCameraScaleSet(0.82f, 3f / 1000f);
+        GmCameraScaleSet(GMD_BOSS2_BODY_BALL_CAMERA_SCALE, (1.0f - GMD_BOSS2_BODY_BALL_CAMERA_SCALE) / GMD_BOSS2_BODY_BALL_FRAME_RISE);
     }
 
     private static void gmBoss2BodyStatePreBallUpdateRise(GMS_BOSS2_BODY_WORK body_work)

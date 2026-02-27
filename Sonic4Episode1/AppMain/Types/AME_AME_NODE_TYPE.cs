@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum AME_AME_NODE_TYPE : ushort
     {

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_SONIC_WORK
+    internal class DMS_LOGO_SONIC_WORK
     {
         public AOS_ACTION[] act = new AOS_ACTION[2];
         public uint flag;

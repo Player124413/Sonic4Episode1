@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GMM_ENEMY_CREATE_RIDE_WORK(
         GMS_EVE_RECORD_EVENT eve_rec,

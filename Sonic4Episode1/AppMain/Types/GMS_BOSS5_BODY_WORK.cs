@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_BODY_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_BODY_WORK : IOBS_OBJECT_WORK
     {
         public OBS_RECT_WORK[][] sub_rect_work = New<OBS_RECT_WORK>(2, 3);
         public readonly GMS_BS_CMN_BMCB_MGR bmcb_mgr = new GMS_BS_CMN_BMCB_MGR();

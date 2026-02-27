@@ -8,7 +8,7 @@ using System;
 
 namespace gs.backup
 {
-    public class SSystem : SBase
+    internal class SSystem : SBase
     {
         private Sonic4Save save;
 

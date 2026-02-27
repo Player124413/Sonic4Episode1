@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class MatrixPool
+    internal class MatrixPool
     {
         private List<NNS_MATRIX> cache_;
 

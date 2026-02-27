@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SOUND_BGM_FADE_WORK
+    internal class GMS_SOUND_BGM_FADE_WORK
     {
         public float start_vol;
         public float end_vol;

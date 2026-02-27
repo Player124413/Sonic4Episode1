@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMTRS_FC_PARAM
+    internal class AMTRS_FC_PARAM
     {
         public float[] m_x = new float[4];
         public float[] m_y = new float[4];

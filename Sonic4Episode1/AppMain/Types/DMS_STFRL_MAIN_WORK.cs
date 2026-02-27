@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_STFRL_MAIN_WORK
+    internal class DMS_STFRL_MAIN_WORK
     {
         public readonly DMS_STFRL_DATA_MGR arc_data = new DMS_STFRL_DATA_MGR();
         public readonly AMS_AMB_HEADER[] arc_cmn_amb_fs = new AMS_AMB_HEADER[2];

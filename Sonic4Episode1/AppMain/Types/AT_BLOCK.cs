@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AT_BLOCK
+    internal class AT_BLOCK
     {
         public byte[][] at;
 

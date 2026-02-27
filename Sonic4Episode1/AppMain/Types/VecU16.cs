@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct VecU16
+    internal struct VecU16
     {
         public ushort x;
         public ushort y;

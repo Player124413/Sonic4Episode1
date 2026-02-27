@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_STDSHADER_TEXMAP_DESC
+    internal class NNS_MATERIAL_STDSHADER_TEXMAP_DESC
     {
         public NNS_RGBA? pBorderColor = new NNS_RGBA?();
         public uint fType;

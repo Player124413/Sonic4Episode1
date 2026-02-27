@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    private enum GSE_DECIDE_KEY
+    public enum GSE_DECIDE_KEY
     {
         GSD_DECIDE_KEY_O = 0,
         GSD_DECIDE_KEY_DEF = 1,

@@ -1,4 +1,4 @@
-public struct NNS_VECTORFAST
+internal struct NNS_VECTORFAST
 {
     public float x;
     public float y;

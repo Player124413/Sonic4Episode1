@@ -1,5 +1,5 @@
 
-public class NNS_VECTOR_S16
+internal class NNS_VECTOR_S16
 {
     public short x;
     public short y;

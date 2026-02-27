@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_HEADER
+    internal class AMS_AME_HEADER
     {
         public byte[] file_id = new byte[4];
         public readonly AMS_AME_BOUNDING bounding = new AMS_AME_BOUNDING();

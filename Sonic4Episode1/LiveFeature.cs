@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Sonic4ep1;
 
-public class LiveFeature : XBOXLive
+internal class LiveFeature : XBOXLive
 {
     static Rectangle SCALE(Rectangle rect)
     {
@@ -144,9 +144,10 @@ public class LiveFeature : XBOXLive
 
     public static LiveFeature getInstance()
     {
-        if (instance == null)
-            instance = new LiveFeature();
-        return instance;
+        //if (instance == null)
+        //    instance = new LiveFeature();
+        //return instance;
+        return null;
     }
 
     public bool GotAchievment(string achievementKey)
@@ -548,18 +549,19 @@ public class LiveFeature : XBOXLive
 
     public void ShowOverride()
     {
-        if (interruptMainLoop == 0)
-            return;
-        if (interruptMainLoop == 2)
-        {
-            this._drawLeaderboards(GAME.spriteBatch, GAME.fnts);
-        }
-        else
-        {
-            if (interruptMainLoop != 1)
-                return;
-            this._drawAchievements(GAME.spriteBatch, GAME.fnts);
-        }
+        //if (interruptMainLoop == 0)
+        //    return;
+        //if (interruptMainLoop == 2)
+        //{
+        //    this._drawLeaderboards(GAME.spriteBatch, GAME.fnts);
+        //}
+        //else
+        //{
+        //    if (interruptMainLoop != 1)
+        //        return;
+        //    this._drawAchievements(GAME.spriteBatch, GAME.fnts);
+        //}
+        return;
     }
 
     public static bool isInterrupted()
@@ -757,7 +759,7 @@ public class LiveFeature : XBOXLive
         ReadFail,
     }
 
-    public struct HISCORE_ENTRY
+    internal struct HISCORE_ENTRY
     {
         public int index;
         public bool isMe;

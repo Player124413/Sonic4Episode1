@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_UPBUMPER_REBOUND_DATA
+    internal class GMS_GMK_UPBUMPER_REBOUND_DATA
     {
         public int act_state;
         public int spd_x;

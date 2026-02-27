@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_MOVE
+    internal class GMS_BOSS4_MOVE
     {
         public VecFx32 pos;
         public VecFx32 start;

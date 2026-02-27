@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_RING_WORK : IClearable
+    internal class GMS_RING_WORK : IClearable
     {
         public VecFx32 pos = new VecFx32();
         public VecFx32 scale = new VecFx32();

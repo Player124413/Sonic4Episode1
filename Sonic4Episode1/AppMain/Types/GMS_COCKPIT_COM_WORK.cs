@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_COCKPIT_COM_WORK
+    internal class GMS_COCKPIT_COM_WORK
     {
         public readonly OBS_OBJECT_WORK obj_work;
         public readonly object holder;

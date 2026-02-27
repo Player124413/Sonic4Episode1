@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class IZS_FADE_WORK
+    internal class IZS_FADE_WORK
     {
         public readonly AMS_PARAM_DRAW_PRIMITIVE prim_param = GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Alloc();
         public readonly NNS_PRIM2D_PC[][] vtx = New<NNS_PRIM2D_PC>(2, 4);

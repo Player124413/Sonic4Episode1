@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMD_BOSS5_WALK_GROUND_TIMING_INFO
+    internal class GMD_BOSS5_WALK_GROUND_TIMING_INFO
     {
         public float grounding_frame;
         public int leg_type;

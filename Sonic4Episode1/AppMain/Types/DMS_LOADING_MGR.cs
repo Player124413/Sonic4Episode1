@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOADING_MGR
+    internal class DMS_LOADING_MGR
     {
         public MTS_TASK_TCB tcb;
     }

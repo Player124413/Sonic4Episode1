@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class AMS_IPHONE_TP_CTRL_DATA
     {

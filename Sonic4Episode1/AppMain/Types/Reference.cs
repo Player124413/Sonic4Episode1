@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class Reference<T>
+    internal class Reference<T>
     {
         private T target_;
 

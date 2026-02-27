@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_NODE_CTRL_OBJECT : IOBS_OBJECT_WORK
+    internal class GMS_BS_CMN_NODE_CTRL_OBJECT : IOBS_OBJECT_WORK
     {
         public readonly NNS_VECTOR user_ofst = new NNS_VECTOR();
         public readonly NNS_MATRIX w_mtx = GlobalPool<NNS_MATRIX>.Alloc();

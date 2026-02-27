@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_LIGHTPTR
+    internal class NNS_LIGHTPTR
     {
         public uint fType;
         public object pLight;

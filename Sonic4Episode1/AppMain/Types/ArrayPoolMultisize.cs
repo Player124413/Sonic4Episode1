@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class ArrayPoolMultisize<T> where T : new()
+    internal class ArrayPoolMultisize<T> where T : new()
     {
         private List<int> arrayElementCapacity_ = new List<int>();
         private List<ArrayPoolFast<T>> Arrays_ = new List<ArrayPoolFast<T>>();

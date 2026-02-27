@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-public class KeyboardController : Controller
+internal class KeyboardController : Controller
 {
     public override void SetVibration(ushort left, ushort right) { }
     public override void SetVibrationEnabled(bool enabled) { }
@@ -8,13 +8,13 @@ public class KeyboardController : Controller
     public override void UpdateControllerReading(ref ControllerReading reading)
     {
         var state = Keyboard.GetState();
-        if (state.IsKeyDown(Keys.Up))
+        if (state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.I))
             reading.direction |= ControllerConsts.UP;
-        if (state.IsKeyDown(Keys.Down))
+        if (state.IsKeyDown(Keys.Down) || state.IsKeyDown(Keys.K))
             reading.direction |= ControllerConsts.DOWN;
-        if (state.IsKeyDown(Keys.Left))
+        if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.J))
             reading.direction |= ControllerConsts.LEFT;
-        if (state.IsKeyDown(Keys.Right))
+        if (state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.L))
             reading.direction |= ControllerConsts.RIGHT;
         if (state.IsKeyDown(Keys.A))
             reading.direction |= ControllerConsts.A;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS1_EFF_SHOCKWAVE_SUB_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS1_EFF_SHOCKWAVE_SUB_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_EFFECT_3DES_WORK eff_3des;
         public GMS_BOSS1_MGR_WORK mgr_work;

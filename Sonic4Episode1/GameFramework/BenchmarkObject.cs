@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GameFramework
 {
-    public class BenchmarkObject : TextObject
+    internal class BenchmarkObject : TextObject
     {
         private StringBuilder _strBuilder = new StringBuilder();
         private double _lastUpdateMilliseconds;

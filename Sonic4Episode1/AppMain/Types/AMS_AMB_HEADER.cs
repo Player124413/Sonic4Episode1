@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AMB_HEADER
+    internal class AMS_AMB_HEADER
     {
         public char[] file_id = new char[4]
         {

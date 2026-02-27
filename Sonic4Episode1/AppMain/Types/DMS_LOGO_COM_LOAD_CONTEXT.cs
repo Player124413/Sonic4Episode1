@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_COM_LOAD_CONTEXT
+    internal class DMS_LOGO_COM_LOAD_CONTEXT
     {
         public DME_LOGO_COM_LOAD_STATE state;
         public int no;

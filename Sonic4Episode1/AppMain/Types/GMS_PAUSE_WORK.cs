@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PAUSE_WORK
+    internal class GMS_PAUSE_WORK
     {
         public uint flag;
         public _proc_update_ proc_update;

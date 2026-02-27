@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static void VEC3_COPY(NNS_QUATERNION d_vec, NNS_VECTOR s_vec)
     {

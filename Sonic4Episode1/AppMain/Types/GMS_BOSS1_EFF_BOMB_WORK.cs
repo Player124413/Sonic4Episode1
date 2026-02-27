@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS1_EFF_BOMB_WORK
+    internal class GMS_BOSS1_EFF_BOMB_WORK
     {
         public readonly int[] pos = new int[2];
         public readonly int[] area = new int[2];

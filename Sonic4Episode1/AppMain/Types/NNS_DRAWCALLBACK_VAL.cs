@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_DRAWCALLBACK_VAL
+    internal class NNS_DRAWCALLBACK_VAL
     {
         public int iMaterial;
         public int iPrevMaterial;

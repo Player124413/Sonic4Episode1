@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_OBJECT_WORK : IClearable
+    internal class OBS_OBJECT_WORK : IClearable
     {
         public readonly short[] view_out_ofst_plus = new short[4];
         public VecU16 dir = new VecU16();

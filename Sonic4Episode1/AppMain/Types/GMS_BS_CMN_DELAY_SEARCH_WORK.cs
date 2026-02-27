@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_DELAY_SEARCH_WORK
+    internal class GMS_BS_CMN_DELAY_SEARCH_WORK
     {
         public VecFx32[] pos_hist_buf;
         public int cur_point;

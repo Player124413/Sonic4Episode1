@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class YSDS_HEADER
+    internal class YSDS_HEADER
     {
         public byte[] masic;
         public uint page_num;

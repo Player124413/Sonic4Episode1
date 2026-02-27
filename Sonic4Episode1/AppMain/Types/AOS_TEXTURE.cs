@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_TEXTURE : IClearable
+    internal class AOS_TEXTURE : IClearable
     {
         public NNS_TEXLIST texlist;
         public object texlist_buf;

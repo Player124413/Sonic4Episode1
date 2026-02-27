@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum GMD_MAIN_NEXT_EVT
     {

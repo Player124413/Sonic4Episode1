@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_ACTION2D_AMA_WORK : IClearable
+    internal class OBS_ACTION2D_AMA_WORK : IClearable
     {
         public readonly AOS_TEXTURE ao_tex = new AOS_TEXTURE();
         public uint flag;

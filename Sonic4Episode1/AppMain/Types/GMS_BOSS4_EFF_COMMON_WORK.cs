@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_EFF_COMMON_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS4_EFF_COMMON_WORK : IOBS_OBJECT_WORK
     {
         public readonly NNS_VECTOR ofs = new NNS_VECTOR();
         public readonly NNS_VECTOR rot = new NNS_VECTOR();

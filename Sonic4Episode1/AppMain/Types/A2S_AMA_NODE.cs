@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_AMA_NODE
+    internal class A2S_AMA_NODE
     {
         public int _off;
         public uint flag;

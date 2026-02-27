@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static int GMM_BOSS5_AREA_LEFT()
     {

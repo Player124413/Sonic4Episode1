@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static readonly int[] dm_stfrl_lng_amb_id_tbl;
     private static readonly int[] dm_stfrl_cmn_msg_lng_amb_id_tbl;

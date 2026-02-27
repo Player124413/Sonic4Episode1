@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_RING_SYS_WORK : IClearable
+    internal class GMS_RING_SYS_WORK : IClearable
     {
         public byte[] damage_num = new byte[1];
         public GMS_RING_WORK[] ring_list = new GMS_RING_WORK[96];

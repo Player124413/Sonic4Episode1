@@ -6,7 +6,7 @@
 
 namespace setting
 {
-    public class file1
+    internal class file1
     {
         public static readonly string[] c_lang_amb = new string[11]
         {

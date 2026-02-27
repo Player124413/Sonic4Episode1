@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION : IClearable
+    internal class NNS_MOTION : IClearable
     {
         public uint fType;
         public float StartFrame;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_QUATERNION
+    internal struct NNS_QUATERNION
     {
         public float x;
         public float y;

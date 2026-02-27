@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void GmWaterSurfaceInitData(AMS_AMB_HEADER amb)
     {

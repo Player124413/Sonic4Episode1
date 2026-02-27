@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECO_PRIM_DRAW_STACK
+    internal class GMS_DECO_PRIM_DRAW_STACK
     {
         public AOS_TVX_VERTEX[] vtx;
         public VecFx32 pos;

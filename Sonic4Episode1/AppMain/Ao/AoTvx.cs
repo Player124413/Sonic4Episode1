@@ -1,7 +1,7 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
-    public class TVX_FILE
+    internal class TVX_FILE
     {
         public TVXS_HEADER header;
         public TVXS_TEXTURE[] textures;

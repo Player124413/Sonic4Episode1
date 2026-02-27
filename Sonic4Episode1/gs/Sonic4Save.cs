@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 namespace gs
 {
     [XmlRoot("Sonic4Save")]
-    public class Sonic4Save
+    internal class Sonic4Save
     {
         public Sonic4Save()
         {
@@ -38,7 +38,7 @@ namespace gs
         [XmlElement("SpecialStage")] public SpecialStage[] SpecialStages { get; set; }
     }
 
-    public class System
+    internal class System
     {
         [XmlElement("Lives")] public uint Lives { get; set; } = 3;
         [XmlElement("Killed")] public uint Killed { get; set; } = 0;
@@ -46,7 +46,7 @@ namespace gs
         [XmlElement("Announce")] public Announce Announce { get; set; } = new Announce();
     }
 
-    public class Announce
+    internal class Announce
     {
         [XmlElement("ZoneSelect")] public bool ZoneSelect { get; set; }
         [XmlElement("Zone1Boss")] public bool Zone1Boss { get; set; }
@@ -62,7 +62,7 @@ namespace gs
         [XmlElement("MinecartFlickControls")] public bool MinecartFlickControls { get; set; }
     }
 
-    public class Stage
+    internal class Stage
     {
         public Stage()
         {
@@ -81,7 +81,7 @@ namespace gs
         [XmlElement("StageRecord")] public StageRecord[] StageRecords { get; set; }
     }
 
-    public class StageRecord
+    internal class StageRecord
     {
         [XmlAttribute("HighScore")] public uint HighScore { get; set; }
         [XmlIgnore] public TimeSpan BestTime { get; set; }
@@ -100,7 +100,7 @@ namespace gs
         }
     }
 
-    public class SpecialStage
+    internal class SpecialStage
     {
         [XmlAttribute("EmeraldStage")] public uint EmeraldStage { get; set; }
         [XmlAttribute("HighScore")] public uint HighScore { get; set; }
@@ -120,7 +120,7 @@ namespace gs
         }
     }
 
-    public class gsOptions
+    internal class gsOptions
     {
         [XmlElement("Vibration")] public bool Vibration { get; set; } = true;
         [XmlElement("BGMVolume")] public float BGMVolume { get; set; } = 1;
@@ -128,7 +128,7 @@ namespace gs
         [XmlElement("ControlStyle")] public ControlType ControlType { get; set; } = ControlType.VirtualPadUp;
     }
 
-    public class Remaster
+    internal class Remaster
     {
         [XmlElement("LoopCamera")] public bool LoopCamera { get; set; } = false;
         [XmlElement("BetterSoundEffects")] public bool BetterSoundEffects { get; set; } = true;
@@ -137,9 +137,10 @@ namespace gs
         [XmlElement("BetterMusic")] public bool BetterMusic { get; set; } = true;
         [XmlElement("BugFixes")] public bool BugFixes { get; set; } = true;
         [XmlElement("Misc")] public bool Misc { get; set; } = true;
+        [XmlElement("iPhoneMenus")] public bool iPhoneMenus { get; set; } = false;
     }
 
-    public class Debug
+    internal class Debug
     {
         [XmlElement("GodMode")] public bool GodMode { get; set; } = false;
     }

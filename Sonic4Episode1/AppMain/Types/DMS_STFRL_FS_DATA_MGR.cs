@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_STFRL_FS_DATA_MGR
+    internal class DMS_STFRL_FS_DATA_MGR
     {
         public readonly AMS_AMB_HEADER[] arc_cmn_amb_fs = new AMS_AMB_HEADER[2];
         public AMS_AMB_HEADER arc_list_font_amb_fs;

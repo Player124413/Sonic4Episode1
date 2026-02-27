@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFFECT_CREATE_PARAM
+    internal class GMS_EFFECT_CREATE_PARAM
     {
         public int ame_idx;
         public uint pos_type;

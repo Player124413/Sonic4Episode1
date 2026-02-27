@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private void amEffectCreateParticle(AMS_AME_CREATE_PARAM param)
     {

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static TXB_HEADER readTXBfile(object data)
     {
@@ -59,8 +59,6 @@ public partial class AppMain
             {
                 br.BaseStream.Position = ((TXB_TEXFILE)txbHeader.texfilelist.pTexFileList[index]).name_offset;
                 txbHeader.texfilelist.pTexFileList[index].Filename = readChars(br);
-                string str = txbHeader.texfilelist.pTexFileList[index].Filename.Replace(".PVR", ".PNG");
-                txbHeader.texfilelist.pTexFileList[index].Filename = str;
             }
         }
         return txbHeader;

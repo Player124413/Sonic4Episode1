@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_ANIMAL_PARAM
+    internal class GMS_GMK_ANIMAL_PARAM
     {
         public int spd_x;
         public int jump;

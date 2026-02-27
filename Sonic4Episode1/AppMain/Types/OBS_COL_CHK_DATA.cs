@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_COL_CHK_DATA : IClearable
+    internal class OBS_COL_CHK_DATA : IClearable
     {
         public int pos_x;
         public int pos_y;

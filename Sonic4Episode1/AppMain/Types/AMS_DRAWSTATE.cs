@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE
+    internal class AMS_DRAWSTATE
     {
         public readonly AMS_DRAWSTATE_DIFFUSE diffuse = new AMS_DRAWSTATE_DIFFUSE();
         public readonly AMS_DRAWSTATE_AMBIENT ambient = new AMS_DRAWSTATE_AMBIENT();

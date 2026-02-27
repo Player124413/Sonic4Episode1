@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_CAMERAPTR
+    internal class NNS_CAMERAPTR
     {
         public uint fType;
         public object pCamera;

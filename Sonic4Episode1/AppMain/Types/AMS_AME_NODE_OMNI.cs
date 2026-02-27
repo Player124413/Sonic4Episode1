@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_NODE_OMNI : AMS_AME_NODE_TR_ROT
+    internal class AMS_AME_NODE_OMNI : AMS_AME_NODE_TR_ROT
     {
         public float inheritance_rate;
         public float life;

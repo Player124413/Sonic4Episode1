@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void gmBoss3EggChangeAction(GMS_BOSS3_EGG_WORK egg_work, int action_id)
     {

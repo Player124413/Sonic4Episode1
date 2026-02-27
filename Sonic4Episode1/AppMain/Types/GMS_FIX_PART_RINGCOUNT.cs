@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_FIX_PART_RINGCOUNT
+    internal class GMS_FIX_PART_RINGCOUNT
     {
         public GMS_COCKPIT_2D_WORK[] sub_parts = new GMS_COCKPIT_2D_WORK[4];
         public int[] digit_list = new int[3];

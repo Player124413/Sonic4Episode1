@@ -8,7 +8,7 @@ using System;
 
 namespace gs.backup
 {
-    public class SSpecialSolo : SBase
+    internal class SSpecialSolo : SBase
     {
         private SpecialStage specialStage;
         public const uint c_false = 0;

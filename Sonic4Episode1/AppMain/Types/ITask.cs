@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class ITask
+    internal class ITask
     {
         public static uint c_priority_default = 4096;
         public static uint c_user_default = 0;

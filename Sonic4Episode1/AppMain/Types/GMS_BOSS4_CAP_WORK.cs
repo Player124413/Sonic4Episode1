@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_CAP_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS4_CAP_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_BOSS4_1SHOT_TIMER timer = new GMS_BOSS4_1SHOT_TIMER();
         public readonly GMS_BOSS4_EFF_BOMB_WORK bomb = new GMS_BOSS4_EFF_BOMB_WORK();

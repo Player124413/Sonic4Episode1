@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void DmManualBuild(AMS_AMB_HEADER[] arc_amb)
     {

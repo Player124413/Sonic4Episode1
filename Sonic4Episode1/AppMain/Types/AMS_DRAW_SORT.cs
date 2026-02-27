@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAW_SORT
+    internal class AMS_DRAW_SORT
     {
         public int key;
         public AMS_COMMAND_HEADER command;

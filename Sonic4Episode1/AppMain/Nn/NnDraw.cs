@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using mpp;
 
 
-public partial class AppMain
+internal partial class AppMain
 {
     private void nnDrawMultiObjectInitialPoseBaseMatrixList(
         NNS_OBJECT obj,
@@ -2771,20 +2771,20 @@ public partial class AppMain
         {
             NNS_VTXLISTPTR pVtxListPtr = obj.pVtxListPtrList[index];
             if (((int)pVtxListPtr.fType & 16) != 0)
-                OpenGL.glDeleteBuffers(1, new uint[1]
-                {
+                OpenGL.glDeleteBuffers(1,
+                [
                     ((NNS_VTXLIST_GL_DESC) pVtxListPtr.pVtxList).BufferName
-                });
+                ]);
         }
 
         for (int index = 0; index < obj.nPrimList; ++index)
         {
             NNS_PRIMLISTPTR pPrimListPtr = obj.pPrimListPtrList[index];
             if (((int)pPrimListPtr.fType & 2) != 0)
-                OpenGL.glDeleteBuffers(1, new uint[1]
-                {
+                OpenGL.glDeleteBuffers(1,
+                [
                     ((NNS_PRIMLIST_GL_DESC) pPrimListPtr.pPrimList).BufferName
-                });
+                ]);
         }
     }
 
@@ -4254,14 +4254,14 @@ public partial class AppMain
 
     private static void nnPutColorNWeight(NNS_VTXLISTPTR vlistptr)
     {
-        float[][] numArray = new float[5][]
-        {
-      new float[3]{ 0.0f, 0.0f, 1f },
-      new float[3]{ 0.0f, 1f, 0.0f },
-      new float[3]{ 1f, 1f, 0.0f },
-      new float[3]{ 1f, 0.0f, 1f },
-      new float[3]{ 1f, 0.0f, 0.0f }
-        };
+        float[][] numArray =
+        [
+      [0.0f, 0.0f, 1f],
+      [0.0f, 1f, 0.0f],
+      [1f, 1f, 0.0f],
+      [1f, 0.0f, 1f],
+      [1f, 0.0f, 0.0f]
+        ];
         if (((int)vlistptr.fType & 1) != 0)
         {
             NNS_VTXLIST_GL_DESC pVtxList = (NNS_VTXLIST_GL_DESC)vlistptr.pVtxList;
@@ -4301,17 +4301,17 @@ public partial class AppMain
 
     private static void nnPutColorNTexture(int nTexture)
     {
-        float[][] numArray = new float[8][]
-        {
+        float[][] numArray =
+        [
       new float[3],
-      new float[3]{ 0.0f, 0.0f, 1f },
-      new float[3]{ 0.0f, 1f, 1f },
-      new float[3]{ 0.0f, 1f, 0.0f },
-      new float[3]{ 1f, 1f, 0.0f },
-      new float[3]{ 1f, 0.0f, 0.0f },
-      new float[3]{ 1f, 0.0f, 1f },
-      new float[3]{ 1f, 1f, 1f }
-        };
+      [0.0f, 0.0f, 1f],
+      [0.0f, 1f, 1f],
+      [0.0f, 1f, 0.0f],
+      [1f, 1f, 0.0f],
+      [1f, 0.0f, 0.0f],
+      [1f, 0.0f, 1f],
+      [1f, 1f, 1f]
+        ];
         if (nTexture >= numArray.Length)
             nTexture = numArray.Length - 1;
         OpenGL.glColor3fv(numArray[nTexture]);

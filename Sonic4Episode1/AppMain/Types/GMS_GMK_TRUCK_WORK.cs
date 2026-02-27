@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_TRUCK_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_TRUCK_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_NN_WORK obj_3d_tire = new OBS_ACTION3D_NN_WORK();
         public readonly NNS_MATRIX tire_pos_f = new NNS_MATRIX();

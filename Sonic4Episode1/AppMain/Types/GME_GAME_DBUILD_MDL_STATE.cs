@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum GME_GAME_DBUILD_MDL_STATE
     {

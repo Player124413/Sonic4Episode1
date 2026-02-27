@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private const int GME_PLY_SEQ_STATE_FW = 0;
     private const int GME_PLY_SEQ_STATE_WALK = 1;

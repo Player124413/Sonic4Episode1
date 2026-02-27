@@ -3,7 +3,7 @@ import * as asar from 'asar/dist/extractor.js';
 export type Progress = {
     status: string;
     progress: number;
-    step: number;
+    step?: number;
 }
 
 type ProgressCallback = (progress: Progress) => void;
@@ -46,7 +46,7 @@ class Installer {
 
         let request = new XMLHttpRequest();
         request.open('GET', 'Content.asar', true);
-        request.responseType = 'arraybuffer';
+        request.responseType = '';
         request.onprogress = (e) => {
             if (e.lengthComputable) {
                 this._callback({ status: DOWNLOADING_UPDATE_PACKAGE, progress: e.loaded / e.total, step: 1 });
@@ -56,7 +56,7 @@ class Installer {
         const asarBlob = await new Promise<ArrayBuffer>((res, rej) => {
             request.onload = () => res(request.response);
             request.send();
-        });
+        }); 
 
         this._callback({ status: INSTALLING_UPDATE_PACKAGE, progress: 0, step: 2 });
 

@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 
 namespace er
 {
-    public class CTrgRect : CTrgBase<CTrgState>
+    internal class CTrgRect : CTrgBase<CTrgState>
     {
         private bool[] m_flag = new bool[1];
         private IntPair m_pos;

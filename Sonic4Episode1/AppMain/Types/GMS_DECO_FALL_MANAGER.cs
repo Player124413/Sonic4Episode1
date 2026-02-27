@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECO_FALL_MANAGER : IClearable
+    internal class GMS_DECO_FALL_MANAGER : IClearable
     {
         public GMS_DECO_FALL_REGISTER[] reg = New<GMS_DECO_FALL_REGISTER>(8);
         public uint dec_id;

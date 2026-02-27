@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_PRIMLISTPTR
+    internal class NNS_PRIMLISTPTR
     {
         public uint fType;
         public object pPrimList;

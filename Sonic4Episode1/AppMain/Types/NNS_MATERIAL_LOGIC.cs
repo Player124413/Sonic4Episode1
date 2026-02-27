@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_LOGIC
+    internal class NNS_MATERIAL_LOGIC
     {
         public uint fFlag;
         public ushort SrcFactorRGB;

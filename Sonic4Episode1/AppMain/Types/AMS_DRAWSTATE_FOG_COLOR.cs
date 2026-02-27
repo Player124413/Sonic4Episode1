@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_FOG_COLOR : IClearable
+    internal class AMS_DRAWSTATE_FOG_COLOR : IClearable
     {
         public float r;
         public float g;

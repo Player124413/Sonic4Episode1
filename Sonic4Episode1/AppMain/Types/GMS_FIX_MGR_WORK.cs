@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_FIX_MGR_WORK
+    internal class GMS_FIX_MGR_WORK
     {
         public GMS_FIX_PART_WORK[] part_work = new GMS_FIX_PART_WORK[5];
         public GMS_FIX_PART_RINGCOUNT part_ringcount = new GMS_FIX_PART_RINGCOUNT();

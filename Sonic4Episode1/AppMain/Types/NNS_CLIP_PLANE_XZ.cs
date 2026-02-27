@@ -1,9 +1,9 @@
 using System.Runtime.InteropServices;
 
-public partial class AppMain
+internal partial class AppMain
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class NNS_CLIP_PLANE_XZ
+    internal class NNS_CLIP_PLANE_XZ
     {
         [FieldOffset(0)]
         public float nx;

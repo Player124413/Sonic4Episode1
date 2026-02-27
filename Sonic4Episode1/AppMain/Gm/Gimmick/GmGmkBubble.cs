@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static OBS_OBJECT_WORK GmGmkBubbleManagerInit(
       GMS_EVE_RECORD_EVENT eve_rec,

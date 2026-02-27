@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_DRAW_VIDEO
+    internal struct AMS_DRAW_VIDEO
     {
         public float draw_width;
         public float draw_height;

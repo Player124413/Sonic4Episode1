@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AME_HEADER : AMS_AME_HEADER
+    internal class AME_HEADER : AMS_AME_HEADER
     {
     }
 }

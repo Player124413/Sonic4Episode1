@@ -1,16 +1,17 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void GmCameraInit()
     {
-        NNS_VECTOR pos1 = new NNS_VECTOR(177f, -15800f, 50f);
-        ObjCameraInit(0, pos1, 4, 0, 8192);
-        ObjCamera3dInit(0);
-        g_obj.glb_camera_id = 0;
-        g_obj.glb_camera_type = 1;
+        NNS_VECTOR cam_pos = new NNS_VECTOR(177f, -1580.0f, 50f);
+        ObjCameraInit(GME_CAMERA_NO_MAIN, cam_pos, GMD_TASK_GROUP_OBJSYS, GMD_TASK_PAUSE_LEVEL_CAMERA, GMD_TASK_PRIO_CAMERA);
+        ObjCamera3dInit(GME_CAMERA_NO_MAIN);
+        g_obj.glb_camera_id = GME_CAMERA_NO_MAIN;
+        g_obj.glb_camera_type = NNE_PROJECTION_TYPE_ORTHO;  // 正射影
         GmCameraDelayReset();
         GmCameraAllowReset();
+        ObjCameraSetUserFunc(GME_CAMERA_NO_MAIN, GmCameraFunc);	// ユーザー処理
         ObjCameraSetUserFunc(0, new OBJF_CAMERA_USER_FUNC(GmCameraFunc));
         OBS_CAMERA obsCamera1 = ObjCameraGet(0);
         obsCamera1.scale = GMD_CAMERA_SCALE;
@@ -59,7 +60,7 @@ public partial class AppMain
                 obsCamera3.command_state = numArray3[index];
             }
         }
-        ObjCameraInit(6, new NNS_VECTOR(pos1.x, pos1.y, pos1.z), 4, 0, 8192);
+        ObjCameraInit(6, new NNS_VECTOR(cam_pos.x, cam_pos.y, cam_pos.z), 4, 0, 8192);
         ObjCamera3dInit(6);
         ObjCameraSetUserFunc(6, new OBJF_CAMERA_USER_FUNC(gmCameraFuncWater));
         OBS_CAMERA obsCamera4 = ObjCameraGet(6);
@@ -75,17 +76,17 @@ public partial class AppMain
     public static void GmCameraPosSet(int pos_x, int pos_y, int pos_z)
     {
         OBS_CAMERA obsCamera = ObjCameraGet(0);
-        float num1 = GSD_DISP_WIDTH / 2 * obsCamera.scale;
-        float num2 = GSD_DISP_HEIGHT / 2 * obsCamera.scale;
-        float num3 = g_gm_main_system.map_fcol.bottom - GSD_DISP_HEIGHT / 2 * obsCamera.scale;
+        float lcd_width = (float)(GSD_DISP_WIDTH / 2) * obsCamera.scale;
+        float lcd_height = (float)(GSD_DISP_HEIGHT / 2) * obsCamera.scale;
+        float bottom = g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obsCamera.scale;
         obsCamera.pos.x = FXM_FX32_TO_FLOAT(pos_x);
-        if (obsCamera.pos.x < (double)num1)
-            obsCamera.pos.x = num1;
+        if (obsCamera.pos.x < (double)lcd_width)
+            obsCamera.pos.x = lcd_width;
         obsCamera.pos.y = -FXM_FX32_TO_FLOAT(pos_y);
-        if (obsCamera.pos.y > -(double)num2)
-            obsCamera.pos.y = -num2;
-        if (obsCamera.pos.y > (double)num3)
-            obsCamera.pos.y = num3;
+        if (obsCamera.pos.y > -(double)lcd_height)
+            obsCamera.pos.y = -lcd_height;
+        if (obsCamera.pos.y > (double)bottom)
+            obsCamera.pos.y = bottom;
         obsCamera.pos.z = FXM_FX32_TO_FLOAT(pos_z) + 50f;
         obsCamera.disp_pos.x = obsCamera.pos.x;
         obsCamera.disp_pos.y = obsCamera.pos.y;
@@ -143,170 +144,470 @@ public partial class AppMain
 
     public static void GmCameraSetClipCamera(OBS_CAMERA obj_camera)
     {
-        ObjObjectClipCameraSet(g_obj.camera[0][0], g_obj.camera[0][1]);
+        if (false)
+        {
+
+            ObjObjectClipCameraSet(g_obj.camera[0][0], g_obj.camera[0][1]);
+        }
+        else
+        {
+            float left = (float)(g_gm_main_system.map_fcol.left + GMD_OBJ_CLIP_LCD_X / 2);
+            float right = (float)(g_gm_main_system.map_fcol.right - GMD_OBJ_CLIP_LCD_X / 2);
+            float top = (float)(g_gm_main_system.map_fcol.top + GMD_OBJ_CLIP_LCD_Y / 2);
+            float bottom = (float)(g_gm_main_system.map_fcol.bottom - GMD_OBJ_CLIP_LCD_Y / 2);
+
+            float camera_x, camera_y;
+
+            if (obj_camera.disp_pos.x <= left)
+            {
+                camera_x = left;
+            }
+            else if (obj_camera.disp_pos.x >= right)
+            {
+                camera_x = right;
+            }
+            else
+            {
+                camera_x = obj_camera.disp_pos.x;
+            }
+            if (-obj_camera.disp_pos.y <= top)
+            {
+                camera_y = top;
+            }
+            else if (-obj_camera.disp_pos.y >= bottom)
+            {
+                camera_y = bottom;
+            }
+            else
+            {
+                camera_y = -obj_camera.disp_pos.y;
+            }
+
+
+            ObjObjectClipCameraSet(FXM_FLOAT_TO_FX32(camera_x - (float)(OBD_OBJ_CLIP_LCD_X / 2)),
+                                FXM_FLOAT_TO_FX32(camera_y - (float)(OBD_OBJ_CLIP_LCD_Y / 2)));
+        }
     }
 
     private static void GmCameraFunc(OBS_CAMERA obj_camera)
     {
-        GMS_PLAYER_WORK gmsPlayerWork = g_gm_main_system.ply_work[0];
-        SNNS_VECTOR snnsVector1;
-        snnsVector1.x = FXM_FX32_TO_FLOAT(gmsPlayerWork.obj_work.pos.x);
-        snnsVector1.z = FXM_FX32_TO_FLOAT(gmsPlayerWork.obj_work.pos.z);
-        snnsVector1.y = GSM_MAIN_STAGE_IS_SPSTAGE() ? FXM_FX32_TO_FLOAT(-gmsPlayerWork.obj_work.pos.y + 8192) : FXM_FX32_TO_FLOAT(-gmsPlayerWork.obj_work.pos.y + 24576);
-        if ((gmsPlayerWork.player_flag & GMD_PLF_DIE) != 0 && (gmsPlayerWork.player_flag & GMD_PLF_TATK_RETRY) == 0)
+        SNNS_VECTOR pos;
+        GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[GSD_MAIN_PLAYER_1P];
+
+        pos.x = FXM_FX32_TO_FLOAT(ply_work.obj_work.pos.x);
+        pos.z = FXM_FX32_TO_FLOAT(ply_work.obj_work.pos.z);
+        if (!GSM_MAIN_STAGE_IS_SPSTAGE())
         {
-            snnsVector1.x = obj_camera.work.x;
-            snnsVector1.y = obj_camera.work.y;
-            snnsVector1.z = obj_camera.work.z;
+            // 通常はカメラＹを少しオフセット
+            pos.y = FXM_FX32_TO_FLOAT(-ply_work.obj_work.pos.y + GMD_SCR_PLY_Y_OFFS);
         }
         else
         {
-            obj_camera.work.x = snnsVector1.x;
-            obj_camera.work.y = snnsVector1.y;
-            obj_camera.work.z = snnsVector1.z;
+            // スペステはオフセット量を少し抑える（スペステ終了時画面回転時の中心ずれ違和感を抑えるため）
+            pos.y = FXM_FX32_TO_FLOAT(-ply_work.obj_work.pos.y + GMD_SCR_PLY_Y_OFFS / 3);
         }
+
+        // 目的値を記録
+        if ((ply_work.player_flag & GMD_PLF_DIE) == GMD_PLF_DIE &&
+                    (ply_work.player_flag & GMD_PLF_TATK_RETRY) == 0)
+        {
+            // プレイヤー死亡時はカメラ不動(リトライ演出中を除く)
+            pos.x = obj_camera.work.x;
+            pos.y = obj_camera.work.y;
+            pos.z = obj_camera.work.z;
+        }
+        else
+        {
+            // 通常時は更新
+            obj_camera.work.x = pos.x;
+            obj_camera.work.y = pos.y;
+            obj_camera.work.z = pos.z;
+        }
+
         obj_camera.prev_pos.x = obj_camera.pos.x;
         obj_camera.prev_pos.y = obj_camera.pos.y;
         obj_camera.prev_pos.z = obj_camera.pos.z;
-        if ((obj_camera.flag & 1) != 0)
+
+        if ((obj_camera.flag & OBD_CAMERA_FIX) == OBD_CAMERA_FIX)
         {
-            if (obj_camera.target_obj == null)
-                return;
-            obj_camera.pos.x = snnsVector1.x;
-            obj_camera.pos.y = snnsVector1.y;
-            obj_camera.pos.z = snnsVector1.z;
+            if (obj_camera.target_obj != null)
+            {
+                obj_camera.pos.x = pos.x;
+                obj_camera.pos.y = pos.y;
+                obj_camera.pos.z = pos.z;
+            }
+
+            return;
+        }
+
+        // スケール変更チェック＆実行
+        gmCameraScaleChange(obj_camera);
+
+
+        if ((obj_camera.flag & OBD_CAMERA_SHIFT) == OBD_CAMERA_SHIFT)
+        {
+            // シフトで各軸移動
+            obj_camera.pos.x = ObjShiftSetF(obj_camera.pos.x, pos.x, obj_camera.shift, obj_camera.spd_max.x, obj_camera.spd_add.x);
+            obj_camera.pos.y = ObjShiftSetF(obj_camera.pos.y, pos.x, obj_camera.shift, obj_camera.spd_max.y, obj_camera.spd_add.y);
+            obj_camera.pos.z = ObjShiftSetF(obj_camera.pos.z, pos.x, obj_camera.shift, obj_camera.spd_max.z, obj_camera.spd_add.z);
         }
         else
         {
-            gmCameraScaleChange(obj_camera);
-            if ((obj_camera.flag & 2) != 0)
-            {
-                obj_camera.pos.x = ObjShiftSetF(obj_camera.pos.x, snnsVector1.x, obj_camera.shift, obj_camera.spd_max.x, obj_camera.spd_add.x);
-                obj_camera.pos.y = ObjShiftSetF(obj_camera.pos.y, snnsVector1.x, obj_camera.shift, obj_camera.spd_max.y, obj_camera.spd_add.y);
-                obj_camera.pos.z = ObjShiftSetF(obj_camera.pos.z, snnsVector1.x, obj_camera.shift, obj_camera.spd_max.z, obj_camera.spd_add.z);
+            // スクロール開始範囲セット
+            obj_camera.allow.x = obj_camera.allow_limit.x;
+            obj_camera.allow.z = obj_camera.allow_limit.z;
+            if ((ply_work.obj_work.move_flag & OBD_MOVE_JUMP) == OBD_MOVE_JUMP)
+            {   // 接地で判定する場合は、OBD_MOVE_UNDER
+                // 空中
+                //			obj_camera.allow.y = MTM_MATH_MIN(obj_camera.allow.y + GMD_SCR_ALLOW_SPD, obj_camera.allow_limit.y);
+                obj_camera.allow.y = obj_camera.allow_limit.y;
             }
             else
             {
-                obj_camera.allow.x = obj_camera.allow_limit.x;
-                obj_camera.allow.z = obj_camera.allow_limit.z;
-                obj_camera.allow.y = (gmsPlayerWork.obj_work.move_flag & 16) == 0 ? Math.Max(obj_camera.allow.y - 4f, 0.0f) : obj_camera.allow_limit.y;
-                if (snnsVector1.x < obj_camera.pos.x - (double)obj_camera.allow.x)
-                    snnsVector1.x += obj_camera.allow.x;
-                else if (snnsVector1.x > obj_camera.pos.x + (double)obj_camera.allow.x)
-                    snnsVector1.x -= obj_camera.allow.x;
-                else
-                    snnsVector1.x = obj_camera.pos.x;
-                if (snnsVector1.y < obj_camera.pos.y - (double)obj_camera.allow.y)
-                    snnsVector1.y += obj_camera.allow.y;
-                else if (snnsVector1.y > obj_camera.pos.y + (double)obj_camera.allow.y)
-                    snnsVector1.y -= obj_camera.allow.y;
-                else
-                    snnsVector1.y = obj_camera.pos.y;
-                obj_camera.spd.x = snnsVector1.x == (double)obj_camera.pos.x ? ObjSpdDownSetF(obj_camera.spd.x, obj_camera.spd_add.x) : ObjSpdUpSetF(obj_camera.spd.x, obj_camera.spd_add.x, obj_camera.spd_max.x);
-                obj_camera.spd.y = snnsVector1.y == (double)obj_camera.pos.y ? ObjSpdDownSetF(obj_camera.spd.y, obj_camera.spd_add.y) : ObjSpdUpSetF(obj_camera.spd.y, obj_camera.spd_add.y, obj_camera.spd_max.y);
-                obj_camera.spd.z = snnsVector1.z == (double)obj_camera.pos.z ? ObjSpdDownSetF(obj_camera.spd.z, obj_camera.spd_add.z) : ObjSpdUpSetF(obj_camera.spd.z, obj_camera.spd_add.z, obj_camera.spd_max.z);
-                if (snnsVector1.x > (double)obj_camera.pos.x)
-                {
-                    obj_camera.pos.x += obj_camera.spd.x;
-                    if (obj_camera.pos.x > (double)snnsVector1.x)
-                        obj_camera.pos.x = snnsVector1.x;
-                }
-                else
-                {
-                    obj_camera.pos.x -= obj_camera.spd.x;
-                    if (obj_camera.pos.x < (double)snnsVector1.x)
-                        obj_camera.pos.x = snnsVector1.x;
-                }
-                if (snnsVector1.y > (double)obj_camera.pos.y)
-                {
-                    obj_camera.pos.y += obj_camera.spd.y;
-                    if (obj_camera.pos.y > (double)snnsVector1.y)
-                        obj_camera.pos.y = snnsVector1.y;
-                }
-                else
-                {
-                    obj_camera.pos.y -= obj_camera.spd.y;
-                    if (obj_camera.pos.y < (double)snnsVector1.y)
-                        obj_camera.pos.y = snnsVector1.y;
-                }
-                if (snnsVector1.z > (double)obj_camera.pos.z)
-                {
-                    obj_camera.pos.z += obj_camera.spd.z;
-                    if (obj_camera.pos.z > (double)snnsVector1.z)
-                        obj_camera.pos.z = snnsVector1.z;
-                }
-                else
-                {
-                    obj_camera.pos.z -= obj_camera.spd.z;
-                    if (obj_camera.pos.z < (double)snnsVector1.z)
-                        obj_camera.pos.z = snnsVector1.z;
-                }
+                //　地上
+                obj_camera.allow.y = MTM_MATH_MAX((uint)(obj_camera.allow.y - GMD_SCR_ALLOW_SPD), 0);
             }
-            if (MTM_MATH_ABS(snnsVector1.z - obj_camera.pos.z) > (double)obj_camera.play_ofst_max.z)
-                obj_camera.pos.z = snnsVector1.z <= (double)obj_camera.pos.z ? snnsVector1.z + obj_camera.play_ofst_max.z : snnsVector1.z - obj_camera.play_ofst_max.z;
-            obj_camera.disp_ofst.x = gm_camera_vibration.x / 16f;
-            obj_camera.disp_ofst.y = gm_camera_vibration.y / 16f;
-            obj_camera.disp_ofst.z = gm_camera_vibration.z / 16f;
-            gm_camera_vibration.x = gmCameraVibCheck(gm_camera_vibration.x);
-            gm_camera_vibration.y = gmCameraVibCheck(gm_camera_vibration.y);
-            gm_camera_vibration.z = gmCameraVibCheck(gm_camera_vibration.z);
-            obj_camera.pos.z = 50f;
-            SNNS_VECTOR snnsVector2;
-            snnsVector2.x = obj_camera.ofst.x;
-            snnsVector2.y = obj_camera.ofst.y;
-            snnsVector2.z = obj_camera.ofst.z;
-            if ((double)obj_camera.scale < GMD_CAMERA_SCALE)
+
+            // スクロール開始範囲チェック(スクロールトリガ)
+            // X
+            if (pos.x < (obj_camera.pos.x - obj_camera.allow.x))
             {
-                float num = (obj_camera.scale - 0.3371917f) / 0.3371917f;
-                snnsVector2.x *= num;
-                snnsVector2.y *= num;
+                pos.x += obj_camera.allow.x;
             }
-            obj_camera.disp_pos.x = obj_camera.pos.x + snnsVector2.x;
-            obj_camera.disp_pos.y = obj_camera.pos.y + snnsVector2.y;
-            obj_camera.disp_pos.z = obj_camera.pos.z + snnsVector2.z;
-            gmCameraLookupCheck(obj_camera);
-            float num1 = g_gm_main_system.map_fcol.left + GSD_DISP_WIDTH / 2 * obj_camera.scale;
-            float num2 = g_gm_main_system.map_fcol.right - GSD_DISP_WIDTH / 2 * obj_camera.scale;
-            float num3 = g_gm_main_system.map_fcol.top + GSD_DISP_HEIGHT / 2 * obj_camera.scale;
-            float num4 = g_gm_main_system.map_fcol.bottom - GSD_DISP_HEIGHT / 2 * obj_camera.scale;
-            if (obj_camera.disp_pos.x < (double)num1)
+            else if (pos.x > (obj_camera.pos.x + obj_camera.allow.x))
             {
-                obj_camera.disp_pos.x = num1;
-                if (obj_camera.disp_pos.x > (double)num2)
-                    obj_camera.disp_pos.x = (float)((num2 + (double)num1) / 2.0);
+                pos.x -= obj_camera.allow.x;
             }
-            else if (obj_camera.disp_pos.x > (double)num2)
+            else
             {
-                obj_camera.disp_pos.x = num2;
-                if (obj_camera.disp_pos.x < (double)num1)
-                    obj_camera.disp_pos.x = (float)((num2 + (double)num1) / 2.0);
+                pos.x = obj_camera.pos.x;
             }
-            if (obj_camera.disp_pos.y > -(double)num3)
-                obj_camera.disp_pos.y = -num3;
-            if (obj_camera.disp_pos.y < -(double)num4)
-                obj_camera.disp_pos.y = -num4;
-            obj_camera.target_pos.Assign(obj_camera.disp_pos);
-            obj_camera.target_pos.z -= 50f;
-            if (!GSM_MAIN_STAGE_IS_SPSTAGE())
+            // Y
+            if (pos.y < (obj_camera.pos.y - obj_camera.allow.y))
             {
-                var loopCamera = gs.backup.SSave.CreateInstance().GetRemaster().LoopCamera;
-                if (((int)obj_camera.flag & int.MinValue) != 0 && ((int)gmsPlayerWork.obj_work.move_flag & 1) != 0 && loopCamera)
-                {
-                    short num5 = (short)-gmsPlayerWork.obj_work.dir.z;
-                    short roll = (short)obj_camera.roll;
-                    short num6 = (ushort)num5 <= 16384 || (ushort)num5 >= 49152 ? (short)((num5 + roll) / 2) : (short)(ushort)(((ushort)num5 + (uint)(ushort)roll) / 2U);
-                    obj_camera.roll = num6;
-                    obj_camera.flag &= int.MaxValue;
-                }
-                else
-                {
-                    obj_camera.roll = obj_camera.roll * 9 / 10;
-                    obj_camera.flag &= int.MaxValue;
-                }
+                pos.y += obj_camera.allow.y;
             }
-            ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - OBD_LCD_X / 2), FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - OBD_LCD_Y / 2), FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - OBD_LCD_X / 2), FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - OBD_LCD_Y / 2));
-            GmCameraSetClipCamera(obj_camera);
+            else if (pos.y > (obj_camera.pos.y + obj_camera.allow.y))
+            {
+                pos.y -= obj_camera.allow.y;
+            }
+            else
+            {
+                pos.y = obj_camera.pos.y;
+            }
+            // 移動速度設定、加減速
+            if (pos.x != obj_camera.pos.x)
+            {
+                obj_camera.spd.x = ObjSpdUpSetF(obj_camera.spd.x, obj_camera.spd_add.x, obj_camera.spd_max.x);
+            }
+            else
+            {
+                obj_camera.spd.x = ObjSpdDownSetF(obj_camera.spd.x, obj_camera.spd_add.x);
+            }
+            if (pos.y != obj_camera.pos.y)
+            {
+                obj_camera.spd.y = ObjSpdUpSetF(obj_camera.spd.y, obj_camera.spd_add.y, obj_camera.spd_max.y);
+            }
+            else
+            {
+                obj_camera.spd.y = ObjSpdDownSetF(obj_camera.spd.y, obj_camera.spd_add.y);
+            }
+            if (pos.z != obj_camera.pos.z)
+            {
+                obj_camera.spd.z = ObjSpdUpSetF(obj_camera.spd.z, obj_camera.spd_add.z, obj_camera.spd_max.z);
+            }
+            else
+            {
+                obj_camera.spd.z = ObjSpdDownSetF(obj_camera.spd.z, obj_camera.spd_add.z);
+            }
+            // 各軸移動
+            if (pos.x > obj_camera.pos.x)
+            {
+                obj_camera.pos.x += obj_camera.spd.x;
+                if (obj_camera.pos.x > pos.x)
+                    obj_camera.pos.x = pos.x;
+            }
+            else
+            {
+                obj_camera.pos.x -= obj_camera.spd.x;
+                if (obj_camera.pos.x < pos.x)
+                    obj_camera.pos.x = pos.x;
+            }
+            if (pos.y > obj_camera.pos.y)
+            {
+                obj_camera.pos.y += obj_camera.spd.y;
+                if (obj_camera.pos.y > pos.y)
+                    obj_camera.pos.y = pos.y;
+            }
+            else
+            {
+                obj_camera.pos.y -= obj_camera.spd.y;
+                if (obj_camera.pos.y < pos.y)
+                    obj_camera.pos.y = pos.y;
+            }
+            if (pos.z > obj_camera.pos.z)
+            {
+                obj_camera.pos.z += obj_camera.spd.z;
+                if (obj_camera.pos.z > pos.z)
+                    obj_camera.pos.z = pos.z;
+            }
+            else
+            {
+                obj_camera.pos.z -= obj_camera.spd.z;
+                if (obj_camera.pos.z < pos.z)
+                    obj_camera.pos.z = pos.z;
+            }
         }
+#if false
+    // 離れオーバーチェック
+    if ( MTM_MATH_ABS(pos.x - obj_camera.pos.x) > obj_camera.play_ofst_max.x ){
+        if ( pos.x > obj_camera.pos.x ){
+            obj_camera.pos.x = pos.x - obj_camera.play_ofst_max.x;
+        }else{
+            obj_camera.pos.x = pos.x + obj_camera.play_ofst_max.x;
+        }
+
+    }
+    if ( MTM_MATH_ABS(pos.y - obj_camera.pos.y) > obj_camera.play_ofst_max.y ){
+        if ( pos.y > obj_camera.pos.y ){
+            obj_camera.pos.y = pos.y - obj_camera.play_ofst_max.y;
+        }else{
+            obj_camera.pos.y = pos.y + obj_camera.play_ofst_max.y;
+        }
+
+    }
+#endif
+        if (MTM_MATH_ABS(pos.z - obj_camera.pos.z) > obj_camera.play_ofst_max.z)
+        {
+            if (pos.z > obj_camera.pos.z)
+            {
+                obj_camera.pos.z = pos.z - obj_camera.play_ofst_max.z;
+            }
+            else
+            {
+                obj_camera.pos.z = pos.z + obj_camera.play_ofst_max.z;
+            }
+        }
+        // 範囲オーバーチェック
+        //	objCameraPosLimitCheck(obj_camera, &obj_camera.pos );
+
+        // 振動チェック
+        obj_camera.disp_ofst.x = gm_camera_vibration.x / 16;
+        obj_camera.disp_ofst.y = gm_camera_vibration.y / 16;
+        obj_camera.disp_ofst.z = gm_camera_vibration.z / 16;
+        gm_camera_vibration.x = gmCameraVibCheck(gm_camera_vibration.x);
+        gm_camera_vibration.y = gmCameraVibCheck(gm_camera_vibration.y);
+        gm_camera_vibration.z = gmCameraVibCheck(gm_camera_vibration.z);
+
+        obj_camera.pos.z = 50.0f;
+
+#if false
+        // コンソール版
+        obj_camera.disp_pos.x = obj_camera.pos.x + obj_camera.ofst.x;
+        obj_camera.disp_pos.y = obj_camera.pos.y + obj_camera.ofst.y;
+        obj_camera.disp_pos.z = obj_camera.pos.z + obj_camera.ofst.z;
+#else
+	// iPhone版：The iPhone version corrects the offset amount for the camera offset when magnifying the screen.
+	{
+		SNNS_VECTOR	ofst;
+		ofst.x = obj_camera.ofst.x;
+		ofst.y = obj_camera.ofst.y;
+		ofst.z = obj_camera.ofst.z;
+		if (obj_camera.scale < GMD_CAMERA_SCALE) {
+			// スケール値によりオフセット量を調整
+			float rate = obj_camera.scale - GMD_CAMERA_UP_SCALE_MAX;
+			rate /= GMD_CAMERA_SCALE - GMD_CAMERA_UP_SCALE_MAX;
+			ofst.x *= rate;
+			ofst.y *= rate;
+		}
+		obj_camera.disp_pos.x = obj_camera.pos.x + ofst.x;
+		obj_camera.disp_pos.y = obj_camera.pos.y + ofst.y;
+		obj_camera.disp_pos.z = obj_camera.pos.z + ofst.z;
+	}
+#endif
+        gmCameraLookupCheck(obj_camera);                                // 見上げ/見下ろし
+
+        // 表示限界リミットチェック
+        {
+#if true
+            float left = g_gm_main_system.map_fcol.left + (float)(OBD_LCD_X / 2) * obj_camera.scale;
+            float right = g_gm_main_system.map_fcol.right - (float)(OBD_LCD_X / 2) * obj_camera.scale;
+            float top = g_gm_main_system.map_fcol.top + (float)(OBD_LCD_Y / 2) * obj_camera.scale;
+            float bottom = g_gm_main_system.map_fcol.bottom - (float)(OBD_LCD_Y / 2) * obj_camera.scale;
+#else
+            float left = g_gm_main_system.map_fcol.left + (float)(AMD_SCREEN_2D_WIDTH / 2) * obj_camera.scale;
+            float right = g_gm_main_system.map_fcol.right - (float)(AMD_SCREEN_2D_WIDTH / 2) * obj_camera.scale;
+            float top = g_gm_main_system.map_fcol.top + (float)(AMD_SCREEN_2D_HEIGHT / 2) * obj_camera.scale;
+            float bottom = g_gm_main_system.map_fcol.bottom - (float)(AMD_SCREEN_2D_HEIGHT / 2) * obj_camera.scale;
+#endif
+            // scale変更時の左右端チェック
+#if true
+            // 左端チェック
+            if (obj_camera.disp_pos.x < left)
+            {
+                obj_camera.disp_pos.x = left;
+
+                if (obj_camera.disp_pos.x > right)
+                {
+                    obj_camera.disp_pos.x = (right + left) / 2;
+                }
+            }
+            // 右端チェック
+            else
+            if (obj_camera.disp_pos.x > right)
+            {
+                obj_camera.disp_pos.x = right;
+
+                if (obj_camera.disp_pos.x < left)
+                {
+                    obj_camera.disp_pos.x = (right + left) / 2;
+                }
+            }
+#else
+            // 左端チェック
+            if (obj_camera.disp_pos.x < left)
+            {
+                obj_camera.disp_pos.x = left;
+            }
+            // 右端チェック
+            if (obj_camera.disp_pos.x > right)
+            {
+                obj_camera.disp_pos.x = right;
+            }
+#endif
+            // 上端チェック
+            if (obj_camera.disp_pos.y > -top)
+            {
+                obj_camera.disp_pos.y = -top;
+            }
+            // 下端チェック
+            if (obj_camera.disp_pos.y < -bottom)
+            {
+                obj_camera.disp_pos.y = -bottom;
+            }
+        }
+
+        obj_camera.target_pos.Assign(obj_camera.disp_pos);
+        obj_camera.target_pos.z -= 50.0f;
+
+        // スペステ回転時は何も回転補正しない
+        if (GSM_MAIN_STAGE_IS_SPSTAGE())
+        {
+        }
+        else
+#if true
+    // ループカメラテスト開始その１
+    if ((obj_camera.flag & OBD_CAMERA_ROT_EX) == OBD_CAMERA_ROT_EX && (ply_work.obj_work.move_flag & OBD_MOVE_UNDER) == OBD_MOVE_UNDER)
+        {
+            // ループカメラ用回転制御
+            // 接地時のみ
+            short ply_roll;
+            short cam_roll;
+            short add_roll;
+            ply_roll = (short)(0 - (short)ply_work.obj_work.dir.z);
+            cam_roll = (short)obj_camera.roll;
+            if (((ushort)ply_roll > 0x4000)
+                && ((ushort)ply_roll < 0xc000))
+            {
+                add_roll = (short)((ushort)((uint)((ushort)(ply_roll) + (ushort)(cam_roll)) / 2));
+            }
+            else
+            {
+                add_roll = (short)((ply_roll + cam_roll) / 2);
+            }
+            obj_camera.roll = (int)add_roll;
+            obj_camera.flag &= ~OBD_CAMERA_ROT_EX;
+        }
+#if false  // Camera rotation control by tilting operation: From here                                                             
+	else
+// ループカメラテスト終了その１
+
+	if (!(g_gs_main_sys_info.game_flag & GSD_MAINSYS_GAME_FLAG_INPUT_CLASSIC)) {
+		// 傾斜操作による画面回転
+		Angle32	roll;
+#if false  // ほぼコントローラ角度直値                  
+		roll = (0-AoPadRotZ())/4;
+		roll = (roll + obj_camera.roll) /2;
+#elif false    // コントローラＺ回転角度履歴からの平均値                       
+		u16		i;
+		obj_camera.roll_ptr = ++obj_camera.roll_ptr & 0x0f;
+		obj_camera.roll_hist[obj_camera.roll_ptr] = ply_work.key_rot_z/4;
+
+		roll = 0;
+		for (i = 0; i < 16;i++) {
+			roll += obj_camera.roll_hist[i];
+		}
+		roll /= 16;
+#elif false    // コントローラＺ回転角度累乗値履歴からの平均値                          
+		u16		i;
+		float	mul;
+		obj_camera.roll_ptr = ++obj_camera.roll_ptr & 0x0f;
+
+		roll = ply_work.key_rot_z/4;
+		mul = float(roll);
+		mul = MTM_MATH_ABS(mul / (GMD_SCR_ROLL_MAX/2));
+		roll = fx32(roll * mul);
+		obj_camera.roll_hist[obj_camera.roll_ptr] = roll;
+
+		roll = 0;
+		for (i = 0; i < 16;i++) {
+			roll += obj_camera.roll_hist[i];
+		}
+		roll /= 16;
+#elif true // コントローラＺ回転角度累乗値履歴からの平均値(コントローラ傾斜リミットをプレイヤー傾斜にあわせる)                                                      
+		u16		i;
+		float	fMul,fRol;
+		obj_camera.roll_ptr = ++obj_camera.roll_ptr & 0x0f;
+
+		roll = MTM_MATH_CLIP(ply_work.key_rot_z, -GMD_PL_DEF_ROLL_MAX, GMD_PL_DEF_ROLL_MAX);
+		fRol = (float)(roll * GMD_SCR_ROLL_MAX / GMD_PL_DEF_ROLL_MAX);
+		fMul = fRol;
+		fMul = MTM_MATH_ABS(fMul / GMD_SCR_ROLL_MAX);
+		roll = fx32(fRol * fMul);
+		obj_camera.roll_hist[obj_camera.roll_ptr] = roll;
+
+		roll = 0;
+		for (i = 0; i < 16;i++) {
+			roll += obj_camera.roll_hist[i];
+		}
+		roll /= 16;
+#else // プレイヤー速度から回転角を求める                      
+		u16		i;
+//		fx32	spd = ply_work.obj_work.spd_m;
+//		roll = FXM_FX32_TO_FLOAT(spd);
+	//	roll = FXM_FX32_TO_FLOAT(ply_work.obj_work.spd_m);
+		roll = Angle32(ply_work.obj_work.spd_m) / 12;
+
+		obj_camera.roll_ptr = ++obj_camera.roll_ptr & 0x07;
+		obj_camera.roll_hist[obj_camera.roll_ptr] = roll;
+
+		roll = 0;
+		for (i = 0; i < 8;i++) {
+			roll += obj_camera.roll_hist[i];
+		}
+		roll /= 8;
+#endif    // コントロールタイプ              
+		obj_camera.roll = MTM_MATH_CLIP(roll, -GMD_SCR_ROLL_MAX, GMD_SCR_ROLL_MAX);
+	}
+#endif    // 傾斜操作によるカメラ回転制御：ここまで                        
+        // ループカメラテスト開始その２
+        else
+        {
+            // 徐々に角度を戻す
+            obj_camera.roll = obj_camera.roll * 9 / 10;
+            obj_camera.flag &= ~OBD_CAMERA_ROT_EX;
+        }
+        // ループカメラテスト終了その２
+#endif
+
+        // オブジェクトカメラ設定
+        ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)),
+                            FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)),
+                            FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)),
+                            FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)));
+
+        // クリッピングカメラ設定
+        GmCameraSetClipCamera(obj_camera);
     }
 
     private static void gmCameraFuncMapFar(OBS_CAMERA obj_camera)
@@ -457,20 +758,29 @@ public partial class AppMain
                 gm_camera_vibration.y = gmCameraVibCheck(gm_camera_vibration.y);
                 gm_camera_vibration.z = gmCameraVibCheck(gm_camera_vibration.z);
                 obj_camera.pos.z = 50f;
-                NNS_VECTOR nnsVector2 = GlobalPool<NNS_VECTOR>.Alloc();
-                nnsVector2.x = obj_camera.ofst.x;
-                nnsVector2.y = obj_camera.ofst.y;
-                nnsVector2.z = obj_camera.ofst.z;
-                if ((double)obj_camera.scale < GMD_CAMERA_SCALE)
+                if (true)
                 {
-                    float num = (obj_camera.scale - 0.3371917f) / 0.3371917f;
-                    nnsVector2.x *= num;
-                    nnsVector2.y *= num;
+                    obj_camera.disp_pos.x = obj_camera.pos.x + obj_camera.ofst.x;
+                    obj_camera.disp_pos.y = obj_camera.pos.y + obj_camera.ofst.y;
+                    obj_camera.disp_pos.z = obj_camera.pos.z + obj_camera.ofst.z;
                 }
-                obj_camera.disp_pos.x = obj_camera.pos.x + nnsVector2.x;
-                obj_camera.disp_pos.y = obj_camera.pos.y + nnsVector2.y;
-                obj_camera.disp_pos.z = obj_camera.pos.z + nnsVector2.z;
-                GlobalPool<NNS_VECTOR>.Release(nnsVector2);
+                else
+                {
+                    NNS_VECTOR nnsVector2 = GlobalPool<NNS_VECTOR>.Alloc();
+                    nnsVector2.x = obj_camera.ofst.x;
+                    nnsVector2.y = obj_camera.ofst.y;
+                    nnsVector2.z = obj_camera.ofst.z;
+                    if ((double)obj_camera.scale < GMD_CAMERA_SCALE)
+                    {
+                        float num = (obj_camera.scale - 0.3371917f) / 0.3371917f;
+                        nnsVector2.x *= num;
+                        nnsVector2.y *= num;
+                    }
+                    obj_camera.disp_pos.x = obj_camera.pos.x + nnsVector2.x;
+                    obj_camera.disp_pos.y = obj_camera.pos.y + nnsVector2.y;
+                    obj_camera.disp_pos.z = obj_camera.pos.z + nnsVector2.z;
+                    GlobalPool<NNS_VECTOR>.Release(nnsVector2);
+                }
                 gmCameraLookupCheck(obj_camera);
                 float num1 = g_gm_main_system.map_fcol.left + GSD_DISP_WIDTH / 2 * obj_camera.scale;
                 float num2 = g_gm_main_system.map_fcol.right - GSD_DISP_WIDTH / 2 * obj_camera.scale;

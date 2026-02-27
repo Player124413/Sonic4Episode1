@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_PARAM_DELETE_VERTEX_OBJECT
+    internal class AMS_PARAM_DELETE_VERTEX_OBJECT
     {
         public NNS_OBJECT obj;
     }

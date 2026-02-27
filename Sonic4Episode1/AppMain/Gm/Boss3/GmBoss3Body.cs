@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void gmBoss3BodyExit(MTS_TASK_TCB tcb)
     {

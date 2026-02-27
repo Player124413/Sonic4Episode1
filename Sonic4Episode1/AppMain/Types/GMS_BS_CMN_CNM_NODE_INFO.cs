@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BS_CMN_CNM_NODE_INFO
+    internal class GMS_BS_CMN_CNM_NODE_INFO
     {
         public readonly NNS_MATRIX node_w_mtx = new NNS_MATRIX();
         public int node_index;

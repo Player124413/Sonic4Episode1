@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private int nnGetMaterialIndex(NNS_NODENAMELIST pMaterialNameList, string MaterialName)
     {

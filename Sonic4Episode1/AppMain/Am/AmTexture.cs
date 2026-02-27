@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
+using CSharp_PVR;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Pvrtc;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static int amTextureLoad(
         NNS_TEXLIST texlist,
@@ -32,74 +35,79 @@ public partial class AppMain
             else
             {
                 Texture2D texbuf;
-                string str = (~arrayPointer2).Filename;
-                int index = Array.IndexOf(amb.files, str);
-                if (index == -1)
-                {
-                    int startIndex = str.LastIndexOf(".pvr", StringComparison.OrdinalIgnoreCase);
-                    if (startIndex > 0)
-                        str = str.Remove(startIndex) + ".PNG";
-                    index = Array.IndexOf(amb.files, str);
-                }
+                string fName = (~arrayPointer2).Filename;
 
-                if (index == -1)
-                {
-                    int startIndex = str.LastIndexOf(".png", StringComparison.OrdinalIgnoreCase);
-                    if (startIndex > 0)
-                        str = str.Remove(startIndex) + ".DDS";
-                    index = Array.IndexOf(amb.files, str);
-                }
+                var index = -1;
+                var ext = "";
+                var fileNames = new string[] {
+                    fName,
+                    Path.ChangeExtension(fName, ".png"), 
+                    Path.ChangeExtension(fName, ".dds"), // we leave these formats in even if they're not supported so we can at least
+                    Path.ChangeExtension(fName, ".pvr")  // throw an error if the game tries to load them, instead of just silently failing 
+                };
 
-                if (index == -1)
+                for (int i = 0; i < amb.files.Length; i++)
                 {
-                    for (int i = 0; i < amb.files.Length; i++)
+                    for (int j = 0; j < fileNames.Length; j++)
                     {
-                        if (string.Compare(amb.files[i], (~arrayPointer2).Filename,
-                                StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(Path.GetFileName(amb.files[i]), fileNames[j],
+                            StringComparison.OrdinalIgnoreCase) == 0)
                         {
+                            ext = Path.GetExtension(fileNames[j]);
                             index = i;
                             break;
                         }
                     }
+
+                    if (index != -1)
+                        break;
                 }
 
-                //try
-                //{
-                if (amb.buf[index] != null)
+                if (index == -1)
                 {
-                    texbuf = (Texture2D) amb.buf[index];
+                    System.Diagnostics.Debug.WriteLine($"Didn't find {fName}");
+                    texbuf = new Texture2D(m_game.GraphicsDevice, 1, 1);
+                    texbuf.SetData([Color.Magenta]);
                 }
                 else
                 {
-                    using (MemoryStream memoryStream = new MemoryStream(amb.data, amb.offsets[index],
-                               amb.data.Length - amb.offsets[index]))
+                    if (amb.buf[index] != null)
                     {
+                        texbuf = (Texture2D)amb.buf[index];
+                    }
+                    else
+                    {
+                        static Texture2D LoadTexture(AMS_AMB_HEADER amb, int index, string ext)
+                        {
+                            using var memoryStream = new MemoryStream(amb.data, amb.offsets[index], amb.data.Length - amb.offsets[index]);
+                            if (ext.Equals(".dds", StringComparison.InvariantCultureIgnoreCase))
+                            {
 #if FNA
-                        if (str.EndsWith(".DDS"))
-                        {
-                            texbuf = Texture2D.DDSFromStreamEXT(m_game.GraphicsDevice, memoryStream);
-                            amb.buf[index] = texbuf;
-                        }
-                        else
-                        {
+                                return Texture2D.DDSFromStreamEXT(m_game.GraphicsDevice, memoryStream);
+#elif THIRD_PARTY_DDS
+                                return (Texture2D)DdsKtxXna.DdsKtxLoader.FromStream(m_game.GraphicsDevice, memoryStream);
+#else
+                                throw new InvalidOperationException("DDS textures are not supported on this platform.");
 #endif
-                            texbuf = Texture2D.FromStream(m_game.GraphicsDevice, memoryStream);
-                            amb.buf[index] = texbuf;
+                            }
 
-#if FNA
-                        }
+                            if (ext.Equals(".pvr", StringComparison.InvariantCultureIgnoreCase))
+                            {
+#if DEBUG
+                                return PVRTextureLoader.LoadTexture(m_game.GraphicsDevice, memoryStream);
+#else
+                                throw new InvalidOperationException("PVR textures are not supported on this platform.");   
 #endif
+                            }
+
+
+                            return Texture2D.FromStream(m_game.GraphicsDevice, memoryStream);
+                        }
+
+                        texbuf = LoadTexture(amb, index, ext);
+                        amb.buf[index] = texbuf;
                     }
                 }
-                //}
-                //catch (Exception)
-                //{
-                //    using (var stream = File.OpenRead("Content/dummy.png"))
-                //    {
-                //        texbuf = Texture2D.FromStream(AppMain.m_game.GraphicsDevice, (Stream)stream);
-                //        amb.buf[index] = (object)texbuf;
-                //    }
-                //}
 
                 num = amTextureLoad(arrayPointer1, arrayPointer2, filepath, texbuf, 0);
             }
@@ -122,7 +130,7 @@ public partial class AppMain
         AMS_PARAM_LOAD_TEXTURE paramLoadTexture = new AMS_PARAM_LOAD_TEXTURE();
         paramLoadTexture.pTexInfo = texinfo;
         paramLoadTexture.tex = texbuf;
-        paramLoadTexture.size = (uint) size;
+        paramLoadTexture.size = (uint)size;
         _amTextureSetupLoadParam(ref paramLoadTexture, ref texfile, texbuf);
         return amDrawRegistCommand(1, paramLoadTexture);
     }
@@ -142,10 +150,10 @@ public partial class AppMain
         {
             texture = texture,
             size = size,
-            minfilter = (short) minfilter,
-            magfilter = (short) magfilter,
-            u_wrap = (short) u_wrap,
-            v_wrap = (short) v_wrap
+            minfilter = (short)minfilter,
+            magfilter = (short)magfilter,
+            u_wrap = (short)u_wrap,
+            v_wrap = (short)v_wrap
         });
     }
 
@@ -174,7 +182,7 @@ public partial class AppMain
         ref NNS_TEXFILE texfile,
         Texture2D texload)
     {
-        if (((int) texfile.fType & 512) != 0)
+        if (((int)texfile.fType & 512) != 0)
         {
             param.minfilter = 0;
             param.magfilter = 0;
@@ -185,8 +193,8 @@ public partial class AppMain
             param.magfilter = texfile.MagFilter;
         }
 
-        param.globalIndex = ((int) texfile.fType & 1024) == 0 ? 0U : texfile.GlobalIndex;
-        if (((int) texfile.fType & 2048) != 0)
+        param.globalIndex = ((int)texfile.fType & 1024) == 0 ? 0U : texfile.GlobalIndex;
+        if (((int)texfile.fType & 2048) != 0)
             param.bank = texfile.Bank;
         else
             param.bank = 0U;

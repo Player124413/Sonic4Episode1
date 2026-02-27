@@ -1,4 +1,4 @@
-public class NNS_VECTOR_S8
+internal class NNS_VECTOR_S8
 {
     public sbyte x;
     public sbyte y;

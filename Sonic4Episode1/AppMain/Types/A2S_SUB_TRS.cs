@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_SUB_TRS
+    internal class A2S_SUB_TRS
     {
         public float trs_x;
         public float trs_y;

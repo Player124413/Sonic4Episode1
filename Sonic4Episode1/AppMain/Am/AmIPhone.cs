@@ -6,39 +6,65 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public void amIPhoneInitNN(PresentationParameters presParams)
+    public void amIPhoneInitNN(PresentationParameters parameters) =>
+        amIPhoneInitNN(parameters.BackBufferWidth, parameters.BackBufferHeight);
+
+    public void amIPhoneInitNN(int bbWidth, int bbHeight)
     {
         OpenGL.init(m_game, m_graphicsDevice);
-        OpenGL.glViewport(0, 0, presParams.BackBufferWidth, presParams.BackBufferHeight);
-        
-        // TODO: 360.0f
-        float num1 = 320.0f * ((float)presParams.BackBufferWidth / (presParams.BackBufferHeight));
-        float num2 = 320.0f;
+        OpenGL.glViewport(0, 0, bbWidth, bbHeight);
+
+        float width = bbWidth;
+        float height = bbHeight;
         amRenderInit();
         NNS_MATRIX mtx = GlobalPool<NNS_MATRIX>.Alloc();
         NNS_VECTOR nnsVector = new NNS_VECTOR(0.0f, 0.0f, -1f);
         NNS_RGBA nnsRgba = new NNS_RGBA(1f, 1f, 1f, 1f);
         NNS_CONFIG_GL config;
-        config.WindowWidth = (int)num1;
-        config.WindowHeight = (int)num2;
+        config.WindowWidth = (int)width;
+        config.WindowHeight = (int)height;
         this.nnConfigureSystemGL(config);
-        nnMakePerspectiveMatrix(mtx, NNM_DEGtoA32(45f), num2 / (float)num1, 1f, 10000f);
-        _am_draw_video.draw_aspect = num2 / (float)num1;
+
+        var fov = 45f + NNM_RADtoDEG((float)AppMain.nnArcTan2(height, width) - NNM_DEGtoRAD(45f));
+
+        nnMakePerspectiveMatrix(mtx, NNM_DEGtoA32(fov), height / (float)width, 1f, 10000f);
         nnSetProjection(mtx, 0);
-        _am_draw_video.draw_width = num1;
-        _am_draw_video.draw_height = num2;
-        _am_draw_video.disp_width = num1;
-        _am_draw_video.disp_height = num2;
-        _am_draw_video.width_2d = num1;
-        _am_draw_video.height_2d = num2;
-        _am_draw_video.scale_x_2d = 1f;
-        _am_draw_video.scale_y_2d = 1f;
-        _am_draw_video.base_x_2d = 0.0f;
+
+        _am_draw_video.draw_aspect = height / (float)width;
+        _am_draw_video.draw_width = bbWidth;
+        _am_draw_video.draw_height = bbHeight;
+        _am_draw_video.disp_width = bbWidth;
+        _am_draw_video.disp_height = bbHeight;
+
+        var aspect = width / height;
+        g_ao_act_wide_w = _am_draw_video.width_2d = 720.0f * aspect;
+        g_ao_act_wide_h = _am_draw_video.height_2d = 720.0f;
+
+        float vw = _am_draw_video.draw_aspect * _am_draw_video.height_2d;
+        _am_draw_video.scale_x_2d = _am_draw_video.draw_width / vw;
+        _am_draw_video.scale_y_2d = _am_draw_video.draw_height
+                                        / _am_draw_video.height_2d;
+        _am_draw_video.base_x_2d = (vw - _am_draw_video.width_2d) * 0.5f
+                                        * _am_draw_video.scale_x_2d;
         _am_draw_video.base_y_2d = 0.0f;
-        _am_draw_video.wide_screen = false;
+
+        _am_draw_video.wide_screen = true;
         _am_draw_video.refresh_rate = 60f;
+
+        //for (int i = 0; i < gm_player_push_jump_key_rect2.Length; i++)
+        //{
+        //    gm_player_push_jump_key_rect[i] = new ushort[gm_player_push_jump_key_rect2[i].Length];
+        //    for (int j = 0; j < gm_player_push_jump_key_rect2[i].Length; j++)
+        //    {
+        //        gm_player_push_jump_key_rect[i][j] = (ushort)gm_player_push_jump_key_rect2[i][j];
+        //        if (j % 2 == 0)
+        //            gm_player_push_jump_key_rect[i][j] -= (ushort)(((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f);
+        //    }
+        //}
+
+
         amRenderInit();
         GlobalPool<NNS_MATRIX>.Release(mtx);
     }
@@ -164,12 +190,10 @@ public partial class AppMain
     private static void screen2real(ref float X, ref float Y)
     {
 #if WINDOWSPHONE7_5
-        // nominal 480, 288
-        X = (X / 533) * 480;
-        Y = (Y / 320) * 288;
-        Y += 16;
+        var bounds = new Rectangle(0,0,800,480);
 #else
         var bounds = m_game.Window.ClientBounds;
+#endif
 
         // nominal 480, 288
         X /= bounds.Width;
@@ -178,7 +202,6 @@ public partial class AppMain
         Y /= bounds.Height;
         Y *= 288;
         Y += 16;
-#endif
     }
 
     private static int amFindTouchIndex(int id)

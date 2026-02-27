@@ -58,7 +58,7 @@ class MonoGameController : Controller
         if (state.Buttons.LeftShoulder == ButtonState.Pressed)
             reading.direction |= ControllerConsts.L;
 
-        if (state.Buttons.LeftShoulder == ButtonState.Pressed)
+        if (state.Buttons.RightShoulder == ButtonState.Pressed)
             reading.direction |= ControllerConsts.R;
 
         if (state.Buttons.Start == ButtonState.Pressed)

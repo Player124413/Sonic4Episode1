@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AOS_ACT_RECT
+    internal struct AOS_ACT_RECT
     {
         public float left;
         public float top;

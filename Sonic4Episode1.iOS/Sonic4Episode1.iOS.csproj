@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <NoWarn>1701;1702;CA1416;</NoWarn>
+    
+    <!--
+      Enable full trimming in Release mode.
+      To learn more, see: https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
+    -->
+    <TrimMode Condition="'$(Configuration)' == 'Release'">full</TrimMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+  <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+</Project>

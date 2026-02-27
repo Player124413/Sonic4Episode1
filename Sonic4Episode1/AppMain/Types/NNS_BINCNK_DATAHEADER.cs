@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_BINCNK_DATAHEADER
+    internal class NNS_BINCNK_DATAHEADER
     {
         public uint Id;
         public int OfsNextId;

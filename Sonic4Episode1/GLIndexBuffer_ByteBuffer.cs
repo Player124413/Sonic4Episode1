@@ -6,7 +6,7 @@
 
 using mpp;
 
-public struct GLIndexBuffer_ByteBuffer : OpenGL.GLIndexBuffer
+internal struct GLIndexBuffer_ByteBuffer : OpenGL.GLIndexBuffer
 {
     private ByteBuffer data_;
     private int dataSize_;

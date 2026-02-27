@@ -2,9 +2,9 @@
 using accel;
 using er;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class CProc<TCrtpType> where TCrtpType : class, IFunctor
+    internal class CProc<TCrtpType> where TCrtpType : class, IFunctor
     {
         private FProc m_proc;
         private TCrtpType m_it;
@@ -77,7 +77,7 @@ public partial class AppMain
         public delegate void FProc();
     }
 
-    public class CProcCount<TCrtpType> : CProc<TCrtpType> where TCrtpType : class, IFunctor
+    internal class CProcCount<TCrtpType> : CProc<TCrtpType> where TCrtpType : class, IFunctor
     {
         private ulong m_counter;
 
@@ -123,7 +123,7 @@ public partial class AppMain
         }
     }
 
-    public class CMainTask<TCrtpType> : CProcCount<CMain>, IFunctor
+    internal class CMainTask<TCrtpType> : CProcCount<CMain>, IFunctor
     {
         public ITaskLink m_pTaskLink;
 
@@ -142,7 +142,7 @@ public partial class AppMain
             base.operator_brackets();
         }
     }
-    public class CMain : CMainTask<CMain>
+    internal class CMain : CMainTask<CMain>
     {
         public static readonly int[] c_return_table = new int[2]
         {
@@ -565,7 +565,7 @@ public partial class AppMain
             }
         }
 
-        public class EMemFile
+        internal class EMemFile
         {
             public enum Type
             {
@@ -576,7 +576,7 @@ public partial class AppMain
             }
         }
 
-        public class EFile : EMemFile
+        internal class EFile : EMemFile
         {
             public enum EFileEnum
             {
@@ -589,7 +589,7 @@ public partial class AppMain
             }
         }
 
-        public class ETex
+        internal class ETex
         {
             public enum Type
             {
@@ -600,7 +600,7 @@ public partial class AppMain
             }
         }
 
-        public class EAct
+        internal class EAct
         {
             public enum Type
             {
@@ -629,7 +629,7 @@ public partial class AppMain
             }
         }
 
-        public class SAction
+        internal class SAction
         {
             public bool[] flag = new bool[3];
             public AOS_ACTION act;
@@ -671,7 +671,7 @@ public partial class AppMain
                     AoActDraw(this.act);
             }
 
-            public class BFlag
+            internal class BFlag
             {
                 public enum ESAction
                 {
@@ -696,7 +696,7 @@ public partial class AppMain
             }
         }
 
-        public struct SLocalCreateActionTable
+        internal struct SLocalCreateActionTable
         {
             public EFile.EFileEnum file;
             public ETex.Type tex;

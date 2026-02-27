@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_NODENAMELIST
+    internal class NNS_NODENAMELIST
     {
         public NNE_NODENAME_SORTTYPE SortType;
         public int nNode;

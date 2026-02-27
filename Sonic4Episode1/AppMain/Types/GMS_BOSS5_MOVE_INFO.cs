@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_MOVE_INFO
+    internal class GMS_BOSS5_MOVE_INFO
     {
         public float switching_frame;
         public int move_phase_type;

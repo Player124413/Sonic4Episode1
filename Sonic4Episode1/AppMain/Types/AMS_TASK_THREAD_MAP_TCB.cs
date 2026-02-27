@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private struct AMS_TASK_THREAD_MAP_TCB
     {

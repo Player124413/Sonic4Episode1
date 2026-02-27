@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_P_STEAM_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_P_STEAM_WORK : IOBS_OBJECT_WORK
     {
         public OBS_OBJECT_WORK[] opt_steam_int = new OBS_OBJECT_WORK[3];
         public const int GMD_GMK_PSTEAM_STAT_HIT = 1;

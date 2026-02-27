@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TRAIL_PARTSDATA
+    internal class AMS_TRAIL_PARTSDATA
     {
         public AMS_TRAIL_PARTS[] parts = New<AMS_TRAIL_PARTS>(64);
         public AMS_TRAIL_PARTS trailHead = new AMS_TRAIL_PARTS();

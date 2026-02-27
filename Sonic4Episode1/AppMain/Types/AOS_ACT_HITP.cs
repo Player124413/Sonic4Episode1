@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_ACT_HITP
+    internal class AOS_ACT_HITP
     {
         public uint flag;
         public AOE_ACT_HIT type;

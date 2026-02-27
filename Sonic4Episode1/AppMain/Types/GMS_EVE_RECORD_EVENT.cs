@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EVE_RECORD_EVENT
+    internal class GMS_EVE_RECORD_EVENT
     {
         public byte[] byte_param = new byte[2];
         public byte pos_x;

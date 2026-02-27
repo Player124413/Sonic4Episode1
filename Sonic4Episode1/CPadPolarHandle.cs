@@ -1,9 +1,9 @@
 ﻿using System;
 using accel;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class CPadPolarHandle
+    internal class CPadPolarHandle
     {
         public static CPadPolarHandle p_instance = null;
         public static readonly float c_pi = (float)Math.Atan2(0.0, -1.0) * 2f;
@@ -191,6 +191,7 @@ public partial class AppMain
         private bool create()
         {
             this.Release();
+
             this.m_value = 0.0f;
             this.m_focus = this.getOnTpIndex();
             this.m_zero_point = 0 > this.m_focus ? 0.0f : this.getCurrentValue();

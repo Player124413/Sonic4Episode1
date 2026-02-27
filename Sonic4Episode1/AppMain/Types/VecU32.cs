@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class VecU32
+    internal class VecU32
     {
         public uint x;
         public uint y;

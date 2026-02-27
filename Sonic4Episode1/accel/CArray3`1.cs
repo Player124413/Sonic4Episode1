@@ -8,7 +8,7 @@ using System;
 
 namespace accel
 {
-    public struct CArray3<T> where T : struct
+    internal struct CArray3<T> where T : struct
     {
         private T v0;
         private T v1;

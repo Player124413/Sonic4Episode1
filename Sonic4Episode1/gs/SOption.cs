@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace gs.backup
 {
-    public class SOption : SBase
+    internal class SOption : SBase
     {
         private Sonic4Save save;
         public const uint c_false = 0;
@@ -89,7 +89,7 @@ namespace gs.backup
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 1)]
-        public struct EControl
+        internal struct EControl
         {
             public enum Type
             {

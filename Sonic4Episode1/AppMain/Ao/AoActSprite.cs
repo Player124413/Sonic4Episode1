@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static AOS_SPRITE AoActSprCreate(
       A2S_AMA_HEADER ama,

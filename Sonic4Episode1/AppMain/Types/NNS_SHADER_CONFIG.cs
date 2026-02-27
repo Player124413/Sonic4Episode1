@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct NNS_SHADER_CONFIG
+    internal struct NNS_SHADER_CONFIG
     {
         private int bNormalizeVertexNormal;
         private int bRescaleVertexNormal;

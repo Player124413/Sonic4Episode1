@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void ObjAction3dNNModelLoad(
      OBS_ACTION3D_NN_WORK obj_3d,

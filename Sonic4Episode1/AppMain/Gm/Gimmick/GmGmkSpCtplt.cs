@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void gmGmkSpCtpltStart(OBS_OBJECT_WORK obj_work)
     {

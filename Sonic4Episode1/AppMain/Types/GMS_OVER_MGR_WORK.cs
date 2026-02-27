@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_OVER_MGR_WORK
+    internal class GMS_OVER_MGR_WORK
     {
         public readonly GMS_COCKPIT_2D_WORK[] string_sub_parts = new GMS_COCKPIT_2D_WORK[4];
         public readonly GMS_COCKPIT_2D_WORK[] fadeout_sub_parts = new GMS_COCKPIT_2D_WORK[2];

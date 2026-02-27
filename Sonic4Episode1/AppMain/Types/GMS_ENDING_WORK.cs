@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENDING_WORK
+    internal class GMS_ENDING_WORK
     {
         public int step;
         public int type;

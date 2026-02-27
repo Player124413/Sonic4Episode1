@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     public static void DmSndBgmPlayerInit()
@@ -16,12 +16,12 @@
         dm_snd_bgm_player_flag |= 8U;
     }
 
-    private static bool DmSndBgmPlayerIsTaskExit()
+    public static bool DmSndBgmPlayerIsTaskExit()
     {
         return dm_snd_bgm_player_tcb == null;
     }
 
-    private static bool DmSndBgmPlayerIsSndSysBuild()
+    public static bool DmSndBgmPlayerIsSndSysBuild()
     {
         return DmSoundBuildCheck();
     }

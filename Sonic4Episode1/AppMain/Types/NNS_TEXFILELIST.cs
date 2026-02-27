@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXFILELIST
+    internal class NNS_TEXFILELIST
     {
         public int nTex;
         public NNS_TEXFILE[] pTexFileList;

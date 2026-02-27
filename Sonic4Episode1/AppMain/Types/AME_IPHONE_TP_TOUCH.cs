@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private enum AME_IPHONE_TP_TOUCH
     {

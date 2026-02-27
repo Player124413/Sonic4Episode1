@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace gs.backup
 {
-    public class SStage : SBase
+    internal class SStage : SBase
     {
         private Sonic4Save save;
         private const uint c_size = 17;
@@ -70,7 +70,7 @@ namespace gs.backup
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 1)]
-        public struct EStage
+        internal struct EStage
         {
             public enum Type
             {

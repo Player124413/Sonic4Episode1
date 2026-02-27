@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_ACTION
+    internal class AOS_ACTION
     {
         public object data;
         public uint flag;

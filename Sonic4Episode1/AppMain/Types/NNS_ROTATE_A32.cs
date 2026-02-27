@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public struct NNS_ROTATE_A32
+internal struct NNS_ROTATE_A32
 {
     public int x;
     public int y;

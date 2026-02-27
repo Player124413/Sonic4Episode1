@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     private static void DmSoundBuild()
@@ -41,7 +41,7 @@
         GsSoundReset();
     }
 
-    private static void DmSoundPlaySE(string cue_name)
+    public static void DmSoundPlaySE(string cue_name)
     {
         GsSoundPlaySe(cue_name);
     }

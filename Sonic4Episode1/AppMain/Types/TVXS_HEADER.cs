@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct TVXS_HEADER
+    internal struct TVXS_HEADER
     {
         public uint tex_num;
         public uint tex_tbl_ofst;

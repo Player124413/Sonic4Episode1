@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_DRAIN_TANK_OUT_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_DRAIN_TANK_OUT_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK enemy_work;
         public bool flag_dir_left;

@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum DME_LOGO_COM_LOAD_STATE
     {

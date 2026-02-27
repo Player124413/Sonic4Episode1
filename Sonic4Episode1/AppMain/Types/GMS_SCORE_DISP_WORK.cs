@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SCORE_DISP_WORK : IOBS_OBJECT_WORK
+    internal class GMS_SCORE_DISP_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_EFFECT_3DES_WORK[] efct_work = new GMS_EFFECT_3DES_WORK[5];
         public readonly OBS_OBJECT_WORK obj_work;

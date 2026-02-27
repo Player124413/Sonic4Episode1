@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TCB : IClearable
+    internal class AMS_TCB : IClearable
     {
         public readonly AMS_TCB_FOOTER footer = new AMS_TCB_FOOTER();
         public string name;

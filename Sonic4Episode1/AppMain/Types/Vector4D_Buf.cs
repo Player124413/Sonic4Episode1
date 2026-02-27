@@ -1,9 +1,9 @@
 using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct Vector4D_Buf
+    internal struct Vector4D_Buf
     {
         private readonly byte[] data_;
         private readonly int offset_;

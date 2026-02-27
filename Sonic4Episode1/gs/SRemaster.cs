@@ -1,6 +1,6 @@
 ﻿namespace gs.backup
 {
-    public class SRemaster : SBase
+    internal class SRemaster : SBase
     {
         private Sonic4Save save;
 

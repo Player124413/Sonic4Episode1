@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class HGS_TROPHY_CHECK_TIMING_INFO
+    internal class HGS_TROPHY_CHECK_TIMING_INFO
     {
         public HGS_TROPHY_CHECK_INFO[] check_info_tbl;
         public int num;

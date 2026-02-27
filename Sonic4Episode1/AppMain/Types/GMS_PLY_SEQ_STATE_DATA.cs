@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLY_SEQ_STATE_DATA
+    internal class GMS_PLY_SEQ_STATE_DATA
     {
         public uint check_attr;
         public uint accept_attr;

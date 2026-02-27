@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace gs.backup
 {
     [StructLayout(LayoutKind.Sequential, Size = 1)]
-    public struct ESpecialStage
+    internal struct ESpecialStage
     {
         public enum Type
         {

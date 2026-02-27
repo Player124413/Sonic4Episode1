@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public const uint GMD_PLF_USER1 = 1;
     public const uint GMD_PLF_USER2 = 2;

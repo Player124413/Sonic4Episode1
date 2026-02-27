@@ -4,7 +4,7 @@ using mpp;
 
 using static AppMain.nncalcmatrixpalettemotion;
 
-public partial class AppMain
+internal partial class AppMain
 {
 #if !WINDOWSPHONE7_5 && !NET40
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -772,16 +772,16 @@ public partial class AppMain
         mppAssertNotImpl();
         switch (camptr.fType)
         {
-            case byte.MaxValue:
+            case NND_CAMERATYPE_TARGET_ROLL:
                 nnMakeTargetRollCameraViewMatrix(mtx, (NNS_CAMERA_TARGET_ROLL)camptr.pCamera);
                 break;
-            case 383:
+            case NND_CAMERATYPE_TARGET_UPVECTOR:
                 nnMakeTargetUpVectorCameraViewMatrix(mtx, (NNS_CAMERA_TARGET_UPVECTOR)camptr.pCamera);
                 break;
-            case 639:
+            case NND_CAMERATYPE_TARGET_UPTARGET:
                 nnMakeTargetUpTargetCameraViewMatrix(mtx, (NNS_CAMERA_TARGET_UPTARGET)camptr.pCamera);
                 break;
-            case 3135:
+            case NND_CAMERATYPE_ROTATION:
                 this.nnMakeRotationCameraViewMatrix(mtx, (NNS_CAMERA_ROTATION)camptr.pCamera);
                 break;
         }
@@ -4719,12 +4719,12 @@ public partial class AppMain
                         nnsPrimlistGlDesc.pIndices[index2] = (nnsPrimlistGlDesc.pIndexBuffer + pPrimList.pIndices[index2].Offset).AsUShortBuffer();
                 }
             }
-            else if (((int)srcplist[index1].fType & 16711680) != 0)
+            else if (((int)srcplist[index1].fType & NND_PRIMTYPE_COMMON_MASK) != 0)
             {
                 switch (srcplist[index1].fType)
                 {
-                    case 65536:
-                    case 131072:
+                    case NND_PRIMTYPE_COMMON_TRIANGLE_STRIP_R:
+                    case NND_PRIMTYPE_COMMON_TRIANGLE_STRIP_L:
                         NNS_PRIMLIST_COMMON_TRIANGLE_STRIP pPrimList1 = (NNS_PRIMLIST_COMMON_TRIANGLE_STRIP)srcplist[index1].pPrimList;
                         NNS_PRIMLIST_COMMON_TRIANGLE_STRIP commonTriangleStrip = null;
                         if (dstplist != null)
@@ -4748,7 +4748,7 @@ public partial class AppMain
                             continue;
                         }
                         continue;
-                    case 262144:
+                    case NND_PRIMTYPE_COMMON_TRIANGLE_LIST:
                         NNS_PRIMLIST_COMMON_TRIANGLE_LIST pPrimList2 = (NNS_PRIMLIST_COMMON_TRIANGLE_LIST)srcplist[index1].pPrimList;
                         NNS_PRIMLIST_COMMON_TRIANGLE_LIST commonTriangleList = null;
                         if (dstplist != null)
@@ -4763,7 +4763,7 @@ public partial class AppMain
                             continue;
                         }
                         continue;
-                    case 524288:
+                    case NND_PRIMTYPE_COMMON_QUAD_LIST:
                         NNS_PRIMLIST_COMMON_QUAD_LIST pPrimList3 = (NNS_PRIMLIST_COMMON_QUAD_LIST)srcplist[index1].pPrimList;
                         NNS_PRIMLIST_COMMON_QUAD_LIST primlistCommonQuadList = null;
                         if (dstplist != null)
@@ -4778,7 +4778,7 @@ public partial class AppMain
                             continue;
                         }
                         continue;
-                    case 1048576:
+                    case NND_PRIMTYPE_COMMON_TRIANGLE_QUAD_LIST:
                         NNS_PRIMLIST_COMMON_TRIANGLE_QUAD_LIST pPrimList4 = (NNS_PRIMLIST_COMMON_TRIANGLE_QUAD_LIST)srcplist[index1].pPrimList;
                         NNS_PRIMLIST_COMMON_TRIANGLE_QUAD_LIST triangleQuadList = null;
                         if (dstplist != null)
@@ -5375,14 +5375,14 @@ public partial class AppMain
       float endframe,
       float frame)
     {
-        if (((int)fType & 64) != 0)
+        if (((int)fType & NND_SMOTIPTYPE_TRIGGER) != 0)
         {
             dstframe = frame;
             return 1;
         }
-        switch ((uint)((int)fType & 2031680 & -65))
+        switch ((uint)((int)fType & NND_MOTIONTYPE_REPEAT_MASK & -65))
         {
-            case 65536:
+            case NND_MOTIONTYPE_NOREPEAT:
                 if (startframe <= (double)frame && frame < (double)endframe)
                 {
                     dstframe = frame;
@@ -5390,10 +5390,10 @@ public partial class AppMain
                 }
                 dstframe = frame;
                 return 0;
-            case 131072:
+            case NND_MOTIONTYPE_CONSTREPEAT:
                 dstframe = startframe <= (double)frame ? (endframe > (double)frame ? frame : endframe) : startframe;
                 return 1;
-            case 262144:
+            case NND_MOTIONTYPE_REPEAT:
                 if (startframe <= (double)frame && frame < (double)endframe)
                 {
                     dstframe = frame;
@@ -5410,7 +5410,7 @@ public partial class AppMain
                     dstframe = frame - num2 * num5;
                 }
                 return 1;
-            case 524288:
+            case NND_MOTIONTYPE_MIRROR:
                 float num6 = frame - startframe;
                 float num7 = endframe - startframe;
                 float num8 = num6 / num7;
@@ -5432,60 +5432,60 @@ public partial class AppMain
         NNS_NODE nnsNode;
         do
         {
-            nnsNode = nncalcmatrixpalettemotion.nnsNodeList[nodeIdx];
-            if (((int)nnsNode.fType & 134217728) != 0)
+            nnsNode = nnsNodeList[nodeIdx];
+            if (((int)nnsNode.fType & NND_NODETYPE_XSIIK) != 0)
             {
-                if (((int)nnsNode.fType & 100663296) != 0)
+                if (((int)nnsNode.fType & (NND_NODETYPE_1BONE_IK_CHAIN_ROOT | NND_NODETYPE_2BONE_IK_CHAIN_ROOT)) != 0)
                 {
-                    nnPushMatrix(nncalcmatrixpalettemotion.nnsMstk, null);
-                    if (((int)nnsNode.fType & 33554432) != 0)
+                    nnPushMatrix(nnsMstk, null);
+                    if (((int)nnsNode.fType & NND_NODETYPE_1BONE_IK_CHAIN_ROOT) != 0)
                         nnCalcMatrixPaletteMotionNode1BoneXSIIK(nodeIdx);
-                    else if (((int)nnsNode.fType & 67108864) != 0)
+                    else if (((int)nnsNode.fType & NND_NODETYPE_2BONE_IK_CHAIN_ROOT) != 0)
                         nnCalcMatrixPaletteMotionNode2BoneXSIIK(nodeIdx);
-                    nnPopMatrix(nncalcmatrixpalettemotion.nnsMstk);
+                    nnPopMatrix(nnsMstk);
                     nodeIdx = nnsNode.iSibling;
                     goto label_25;
                 }
             }
             else
             {
-                if (((int)nnsNode.fType & 16384) != 0)
+                if (((int)nnsNode.fType & NND_NODETYPE_SIIK_1BONE_IK_JOINT1) != 0)
                 {
-                    nnPushMatrix(nncalcmatrixpalettemotion.nnsMstk, null);
+                    nnPushMatrix(nnsMstk, null);
                     nnCalcMatrixPaletteMotionNode1BoneSIIK(nodeIdx);
-                    nnPopMatrix(nncalcmatrixpalettemotion.nnsMstk);
+                    nnPopMatrix(nnsMstk);
                     break;
                 }
-                if (((int)nnsNode.fType & 32768) != 0)
+                if (((int)nnsNode.fType & NND_NODETYPE_SIIK_2BONE_IK_JOINT1) != 0)
                 {
-                    nnPushMatrix(nncalcmatrixpalettemotion.nnsMstk, null);
+                    nnPushMatrix(nnsMstk, null);
                     nnCalcMatrixPaletteMotionNode2BoneSIIK(nodeIdx);
-                    nnPopMatrix(nncalcmatrixpalettemotion.nnsMstk);
+                    nnPopMatrix(nnsMstk);
                     break;
                 }
             }
-            nnPushMatrix(nncalcmatrixpalettemotion.nnsMstk, null);
-            NNS_MATRIX currentMatrix = nnGetCurrentMatrix(nncalcmatrixpalettemotion.nnsMstk);
-            nncalcmatrixpalettemotion.nnsSubMotIdx = nnCalcNodeMotionCore(currentMatrix, ref pHideFlag, nncalcmatrixpalettemotion.nnsBaseMtx, nnsNode, nodeIdx, nncalcmatrixpalettemotion.nnsObj, nncalcmatrixpalettemotion.nnsMot, nncalcmatrixpalettemotion.nnsSubMotIdx, nncalcmatrixpalettemotion.nnsFrame);
-            if (nnsNode.iMatrix != -1)
+            nnPushMatrix(nnsMstk, null);
+            NNS_MATRIX currentMatrix = nnGetCurrentMatrix(nnsMstk);
+            nnsSubMotIdx = nnCalcNodeMotionCore(currentMatrix, ref pHideFlag, nnsBaseMtx, nnsNode, nodeIdx, nnsObj, nnsMot, nnsSubMotIdx, nnsFrame);
+            if (nnsNode.iMatrix != NND_MTXIDX_NIL)
             {
-                if (((int)nnsNode.fType & 8) != 0)
-                    nnCopyMatrix(nncalcmatrixpalettemotion.nnsMtxPal[nnsNode.iMatrix], currentMatrix);
+                if (((int)nnsNode.fType & NND_NODETYPE_UNIT_INIT_MATRIX) != 0)
+                    nnCopyMatrix(nnsMtxPal[nnsNode.iMatrix], currentMatrix);
                 else
-                    nnMultiplyMatrix(nncalcmatrixpalettemotion.nnsMtxPal[nnsNode.iMatrix], currentMatrix, nnsNode.InvInitMtx);
+                    nnMultiplyMatrix(nnsMtxPal[nnsNode.iMatrix], currentMatrix, nnsNode.InvInitMtx);
             }
-            if (nncalcmatrixpalettemotion.nnsNodeStatList != null)
+            if (nnsNodeStatList != null)
             {
-                if (nodeIdx == 0 && nncalcmatrixpalettemotion.nnsNSFlag != 0U)
-                    nncalcmatrixpalettemotion.nnsRootScale = nnEstimateMatrixScaling(currentMatrix);
+                if (nodeIdx == 0 && nnsNSFlag != 0U)
+                    nnsRootScale = nnEstimateMatrixScaling(currentMatrix);
                 int? nullable = pHideFlag;
                 if ((nullable.GetValueOrDefault() != 0 ? 1 : (!nullable.HasValue ? 1 : 0)) != 0)
-                    nncalcmatrixpalettemotion.nnsNodeStatList[nodeIdx] |= 1U;
-                nnCalcClipSetNodeStatus(nncalcmatrixpalettemotion.nnsNodeStatList, nncalcmatrixpalettemotion.nnsNodeList, nodeIdx, currentMatrix, nncalcmatrixpalettemotion.nnsRootScale, nncalcmatrixpalettemotion.nnsNSFlag);
+                    nnsNodeStatList[nodeIdx] |= 1U;
+                nnCalcClipSetNodeStatus(nnsNodeStatList, nnsNodeList, nodeIdx, currentMatrix, nnsRootScale, nnsNSFlag);
             }
             if (nnsNode.iChild != -1)
                 nnCalcMatrixPaletteMotionNode(nnsNode.iChild);
-            nnPopMatrix(nncalcmatrixpalettemotion.nnsMstk);
+            nnPopMatrix(nnsMstk);
             nodeIdx = nnsNode.iSibling;
         label_25:;
         }
@@ -5634,18 +5634,35 @@ public partial class AppMain
                 {
                     switch (submot.fIPType & 3703U)
                     {
+                        // HACKS TO SUPPORT NNS_MOTION_KEY_Class14 (incorrectly)
                         case 2:
-                            nnInterpolateLinearA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
-                            rv.x = val.x;
-                            rv.y = val.y;
-                            rv.z = val.z;
+                            if (pKeyList is NNS_MOTION_KEY_Class16[])
+                            {
+                                nnInterpolateLinearA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
+                                rv.x = val.x;
+                                rv.y = val.y;
+                                rv.z = val.z;
+                            }
+                            if (pKeyList is NNS_MOTION_KEY_Class14[])
+                            {
+                                nnInterpolateLinearA16_1((NNS_MOTION_KEY_Class14[])pKeyList, nKeyFrame, frame, out var x);
+                                rv.x = x;
+                            };
                             num1 = 1;
                             break;
                         case 4:
-                            nnInterpolateConstantA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
-                            rv.x = val.x;
-                            rv.y = val.y;
-                            rv.z = val.z;
+                            if (pKeyList is NNS_MOTION_KEY_Class16[])
+                            {
+                                nnInterpolateConstantA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
+                                rv.x = val.x;
+                                rv.y = val.y;
+                                rv.z = val.z;
+                            }
+                            if (pKeyList is NNS_MOTION_KEY_Class14[])
+                            {
+                                nnInterpolateConstantA16_1((NNS_MOTION_KEY_Class14[])pKeyList, nKeyFrame, frame, out var x);
+                                rv.x = x;
+                            };
                             num1 = 1;
                             break;
                         case 512:

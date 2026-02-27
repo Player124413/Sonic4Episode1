@@ -1,9 +1,9 @@
 using System.Runtime.InteropServices;
 
-public partial class AppMain
+internal partial class AppMain
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct AMS_RGBA8888
+    internal struct AMS_RGBA8888
     {
         [FieldOffset(0)]
         public byte r;

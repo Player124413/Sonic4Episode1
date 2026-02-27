@@ -1,9 +1,9 @@
 using System;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_AME_RUNTIME_WORK_LINE
+    internal struct AMS_AME_RUNTIME_WORK_LINE
     {
         private Vector4D_Quat st_;
         private AMS_RGBA8888_Buf inside_color_;

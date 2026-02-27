@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public const int AMD_TRAIL_SAMPLING_NUM = 4;
     public const int AMD_FX32_ONE = 4096;

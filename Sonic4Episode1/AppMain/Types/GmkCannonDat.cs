@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkCannonDat
+    internal class GmkCannonDat
     {
         private const int GME_GMK_RECT_DATA_LEFT = 0;
         private const int GME_GMK_RECT_DATA_TOP = 1;

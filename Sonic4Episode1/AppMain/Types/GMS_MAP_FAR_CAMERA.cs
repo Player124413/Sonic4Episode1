@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_FAR_CAMERA
+    internal class GMS_MAP_FAR_CAMERA
     {
         public int camera_id;
         public int camera_type;

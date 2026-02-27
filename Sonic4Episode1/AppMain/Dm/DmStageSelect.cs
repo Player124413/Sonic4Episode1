@@ -2,9 +2,177 @@
 using accel;
 using er;
 using gs.backup;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-public partial class AppMain
+internal partial class AppMain
 {
+    public const int DMD_STGSLCT_TASK_PAUSELEVEL = 0;
+    public const int DMD_STGSLCT_TASK_PRIO_MAIN = 8192;
+    public const int DMD_STGSLCT_TASK_GROUP_MAIN = 0;
+    public const int DMD_STGSLCT_FILE_PATH_NUM_MAX = 60;
+    public const string DMD_STGSLCT_CMN_DATA_FILENAME = "DEMO/CMN/D_CMN_WIN.AMB";
+    public const string DMD_STGSLCT_DATA_FILENAME = "DEMO/STGSLCT/D_STGSLCT.AMB";
+    public const float DMD_STGSLCT_SIZE_WIDTH = 960f;
+    public const float DMD_STGSLCT_SIZE_HEIGHT = 720f;
+    public const float DMD_STGSLCT_SIZE_HALF_WIDTH = 480f;
+    public const float DMD_STGSLCT_SIZE_HALF_HEIGHT = 360f;
+    public const int DMD_STGSLCT_DISP_SCORE_DIGIT_NUM = 9;
+    public const int DMD_STGSLCT_DRAW_PRIO_ZONE = 8192;
+    public const int DMD_STGSLCT_DRAW_PRIO_STAGE = 8192;
+    public const int DMD_STGSLCT_DRAW_PRIO_BG = 4096;
+    public const int DMD_STGSLCT_DRAW_PRIO_FIX = 12288;
+    public const int DMD_STGSLCT_DRAW_PRIO_WIN = 13568;
+    public const int DMD_STGSLCT_DRAW_PRIO_WIN_FIX = 16384;
+    public const float DMD_STGSLCT_ACT_TABLE_TOP_POS_X = 100f;
+    public const float DMD_STGSLCT_ACT_TABLE_DIST_Y = 128f;
+    public const int DMD_STGSLCT_INIT_SCORE_NUM = 1000000000;
+    public const int DMD_STGSLCT_INIT_RECORD_TIME_NUM = 36000;
+    public const int DMD_STGSLCT_CONV_SCORE_RATE = 10;
+    public const int DMD_STGSLCT_DOWN_ACT_DISP_POS = 0;
+    public const int DMD_STGSLCT_DOWN_ACT_NODISP_POS = 180;
+    public const int DMD_STGSLCT_MODE_TEX_FRAME_MAX = 60;
+    public const float DMD_STGSLCT_NO_ACTIVE_NUM_ID = 10f;
+    public const float DMD_STGSLCT_TIME_COLON_ID = 11f;
+    public const float DMD_STGSLCT_WINDOW_SIZE_W = 420f;
+    public const float DMD_STGSLCT_WINDOW_SIZE_H = 180f;
+    public const float DMD_STGSLCT_WIN_DEF_RATE = 1f;
+    public const float DMD_STGSLCT_FADEIN_TIME = 32f;
+    public const float DMD_STGSLCT_FADEOUT_TIME = 32f;
+    public const int DMD_STGSLCT_BGM_FADEIN_TIME = 32;
+    public const int DMD_STGSLCT_BGM_FADEOUT_TIME = 32;
+    public const int DMD_STGSLCT_BG_FADE_SPEED = 20;
+    public const float DMD_STGSLCT_ZONE_EFCT_TIME = 16f;
+    public const float DMD_STGSLCT_ACT_EFCT_TIME = 16f;
+    public const float DMD_STGSLCT_WIN_EFCT_TIME = 8f;
+    public const float DMD_STGSLCT_OBI_MOVE_START_POS = 1120f;
+    public const float DMD_STGSLCT_OBI_MOVE_END_POS = -1120f;
+    public const float DMD_STGSLCT_OBI_MOVE_SPEED = -3f;
+    public const float DMD_STGSLCT_ACT_VRTCL_CHNG_DIST = 128f;
+    public const int DMD_STGSLCT_ACT_VRTCL_CHNG_NUM = 3;
+    public const float DMD_STGSLCT_ACT_VRTCL_MOVE_TIME = 12f;
+    public const float DMD_STGSLCT_CRSR_MOVE_TIME = 8f;
+    public const int DMD_STGSLCT_ZONE_FINAL_OPEN = 1;
+    public const int DMD_STGSLCT_ZONE_SPECIAL_OPEN = 2;
+    public const int DMD_STGSLCT_ZONE_ALL_OPEN = 3;
+    public const int DMD_STGSLCT_ZONE_DECIDE_EFCT_ON = 6;
+    public const int DMD_STGSLCT_ZONE_DECIDE_EFCT_TIME = 10;
+    public const int DMD_STGSLCT_ZONE_DECIDE_EFCT_ON_POS_X = 8;
+    public const int DMD_STGSLCT_ZONE_DECIDE_EFCT_ON_POS_Y = 8;
+    public const int DMD_STGSLCT_ZONE_SCR_ID_NUM = 3;
+    public const int DMD_STGSLCT_ZONE_SCR_CHANGE_ALL_FRM = 360;
+    public const int DMD_STGSLCT_ZONE_CHNG_BTN_END_FRM = 12;
+    public const uint DMD_STGSLCT_FLAG_EXIT = 1;
+    public const uint DMD_STGSLCT_FLAG_CANCEL = 2;
+    public const uint DMD_STGSLCT_FLAG_DECIDE = 4;
+    public const uint DMD_STGSLCT_FLAG_DISP_MENU = 8;
+    public const uint DMD_STGSLCT_FLAG_WIN_EFCT_END = 16;
+    public const uint DMD_STGSLCT_FLAG_ACT_CHNG_ZONE = 32;
+    public const uint DMD_STGSLCT_FLAG_ACT_CHNG_VRTCL = 64;
+    public const uint DMD_STGSLCT_FLAG_ACT_CHNG_CRSR = 128;
+    public const uint DMD_STGSLCT_FLAG_ACT_RE_CHNG_ZONE = 256;
+    public const uint DMD_STGSLCT_FLAG_ACT_RE_CHNG_VRTCL = 512;
+    public const uint DMD_STGSLCT_FLAG_ACT_RE_CHNG_CRSR = 1024;
+    public const uint DMD_STGSLCT_FLAG_UP_CHNG_CRSR = 2048;
+    public const uint DMD_STGSLCT_FLAG_DOWN_CHNG_CRSR = 4096;
+    public const uint DMD_STGSLCT_FLAG_EME_TBL_MOVE_NODISP = 8192;
+    public const uint DMD_STGSLCT_FLAG_EME_TBL_MOVE_DISP = 16384;
+    public const uint DMD_STGSLCT_FLAG_MODE_TEX_MOVE_NODISP = 32768;
+    public const uint DMD_STGSLCT_FLAG_MODE_TEX_MOVE_DISP = 65536;
+    public const uint DMD_STGSLCT_FLAG_WHITE_FLASH_EFCT = 131072;
+    public const uint DMD_STGSLCT_FLAG_DECIDE_ZONE_TABLE_EFCT = 262144;
+    public const uint DMD_STGSLCT_FLAG_CHANGE_EVT_RANKING = 524288;
+    public const uint DMD_STGSLCT_FLAG_CHANGE_DISP_BG = 1048576;
+    public const uint DMD_STGSLCT_FLAG_BG_FADE_EFCT = 2097152;
+    public const uint DMD_STGSLCT_FLAG_ACT_PUSH_L_BTN = 4194304;
+    public const uint DMD_STGSLCT_FLAG_ACT_PUSH_R_BTN = 8388608;
+    public const uint DMD_STGSLCT_FLAG_PREV_EVT_RANKING = 16777216;
+    public const uint DMD_STGSLCT_FLAG_DEMO_SND_END = 33554432;
+    public const uint DMD_STGSLCT_FLAG_CHECK_SIGN_OUT_OK = 1073741824;
+    public const uint DMD_STGSLCT_FLAG_SIGN_OUT_EXIT = 2147483648;
+    public const uint DMD_STGSLCT_DISP_FLAG_WIN_ACT = 1;
+    public const uint DMD_STGSLCT_DISP_FLAG_LR_ARROW = 2;
+    public const uint DMD_STGSLCT_DISP_FLAG_ACT_CRSR = 4;
+    public const float DMD_STGSLCT_DISP_SCALE_TEXT = 1.68f;
+    public const float DMD_STGSLCT_STAGE_TAB_NODISP_POS_X = 1120f;
+    private const int DME_STGSLCT_NEXT_EVT_MAINGAME = 0;
+    private const int DME_STGSLCT_NEXT_EVT_SPESTE = 1;
+    private const int DME_STGSLCT_NEXT_EVT_RANKING = 2;
+    private const int DME_STGSLCT_NEXT_EVT_MAINMENU = 3;
+    private const int DME_STGSLCT_NEXT_EVT_TITLE = 4;
+    private const int DME_STGSLCT_NEXT_EVT_MAX = 5;
+    private const int DME_STGSLCT_DATA_TYPE_CMN_DATA = 0;
+    private const int DME_STGSLCT_DATA_TYPE_LANG_DATA = 1;
+    private const int DME_STGSLCT_DATA_TYPE_MAX = 2;
+    private const int DME_STGSLCT_DATA_TYPE_NONE = 3;
+    private const int DME_STGSLCT_PLATFORM_TYPE_PC = 0;
+    private const int DME_STGSLCT_PLATFORM_TYPE_XBOX = 1;
+    private const int DME_STGSLCT_PLATFORM_TYPE_PS3 = 2;
+    private const int DME_STGSLCT_PLATFORM_TYPE_WII = 3;
+    private const int DME_STGSLCT_PLATFORM_TYPE_IPHONE = 4;
+    private const int DME_STGSLCT_PLATFORM_TYPE_MAX = 5;
+    private const int DME_STGSLCT_PLATFORM_TYPE_NONE = 6;
+    private const int DME_STGSLCT_ZONE_TYPE_1 = 0;
+    private const int DME_STGSLCT_ZONE_TYPE_2 = 1;
+    private const int DME_STGSLCT_ZONE_TYPE_3 = 2;
+    private const int DME_STGSLCT_ZONE_TYPE_4 = 3;
+    private const int DME_STGSLCT_ZONE_TYPE_FINAL = 4;
+    private const int DME_STGSLCT_ZONE_TYPE_SPE = 5;
+    private const int DME_STGSLCT_ZONE_TYPE_NUM = 6;
+    private const int DME_STGSLCT_ZONE_TYPE_NONE = 7;
+    private const int DME_STGSLCT_MODE_STATE_ZONE_SLCT = 0;
+    private const int DME_STGSLCT_MODE_STATE_ACT_SLCT = 1;
+    private const int DME_STGSLCT_MODE_STATE_NUM = 2;
+    private const int DME_STGSLCT_MODE_STATE_NONE = 3;
+    private const int DME_STGSLCT_PLAY_MODE_NORMAL = 0;
+    private const int DME_STGSLCT_PLAY_MODE_TIME_ATK = 1;
+    private const int DME_STGSLCT_PLAY_MODE_NUM = 2;
+    private const int DME_STGSLCT_PLAY_MODE_NONE = 3;
+    private const int DME_STGSLCT_WIN_MENU = 0;
+    private const int DME_STGSLCT_WIN_STG_SLCT = 1;
+    private const int DME_STGSLCT_WIN_1_1_CLEAR = 2;
+    private const int DME_STGSLCT_WIN_BOSS1_CAN_PLAY = 3;
+    private const int DME_STGSLCT_WIN_BOSS2_CAN_PLAY = 4;
+    private const int DME_STGSLCT_WIN_BOSS3_CAN_PLAY = 5;
+    private const int DME_STGSLCT_WIN_BOSS4_CAN_PLAY = 6;
+    private const int DME_STGSLCT_WIN_FINAL_CAN_SLCT = 7;
+    private const int DME_STGSLCT_WIN_SSONIC_SLCT = 8;
+    private const int DME_STGSLCT_WIN_SPESTE_CAN_SLCT = 9;
+    private const int DME_STGSLCT_WIN_NUM = 10;
+    private const int DME_STGSLCT_WIN_NONE = 11;
+    private const int DME_STGSLCT_ACT_PAGE_1 = 0;
+    private const int DME_STGSLCT_ACT_PAGE_2 = 1;
+    private const int DME_STGSLCT_ACT_PAGE_3 = 2;
+    private const int DME_STGSLCT_ACT_PAGE_4 = 3;
+    private const int DME_STGSLCT_ACT_PAGE_FINAL = 4;
+    private const int DME_STGSLCT_ACT_PAGE_SPE = 5;
+    private const int DME_STGSLCT_ACT_PAGE_NUM = 6;
+    private const int DME_STGSLCT_ACT_PAGE_NONE = 7;
+    private const int DME_STGSLCT_STAGE_1_1 = 0;
+    private const int DME_STGSLCT_STAGE_1_2 = 1;
+    private const int DME_STGSLCT_STAGE_1_3 = 2;
+    private const int DME_STGSLCT_STAGE_1_B = 3;
+    private const int DME_STGSLCT_STAGE_2_1 = 4;
+    private const int DME_STGSLCT_STAGE_2_2 = 5;
+    private const int DME_STGSLCT_STAGE_2_3 = 6;
+    private const int DME_STGSLCT_STAGE_2_B = 7;
+    private const int DME_STGSLCT_STAGE_3_1 = 8;
+    private const int DME_STGSLCT_STAGE_3_2 = 9;
+    private const int DME_STGSLCT_STAGE_3_3 = 10;
+    private const int DME_STGSLCT_STAGE_3_B = 11;
+    private const int DME_STGSLCT_STAGE_4_1 = 12;
+    private const int DME_STGSLCT_STAGE_4_2 = 13;
+    private const int DME_STGSLCT_STAGE_4_3 = 14;
+    private const int DME_STGSLCT_STAGE_4_B = 15;
+    private const int DME_STGSLCT_STAGE_F_1 = 16;
+    private const int DME_STGSLCT_STAGE_S_1 = 17;
+    private const int DME_STGSLCT_STAGE_S_2 = 18;
+    private const int DME_STGSLCT_STAGE_S_3 = 19;
+    private const int DME_STGSLCT_STAGE_S_4 = 20;
+    private const int DME_STGSLCT_STAGE_S_5 = 21;
+    private const int DME_STGSLCT_STAGE_S_6 = 22;
+    private const int DME_STGSLCT_STAGE_S_7 = 23;
+    private const int DME_STGSLCT_STAGE_NUM = 24;
+    private const int DME_STGSLCT_STAGE_NONE = 25;
     private void DmStgSlctStart(object arg)
     {
         this.dmStgSlctInit();
@@ -13,10 +181,42 @@ public partial class AppMain
     private void dmStgSlctInit()
     {
         AoActSysSetDrawStateEnable(false);
-        DMS_STGSLCT_MAIN_WORK work = (DMS_STGSLCT_MAIN_WORK) MTM_TASK_MAKE_TCB(
+        DMS_STGSLCT_MAIN_WORK work = (DMS_STGSLCT_MAIN_WORK)MTM_TASK_MAKE_TCB(
             new GSF_TASK_PROCEDURE(this.dmStgSlctProcMain), new GSF_TASK_PROCEDURE(this.dmStgSlctDest), 0U, 0, 8192U, 0,
             () => new DMS_STGSLCT_MAIN_WORK(), "STGSLCT_MAIN").work;
         work.is_jp_region = GeEnvGetDecideKey() == GSE_DECIDE_KEY.GSD_DECIDE_KEY_O;
+
+#if DEBUG
+        if ((AoPad.AoPadDirect().HasFlag(ControllerConsts.UP)) || amTpIsTouchOn(2))
+        {
+            uint save_hi_score = 1000;
+            bool sonic_type = false;
+
+            // 通常ステージデータインスタンス作成
+            //gs::backup::SStage & data
+            //    = gs::backup::SStage::CreateInstance();
+            var data = SStage.CreateInstance();
+
+            // スペシャルステージデータインスタンス作成
+            var spe_data = SSpecial.CreateInstance();
+
+
+            for (var i = 0; i <= GSD_MAIN_STAGE_ID_FINAL_1; i++)
+            {
+                // 通常ステージのハイスコア取得
+                data[i].SetHighScore(save_hi_score, sonic_type);
+
+            }
+
+            for (var i = 0; i < 7; i++)
+            {
+                // スペシャルステージのハイスコア取得
+                spe_data[i].SetHighScore(save_hi_score);
+                spe_data[i].SetEmeraldStage((EEmeraldStage.Type)(i + 1));
+            }
+        }
+#endif
+
         this.dmStgSlctSetInitData(work);
         this.dmStgSlctSetHiScore(work);
         this.dmStgSlctSetClearInfo(work);
@@ -38,11 +238,11 @@ public partial class AppMain
             case 6:
             case 11:
                 dm_stgslct_is_stage_start = true;
-                main_work.cur_game_mode = (uint) g_gs_main_sys_info.game_mode;
+                main_work.cur_game_mode = (uint)g_gs_main_sys_info.game_mode;
                 break;
             case 7:
                 dm_stgslct_is_stage_start = true;
-                main_work.cur_game_mode = (uint) g_gs_main_sys_info.game_mode;
+                main_work.cur_game_mode = (uint)g_gs_main_sys_info.game_mode;
                 main_work.flag |= 16777216U;
                 break;
             default:
@@ -86,7 +286,7 @@ public partial class AppMain
                 else
                 {
                     main_work.cur_stage =
-                        (int) (dm_stgslct_zone_act_num_tbl[5][0] + (g_gs_main_sys_info.stage_id - 21));
+                        (int)(dm_stgslct_zone_act_num_tbl[5][0] + (g_gs_main_sys_info.stage_id - 21));
                     main_work.cur_zone = 5U;
                     main_work.chng_zone = 7U;
                     if (main_work.cur_stage <= 20)
@@ -132,90 +332,96 @@ public partial class AppMain
         SStage instance1 = SStage.CreateInstance();
         for (uint index = 0; index <= 16U; ++index)
         {
-            main_work.n_sonic_hi_score[(int) index] = (int) instance1[(int) index].GetHighScore(false);
-            main_work.s_sonic_hi_score[(int) index] = (int) instance1[(int) index].GetHighScore(true);
-            main_work.hi_score[(int) index] =
-                main_work.n_sonic_hi_score[(int) index] == 0 || main_work.s_sonic_hi_score[(int) index] == 0
-                    ? (main_work.n_sonic_hi_score[(int) index] != 0 || main_work.s_sonic_hi_score[(int) index] != 0
-                        ? (main_work.n_sonic_hi_score[(int) index] != 0
-                            ? (main_work.s_sonic_hi_score[(int) index] != 0
-                                ? main_work.n_sonic_hi_score[(int) index]
-                                : main_work.n_sonic_hi_score[(int) index])
-                            : main_work.s_sonic_hi_score[(int) index])
-                        : main_work.n_sonic_hi_score[(int) index])
-                    : (main_work.n_sonic_hi_score[(int) index] < main_work.s_sonic_hi_score[(int) index]
-                        ? main_work.s_sonic_hi_score[(int) index]
-                        : main_work.n_sonic_hi_score[(int) index]);
-            if (main_work.hi_score[(int) index] > 1000000000)
-                main_work.hi_score[(int) index] = 999999999;
-            main_work.n_sonic_record_time[(int) index] = (int) instance1[(int) index].GetFastTime(false);
-            main_work.s_sonic_record_time[(int) index] = (int) instance1[(int) index].GetFastTime(true);
-            main_work.record_time[(int) index] =
-                main_work.n_sonic_record_time[(int) index] == 0 || main_work.s_sonic_record_time[(int) index] == 0
-                    ? (main_work.n_sonic_record_time[(int) index] != 0 ||
-                       main_work.s_sonic_record_time[(int) index] != 0
-                        ? (main_work.n_sonic_record_time[(int) index] != 0
-                            ? (main_work.s_sonic_record_time[(int) index] != 0
-                                ? main_work.n_sonic_record_time[(int) index]
-                                : main_work.n_sonic_record_time[(int) index])
-                            : main_work.s_sonic_record_time[(int) index])
-                        : main_work.n_sonic_record_time[(int) index])
-                    : (main_work.n_sonic_record_time[(int) index] > main_work.s_sonic_record_time[(int) index]
-                        ? main_work.s_sonic_record_time[(int) index]
-                        : main_work.n_sonic_record_time[(int) index]);
-            if (main_work.record_time[(int) index] > 36000)
-                main_work.record_time[(int) index] = 35999;
+            main_work.n_sonic_hi_score[(int)index] = (int)instance1[(int)index].GetHighScore(false);
+            main_work.s_sonic_hi_score[(int)index] = (int)instance1[(int)index].GetHighScore(true);
+            if (main_work.n_sonic_hi_score[(int)index] == 0 || main_work.s_sonic_hi_score[(int)index] == 0)
+            {
+                main_work.hi_score[(int)index] =
+                (main_work.n_sonic_hi_score[(int)index] != 0 || main_work.s_sonic_hi_score[(int)index] != 0
+                        ? (main_work.n_sonic_hi_score[(int)index] != 0
+                            ? (main_work.s_sonic_hi_score[(int)index] != 0
+                                ? main_work.n_sonic_hi_score[(int)index]
+                                : main_work.n_sonic_hi_score[(int)index])
+                            : main_work.s_sonic_hi_score[(int)index])
+                        : main_work.n_sonic_hi_score[(int)index]);
+            }
+            else
+            {
+                main_work.hi_score[(int)index] =
+                (main_work.n_sonic_hi_score[(int)index] < main_work.s_sonic_hi_score[(int)index]
+                        ? main_work.s_sonic_hi_score[(int)index]
+                        : main_work.n_sonic_hi_score[(int)index]);
+            }
+            if (main_work.hi_score[(int)index] > 1000000000)
+                main_work.hi_score[(int)index] = 999999999;
+            main_work.n_sonic_record_time[(int)index] = (int)instance1[(int)index].GetFastTime(false);
+            main_work.s_sonic_record_time[(int)index] = (int)instance1[(int)index].GetFastTime(true);
+            main_work.record_time[(int)index] =
+                main_work.n_sonic_record_time[(int)index] == 0 || main_work.s_sonic_record_time[(int)index] == 0
+                    ? (main_work.n_sonic_record_time[(int)index] != 0 ||
+                       main_work.s_sonic_record_time[(int)index] != 0
+                        ? (main_work.n_sonic_record_time[(int)index] != 0
+                            ? (main_work.s_sonic_record_time[(int)index] != 0
+                                ? main_work.n_sonic_record_time[(int)index]
+                                : main_work.n_sonic_record_time[(int)index])
+                            : main_work.s_sonic_record_time[(int)index])
+                        : main_work.n_sonic_record_time[(int)index])
+                    : (main_work.n_sonic_record_time[(int)index] > main_work.s_sonic_record_time[(int)index]
+                        ? main_work.s_sonic_record_time[(int)index]
+                        : main_work.n_sonic_record_time[(int)index]);
+            if (main_work.record_time[(int)index] > 36000)
+                main_work.record_time[(int)index] = 35999;
         }
 
         SSpecial instance2 = SSpecial.CreateInstance();
         for (uint index = 0; index < 7U; ++index)
         {
-            main_work.hi_score[(int) (index + 17U)] = (int) instance2[(int) index].GetHighScore();
-            if (main_work.hi_score[(int) (index + 17U)] > 1000000000)
-                main_work.hi_score[(int) (index + 17U)] = 999999999;
-            main_work.record_time[(int) (index + 17U)] = (int) instance2[(int) index].GetFastTime();
-            if (main_work.record_time[(int) index] > 36000)
-                main_work.record_time[(int) index] = 35999;
+            main_work.hi_score[(int)(index + 17U)] = (int)instance2[(int)index].GetHighScore();
+            if (main_work.hi_score[(int)(index + 17U)] > 1000000000)
+                main_work.hi_score[(int)(index + 17U)] = 999999999;
+            main_work.record_time[(int)(index + 17U)] = (int)instance2[(int)index].GetFastTime();
+            if (main_work.record_time[(int)index] > 36000)
+                main_work.record_time[(int)index] = 35999;
         }
 
         for (uint index = 0; index < 24U; ++index)
-            main_work.is_clear_stage[(int) index] =
-                main_work.hi_score[(int) index] != 0 || main_work.record_time[(int) index] != 0 ? 1 : 0;
+            main_work.is_clear_stage[(int)index] =
+                main_work.hi_score[(int)index] != 0 || main_work.record_time[(int)index] != 0 ? 1 : 0;
         for (uint index1 = 0; index1 < 24U; ++index1)
         {
-            if (index1 > 16U && main_work.is_clear_stage[(int) index1] == 0)
-                main_work.is_clear_stage[(int) index1] = -1;
+            if (index1 > 16U && main_work.is_clear_stage[(int)index1] == 0)
+                main_work.is_clear_stage[(int)index1] = -1;
             switch (index1)
             {
                 case 16:
                     for (uint index2 = 3; index2 < 16U; index2 += 4U)
                     {
-                        if (main_work.is_clear_stage[(int) index2] != 1)
+                        if (main_work.is_clear_stage[(int)index2] != 1)
                             num = 1U;
                     }
 
                     if (num != 0U)
                     {
-                        main_work.is_clear_stage[(int) index1] = -1;
+                        main_work.is_clear_stage[(int)index1] = -1;
                         break;
                     }
 
                     break;
                 case 17:
-                    main_work.is_clear_stage[(int) index1] = 1;
+                    main_work.is_clear_stage[(int)index1] = 1;
                     break;
                 default:
                     if (index1 < 16U && (index1 + 1U) % 4U == 0U)
                     {
                         for (uint index2 = 0; index2 < 3U; ++index2)
                         {
-                            if (main_work.is_clear_stage[(int) (index1 - 3U + index2)] == 0)
+                            if (main_work.is_clear_stage[(int)(index1 - 3U + index2)] == 0)
                                 num = 1U;
                         }
 
                         if (num != 0U)
                         {
-                            main_work.is_clear_stage[(int) index1] = -1;
+                            main_work.is_clear_stage[(int)index1] = -1;
                             break;
                         }
 
@@ -234,15 +440,15 @@ public partial class AppMain
         main_work.player_stock = g_gs_main_sys_info.rest_player_num;
         for (uint index = 0; index < 7U; ++index)
         {
-            if (instance2[(int) index].IsGetEmerald())
+            if (instance2[(int)index].IsGetEmerald())
             {
                 main_work.is_final_open |= 2;
-                main_work.get_emerald |= 1U << (int) index;
-                main_work.eme_stage_no[(int) index] =
-                    dm_stgslct_eme_get_act_no_tbl[(int) instance2[(int) index].GetEmeraldStage()];
+                main_work.get_emerald |= 1U << (int)index;
+                main_work.eme_stage_no[(int)index] =
+                    dm_stgslct_eme_get_act_no_tbl[(int)instance2[(int)index].GetEmeraldStage()];
             }
             else
-                main_work.is_clear_stage[(int) (17U + index)] = -1;
+                main_work.is_clear_stage[(int)(17U + index)] = -1;
         }
     }
 
@@ -305,28 +511,28 @@ public partial class AppMain
 
     private void dmStgSlctProcMain(MTS_TASK_TCB tcb)
     {
-        DMS_STGSLCT_MAIN_WORK work = (DMS_STGSLCT_MAIN_WORK) tcb.work;
-        if (((int) work.flag & 1) != 0)
+        DMS_STGSLCT_MAIN_WORK work = (DMS_STGSLCT_MAIN_WORK)tcb.work;
+        if (((int)work.flag & 1) != 0)
         {
             mtTaskClearTcb(tcb);
             this.dmStgSlctSetNextEvt(work);
         }
 
-        if (((int) work.flag & int.MinValue) != 0 && !AoAccountIsCurrentEnable())
+        if (((int)work.flag & int.MinValue) != 0 && !AoAccountIsCurrentEnable())
         {
             work.proc_menu_update = new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcFadeOut);
             work.flag &= int.MaxValue;
             work.next_evt = 4;
             IzFadeInitEasy(1U, 1U, 32f);
             DmSndBgmPlayerExit();
-            work.flag |= 33554432U;
-            work.flag &= 4294967291U;
-            work.flag &= 4294967293U;
+            work.flag |= DMD_STGSLCT_FLAG_DEMO_SND_END;
+            work.flag &= ~DMD_STGSLCT_FLAG_DECIDE;
+            work.flag &= ~DMD_STGSLCT_FLAG_CANCEL;
             work.proc_input = null;
             work.proc_win_input = null;
             work.win_timer = 0.0f;
             work.win_cur_slct = 0;
-            work.win_mode = 1;
+            work.win_mode = DME_STGSLCT_WIN_STG_SLCT;
             work.win_is_disp_cover = false;
         }
 
@@ -346,14 +552,14 @@ public partial class AppMain
 
     private void dmStgSlctSetNextEvt(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        ushort curStage = (ushort) main_work.cur_stage;
+        ushort curStage = (ushort)main_work.cur_stage;
         switch (main_work.next_evt)
         {
             case 0:
                 g_gs_main_sys_info.stage_id = curStage;
                 g_gs_main_sys_info.prev_stage_id = ushort.MaxValue;
                 g_gs_main_sys_info.char_id[0] = 0;
-                g_gs_main_sys_info.game_mode = (int) main_work.cur_game_mode;
+                g_gs_main_sys_info.game_mode = (int)main_work.cur_game_mode;
                 if (main_work.is_clear_stage[23] == 1)
                     g_gs_main_sys_info.game_flag |= 32U;
                 else
@@ -362,20 +568,20 @@ public partial class AppMain
                 GmMainGSInit();
                 break;
             case 1:
-                g_gs_main_sys_info.stage_id = (ushort) (curStage + 4U);
+                g_gs_main_sys_info.stage_id = (ushort)(curStage + 4U);
                 g_gs_main_sys_info.prev_stage_id = ushort.MaxValue;
                 if (main_work.is_clear_stage[23] == 1)
                     g_gs_main_sys_info.game_flag |= 32U;
                 else
                     g_gs_main_sys_info.game_flag &= 4294967263U;
-                g_gs_main_sys_info.game_mode = (int) main_work.cur_game_mode;
+                g_gs_main_sys_info.game_mode = (int)main_work.cur_game_mode;
                 g_gs_main_sys_info.game_flag &= 4294967167U;
                 break;
             case 2:
                 dm_stgslct_is_stage_start = true;
                 if (main_work.cur_zone == 5U)
                 {
-                    g_gs_main_sys_info.stage_id = (ushort) (curStage + 4U);
+                    g_gs_main_sys_info.stage_id = (ushort)(curStage + 4U);
                     g_gs_main_sys_info.prev_stage_id = ushort.MaxValue;
                 }
                 else
@@ -388,7 +594,7 @@ public partial class AppMain
                 break;
         }
 
-        SyDecideEvtCase((short) main_work.next_evt);
+        SyDecideEvtCase((short)main_work.next_evt);
         SyChangeNextEvt();
     }
 
@@ -523,12 +729,13 @@ public partial class AppMain
             }
 
             AoActSetTexture(AoTexGetTexList(tex));
-            main_work.act[(int) index] = AoActCreate(ama, g_dm_act_id_tbl_stg_slct[(int) index]);
+            main_work.act[(int)index] = AoActCreate(ama, g_dm_act_id_tbl_stg_slct[(int)index]);
         }
 
         AoActUpdate(main_work.act[57], 0.0f);
         main_work.act_tab_state_move_base_pos[0] = main_work.act[57].sprite.center_x;
         main_work.act_tab_state_move_base_pos[1] = main_work.act[57].sprite.center_y;
+       
         int index1 = 0;
         for (int index2 = arrayof(main_work.trg_zone); index1 < index2; ++index1)
             main_work.trg_zone[index1].Create(main_work.act[37]);
@@ -547,7 +754,7 @@ public partial class AppMain
         }
 
         CTrgFlick trgActMove = main_work.trg_act_move;
-        trgActMove.Create(50, 90, (int) AMD_SCREEN_2D_WIDTH - 100, 258);
+        trgActMove.Create(50, 90, (int)AMD_SCREEN_2D_WIDTH - 100, 258);
         trgActMove.SetMoveThreshold(4);
         int index7 = 0;
         for (int index2 = arrayof(main_work.trg_mode); index7 < index2; ++index7)
@@ -571,12 +778,12 @@ public partial class AppMain
 
     private void dmStgSlctProcSetDispEfctData(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
-        if (((int) main_work.announce_flag & 4) != 0 || ((int) main_work.announce_flag & 512) != 0 ||
-            ((int) main_work.announce_flag & 128) != 0)
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
+        if (((int)main_work.announce_flag & 4) != 0 || ((int)main_work.announce_flag & 512) != 0 ||
+            ((int)main_work.announce_flag & 128) != 0)
             main_work.flag |= 131072U;
-        if (dm_stgslct_is_stage_start && ((int) main_work.flag & 131072) == 0)
+        if (dm_stgslct_is_stage_start && ((int)main_work.flag & 131072) == 0)
         {
             main_work.proc_draw = new DMS_STGSLCT_MAIN_WORK._proc_draw_(this.dmStgSlctStageSelectDraw);
             main_work.state = 1;
@@ -585,7 +792,7 @@ public partial class AppMain
         {
             main_work.proc_draw = new DMS_STGSLCT_MAIN_WORK._proc_draw_(this.dmStgSlctZoneSelectDraw);
             main_work.state = 0;
-            main_work.cur_zone = main_work.cur_zone = uint.MaxValue;
+            //main_work.cur_zone = main_work.cur_zone = uint.MaxValue;
         }
 
         if (main_work.state == 0)
@@ -594,39 +801,39 @@ public partial class AppMain
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_a_zone_disp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_a_zone_disp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_a_zone_disp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_a_zone_disp_pos_tbl[(int)index][1];
                 }
             }
             else if ((main_work.is_final_open & 2) != 0)
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_s_zone_disp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_s_zone_disp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_s_zone_disp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_s_zone_disp_pos_tbl[(int)index][1];
                 }
             }
             else if ((main_work.is_final_open & 1) != 0)
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_f_zone_disp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_f_zone_disp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_f_zone_disp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_f_zone_disp_pos_tbl[(int)index][1];
                 }
             }
             else
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_n_zone_disp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_n_zone_disp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_n_zone_disp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_n_zone_disp_pos_tbl[(int)index][1];
                 }
             }
 
             for (uint index = 0; index < 24U; ++index)
             {
-                main_work.act_top_pos_x[(int) index] = 1120f;
-                main_work.act_top_pos_y[(int) index] = dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                main_work.act_top_pos_x[(int)index] = 1120f;
+                main_work.act_top_pos_y[(int)index] = dm_stgslct_act_disp_y_pos_tbl[(int)index];
             }
 
             main_work.mode_tex_pos_y = 180f;
@@ -639,41 +846,41 @@ public partial class AppMain
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][1];
                 }
             }
             else if ((main_work.is_final_open & 2) != 0)
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_s_zone_nodisp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_s_zone_nodisp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_s_zone_nodisp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_s_zone_nodisp_pos_tbl[(int)index][1];
                 }
             }
             else if ((main_work.is_final_open & 1) != 0)
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_f_zone_nodisp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_f_zone_nodisp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_f_zone_nodisp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_f_zone_nodisp_pos_tbl[(int)index][1];
                 }
             }
             else
             {
                 for (uint index = 0; index < 6U; ++index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_n_zone_nodisp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_n_zone_nodisp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_n_zone_nodisp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_n_zone_nodisp_pos_tbl[(int)index][1];
                 }
             }
 
             for (uint index = num1; index < num2; ++index)
             {
-                main_work.act_top_pos_x[(int) index] = 100f;
-                main_work.act_top_pos_y[(int) index] = main_work.cur_zone == 5U
+                main_work.act_top_pos_x[(int)index] = 100f;
+                main_work.act_top_pos_y[(int)index] = main_work.cur_zone == 5U
                     ? this.dm_stgslct_act_tab_disp_y_pos_tbl[main_work.focus_disp_no]
-                    : dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                    : dm_stgslct_act_disp_y_pos_tbl[(int)index];
             }
 
             this.dmStgSlctStageSelectChngZoneSetInZoneScroll(main_work, main_work.cur_stage);
@@ -694,7 +901,7 @@ public partial class AppMain
             return;
         IzFadeExit();
         AoPresenceSet(AO_PRESENCE_STAGE_ID_STAGE_SELECT, false);
-        if (((int) main_work.flag & 131072) != 0)
+        if (((int)main_work.flag & 131072) != 0)
         {
             IzFadeInitEasy(0U, 3U, 32f);
             main_work.proc_menu_update =
@@ -761,7 +968,7 @@ public partial class AppMain
             AoActUpdate(main_work.act[index], 0.0f);
         }
 
-        if (((int) main_work.flag & 2) != 0)
+        if (((int)main_work.flag & 2) != 0)
         {
             main_work.flag &= 4294967291U;
             main_work.flag &= 4294967293U;
@@ -773,7 +980,7 @@ public partial class AppMain
             IzFadeInitEasy(0U, 1U, 32f);
             DmSoundPlaySE("Cancel");
         }
-        else if (((int) main_work.flag & 4) != 0)
+        else if (((int)main_work.flag & 4) != 0)
         {
             DmSoundPlaySE("Ok");
             main_work.proc_menu_update =
@@ -796,13 +1003,13 @@ public partial class AppMain
             main_work.flag &= 4294967291U;
             for (uint index = 0; index < 6U; ++index)
             {
-                if ((int) main_work.cur_zone != (int) index)
-                    main_work.efct_out_flag |= 1U << (int) index;
+                if ((int)main_work.cur_zone != (int)index)
+                    main_work.efct_out_flag |= 1U << (int)index;
             }
 
             main_work.decide_zone_efct_dist_x = 0;
             main_work.decide_zone_efct_dist_y = 0;
-            main_work.cur_stage = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
+            main_work.cur_stage = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
             main_work.prev_stage = main_work.cur_stage;
             main_work.proc_input = null;
             main_work.timer = 0;
@@ -816,8 +1023,8 @@ public partial class AppMain
 
     private void dmStgSlctProcZoneSelectOutEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
         if (this.dmStgSlctIsZonePosOutEfct(main_work))
         {
             main_work.proc_menu_update =
@@ -825,19 +1032,19 @@ public partial class AppMain
             main_work.efct_time = 0U;
             for (uint index = 0; index < 6U; ++index)
             {
-                if ((int) main_work.cur_zone != (int) index)
+                if ((int)main_work.cur_zone != (int)index)
                 {
-                    main_work.zone_pos[(int) index][0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][0];
-                    main_work.zone_pos[(int) index][1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][1];
+                    main_work.zone_pos[(int)index][0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][0];
+                    main_work.zone_pos[(int)index][1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][1];
                 }
             }
 
             for (uint index = num1; index < num2; ++index)
             {
-                main_work.act_top_pos_x[(int) index] = 1120f;
-                main_work.act_top_pos_y[(int) index] = main_work.cur_zone == 5U
+                main_work.act_top_pos_x[(int)index] = 1120f;
+                main_work.act_top_pos_y[(int)index] = main_work.cur_zone == 5U
                     ? this.dm_stgslct_act_tab_disp_y_pos_tbl[0]
-                    : dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                    : dm_stgslct_act_disp_y_pos_tbl[(int)index];
             }
 
             main_work.state = 1;
@@ -849,7 +1056,7 @@ public partial class AppMain
         {
             this.dmStgSlctSetZonePosOutEfct(main_work);
             if (main_work.efct_time == 20U)
-                main_work.efct_out_flag |= 1U << (int) main_work.cur_zone;
+                main_work.efct_out_flag |= 1U << (int)main_work.cur_zone;
             ++main_work.efct_time;
             this.dmStgSlctSetZoneScrChangeEfct(main_work);
         }
@@ -900,7 +1107,7 @@ public partial class AppMain
             AoActUpdate(main_work.act[index], 0.0f);
         }
 
-        if (((int) main_work.flag & 2) != 0)
+        if (((int)main_work.flag & 2) != 0)
         {
             main_work.proc_menu_update =
                 new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcStageSelectOutEfct);
@@ -909,7 +1116,7 @@ public partial class AppMain
             main_work.proc_input = null;
             main_work.disp_flag &= 4294967293U;
         }
-        else if (((int) main_work.flag & 4) != 0)
+        else if (((int)main_work.flag & 4) != 0)
         {
             if (!this.dmStgSlctIsCanSelectAct(main_work))
             {
@@ -931,7 +1138,7 @@ public partial class AppMain
                 main_work.win_timer = -10.5f;
             }
         }
-        else if (((int) main_work.flag & 524288) != 0)
+        else if (((int)main_work.flag & 524288) != 0)
         {
             main_work.proc_menu_update = new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcFadeOut);
             IzFadeInitEasy(0U, 1U, 32f);
@@ -943,7 +1150,7 @@ public partial class AppMain
             main_work.win_cur_slct = 0;
             main_work.flag &= 4294443007U;
         }
-        else if (((int) main_work.flag & 32) != 0)
+        else if (((int)main_work.flag & 32) != 0)
         {
             main_work.proc_menu_update =
                 new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcStageSelectChngZone);
@@ -954,7 +1161,7 @@ public partial class AppMain
         }
         else
         {
-            if (((int) main_work.flag & 64) == 0)
+            if (((int)main_work.flag & 64) == 0)
                 return;
             main_work.proc_menu_update =
                 new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcStageSelectChngVrtclAct);
@@ -985,7 +1192,7 @@ public partial class AppMain
     {
         if (main_work.proc_input != null)
             main_work.proc_input(main_work);
-        if (((int) main_work.flag & 2048) != 0 || ((int) main_work.flag & 4096) != 0)
+        if (((int)main_work.flag & 2048) != 0 || ((int)main_work.flag & 4096) != 0)
         {
             this.dmStgSlctSetFocusChangeEfctData(main_work);
             DmSoundPlaySE("Cursol");
@@ -993,7 +1200,7 @@ public partial class AppMain
             main_work.flag &= 4294965247U;
             main_work.flag &= 4294963199U;
         }
-        else if (((int) main_work.flag & 64) == 0 && ((int) main_work.flag & 128) == 0)
+        else if (((int)main_work.flag & 64) == 0 && ((int)main_work.flag & 128) == 0)
         {
             main_work.proc_menu_update =
                 new DMS_STGSLCT_MAIN_WORK._proc_menu_update_(this.dmStgSlctProcStageSelectIdle);
@@ -1004,14 +1211,14 @@ public partial class AppMain
         }
         else
         {
-            if (((int) main_work.flag & 64) != 0)
+            if (((int)main_work.flag & 64) != 0)
             {
                 this.dmStgSlctSetStageVrtclChangeEfct(main_work);
                 if (this.dmStgSlctIsStageVrtclChangeEfct(main_work))
                     main_work.flag &= 4294967231U;
             }
 
-            if (((int) main_work.flag & 128) != 0)
+            if (((int)main_work.flag & 128) != 0)
             {
                 this.dmStgSlctSetStageCrsrChangeEfct(main_work);
                 if (this.dmStgSlctIsStageCrsrChangeEfct(main_work))
@@ -1078,32 +1285,32 @@ public partial class AppMain
                 {
                     for (uint index2 = 0; index2 < 6U; ++index2)
                     {
-                        main_work.zone_pos[(int) index2][0] = dm_stgslct_a_zone_disp_pos_tbl[(int) index2][0];
-                        main_work.zone_pos[(int) index2][1] = dm_stgslct_a_zone_disp_pos_tbl[(int) index2][1];
+                        main_work.zone_pos[(int)index2][0] = dm_stgslct_a_zone_disp_pos_tbl[(int)index2][0];
+                        main_work.zone_pos[(int)index2][1] = dm_stgslct_a_zone_disp_pos_tbl[(int)index2][1];
                     }
                 }
                 else if ((main_work.is_final_open & 2) != 0)
                 {
                     for (uint index2 = 0; index2 < 6U; ++index2)
                     {
-                        main_work.zone_pos[(int) index2][0] = dm_stgslct_s_zone_disp_pos_tbl[(int) index2][0];
-                        main_work.zone_pos[(int) index2][1] = dm_stgslct_s_zone_disp_pos_tbl[(int) index2][1];
+                        main_work.zone_pos[(int)index2][0] = dm_stgslct_s_zone_disp_pos_tbl[(int)index2][0];
+                        main_work.zone_pos[(int)index2][1] = dm_stgslct_s_zone_disp_pos_tbl[(int)index2][1];
                     }
                 }
                 else if ((main_work.is_final_open & 1) != 0)
                 {
                     for (uint index2 = 0; index2 < 6U; ++index2)
                     {
-                        main_work.zone_pos[(int) index2][0] = dm_stgslct_f_zone_disp_pos_tbl[(int) index2][0];
-                        main_work.zone_pos[(int) index2][1] = dm_stgslct_f_zone_disp_pos_tbl[(int) index2][1];
+                        main_work.zone_pos[(int)index2][0] = dm_stgslct_f_zone_disp_pos_tbl[(int)index2][0];
+                        main_work.zone_pos[(int)index2][1] = dm_stgslct_f_zone_disp_pos_tbl[(int)index2][1];
                     }
                 }
                 else
                 {
                     for (uint index2 = 0; index2 < 6U; ++index2)
                     {
-                        main_work.zone_pos[(int) index2][0] = dm_stgslct_n_zone_disp_pos_tbl[(int) index2][0];
-                        main_work.zone_pos[(int) index2][1] = dm_stgslct_n_zone_disp_pos_tbl[(int) index2][1];
+                        main_work.zone_pos[(int)index2][0] = dm_stgslct_n_zone_disp_pos_tbl[(int)index2][0];
+                        main_work.zone_pos[(int)index2][1] = dm_stgslct_n_zone_disp_pos_tbl[(int)index2][1];
                     }
                 }
             }
@@ -1116,7 +1323,7 @@ public partial class AppMain
         else
         {
             this.dmStgSlctSetZonePosInEfct(main_work);
-            main_work.cur_zone = uint.MaxValue;
+            //main_work.cur_zone = uint.MaxValue;
         }
     }
 
@@ -1124,7 +1331,7 @@ public partial class AppMain
     {
         if (main_work.proc_win_input != null)
             main_work.proc_win_input(main_work);
-        if (((int) main_work.flag & 8) == 0 && main_work.announce_flag == 0U)
+        if (((int)main_work.flag & 8) == 0 && main_work.announce_flag == 0U)
             return;
         main_work.proc_win_update = new DMS_STGSLCT_MAIN_WORK._proc_win_update_(this.dmStgSlctProcWindowOpenEfct);
         main_work.proc_input = null;
@@ -1134,7 +1341,7 @@ public partial class AppMain
         {
             if ((main_work.announce_flag & (uint)(1 << (int)index)) != 0)
             {
-                main_work.win_mode = (int) index;
+                main_work.win_mode = (int)index;
                 break;
             }
         }
@@ -1145,7 +1352,7 @@ public partial class AppMain
 
     private void dmStgSlctProcWindowOpenEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (((int) main_work.flag & 16) != 0)
+        if (((int)main_work.flag & 16) != 0)
         {
             main_work.proc_win_update =
                 new DMS_STGSLCT_MAIN_WORK._proc_win_update_(this.dmStgSlctProcWindowAnnounceIdle);
@@ -1176,7 +1383,7 @@ public partial class AppMain
             main_work.proc_win_input(main_work);
         if (main_work.win_mode == 0)
         {
-            if (((int) main_work.flag & 4) != 0)
+            if (((int)main_work.flag & 4) != 0)
             {
                 main_work.proc_input = null;
                 main_work.proc_win_input = null;
@@ -1197,7 +1404,7 @@ public partial class AppMain
                 main_work.flag &= 4294967291U;
                 main_work.flag &= 4294967293U;
             }
-            else if (((int) main_work.flag & 2) != 0)
+            else if (((int)main_work.flag & 2) != 0)
             {
                 main_work.proc_input = null;
                 main_work.proc_win_input = null;
@@ -1212,7 +1419,7 @@ public partial class AppMain
         }
         else if (main_work.win_mode != 1)
         {
-            if (((int) main_work.flag & 4) != 0 || ((int) main_work.flag & 2) != 0)
+            if (((int)main_work.flag & 4) != 0 || ((int)main_work.flag & 2) != 0)
             {
                 main_work.proc_input = null;
                 main_work.proc_win_input = null;
@@ -1225,7 +1432,7 @@ public partial class AppMain
                 main_work.flag &= 4294967293U;
             }
         }
-        else if (((int) main_work.flag & 4) != 0 && main_work.win_cur_slct == 0)
+        else if (((int)main_work.flag & 4) != 0 && main_work.win_cur_slct == 0)
         {
             main_work.proc_input = null;
             main_work.proc_win_input = null;
@@ -1239,14 +1446,14 @@ public partial class AppMain
             main_work.flag &= 4294967291U;
             main_work.flag &= 4294967293U;
         }
-        else if (((int) main_work.flag & 4) != 0 || ((int) main_work.flag & 2) != 0)
+        else if (((int)main_work.flag & 4) != 0 || ((int)main_work.flag & 2) != 0)
         {
             main_work.proc_input = null;
             main_work.proc_win_input = null;
             main_work.win_timer = 8f;
             main_work.disp_flag &= 4294967294U;
             main_work.proc_win_update = new DMS_STGSLCT_MAIN_WORK._proc_win_update_(this.dmStgSlctProcWindowCloseEfct);
-            if (((int) main_work.flag & 2) != 0)
+            if (((int)main_work.flag & 2) != 0)
                 DmSoundPlaySE("Cancel");
             else
                 DmSoundPlaySE("Ok");
@@ -1259,10 +1466,10 @@ public partial class AppMain
 
     private void dmStgSlctProcWindowCloseEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (((int) main_work.flag & 16) != 0)
+        if (((int)main_work.flag & 16) != 0)
         {
             main_work.proc_win_update = new DMS_STGSLCT_MAIN_WORK._proc_win_update_(this.dmStgSlctProcWindowNodispIdle);
-            main_work.announce_flag &= (uint) ~(1 << main_work.win_mode);
+            main_work.announce_flag &= (uint)~(1 << main_work.win_mode);
             if (main_work.announce_flag == 0U)
             {
                 if (main_work.state == 0)
@@ -1342,7 +1549,7 @@ public partial class AppMain
 
     private void dmStgSlctProcWaitFinished(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (((int) main_work.flag & 33554432) != 0)
+        if (((int)main_work.flag & 33554432) != 0)
         {
             if (!DmSndBgmPlayerIsTaskExit())
                 return;
@@ -1361,62 +1568,177 @@ public partial class AppMain
 
     private void dmStgSlctInputProcZoneSelect(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint curZone = main_work.cur_zone;
+        uint tmp_cur_zone = main_work.cur_zone;
         var pad = AoPad.AoPadMStand();
 
         if (main_work.trg_cancel.GetState(0U)[10] && main_work.trg_cancel.GetState(0U)[1] ||
-            pad.HasFlag(ControllerConsts.B) || isBackKeyPressed())
+            pad.HasFlag(ControllerConsts.CANCEL) || isBackKeyPressed())
         {
-            main_work.flag |= 2U;
+            main_work.flag |= DMD_STGSLCT_FLAG_CANCEL;
             setBackKeyRequest(false);
+            return;
         }
-        else
+
+        if(pad.HasFlag(ControllerConsts.CONFIRM))
         {
-            for (int index = 0; index < main_work.trg_zone.Length; ++index)
+            main_work.flag |= DMD_STGSLCT_FLAG_DECIDE;
+            return;
+        }
+
+        if (pad.HasFlag(ControllerConsts.UP))
+        {
+            // 選択ZONE切り替え
+            if (main_work.is_final_open == DMD_STGSLCT_ZONE_ALL_OPEN)
             {
-                int[] numArray = new int[6] {0, 1, 2, 3, 4, 5};
-                CTrgAoAction ctrgAoAction = main_work.trg_zone[index];
-                //ctrgAoAction.IsSelected = index == main_work.cur_zone;
-                if (ctrgAoAction.GetState(0U)[10] && ctrgAoAction.GetState(0U)[1])
-                {
-                    main_work.cur_zone = (uint) numArray[index];
-                    main_work.flag |= 4U;
-                    break;
-                }
-
-                if (ctrgAoAction.GetState(0U)[2])
-                {
-                    main_work.cur_zone = (uint) numArray[index];
-                    main_work.is_disp_cover = true;
-                    break;
-                }
-
-                if (ctrgAoAction.GetState(0U)[13])
-                {
-                    main_work.cur_zone = uint.MaxValue;
-                    main_work.is_disp_cover = false;
-                }
+                main_work.cur_zone = (uint)dm_stgslct_a_zone_input_dir_tbl[tmp_cur_zone][0];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_SPECIAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_s_zone_input_dir_tbl[tmp_cur_zone][0];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_FINAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_f_zone_input_dir_tbl[tmp_cur_zone][0];
+            }
+            else
+            {
+                main_work.cur_zone = (uint)dm_stgslct_n_zone_input_dir_tbl[tmp_cur_zone][0];
             }
 
-            if (main_work.cur_zone != 7U)
-                return;
-            main_work.cur_zone = curZone;
+            if (main_work.cur_zone != DME_STGSLCT_ZONE_TYPE_NONE)
+            {
+                DmSoundPlaySE("Cursol");
+                main_work.zone_scr_id = 0;
+            }
+            // 切り替えフラグ？
         }
+        else if (pad.HasFlag(ControllerConsts.DOWN))
+        {
+            // 選択ZONE切り替え
+            if (main_work.is_final_open == DMD_STGSLCT_ZONE_ALL_OPEN)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_a_zone_input_dir_tbl[tmp_cur_zone][1];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_SPECIAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_s_zone_input_dir_tbl[tmp_cur_zone][1];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_FINAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_f_zone_input_dir_tbl[tmp_cur_zone][1];
+            }
+            else
+            {
+                main_work.cur_zone = (uint)dm_stgslct_n_zone_input_dir_tbl[tmp_cur_zone][1];
+            }
+
+            if (main_work.cur_zone != DME_STGSLCT_ZONE_TYPE_NONE)
+            {
+                DmSoundPlaySE("Cursol");
+                main_work.zone_scr_id = 0;
+            }
+            //		main_work.cur_zone = dm_stgslct_zone_input_dir_tbl[tmp_cur_zone][1];
+        }
+        else if (pad.HasFlag(ControllerConsts.LEFT))
+        {
+            // 選択ZONE切り替え
+            if (main_work.is_final_open == DMD_STGSLCT_ZONE_ALL_OPEN)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_a_zone_input_dir_tbl[tmp_cur_zone][2];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_SPECIAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_s_zone_input_dir_tbl[tmp_cur_zone][2];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_FINAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_f_zone_input_dir_tbl[tmp_cur_zone][2];
+            }
+            else
+            {
+                main_work.cur_zone = (uint)dm_stgslct_n_zone_input_dir_tbl[tmp_cur_zone][2];
+            }
+
+            if (main_work.cur_zone != DME_STGSLCT_ZONE_TYPE_NONE)
+            {
+                DmSoundPlaySE("Cursol");
+                main_work.zone_scr_id = 0;
+            }
+            //		main_work.cur_zone = dm_stgslct_zone_input_dir_tbl[tmp_cur_zone][2];
+        }
+        else if (pad.HasFlag(ControllerConsts.RIGHT))
+        {
+            // 選択ZONE切り替え
+            if (main_work.is_final_open == DMD_STGSLCT_ZONE_ALL_OPEN)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_a_zone_input_dir_tbl[tmp_cur_zone][3];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_SPECIAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_s_zone_input_dir_tbl[tmp_cur_zone][3];
+            }
+            else if ((main_work.is_final_open & DMD_STGSLCT_ZONE_FINAL_OPEN) != 0)
+            {
+                main_work.cur_zone = (uint)dm_stgslct_f_zone_input_dir_tbl[tmp_cur_zone][3];
+            }
+            else
+            {
+                main_work.cur_zone = (uint)dm_stgslct_n_zone_input_dir_tbl[tmp_cur_zone][3];
+            }
+
+            if (main_work.cur_zone != DME_STGSLCT_ZONE_TYPE_NONE)
+            {
+                DmSoundPlaySE("Cursol");
+                main_work.zone_scr_id = 0;
+            }
+            //		main_work.cur_zone = dm_stgslct_zone_input_dir_tbl[tmp_cur_zone][3];
+        }
+
+        for (int index = 0; index < main_work.trg_zone.Length; ++index)
+        {
+            int[] numArray = new int[6] { 0, 1, 2, 3, 4, 5 };
+            CTrgAoAction ctrgAoAction = main_work.trg_zone[index];
+            //ctrgAoAction.IsSelected = index == main_work.cur_zone;
+            if (ctrgAoAction.GetState(0U)[10] && ctrgAoAction.GetState(0U)[1])
+            {
+                main_work.cur_zone = (uint)numArray[index];
+                main_work.flag |= 4U;
+                break;
+            }
+
+            if (ctrgAoAction.GetState(0U)[2])
+            {
+                main_work.cur_zone = (uint)numArray[index];
+                main_work.is_disp_cover = true;
+                break;
+            }
+
+            if (ctrgAoAction.GetState(0U)[13])
+            {
+                main_work.cur_zone = 0;
+                main_work.is_disp_cover = false;
+            }
+        }
+
+        if (main_work.cur_zone != DME_STGSLCT_ZONE_TYPE_NONE)
+            return;
+        main_work.cur_zone = tmp_cur_zone;
+
     }
 
     private void dmStgSlctInputProcStageSelect(DMS_STGSLCT_MAIN_WORK main_work)
     {
         uint num1 = 0;
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num3 = num2 + dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
-        int num4 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num3 = num2 + dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
+        int num4 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
         if (main_work.is_clear_stage[3] == 1 && main_work.is_clear_stage[7] == 1 && main_work.is_clear_stage[11] == 1)
         {
             int num5 = main_work.is_clear_stage[15];
         }
 
         uint num6 = 17;
-        while (num6 < 24U && main_work.is_clear_stage[(int) num6] == -1)
+        while (num6 < 24U && main_work.is_clear_stage[(int)num6] == -1)
             ++num6;
         if (isBackKeyPressed() || !main_work.trg_act_move.GetState(0U)[15] && main_work.trg_cancel.GetState(0U)[14] &&
             (main_work.trg_cancel.GetState(0U)[10] && main_work.trg_cancel.GetState(0U)[1]))
@@ -1426,17 +1748,33 @@ public partial class AppMain
         }
         else
         {
-            float frame =
-                main_work.trg_act_move.GetState(0U)[15] || !main_work.trg_mode[0].GetState(0U)[14] &&
-                !main_work.trg_mode[1].GetState(0U)[14]
-                    ? (2.0 >= main_work.act[51].frame ? 0.0f : -1f)
-                    : (!main_work.trg_mode[0].GetState(0U)[10] || !main_work.trg_mode[0].GetState(0U)[1]
-                        ? (!main_work.trg_mode[1].GetState(0U)[10] || !main_work.trg_mode[1].GetState(0U)[1]
-                            ? (main_work.trg_mode[0].GetState(0U)[0] || main_work.trg_mode[1].GetState(0U)[0]
+            float frame;
+            if (main_work.trg_act_move.GetState(0U)[15] || !main_work.trg_mode[0].GetState(0U)[14] &&
+                !main_work.trg_mode[1].GetState(0U)[14])
+            {
+                frame = (float)(2.0 >= main_work.act[51].frame ? 0.0f : -1f);
+            }
+            else
+            {
+                if (!main_work.trg_mode[0].GetState(0U)[10] || !main_work.trg_mode[0].GetState(0U)[1])
+                {
+                    if (!main_work.trg_mode[1].GetState(0U)[10] || !main_work.trg_mode[1].GetState(0U)[1])
+                    {
+                        frame = (float)((float)((float)(main_work.trg_mode[0].GetState(0U)[0] || main_work.trg_mode[1].GetState(0U)[0]
                                 ? 1f
-                                : 0.0f)
-                            : 2f)
-                        : 2f);
+                                : 0.0f)));
+                    }
+                    else
+                    {
+                        frame = (float)((float)((float)2f));
+                    }
+                }
+                else
+                {
+                    frame = (float)((float)2f);
+                }
+            }
+
             if (0.0 <= frame)
             {
                 if (2.0 == frame)
@@ -1462,16 +1800,16 @@ public partial class AppMain
                 }
             }
 
-            uint num7 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+            uint num7 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
             if (3U < num7)
                 num7 = 3U;
-            uint focusDispNo = (uint) main_work.focus_disp_no;
+            uint focusDispNo = (uint)main_work.focus_disp_no;
             for (uint index = focusDispNo + num7; focusDispNo < index; ++focusDispNo)
             {
-                CTrgAoAction ctrgAoAction = main_work.trg_act[(int) focusDispNo];
+                CTrgAoAction ctrgAoAction = main_work.trg_act[(int)focusDispNo];
                 if (ctrgAoAction.GetState(0U)[8])
                 {
-                    main_work.cur_stage = (int) num2 + (int) focusDispNo;
+                    main_work.cur_stage = (int)num2 + (int)focusDispNo;
                     main_work.is_disp_cover = true;
                 }
 
@@ -1479,7 +1817,7 @@ public partial class AppMain
                     main_work.is_disp_cover = false;
                 if (ctrgAoAction.GetState(0U)[4])
                 {
-                    main_work.cur_stage = (int) num2 + (int) focusDispNo;
+                    main_work.cur_stage = (int)num2 + (int)focusDispNo;
                     main_work.is_disp_cover = true;
                     main_work.flag |= 4U;
                     return;
@@ -1509,7 +1847,7 @@ public partial class AppMain
                 if (main_work.trg_act_tab[index1].GetState(0U)[8] && main_work.cur_zone != num8)
                 {
                     main_work.chng_zone = main_work.cur_zone;
-                    main_work.cur_zone = (uint) num8;
+                    main_work.cur_zone = (uint)num8;
                     if (main_work.chng_zone < main_work.cur_zone)
                         flag2 = true;
                     else
@@ -1525,7 +1863,7 @@ public partial class AppMain
                     ctrgAoAction.GetState(0U)[14])
                 {
                     main_work.chng_zone = main_work.cur_zone;
-                    main_work.cur_zone = (uint) this.dmStgSlctGetRevisedZoneNo((int) main_work.cur_zone,
+                    main_work.cur_zone = (uint)this.dmStgSlctGetRevisedZoneNo((int)main_work.cur_zone,
                         index3 == 0 ? -1 : 1, 1 & isFinalOpen, 2 & isFinalOpen);
                     if (index3 == 0)
                         flag1 = true;
@@ -1536,14 +1874,14 @@ public partial class AppMain
 
             CTrgStateEx state = main_work.trg_act_move.GetState(0U);
             CArray2<float> dragSpeed = state.GetDragSpeed();
-            if (3.0 <= Math.Abs(dragSpeed.x) && Math.Abs(dragSpeed.y) < (double) Math.Abs(dragSpeed.x))
+            if (3.0 <= Math.Abs(dragSpeed.x) && Math.Abs(dragSpeed.y) < (double)Math.Abs(dragSpeed.x))
             {
                 if (0.0 <= dragSpeed.x)
                     flag1 = true;
                 else
                     flag2 = true;
                 main_work.chng_zone = main_work.cur_zone;
-                main_work.cur_zone = (uint) this.dmStgSlctGetRevisedZoneNo((int) main_work.cur_zone, flag1 ? 1 : -1,
+                main_work.cur_zone = (uint)this.dmStgSlctGetRevisedZoneNo((int)main_work.cur_zone, flag1 ? 1 : -1,
                     1 & isFinalOpen, 2 & isFinalOpen);
             }
             else if (state[10])
@@ -1565,9 +1903,9 @@ public partial class AppMain
                             break;
                     }
 
-                    int num10 = (int) amClamp(
-                        ((int) ((int) dm_stgslct_act_disp_y_pos_tbl[0] - (double) main_work.act_top_pos_y[(int) num2] +
-                                60.0) - (int) (dragSpeed.y * 120.0 * 0.25)) / 120, num8, num9);
+                    int num10 = (int)amClamp(
+                        ((int)((int)dm_stgslct_act_disp_y_pos_tbl[0] - (double)main_work.act_top_pos_y[(int)num2] +
+                                60.0) - (int)(dragSpeed.y * 120.0 * 0.25)) / 120, num8, num9);
                     main_work.prev_disp_no = main_work.focus_disp_no;
                     main_work.focus_disp_no = num10;
                     main_work.flag |= 64U;
@@ -1578,13 +1916,13 @@ public partial class AppMain
                 IntPair lastMove = state.GetLastMove();
                 if (lastMove.second != 0)
                 {
-                    for (int index2 = (int) num2; index2 < num3; ++index2)
+                    for (int index2 = (int)num2; index2 < num3; ++index2)
                         main_work.act_top_pos_y[index2] += lastMove.second * 2;
                     flag3 = true;
                 }
             }
 
-            if (flag1 || flag2 || (flag3 || (64 & (int) main_work.flag) != 0))
+            if (flag1 || flag2 || (flag3 || (64 & (int)main_work.flag) != 0))
             {
                 int index2 = 0;
                 for (int index4 = arrayof(main_work.trg_act); index2 < index4; ++index2)
@@ -1594,8 +1932,8 @@ public partial class AppMain
 
             if (flag1)
             {
-                uint num8 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-                num1 = num8 + dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+                uint num8 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+                num1 = num8 + dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
                 main_work.flag |= 32U;
                 main_work.act_move_dest[0] = 1120f;
                 main_work.act_move_dest[1] = 100f;
@@ -1613,7 +1951,7 @@ public partial class AppMain
 
                 main_work.prev_disp_no = main_work.focus_disp_no;
                 main_work.focus_disp_no = 0;
-                main_work.cur_stage = (int) (main_work.crsr_idx + main_work.focus_disp_no + num8);
+                main_work.cur_stage = (int)(main_work.crsr_idx + main_work.focus_disp_no + num8);
                 this.dmStgSlctSetActChngZonePosInit(main_work, -1);
                 DmSoundPlaySE("Cursol");
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.A) != 0 || (AoPad.AoPadMStand() & ControllerConsts.A) != 0)
@@ -1628,8 +1966,8 @@ public partial class AppMain
             {
                 if (!flag2)
                     return;
-                uint num8 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-                num1 = num8 + dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+                uint num8 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+                num1 = num8 + dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
                 main_work.flag |= 32U;
                 main_work.act_move_dest[0] = -1120f;
                 main_work.act_move_dest[1] = 100f;
@@ -1647,7 +1985,7 @@ public partial class AppMain
 
                 main_work.prev_disp_no = main_work.focus_disp_no;
                 main_work.focus_disp_no = 0;
-                main_work.cur_stage = (int) (main_work.crsr_idx + main_work.focus_disp_no + num8);
+                main_work.cur_stage = (int)(main_work.crsr_idx + main_work.focus_disp_no + num8);
                 this.dmStgSlctSetActChngZonePosInit(main_work, 1);
                 DmSoundPlaySE("Cursol");
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.R) != 0 || (AoPad.AoPadMStand() & ControllerConsts.R) != 0)
@@ -1666,9 +2004,9 @@ public partial class AppMain
         uint num1 = 0;
         int is_final_open = 0;
         int is_spe_open = 0;
-        num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        int num2 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
-        int num3 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+        num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        int num2 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
+        int num3 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
         int num4 = 3;
         if (main_work.is_clear_stage[3] == 1 && main_work.is_clear_stage[7] == 1 &&
             (main_work.is_clear_stage[11] == 1 && main_work.is_clear_stage[15] == 1))
@@ -1679,7 +2017,7 @@ public partial class AppMain
 
         for (uint index = 17; index < 24U; ++index)
         {
-            if (main_work.is_clear_stage[(int) index] != -1)
+            if (main_work.is_clear_stage[(int)index] != -1)
             {
                 is_spe_open = 1;
                 num4 = 5;
@@ -1709,9 +2047,9 @@ public partial class AppMain
                     return;
                 main_work.chng_zone = main_work.cur_zone;
                 main_work.cur_zone =
-                    (uint) this.dmStgSlctGetRevisedZoneNo((int) main_work.cur_zone, -1, is_final_open, is_spe_open);
-                uint num5 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-                int num6 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+                    (uint)this.dmStgSlctGetRevisedZoneNo((int)main_work.cur_zone, -1, is_final_open, is_spe_open);
+                uint num5 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+                int num6 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
                 main_work.flag |= 32U;
                 main_work.act_move_dest[0] = 1120f;
                 main_work.act_move_dest[1] = 100f;
@@ -1729,7 +2067,7 @@ public partial class AppMain
 
                 main_work.prev_disp_no = main_work.focus_disp_no;
                 main_work.focus_disp_no = 0;
-                main_work.cur_stage = (int) (main_work.crsr_idx + main_work.focus_disp_no + num5);
+                main_work.cur_stage = (int)(main_work.crsr_idx + main_work.focus_disp_no + num5);
                 this.dmStgSlctSetActChngZonePosInit(main_work, -1);
                 DmSoundPlaySE("Cursol");
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.L) != 0 || (AoPad.AoPadMStand() & ControllerConsts.L) != 0)
@@ -1745,13 +2083,13 @@ public partial class AppMain
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.RIGHT) == 0 &&
                     (AoPad.AoPadMRepeat() & ControllerConsts.R) == 0 ||
                     (AoPad.AoPadMStand() & ControllerConsts.RIGHT) == 0 &&
-                    (AoPad.AoPadMStand() & ControllerConsts.R) == 0 && (int) main_work.cur_zone == num4)
+                    (AoPad.AoPadMStand() & ControllerConsts.R) == 0 && (int)main_work.cur_zone == num4)
                     return;
                 main_work.chng_zone = main_work.cur_zone;
                 main_work.cur_zone =
-                    (uint) this.dmStgSlctGetRevisedZoneNo((int) main_work.cur_zone, 1, is_final_open, is_spe_open);
-                uint num5 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-                int num6 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
+                    (uint)this.dmStgSlctGetRevisedZoneNo((int)main_work.cur_zone, 1, is_final_open, is_spe_open);
+                uint num5 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+                int num6 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
                 main_work.flag |= 32U;
                 main_work.act_move_dest[0] = -1120f;
                 main_work.act_move_dest[1] = 100f;
@@ -1769,7 +2107,7 @@ public partial class AppMain
 
                 main_work.prev_disp_no = main_work.focus_disp_no;
                 main_work.focus_disp_no = 0;
-                main_work.cur_stage = (int) (main_work.crsr_idx + main_work.focus_disp_no + num5);
+                main_work.cur_stage = (int)(main_work.crsr_idx + main_work.focus_disp_no + num5);
                 this.dmStgSlctSetActChngZonePosInit(main_work, 1);
                 DmSoundPlaySE("Cursol");
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.R) != 0 || (AoPad.AoPadMStand() & ControllerConsts.R) != 0)
@@ -1785,14 +2123,14 @@ public partial class AppMain
 
     private void dmStgSlctInputProcStageSelectMove(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = num1 + dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
-        uint num3 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] - 1U;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = num1 + dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
+        uint num3 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] - 1U;
         if ((AoPad.AoPadStand() & ControllerConsts.B) != 0)
             main_work.flag |= 2U;
         else if ((AoPad.AoPadStand() & ControllerConsts.A) != 0)
             main_work.flag |= 4U;
-        else if (((int) AoPad.AoPadStand() & 64) != 0)
+        else if (((int)AoPad.AoPadStand() & 64) != 0)
         {
             main_work.cur_game_mode ^= 1U;
             main_work.mode_tex_frm = 1f;
@@ -1803,7 +2141,7 @@ public partial class AppMain
             this.dmStgSlctInputChangeEvtRanking(main_work);
             if ((AoPad.AoPadMRepeat() & ControllerConsts.UP) != 0)
             {
-                if ((AoPad.AoPadMStand() & ControllerConsts.UP) == 0 && main_work.cur_stage == (int) num1 ||
+                if ((AoPad.AoPadMStand() & ControllerConsts.UP) == 0 && main_work.cur_stage == (int)num1 ||
                     main_work.cur_zone == 4U)
                     return;
                 if (main_work.crsr_idx == 0)
@@ -1821,7 +2159,7 @@ public partial class AppMain
             else
             {
                 if ((AoPad.AoPadMRepeat() & ControllerConsts.DOWN) == 0 ||
-                    (AoPad.AoPadMStand() & ControllerConsts.DOWN) == 0 && main_work.cur_stage == (int) num2 - 1 ||
+                    (AoPad.AoPadMStand() & ControllerConsts.DOWN) == 0 && main_work.cur_stage == (int)num2 - 1 ||
                     main_work.cur_zone == 4U)
                     return;
                 if (main_work.crsr_idx == 3)
@@ -1980,6 +2318,14 @@ public partial class AppMain
 
     private void dmStgSlctCommonFixDraw(DMS_STGSLCT_MAIN_WORK main_work)
     {
+        const int ACT_TAB_STATE_L = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_L;
+        const int ACT_TAB_STATE_C = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_C;
+        const int ACT_TAB_STATE_R = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_R;
+
+        const int ACT_TAB_STATE_L2 = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_L2;
+        const int ACT_TAB_STATE_C2 = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_C2;
+        const int ACT_TAB_STATE_R2 = (int)DME_STGSLCT_ACT.ACT_TAB_STATE_R2;
+
         AoActSysSetDrawTaskPrio(12288U);
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
         for (int index = 4; index <= 9; ++index)
@@ -1996,15 +2342,23 @@ public partial class AppMain
         {
             if (main_work.cur_game_mode != 1U)
             {
-                AoActSortRegAction(main_work.act[51]);
-                AoActSortRegAction(main_work.act[52]);
-                AoActSortRegAction(main_work.act[53]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_L]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_C]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_R]);
+
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_L], (float)main_work.mode_tex_frm);
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_C], (float)main_work.mode_tex_frm);
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_R], (float)main_work.mode_tex_frm);
             }
             else
             {
-                AoActSortRegAction(main_work.act[54]);
-                AoActSortRegAction(main_work.act[55]);
-                AoActSortRegAction(main_work.act[56]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_L2]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_C2]);
+                AoActSortRegAction(main_work.act[ACT_TAB_STATE_R2]);
+
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_L2], (float)main_work.mode_tex_frm);
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_C2], (float)main_work.mode_tex_frm);
+                AoActSetFrame(main_work.act[ACT_TAB_STATE_R2], (float)main_work.mode_tex_frm);
             }
         }
 
@@ -2142,21 +2496,21 @@ public partial class AppMain
             AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
             for (uint index2 = 0; index2 < num; ++index2)
             {
-                AoActSortRegAction(main_work.act[(int) (43U + index2)]);
-                if ((int) main_work.cur_zone == (int) index2)
-                    AoActSetFrame(main_work.act[(int) (43U + index2)], 0.0f);
+                AoActSortRegAction(main_work.act[(int)(43U + index2)]);
+                if ((int)main_work.cur_zone == (int)index2)
+                    AoActSetFrame(main_work.act[(int)(43U + index2)], 0.0f);
                 else
-                    AoActSetFrame(main_work.act[(int) (43U + index2)], 1f);
+                    AoActSetFrame(main_work.act[(int)(43U + index2)], 1f);
                 if ((main_work.is_final_open & 2) != 0 && main_work.cur_zone == 5U &&
                     (index2 == 4U && (main_work.is_final_open & 1) == 0))
-                    AoActSetFrame(main_work.act[(int) (43U + index2)], 0.0f);
+                    AoActSetFrame(main_work.act[(int)(43U + index2)], 0.0f);
                 AoActAcmPush();
                 AoActAcmInit();
                 AoActAcmApplyTrans(x, 0.0f, 0.0f);
-                AoActUpdate(main_work.act[(int) (43U + index2)], 0.0f);
-                main_work.act[(int) (43U + index2)].sprite.hit.rect.bottom += 25f;
-                main_work.act[(int) (43U + index2)].sprite.hit.rect.top -= 30f;
-                main_work.trg_act_tab[(int) index2].Update();
+                AoActUpdate(main_work.act[(int)(43U + index2)], 0.0f);
+                main_work.act[(int)(43U + index2)].sprite.hit.rect.bottom += 25f;
+                main_work.act[(int)(43U + index2)].sprite.hit.rect.top -= 30f;
+                main_work.trg_act_tab[(int)index2].Update();
                 AoActAcmPop();
             }
         }
@@ -2182,28 +2536,28 @@ public partial class AppMain
     {
         int[] numArray = new int[3];
         int num1 = 1;
-        int num2 = (int) main_work.player_stock - 1;
+        int num2 = (int)main_work.player_stock - 1;
         if (num2 < 0)
             num2 = 0;
         if (num2 > 999)
             num2 = 999;
         for (uint index1 = 0; index1 < 3U; ++index1)
         {
-            for (uint index2 = 0; index2 < (uint) (3 - (int) index1 - 1); ++index2)
+            for (uint index2 = 0; index2 < (uint)(3 - (int)index1 - 1); ++index2)
                 num1 *= 10;
             if (num2 >= num1)
             {
-                numArray[(int) index1] = num2 / num1;
-                num2 -= numArray[(int) index1] * num1;
+                numArray[(int)index1] = num2 / num1;
+                num2 -= numArray[(int)index1] * num1;
             }
             else
-                numArray[(int) index1] = 0;
+                numArray[(int)index1] = 0;
 
             num1 = 1;
         }
 
         for (uint index = 0; index < 3U; ++index)
-            AoActSetFrame(main_work.act[(int) (6U + index)], numArray[(int) index]);
+            AoActSetFrame(main_work.act[(int)(6U + index)], numArray[(int)index]);
     }
 
     private void dmStgSlctZoneSelectDraw(DMS_STGSLCT_MAIN_WORK main_work)
@@ -2211,7 +2565,7 @@ public partial class AppMain
         AoActSysSetDrawTaskPrio(8192U);
         for (uint i = 0; i < 6U; ++i)
             this.dmStgSlctOneZoneTableDraw(main_work, i);
-        if (((int) main_work.flag & 262144) == 0)
+        if (((int)main_work.flag & 262144) == 0)
             return;
         int decideZoneEfctDistX = main_work.decide_zone_efct_dist_x;
         int decideZoneEfctDistY = main_work.decide_zone_efct_dist_y;
@@ -2219,22 +2573,22 @@ public partial class AppMain
 
     private void dmStgSlctOneZoneTableDraw(DMS_STGSLCT_MAIN_WORK main_work, uint i)
     {
-        if (((int) main_work.announce_flag & 4) != 0)
+        if (((int)main_work.announce_flag & 4) != 0)
         {
-            if (((int) main_work.flag & 131072) != 0 && i != 0U)
+            if (((int)main_work.flag & 131072) != 0 && i != 0U)
                 return;
         }
-        else if (((int) main_work.announce_flag & 128) != 0)
+        else if (((int)main_work.announce_flag & 128) != 0)
         {
-            if (((int) main_work.flag & 131072) != 0 && i == 4U)
+            if (((int)main_work.flag & 131072) != 0 && i == 4U)
                 return;
         }
-        else if (((int) main_work.announce_flag & 512) != 0 && ((int) main_work.flag & 131072) != 0 && i == 5U)
+        else if (((int)main_work.announce_flag & 512) != 0 && ((int)main_work.flag & 131072) != 0 && i == 5U)
             return;
 
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
         AoActSortRegAction(main_work.act[37]);
-        AoActSortRegAction(main_work.act[(int) (19U + i)]);
+        AoActSortRegAction(main_work.act[(int)(19U + i)]);
         if (i != 5U)
         {
             AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
@@ -2247,28 +2601,28 @@ public partial class AppMain
         }
 
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-        if ((int) main_work.cur_zone != (int) i && main_work.is_disp_cover)
+        if ((int)main_work.cur_zone != (int)i && main_work.is_disp_cover)
         {
             AoActSortRegAction(main_work.act[41]);
             AoActSortRegAction(main_work.act[40]);
             AoActSortRegAction(main_work.act[42]);
         }
 
-        AoActSetFrame(main_work.act[(int) (19U + i)], main_work.zone_scr_id);
+        AoActSetFrame(main_work.act[(int)(19U + i)], main_work.zone_scr_id);
         if (i < 4U)
         {
-            AoActSortRegAction(main_work.act[(int) (uint) (25 + (int) i * 3)]);
-            AoActSortRegAction(main_work.act[(int) (uint) (26 + (int) i * 3)]);
-            AoActSortRegAction(main_work.act[(int) (uint) (27 + (int) i * 3)]);
-            AoActSetFrame(main_work.act[(int) (uint) (25 + (int) i * 3)], main_work.zone_scr_id);
-            AoActSetFrame(main_work.act[(int) (uint) (26 + (int) i * 3)], main_work.zone_scr_id);
-            AoActSetFrame(main_work.act[(int) (uint) (27 + (int) i * 3)], main_work.zone_scr_id);
+            AoActSortRegAction(main_work.act[(int)(uint)(25 + (int)i * 3)]);
+            AoActSortRegAction(main_work.act[(int)(uint)(26 + (int)i * 3)]);
+            AoActSortRegAction(main_work.act[(int)(uint)(27 + (int)i * 3)]);
+            AoActSetFrame(main_work.act[(int)(uint)(25 + (int)i * 3)], main_work.zone_scr_id);
+            AoActSetFrame(main_work.act[(int)(uint)(26 + (int)i * 3)], main_work.zone_scr_id);
+            AoActSetFrame(main_work.act[(int)(uint)(27 + (int)i * 3)], main_work.zone_scr_id);
         }
 
         AoActSetFrame(main_work.act[38], i);
         int num1;
         int num2;
-        if (((int) main_work.flag & 262144) != 0 && (int) main_work.cur_zone == (int) i)
+        if (((int)main_work.flag & 262144) != 0 && (int)main_work.cur_zone == (int)i)
         {
             num1 = main_work.decide_zone_efct_dist_x;
             num2 = main_work.decide_zone_efct_dist_y;
@@ -2281,13 +2635,13 @@ public partial class AppMain
 
         AoActAcmPush();
         AoActAcmInit();
-        AoActAcmApplyTrans(main_work.zone_pos[(int) i][0] + num1, main_work.zone_pos[(int) i][1] + num2, 0.0f);
+        AoActAcmApplyTrans(main_work.zone_pos[(int)i][0] + num1, main_work.zone_pos[(int)i][1] + num2, 0.0f);
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
         AoActUpdate(main_work.act[37], 0.0f);
-        AoActUpdate(main_work.act[(int) (19U + i)], 0.0f);
-        main_work.trg_zone[(int) i].Update();
+        AoActUpdate(main_work.act[(int)(19U + i)], 0.0f);
+        main_work.trg_zone[(int)i].Update();
         for (i = 25U; i <= 36U; ++i)
-            AoActUpdate(main_work.act[(int) i], 0.0f);
+            AoActUpdate(main_work.act[(int)i], 0.0f);
         AoActUpdate(main_work.act[41], 0.0f);
         AoActUpdate(main_work.act[40], 0.0f);
         AoActUpdate(main_work.act[42], 0.0f);
@@ -2310,7 +2664,7 @@ public partial class AppMain
         AoActSysSetDrawTaskPrio(8192U);
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
         this.dmStgSlctSetDrawStageSelectTable(main_work, main_work.cur_zone, true);
-        if (((int) main_work.flag & 32) != 0 && main_work.chng_zone != 7U)
+        if (((int)main_work.flag & 32) != 0 && main_work.chng_zone != 7U)
             this.dmStgSlctSetDrawStageSelectTable(main_work, main_work.chng_zone);
         main_work.trg_act_move.Update();
         if (main_work.state == 1 && main_work.cur_zone == 5U)
@@ -2318,12 +2672,12 @@ public partial class AppMain
         else
             main_work.disp_flag &= 4294967291U;
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-        if (((int) main_work.disp_flag & 2) != 0 && 4U != main_work.cur_zone)
+        if (((int)main_work.disp_flag & 2) != 0 && 4U != main_work.cur_zone)
         {
-            if (0 < main_work.focus_disp_no || (64 & (int) main_work.flag) != 0)
+            if (0 < main_work.focus_disp_no || (64 & (int)main_work.flag) != 0)
                 AoActSortRegAction(main_work.act[70]);
             int num = 5U == main_work.cur_zone ? 4 : 1;
-            if (main_work.focus_disp_no < num || (64 & (int) main_work.flag) != 0)
+            if (main_work.focus_disp_no < num || (64 & (int)main_work.flag) != 0)
                 AoActSortRegAction(main_work.act[71]);
         }
 
@@ -2331,7 +2685,7 @@ public partial class AppMain
         for (uint index = 70; index <= 71U; ++index)
         {
             AoActAcmInit();
-            AoActUpdate(main_work.act[(int) index], 1f);
+            AoActUpdate(main_work.act[(int)index], 1f);
         }
 
         AoActAcmPop();
@@ -2343,17 +2697,17 @@ public partial class AppMain
 
         AoActSortUnregAll();
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-        if (((int) main_work.disp_flag & 2) == 0)
+        if (((int)main_work.disp_flag & 2) == 0)
             return;
         for (uint index = 0; index < 2U; ++index)
         {
-            AoActSortRegAction(main_work.act[(int) (49U + index)]);
-            AoActUpdate(main_work.act[(int) (49U + index)], 1f);
+            AoActSortRegAction(main_work.act[(int)(49U + index)]);
+            AoActUpdate(main_work.act[(int)(49U + index)], 1f);
         }
 
         uint num1 = 0;
         for (int index = arrayof(main_work.trg_act_lr); num1 < index; ++num1)
-            main_work.trg_act_lr[(int) num1].Update();
+            main_work.trg_act_lr[(int)num1].Update();
         if (_am_sample_draw_enable)
         {
             AoActSortExecute();
@@ -2373,8 +2727,8 @@ public partial class AppMain
         uint zone,
         bool is_trg_update)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)zone][1] + num1;
         CActionDraw selectActDrawSys = stgSelect_act_draw_sys;
         selectActDrawSys.Clear();
         AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
@@ -2385,19 +2739,19 @@ public partial class AppMain
                 this.dmStgSlctSetTableActiveInfo(main_work, cnt);
                 AoActAcmPush();
                 AoActAcmInit();
-                AoActAcmApplyTrans(main_work.act_top_pos_x[(int) cnt],
-                    main_work.act_top_pos_y[(int) cnt] + (cnt - num1) * 120f, 0.0f);
-                AoActUpdate(main_work.act[(int) index], 0.0f);
+                AoActAcmApplyTrans(main_work.act_top_pos_x[(int)cnt],
+                    main_work.act_top_pos_y[(int)cnt] + (cnt - num1) * 120f, 0.0f);
+                AoActUpdate(main_work.act[(int)index], 0.0f);
                 AoActAcmPop();
-                selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int) index],
-                    main_work.act[(int) index].frame, main_work.act_top_pos_x[(int) cnt],
-                    main_work.act_top_pos_y[(int) cnt] + (cnt - num1) * 120f);
+                selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int)index],
+                    main_work.act[(int)index].frame, main_work.act_top_pos_x[(int)cnt],
+                    main_work.act_top_pos_y[(int)cnt] + (cnt - num1) * 120f);
             }
 
             if (is_trg_update && num1 <= cnt && cnt < num1 + arrayof(main_work.trg_act))
             {
                 uint num3 = cnt - num1;
-                main_work.trg_act[(int) num3].Update();
+                main_work.trg_act[(int)num3].Update();
             }
         }
 
@@ -2410,7 +2764,7 @@ public partial class AppMain
             {
                 AoActUpdate(main_work.act[62], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[62], main_work.act[62].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             for (uint cnt = num1; cnt < num2; ++cnt)
@@ -2418,7 +2772,7 @@ public partial class AppMain
                 this.dmStgSlctSetTableActiveInfo(main_work, cnt);
                 AoActUpdate(main_work.act[61], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[61], main_work.act[61].frame,
-                    main_work.act_top_pos_x[(int) cnt], main_work.act_top_pos_y[(int) cnt] + (cnt - num1) * 120f);
+                    main_work.act_top_pos_x[(int)cnt], main_work.act_top_pos_y[(int)cnt] + (cnt - num1) * 120f);
             }
 
             selectActDrawSys.Draw();
@@ -2430,24 +2784,24 @@ public partial class AppMain
                     AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
                     AoActUpdate(main_work.act[74], 0.0f);
                     selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[74], main_work.act[74].frame,
-                        main_work.act_top_pos_x[(int) index],
-                        main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                        main_work.act_top_pos_x[(int)index],
+                        main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 }
                 else if ((index + 1U) % 4U != 0U || index == 0U)
                 {
                     AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
                     AoActUpdate(main_work.act[63], 0.0f);
                     selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[63], main_work.act[63].frame,
-                        main_work.act_top_pos_x[(int) index],
-                        (float) (main_work.act_top_pos_y[(int) index] + (index - num1) * 120.0 - 4.0));
+                        main_work.act_top_pos_x[(int)index],
+                        (float)(main_work.act_top_pos_y[(int)index] + (index - num1) * 120.0 - 4.0));
                 }
                 else
                 {
                     AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
                     AoActUpdate(main_work.act[74], 0.0f);
                     selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[74], main_work.act[74].frame,
-                        main_work.act_top_pos_x[(int) index],
-                        main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                        main_work.act_top_pos_x[(int)index],
+                        main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 }
             }
 
@@ -2456,11 +2810,11 @@ public partial class AppMain
                 if (index != 16U && ((index + 1U) % 4U != 0U || index == 0U))
                 {
                     AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-                    AoActSetFrame(main_work.act[64], this.dm_stgslct_act_num_disp_id_tbl[(int) index]);
+                    AoActSetFrame(main_work.act[64], this.dm_stgslct_act_num_disp_id_tbl[(int)index]);
                     AoActUpdate(main_work.act[64], 0.0f);
                     selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[64], main_work.act[64].frame,
-                        main_work.act_top_pos_x[(int) index],
-                        main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                        main_work.act_top_pos_x[(int)index],
+                        main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 }
             }
 
@@ -2472,7 +2826,7 @@ public partial class AppMain
                 AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
                 AoActUpdate(main_work.act[65], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[65], main_work.act[65].frame,
-                    main_work.act_top_pos_x[(int) cnt], main_work.act_top_pos_y[(int) cnt] + (cnt - num1) * 120f);
+                    main_work.act_top_pos_x[(int)cnt], main_work.act_top_pos_y[(int)cnt] + (cnt - num1) * 120f);
             }
 
             for (uint index = num1; index < num2; ++index)
@@ -2481,7 +2835,7 @@ public partial class AppMain
                 AoActUpdate(main_work.act[66], 0.0f);
                 AoActSortRegAction(main_work.act[66]);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[66], main_work.act[66].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             selectActDrawSys.Draw();
@@ -2490,14 +2844,14 @@ public partial class AppMain
             {
                 for (uint index2 = 0; index2 < 7U; ++index2)
                 {
-                    if ((int) main_work.eme_stage_no[(int) index2] == (int) index1 &&
+                    if ((int)main_work.eme_stage_no[(int)index2] == (int)index1 &&
                         (main_work.get_emerald & (uint)(1 << (int)index2)) != 0)
                     {
                         AoActUpdate(main_work.act[67], 0.0f);
                         AoActSetFrame(main_work.act[67], index2);
                         selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[67], main_work.act[67].frame,
-                            main_work.act_top_pos_x[(int) index1],
-                            main_work.act_top_pos_y[(int) index1] + (index1 - num1) * 120f);
+                            main_work.act_top_pos_x[(int)index1],
+                            main_work.act_top_pos_y[(int)index1] + (index1 - num1) * 120f);
                         break;
                     }
                 }
@@ -2513,7 +2867,7 @@ public partial class AppMain
             {
                 AoActUpdate(main_work.act[75], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[75], main_work.act[75].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             selectActDrawSys.Draw();
@@ -2521,22 +2875,22 @@ public partial class AppMain
             AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
             for (uint index = num1; index < num2; ++index)
             {
-                if (GsMainSysIsStageClear(21 + ((int) index - (int) num1)))
+                if (GsMainSysIsStageClear(21 + ((int)index - (int)num1)))
                 {
                     AoActSetFrame(main_work.act[69], index - num1);
                     AoActUpdate(main_work.act[69], 0.0f);
                     selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[69], main_work.act[69].frame,
-                        main_work.act_top_pos_x[(int) index],
-                        main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                        main_work.act_top_pos_x[(int)index],
+                        main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 }
             }
 
             for (uint index = num1; index < num2; ++index)
             {
-                AoActSetFrame(main_work.act[68], this.dm_stgslct_act_num_disp_id_tbl[(int) index]);
+                AoActSetFrame(main_work.act[68], this.dm_stgslct_act_num_disp_id_tbl[(int)index]);
                 AoActUpdate(main_work.act[68], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[68], main_work.act[68].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             selectActDrawSys.Draw();
@@ -2550,22 +2904,22 @@ public partial class AppMain
             {
                 AoActUpdate(main_work.act[72], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[72], main_work.act[72].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             for (uint act_no = num1; act_no < num2; ++act_no)
             {
                 this.dmStgSlctSetScoreDispFrame(main_work, zone, act_no);
                 uint num3 = 0;
-                while (num3 < 9U && 0.0 == main_work.act[(int) (76U + num3)].frame)
+                while (num3 < 9U && 0.0 == main_work.act[(int)(76U + num3)].frame)
                     ++num3;
                 for (; num3 < 9U; ++num3)
                 {
                     AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-                    AoActUpdate(main_work.act[(int) (76U + num3)], 0.0f);
-                    selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int) (76U + num3)],
-                        main_work.act[(int) (76U + num3)].frame, main_work.act_top_pos_x[(int) act_no],
-                        main_work.act_top_pos_y[(int) act_no] + (act_no - num1) * 120f);
+                    AoActUpdate(main_work.act[(int)(76U + num3)], 0.0f);
+                    selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int)(76U + num3)],
+                        main_work.act[(int)(76U + num3)].frame, main_work.act_top_pos_x[(int)act_no],
+                        main_work.act_top_pos_y[(int)act_no] + (act_no - num1) * 120f);
                 }
             }
         }
@@ -2576,7 +2930,7 @@ public partial class AppMain
             {
                 AoActUpdate(main_work.act[73], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[1], g_dm_act_id_tbl_stg_slct[73], main_work.act[73].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
 
             for (uint act_no = num1; act_no < num2; ++act_no)
@@ -2585,10 +2939,10 @@ public partial class AppMain
                 for (uint index = 0; index < 7U; ++index)
                 {
                     AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-                    AoActUpdate(main_work.act[(int) (76U + index)], 0.0f);
-                    selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int) (76U + index)],
-                        main_work.act[(int) (76U + index)].frame, main_work.act_top_pos_x[(int) act_no],
-                        main_work.act_top_pos_y[(int) act_no] + (act_no - num1) * 120f);
+                    AoActUpdate(main_work.act[(int)(76U + index)], 0.0f);
+                    selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[(int)(76U + index)],
+                        main_work.act[(int)(76U + index)].frame, main_work.act_top_pos_x[(int)act_no],
+                        main_work.act_top_pos_y[(int)act_no] + (act_no - num1) * 120f);
                 }
             }
         }
@@ -2610,17 +2964,17 @@ public partial class AppMain
         for (uint index = num1; index < num2; ++index)
         {
             AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-            if (main_work.cur_stage != (int) index && main_work.is_disp_cover)
+            if (main_work.cur_stage != (int)index && main_work.is_disp_cover)
             {
                 AoActUpdate(main_work.act[85], 0.0f);
                 AoActUpdate(main_work.act[86], 0.0f);
                 AoActUpdate(main_work.act[87], 0.0f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[87], main_work.act[87].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[86], main_work.act[86].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
                 selectActDrawSys.Entry(main_work.ama[0], g_dm_act_id_tbl_stg_slct[85], main_work.act[85].frame,
-                    main_work.act_top_pos_x[(int) index], main_work.act_top_pos_y[(int) index] + (index - num1) * 120f);
+                    main_work.act_top_pos_x[(int)index], main_work.act_top_pos_y[(int)index] + (index - num1) * 120f);
             }
         }
 
@@ -2644,32 +2998,32 @@ public partial class AppMain
         bool flag = false;
         if (main_work.cur_game_mode == 0U)
         {
-            if (main_work.hi_score[(int) act_no] != 1000000000)
+            if (main_work.hi_score[(int)act_no] != 1000000000)
             {
-                int num2 = main_work.hi_score[(int) act_no];
+                int num2 = main_work.hi_score[(int)act_no];
                 for (uint index1 = 0; index1 < 9U; ++index1)
                 {
-                    if ((uint) (9 - (int) index1 - 1) <= 0U)
+                    if ((uint)(9 - (int)index1 - 1) <= 0U)
                     {
                         num2 = 1;
                     }
                     else
                     {
-                        for (uint index2 = 0; index2 < (uint) (9 - (int) index1 - 1); ++index2)
+                        for (uint index2 = 0; index2 < (uint)(9 - (int)index1 - 1); ++index2)
                             num1 *= 10;
                     }
 
                     if (num2 >= num1)
                     {
-                        AoActSortRegAction(main_work.act[(int) (76U + index1)]);
+                        AoActSortRegAction(main_work.act[(int)(76U + index1)]);
                         if (index1 >= 8U)
                         {
-                            dispFrameTmpDigit[(int) index1] = 0;
+                            dispFrameTmpDigit[(int)index1] = 0;
                         }
                         else
                         {
-                            dispFrameTmpDigit[(int) index1] = num2 / num1;
-                            num2 -= dispFrameTmpDigit[(int) index1] * num1 - 1;
+                            dispFrameTmpDigit[(int)index1] = num2 / num1;
+                            num2 -= dispFrameTmpDigit[(int)index1] * num1 - 1;
                         }
 
                         flag = true;
@@ -2677,38 +3031,38 @@ public partial class AppMain
                     else
                     {
                         if (flag)
-                            AoActSortRegAction(main_work.act[(int) (76U + index1)]);
-                        dispFrameTmpDigit[(int) index1] = 0;
+                            AoActSortRegAction(main_work.act[(int)(76U + index1)]);
+                        dispFrameTmpDigit[(int)index1] = 0;
                     }
 
                     num1 = 1;
                 }
 
                 for (uint index = 0; index < 9U; ++index)
-                    AoActSetFrame(main_work.act[(int) (76U + index)], dispFrameTmpDigit[(int) index]);
+                    AoActSetFrame(main_work.act[(int)(76U + index)], dispFrameTmpDigit[(int)index]);
             }
             else
             {
                 for (uint index = 0; index < 9U; ++index)
                 {
-                    AoActSortRegAction(main_work.act[(int) (76U + index)]);
-                    AoActSetFrame(main_work.act[(int) (76U + index)], 10f);
+                    AoActSortRegAction(main_work.act[(int)(76U + index)]);
+                    AoActSetFrame(main_work.act[(int)(76U + index)], 10f);
                 }
             }
         }
-        else if (main_work.record_time[(int) act_no] != 36000)
+        else if (main_work.record_time[(int)act_no] != 36000)
         {
-            AkUtilFrame60ToTime((uint) main_work.record_time[(int) act_no], ref min, ref sec, ref msec);
+            AkUtilFrame60ToTime((uint)main_work.record_time[(int)act_no], ref min, ref sec, ref msec);
             float num2 = sec;
             if (num2 >= 10.0)
             {
-                dispFrameTimeDigit[0] = (int) (num2 / 10.0);
+                dispFrameTimeDigit[0] = (int)(num2 / 10.0);
                 num2 -= dispFrameTimeDigit[0] * 10f;
             }
             else
                 dispFrameTimeDigit[0] = 0;
 
-            dispFrameTimeDigit[1] = (int) num2;
+            dispFrameTimeDigit[1] = (int)num2;
             AoActSetFrame(main_work.act[76], min);
             AoActSetFrame(main_work.act[77], 11f);
             AoActSetFrame(main_work.act[78], dispFrameTimeDigit[0]);
@@ -2717,13 +3071,13 @@ public partial class AppMain
             float num3 = msec;
             if (num3 >= 10.0)
             {
-                dispFrameTimeDigit[0] = (int) (num3 / 10.0);
+                dispFrameTimeDigit[0] = (int)(num3 / 10.0);
                 num3 -= dispFrameTimeDigit[0] * 10f;
             }
             else
                 dispFrameTimeDigit[0] = 0;
 
-            dispFrameTimeDigit[1] = (int) num3;
+            dispFrameTimeDigit[1] = (int)num3;
             AoActSetFrame(main_work.act[81], dispFrameTimeDigit[0]);
             AoActSetFrame(main_work.act[82], dispFrameTimeDigit[1]);
         }
@@ -2732,9 +3086,9 @@ public partial class AppMain
             for (uint index = 0; index < 7U; ++index)
             {
                 if (index == 1U || index == 4U)
-                    AoActSetFrame(main_work.act[(int) (76U + index)], 11f);
+                    AoActSetFrame(main_work.act[(int)(76U + index)], 11f);
                 else
-                    AoActSetFrame(main_work.act[(int) (76U + index)], 10f);
+                    AoActSetFrame(main_work.act[(int)(76U + index)], 10f);
             }
         }
     }
@@ -2747,7 +3101,7 @@ public partial class AppMain
         numArray1[1] = 302.4f;
         if (main_work.win_mode == 1)
         {
-            float[] numArray2 = new float[2] {1.01f, 1.27f};
+            float[] numArray2 = new float[2] { 1.01f, 1.27f };
             for (int index = 0; index < 2; ++index)
                 numArray1[index] *= numArray2[index];
         }
@@ -2755,7 +3109,7 @@ public partial class AppMain
         if (0.0 < main_work.win_size_rate[0] && 0.0 < main_work.win_size_rate[1])
             AoWinSysDrawTask(0, AoTexGetTexList(main_work.cmn_tex[3]), 0U, 480f, 360f,
                 numArray1[0] * main_work.win_size_rate[0], numArray1[1] * main_work.win_size_rate[1], 13568);
-        if (((int) main_work.disp_flag & 1) == 0)
+        if (((int)main_work.disp_flag & 1) == 0)
             return;
         AoActSetTexture(AoTexGetTexList(main_work.cmn_tex[4]));
         switch (main_work.win_mode)
@@ -2992,37 +3346,37 @@ public partial class AppMain
             {
                 if (main_work.is_final_open == 3)
                 {
-                    numArray2[0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][0] -
-                                   dm_stgslct_a_zone_disp_pos_tbl[(int) index][0];
-                    numArray2[1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int) index][1] -
-                                   dm_stgslct_a_zone_disp_pos_tbl[(int) index][1];
+                    numArray2[0] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][0] -
+                                   dm_stgslct_a_zone_disp_pos_tbl[(int)index][0];
+                    numArray2[1] = dm_stgslct_a_zone_nodisp_pos_tbl[(int)index][1] -
+                                   dm_stgslct_a_zone_disp_pos_tbl[(int)index][1];
                 }
                 else if ((main_work.is_final_open & 2) != 0)
                 {
-                    numArray2[0] = dm_stgslct_s_zone_nodisp_pos_tbl[(int) index][0] -
-                                   dm_stgslct_s_zone_disp_pos_tbl[(int) index][0];
-                    numArray2[1] = dm_stgslct_s_zone_nodisp_pos_tbl[(int) index][1] -
-                                   dm_stgslct_s_zone_disp_pos_tbl[(int) index][1];
+                    numArray2[0] = dm_stgslct_s_zone_nodisp_pos_tbl[(int)index][0] -
+                                   dm_stgslct_s_zone_disp_pos_tbl[(int)index][0];
+                    numArray2[1] = dm_stgslct_s_zone_nodisp_pos_tbl[(int)index][1] -
+                                   dm_stgslct_s_zone_disp_pos_tbl[(int)index][1];
                 }
                 else if ((main_work.is_final_open & 1) != 0)
                 {
-                    numArray2[0] = dm_stgslct_f_zone_nodisp_pos_tbl[(int) index][0] -
-                                   dm_stgslct_f_zone_disp_pos_tbl[(int) index][0];
-                    numArray2[1] = dm_stgslct_f_zone_nodisp_pos_tbl[(int) index][1] -
-                                   dm_stgslct_f_zone_disp_pos_tbl[(int) index][1];
+                    numArray2[0] = dm_stgslct_f_zone_nodisp_pos_tbl[(int)index][0] -
+                                   dm_stgslct_f_zone_disp_pos_tbl[(int)index][0];
+                    numArray2[1] = dm_stgslct_f_zone_nodisp_pos_tbl[(int)index][1] -
+                                   dm_stgslct_f_zone_disp_pos_tbl[(int)index][1];
                 }
                 else
                 {
-                    numArray2[0] = dm_stgslct_n_zone_nodisp_pos_tbl[(int) index][0] -
-                                   dm_stgslct_n_zone_disp_pos_tbl[(int) index][0];
-                    numArray2[1] = dm_stgslct_n_zone_nodisp_pos_tbl[(int) index][1] -
-                                   dm_stgslct_n_zone_disp_pos_tbl[(int) index][1];
+                    numArray2[0] = dm_stgslct_n_zone_nodisp_pos_tbl[(int)index][0] -
+                                   dm_stgslct_n_zone_disp_pos_tbl[(int)index][0];
+                    numArray2[1] = dm_stgslct_n_zone_nodisp_pos_tbl[(int)index][1] -
+                                   dm_stgslct_n_zone_disp_pos_tbl[(int)index][1];
                 }
 
                 numArray1[0] = numArray2[0] / 16f;
                 numArray1[1] = numArray2[1] / 16f;
-                main_work.zone_pos[(int) index][0] += numArray1[0];
-                main_work.zone_pos[(int) index][1] += numArray1[1];
+                main_work.zone_pos[(int)index][0] += numArray1[0];
+                main_work.zone_pos[(int)index][1] += numArray1[1];
             }
         }
 
@@ -3033,74 +3387,74 @@ public partial class AppMain
     {
         if (main_work.is_final_open == 3)
         {
-            if ((main_work.zone_pos[0][0] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[0][0] ||
-                 main_work.zone_pos[0][1] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[0][1]) &&
+            if ((main_work.zone_pos[0][0] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[0][0] ||
+                 main_work.zone_pos[0][1] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[0][1]) &&
                 main_work.cur_zone != 0U ||
-                (main_work.zone_pos[1][0] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[1][1]) &&
+                (main_work.zone_pos[1][0] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[1][1]) &&
                 main_work.cur_zone != 1U ||
-                ((main_work.zone_pos[2][0] < (double) dm_stgslct_a_zone_nodisp_pos_tbl[2][0] ||
-                  main_work.zone_pos[2][1] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[2][1]) &&
+                ((main_work.zone_pos[2][0] < (double)dm_stgslct_a_zone_nodisp_pos_tbl[2][0] ||
+                  main_work.zone_pos[2][1] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[2][1]) &&
                  main_work.cur_zone != 2U ||
-                 (main_work.zone_pos[3][0] < (double) dm_stgslct_a_zone_nodisp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] < (double) dm_stgslct_a_zone_nodisp_pos_tbl[3][1]) &&
+                 (main_work.zone_pos[3][0] < (double)dm_stgslct_a_zone_nodisp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] < (double)dm_stgslct_a_zone_nodisp_pos_tbl[3][1]) &&
                  main_work.cur_zone != 3U) ||
-                ((main_work.zone_pos[4][0] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[4][0] ||
-                  main_work.zone_pos[4][1] < (double) dm_stgslct_a_zone_nodisp_pos_tbl[4][1]) &&
+                ((main_work.zone_pos[4][0] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[4][0] ||
+                  main_work.zone_pos[4][1] < (double)dm_stgslct_a_zone_nodisp_pos_tbl[4][1]) &&
                  main_work.cur_zone != 4U ||
-                 (main_work.zone_pos[5][0] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[5][0] ||
-                  main_work.zone_pos[5][1] > (double) dm_stgslct_a_zone_nodisp_pos_tbl[5][1]) &&
+                 (main_work.zone_pos[5][0] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[5][0] ||
+                  main_work.zone_pos[5][1] > (double)dm_stgslct_a_zone_nodisp_pos_tbl[5][1]) &&
                  main_work.cur_zone != 5U))
                 return false;
         }
         else if ((main_work.is_final_open & 2) != 0)
         {
-            if ((main_work.zone_pos[0][0] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[0][0] ||
-                 main_work.zone_pos[0][1] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[0][1]) &&
+            if ((main_work.zone_pos[0][0] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[0][0] ||
+                 main_work.zone_pos[0][1] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[0][1]) &&
                 main_work.cur_zone != 0U ||
-                (main_work.zone_pos[1][0] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[1][1]) &&
+                (main_work.zone_pos[1][0] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[1][1]) &&
                 main_work.cur_zone != 1U ||
-                ((main_work.zone_pos[2][0] < (double) dm_stgslct_s_zone_nodisp_pos_tbl[2][0] ||
-                  main_work.zone_pos[2][1] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[2][1]) &&
+                ((main_work.zone_pos[2][0] < (double)dm_stgslct_s_zone_nodisp_pos_tbl[2][0] ||
+                  main_work.zone_pos[2][1] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[2][1]) &&
                  main_work.cur_zone != 2U ||
-                 (main_work.zone_pos[3][0] < (double) dm_stgslct_s_zone_nodisp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] < (double) dm_stgslct_s_zone_nodisp_pos_tbl[3][1]) &&
+                 (main_work.zone_pos[3][0] < (double)dm_stgslct_s_zone_nodisp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] < (double)dm_stgslct_s_zone_nodisp_pos_tbl[3][1]) &&
                  main_work.cur_zone != 3U) ||
-                (main_work.zone_pos[5][0] > (double) dm_stgslct_s_zone_nodisp_pos_tbl[5][0] ||
-                 main_work.zone_pos[5][1] < (double) dm_stgslct_s_zone_nodisp_pos_tbl[5][1]) &&
+                (main_work.zone_pos[5][0] > (double)dm_stgslct_s_zone_nodisp_pos_tbl[5][0] ||
+                 main_work.zone_pos[5][1] < (double)dm_stgslct_s_zone_nodisp_pos_tbl[5][1]) &&
                 main_work.cur_zone != 5U)
                 return false;
         }
         else if ((main_work.is_final_open & 1) != 0)
         {
-            if ((main_work.zone_pos[0][0] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[0][0] ||
-                 main_work.zone_pos[0][1] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[0][1]) &&
+            if ((main_work.zone_pos[0][0] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[0][0] ||
+                 main_work.zone_pos[0][1] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[0][1]) &&
                 main_work.cur_zone != 0U ||
-                (main_work.zone_pos[1][0] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[1][1]) &&
+                (main_work.zone_pos[1][0] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[1][1]) &&
                 main_work.cur_zone != 1U ||
-                ((main_work.zone_pos[2][0] < (double) dm_stgslct_f_zone_nodisp_pos_tbl[2][0] ||
-                  main_work.zone_pos[2][1] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[2][1]) &&
+                ((main_work.zone_pos[2][0] < (double)dm_stgslct_f_zone_nodisp_pos_tbl[2][0] ||
+                  main_work.zone_pos[2][1] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[2][1]) &&
                  main_work.cur_zone != 2U ||
-                 (main_work.zone_pos[3][0] < (double) dm_stgslct_f_zone_nodisp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] < (double) dm_stgslct_f_zone_nodisp_pos_tbl[3][1]) &&
+                 (main_work.zone_pos[3][0] < (double)dm_stgslct_f_zone_nodisp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] < (double)dm_stgslct_f_zone_nodisp_pos_tbl[3][1]) &&
                  main_work.cur_zone != 3U) ||
-                (main_work.zone_pos[4][0] > (double) dm_stgslct_f_zone_nodisp_pos_tbl[4][0] ||
-                 main_work.zone_pos[4][1] < (double) dm_stgslct_f_zone_nodisp_pos_tbl[4][1]) &&
+                (main_work.zone_pos[4][0] > (double)dm_stgslct_f_zone_nodisp_pos_tbl[4][0] ||
+                 main_work.zone_pos[4][1] < (double)dm_stgslct_f_zone_nodisp_pos_tbl[4][1]) &&
                 main_work.cur_zone != 4U)
                 return false;
         }
         else if
-            ((main_work.zone_pos[0][0] > (double) dm_stgslct_n_zone_nodisp_pos_tbl[0][0] ||
-              main_work.zone_pos[0][1] > (double) dm_stgslct_n_zone_nodisp_pos_tbl[0][1]) && main_work.cur_zone != 0U ||
-             (main_work.zone_pos[1][0] > (double) dm_stgslct_n_zone_nodisp_pos_tbl[1][0] ||
-              main_work.zone_pos[1][1] < (double) dm_stgslct_n_zone_nodisp_pos_tbl[1][1]) && main_work.cur_zone != 1U ||
-             ((main_work.zone_pos[2][0] < (double) dm_stgslct_n_zone_nodisp_pos_tbl[2][0] ||
-               main_work.zone_pos[2][1] > (double) dm_stgslct_n_zone_nodisp_pos_tbl[2][1]) &&
+            ((main_work.zone_pos[0][0] > (double)dm_stgslct_n_zone_nodisp_pos_tbl[0][0] ||
+              main_work.zone_pos[0][1] > (double)dm_stgslct_n_zone_nodisp_pos_tbl[0][1]) && main_work.cur_zone != 0U ||
+             (main_work.zone_pos[1][0] > (double)dm_stgslct_n_zone_nodisp_pos_tbl[1][0] ||
+              main_work.zone_pos[1][1] < (double)dm_stgslct_n_zone_nodisp_pos_tbl[1][1]) && main_work.cur_zone != 1U ||
+             ((main_work.zone_pos[2][0] < (double)dm_stgslct_n_zone_nodisp_pos_tbl[2][0] ||
+               main_work.zone_pos[2][1] > (double)dm_stgslct_n_zone_nodisp_pos_tbl[2][1]) &&
               main_work.cur_zone != 2U ||
-              (main_work.zone_pos[3][0] < (double) dm_stgslct_n_zone_nodisp_pos_tbl[3][0] ||
-               main_work.zone_pos[3][1] < (double) dm_stgslct_n_zone_nodisp_pos_tbl[3][1]) && main_work.cur_zone != 3U))
+              (main_work.zone_pos[3][0] < (double)dm_stgslct_n_zone_nodisp_pos_tbl[3][0] ||
+               main_work.zone_pos[3][1] < (double)dm_stgslct_n_zone_nodisp_pos_tbl[3][1]) && main_work.cur_zone != 3U))
             return false;
 
         main_work.efct_out_flag = 0U;
@@ -3111,15 +3465,15 @@ public partial class AppMain
     {
         float[] numArray1 = new float[2];
         float[] numArray2 = new float[2];
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
-        if (main_work.act_top_pos_x[(int) num1] > 100.0)
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
+        if (main_work.act_top_pos_x[(int)num1] > 100.0)
         {
             for (uint index = num1; index < num2; ++index)
             {
                 numArray2[0] = -1020f;
                 numArray1[0] = numArray2[0] / 16f;
-                main_work.act_top_pos_x[(int) index] += numArray1[0];
+                main_work.act_top_pos_x[(int)index] += numArray1[0];
             }
         }
 
@@ -3129,14 +3483,14 @@ public partial class AppMain
 
     private bool dmStgSlctIsStagePosInEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
-        if (!this.dmStgSlctIsModeTexInEfctEnd(main_work) || main_work.act_top_pos_x[(int) num1] > 100.0 ||
-            main_work.zone_pos[(int) main_work.cur_zone][0] >= (double) dm_stgslct_a_zone_nodisp_pos_tbl[0][0])
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
+        if (!this.dmStgSlctIsModeTexInEfctEnd(main_work) || main_work.act_top_pos_x[(int)num1] > 100.0 ||
+            main_work.zone_pos[(int)main_work.cur_zone][0] >= (double)dm_stgslct_a_zone_nodisp_pos_tbl[0][0])
             return false;
         for (uint index = num1; index < num2; ++index)
-            main_work.act_top_pos_x[(int) index] = 100f;
-        main_work.zone_pos[(int) main_work.cur_zone][0] = dm_stgslct_a_zone_nodisp_pos_tbl[0][0];
+            main_work.act_top_pos_x[(int)index] = 100f;
+        main_work.zone_pos[(int)main_work.cur_zone][0] = dm_stgslct_a_zone_nodisp_pos_tbl[0][0];
         return true;
     }
 
@@ -3144,13 +3498,13 @@ public partial class AppMain
     {
         float[] numArray1 = new float[2];
         float[] numArray2 = new float[2];
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
         for (uint index = num1; index < num2; ++index)
         {
             numArray2[0] = 1020f;
             numArray1[0] = numArray2[0] / 16f;
-            main_work.act_top_pos_x[(int) index] += numArray1[0];
+            main_work.act_top_pos_x[(int)index] += numArray1[0];
         }
 
         this.dmStgSlctSetModeTexOutEfct(main_work);
@@ -3158,12 +3512,12 @@ public partial class AppMain
 
     private bool dmStgSlctIsStagePosOutEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
-        if (!this.dmStgSlctIsModeTexOutEfctEnd(main_work) || main_work.act_top_pos_x[(int) num1] < 1120.0)
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
+        if (!this.dmStgSlctIsModeTexOutEfctEnd(main_work) || main_work.act_top_pos_x[(int)num1] < 1120.0)
             return false;
         for (uint index = num1; index < num2; ++index)
-            main_work.act_top_pos_x[(int) index] = 1120f;
+            main_work.act_top_pos_x[(int)index] = 1120f;
         return true;
     }
 
@@ -3208,56 +3562,56 @@ public partial class AppMain
     {
         if (main_work.is_final_open == 3)
         {
-            if (main_work.zone_pos[0][0] < (double) dm_stgslct_a_zone_disp_pos_tbl[0][0] ||
-                main_work.zone_pos[0][1] < (double) dm_stgslct_a_zone_disp_pos_tbl[0][1] ||
-                (main_work.zone_pos[1][0] < (double) dm_stgslct_a_zone_disp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] < (double) dm_stgslct_a_zone_disp_pos_tbl[1][1]) ||
-                (main_work.zone_pos[2][0] > (double) dm_stgslct_a_zone_disp_pos_tbl[2][0] ||
-                 main_work.zone_pos[2][1] < (double) dm_stgslct_a_zone_disp_pos_tbl[2][1] ||
-                 (main_work.zone_pos[3][0] > (double) dm_stgslct_a_zone_disp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] > (double) dm_stgslct_a_zone_disp_pos_tbl[3][1])) ||
-                (main_work.zone_pos[4][0] < (double) dm_stgslct_a_zone_disp_pos_tbl[4][0] ||
-                 main_work.zone_pos[4][1] < (double) dm_stgslct_a_zone_disp_pos_tbl[4][1] ||
-                 (main_work.zone_pos[5][0] < (double) dm_stgslct_a_zone_disp_pos_tbl[5][0] ||
-                  main_work.zone_pos[5][1] > (double) dm_stgslct_a_zone_disp_pos_tbl[5][1])))
+            if (main_work.zone_pos[0][0] < (double)dm_stgslct_a_zone_disp_pos_tbl[0][0] ||
+                main_work.zone_pos[0][1] < (double)dm_stgslct_a_zone_disp_pos_tbl[0][1] ||
+                (main_work.zone_pos[1][0] < (double)dm_stgslct_a_zone_disp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] < (double)dm_stgslct_a_zone_disp_pos_tbl[1][1]) ||
+                (main_work.zone_pos[2][0] > (double)dm_stgslct_a_zone_disp_pos_tbl[2][0] ||
+                 main_work.zone_pos[2][1] < (double)dm_stgslct_a_zone_disp_pos_tbl[2][1] ||
+                 (main_work.zone_pos[3][0] > (double)dm_stgslct_a_zone_disp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] > (double)dm_stgslct_a_zone_disp_pos_tbl[3][1])) ||
+                (main_work.zone_pos[4][0] < (double)dm_stgslct_a_zone_disp_pos_tbl[4][0] ||
+                 main_work.zone_pos[4][1] < (double)dm_stgslct_a_zone_disp_pos_tbl[4][1] ||
+                 (main_work.zone_pos[5][0] < (double)dm_stgslct_a_zone_disp_pos_tbl[5][0] ||
+                  main_work.zone_pos[5][1] > (double)dm_stgslct_a_zone_disp_pos_tbl[5][1])))
                 return false;
         }
         else if ((main_work.is_final_open & 2) != 0)
         {
-            if (main_work.zone_pos[0][0] < (double) dm_stgslct_s_zone_disp_pos_tbl[0][0] ||
-                main_work.zone_pos[0][1] < (double) dm_stgslct_s_zone_disp_pos_tbl[0][1] ||
-                (main_work.zone_pos[1][0] < (double) dm_stgslct_s_zone_disp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] < (double) dm_stgslct_s_zone_disp_pos_tbl[1][1]) ||
-                (main_work.zone_pos[2][0] > (double) dm_stgslct_s_zone_disp_pos_tbl[2][0] ||
-                 main_work.zone_pos[2][1] < (double) dm_stgslct_s_zone_disp_pos_tbl[2][1] ||
-                 (main_work.zone_pos[3][0] > (double) dm_stgslct_s_zone_disp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] > (double) dm_stgslct_s_zone_disp_pos_tbl[3][1])) ||
-                (main_work.zone_pos[5][0] < (double) dm_stgslct_s_zone_disp_pos_tbl[5][0] ||
-                 main_work.zone_pos[5][1] > (double) dm_stgslct_s_zone_disp_pos_tbl[5][1]))
+            if (main_work.zone_pos[0][0] < (double)dm_stgslct_s_zone_disp_pos_tbl[0][0] ||
+                main_work.zone_pos[0][1] < (double)dm_stgslct_s_zone_disp_pos_tbl[0][1] ||
+                (main_work.zone_pos[1][0] < (double)dm_stgslct_s_zone_disp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] < (double)dm_stgslct_s_zone_disp_pos_tbl[1][1]) ||
+                (main_work.zone_pos[2][0] > (double)dm_stgslct_s_zone_disp_pos_tbl[2][0] ||
+                 main_work.zone_pos[2][1] < (double)dm_stgslct_s_zone_disp_pos_tbl[2][1] ||
+                 (main_work.zone_pos[3][0] > (double)dm_stgslct_s_zone_disp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] > (double)dm_stgslct_s_zone_disp_pos_tbl[3][1])) ||
+                (main_work.zone_pos[5][0] < (double)dm_stgslct_s_zone_disp_pos_tbl[5][0] ||
+                 main_work.zone_pos[5][1] > (double)dm_stgslct_s_zone_disp_pos_tbl[5][1]))
                 return false;
         }
         else if ((main_work.is_final_open & 1) != 0)
         {
-            if (main_work.zone_pos[0][0] < (double) dm_stgslct_f_zone_disp_pos_tbl[0][0] ||
-                main_work.zone_pos[0][1] < (double) dm_stgslct_f_zone_disp_pos_tbl[0][1] ||
-                (main_work.zone_pos[1][0] < (double) dm_stgslct_f_zone_disp_pos_tbl[1][0] ||
-                 main_work.zone_pos[1][1] < (double) dm_stgslct_f_zone_disp_pos_tbl[1][1]) ||
-                (main_work.zone_pos[2][0] > (double) dm_stgslct_f_zone_disp_pos_tbl[2][0] ||
-                 main_work.zone_pos[2][1] < (double) dm_stgslct_f_zone_disp_pos_tbl[2][1] ||
-                 (main_work.zone_pos[3][0] > (double) dm_stgslct_f_zone_disp_pos_tbl[3][0] ||
-                  main_work.zone_pos[3][1] > (double) dm_stgslct_f_zone_disp_pos_tbl[3][1])) ||
-                (main_work.zone_pos[4][0] < (double) dm_stgslct_f_zone_disp_pos_tbl[4][0] ||
-                 main_work.zone_pos[4][1] > (double) dm_stgslct_f_zone_disp_pos_tbl[4][1]))
+            if (main_work.zone_pos[0][0] < (double)dm_stgslct_f_zone_disp_pos_tbl[0][0] ||
+                main_work.zone_pos[0][1] < (double)dm_stgslct_f_zone_disp_pos_tbl[0][1] ||
+                (main_work.zone_pos[1][0] < (double)dm_stgslct_f_zone_disp_pos_tbl[1][0] ||
+                 main_work.zone_pos[1][1] < (double)dm_stgslct_f_zone_disp_pos_tbl[1][1]) ||
+                (main_work.zone_pos[2][0] > (double)dm_stgslct_f_zone_disp_pos_tbl[2][0] ||
+                 main_work.zone_pos[2][1] < (double)dm_stgslct_f_zone_disp_pos_tbl[2][1] ||
+                 (main_work.zone_pos[3][0] > (double)dm_stgslct_f_zone_disp_pos_tbl[3][0] ||
+                  main_work.zone_pos[3][1] > (double)dm_stgslct_f_zone_disp_pos_tbl[3][1])) ||
+                (main_work.zone_pos[4][0] < (double)dm_stgslct_f_zone_disp_pos_tbl[4][0] ||
+                 main_work.zone_pos[4][1] > (double)dm_stgslct_f_zone_disp_pos_tbl[4][1]))
                 return false;
         }
-        else if (main_work.zone_pos[0][0] < (double) dm_stgslct_n_zone_disp_pos_tbl[0][0] ||
-                 main_work.zone_pos[0][1] < (double) dm_stgslct_n_zone_disp_pos_tbl[0][1] ||
-                 (main_work.zone_pos[1][0] < (double) dm_stgslct_n_zone_disp_pos_tbl[1][0] ||
-                  main_work.zone_pos[1][1] > (double) dm_stgslct_n_zone_disp_pos_tbl[1][1]) ||
-                 (main_work.zone_pos[2][0] > (double) dm_stgslct_n_zone_disp_pos_tbl[2][0] ||
-                  main_work.zone_pos[2][1] < (double) dm_stgslct_n_zone_disp_pos_tbl[2][1] ||
-                  (main_work.zone_pos[3][0] > (double) dm_stgslct_n_zone_disp_pos_tbl[3][0] ||
-                   main_work.zone_pos[3][1] > (double) dm_stgslct_n_zone_disp_pos_tbl[3][1])))
+        else if (main_work.zone_pos[0][0] < (double)dm_stgslct_n_zone_disp_pos_tbl[0][0] ||
+                 main_work.zone_pos[0][1] < (double)dm_stgslct_n_zone_disp_pos_tbl[0][1] ||
+                 (main_work.zone_pos[1][0] < (double)dm_stgslct_n_zone_disp_pos_tbl[1][0] ||
+                  main_work.zone_pos[1][1] > (double)dm_stgslct_n_zone_disp_pos_tbl[1][1]) ||
+                 (main_work.zone_pos[2][0] > (double)dm_stgslct_n_zone_disp_pos_tbl[2][0] ||
+                  main_work.zone_pos[2][1] < (double)dm_stgslct_n_zone_disp_pos_tbl[2][1] ||
+                  (main_work.zone_pos[3][0] > (double)dm_stgslct_n_zone_disp_pos_tbl[3][0] ||
+                   main_work.zone_pos[3][1] > (double)dm_stgslct_n_zone_disp_pos_tbl[3][1])))
             return false;
 
         return this.dmStgSlctIsEmeTableInEfctEnd(main_work);
@@ -3281,70 +3635,70 @@ public partial class AppMain
             0.0f
         };
         numArray1[0] = numArray2[0] / 16f;
-        main_work.zone_pos[(int) main_work.cur_zone][0] += numArray1[0];
+        main_work.zone_pos[(int)main_work.cur_zone][0] += numArray1[0];
     }
 
     private void dmStgSlctSetStageZoneChangeEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
         float[] numArray1 = new float[2];
         float[] numArray2 = new float[2];
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][1] + num1;
         for (uint index = num1; index < num2; ++index)
         {
             numArray2[0] = main_work.act_move_dest[0] - main_work.act_move_src[0];
             numArray1[0] = numArray2[0] / 16f;
-            main_work.act_top_pos_x[(int) index] += numArray1[0];
+            main_work.act_top_pos_x[(int)index] += numArray1[0];
         }
 
-        uint num3 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num4 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num3;
+        uint num3 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num4 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num3;
         for (uint index = num3; index < num4; ++index)
         {
             numArray2[1] = main_work.act_move_dest[1] - main_work.act_move_src[1];
             numArray1[1] = numArray2[1] / 16f;
-            main_work.act_top_pos_x[(int) index] += numArray1[1];
+            main_work.act_top_pos_x[(int)index] += numArray1[1];
         }
     }
 
     private bool dmStgSlctIsStageZoneChangeEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
         byte num1 = 0;
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][0];
-        uint num3 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][1] + num2;
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][0];
+        uint num3 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][1] + num2;
         if (main_work.act_move_dest[0] > 0.0)
         {
-            if (main_work.act_top_pos_x[(int) num2] >= (double) main_work.act_move_dest[0])
+            if (main_work.act_top_pos_x[(int)num2] >= (double)main_work.act_move_dest[0])
             {
                 for (uint index = num2; index < num3; ++index)
-                    main_work.act_top_pos_x[(int) index] = main_work.act_move_dest[0];
+                    main_work.act_top_pos_x[(int)index] = main_work.act_move_dest[0];
                 num1 |= 1;
             }
 
-            uint num4 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-            uint num5 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num4;
-            if (main_work.act_top_pos_x[(int) num4] >= (double) main_work.act_move_dest[1])
+            uint num4 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+            uint num5 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num4;
+            if (main_work.act_top_pos_x[(int)num4] >= (double)main_work.act_move_dest[1])
             {
                 for (uint index = num4; index < num5; ++index)
-                    main_work.act_top_pos_x[(int) index] = main_work.act_move_dest[1];
+                    main_work.act_top_pos_x[(int)index] = main_work.act_move_dest[1];
                 num1 |= 2;
             }
         }
         else if (main_work.act_move_dest[0] < 0.0)
         {
-            if (main_work.act_top_pos_x[(int) num2] <= (double) main_work.act_move_dest[0])
+            if (main_work.act_top_pos_x[(int)num2] <= (double)main_work.act_move_dest[0])
             {
                 for (uint index = num2; index < num3; ++index)
-                    main_work.act_top_pos_x[(int) index] = main_work.act_move_dest[0];
+                    main_work.act_top_pos_x[(int)index] = main_work.act_move_dest[0];
                 num1 |= 1;
             }
 
-            uint num4 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-            uint num5 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num4;
-            if (main_work.act_top_pos_x[(int) num4] <= (double) main_work.act_move_dest[1])
+            uint num4 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+            uint num5 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num4;
+            if (main_work.act_top_pos_x[(int)num4] <= (double)main_work.act_move_dest[1])
             {
                 for (uint index = num4; index < num5; ++index)
-                    main_work.act_top_pos_x[(int) index] = main_work.act_move_dest[1];
+                    main_work.act_top_pos_x[(int)index] = main_work.act_move_dest[1];
                 num1 |= 2;
             }
         }
@@ -3356,24 +3710,24 @@ public partial class AppMain
     {
         float[] numArray1 = new float[2];
         float[] numArray2 = new float[2];
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
         for (uint index = num1; index < num2; ++index)
         {
-            numArray2[1] = main_work.act_move_pos_dst[(int) index] - main_work.act_move_pos_src[(int) index];
+            numArray2[1] = main_work.act_move_pos_dst[(int)index] - main_work.act_move_pos_src[(int)index];
             numArray1[1] = numArray2[1] / 12f;
-            main_work.act_top_pos_y[(int) index] += numArray1[1];
+            main_work.act_top_pos_y[(int)index] += numArray1[1];
         }
     }
 
     private bool dmStgSlctIsStageVrtclChangeEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
         if (main_work.timer < 12.0)
             return false;
         for (uint index = num1; index < num2; ++index)
-            main_work.act_top_pos_y[(int) index] = main_work.act_move_pos_dst[(int) index];
+            main_work.act_top_pos_y[(int)index] = main_work.act_move_pos_dst[(int)index];
         return true;
     }
 
@@ -3400,29 +3754,29 @@ public partial class AppMain
             main_work.flag |= 16U;
             main_work.win_timer = 0.0f;
             for (uint index = 0; index < 2U; ++index)
-                main_work.win_size_rate[(int) index] = 1f;
+                main_work.win_size_rate[(int)index] = 1f;
         }
         else
             ++main_work.win_timer;
 
         for (uint index = 0; index < 2U; ++index)
         {
-            main_work.win_size_rate[(int) index] = main_work.win_timer == 0.0 ? 1f : main_work.win_timer / 8f;
-            if (main_work.win_size_rate[(int) index] > 1.0)
-                main_work.win_size_rate[(int) index] = 1f;
+            main_work.win_size_rate[(int)index] = main_work.win_timer == 0.0 ? 1f : main_work.win_timer / 8f;
+            if (main_work.win_size_rate[(int)index] > 1.0)
+                main_work.win_size_rate[(int)index] = 1f;
         }
     }
 
     private void dmStgSlctSetWinCloseEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
         for (uint index = 0; index < 2U; ++index)
-            main_work.win_size_rate[(int) index] = main_work.win_timer == 0.0 ? 0.0f : main_work.win_timer / 8f;
+            main_work.win_size_rate[(int)index] = main_work.win_timer == 0.0 ? 0.0f : main_work.win_timer / 8f;
         if (main_work.win_timer < 0.0)
         {
             main_work.flag |= 16U;
             main_work.win_timer = 0.0f;
             for (uint index = 0; index < 2U; ++index)
-                main_work.win_size_rate[(int) index] = 0.0f;
+                main_work.win_size_rate[(int)index] = 0.0f;
         }
         else
             --main_work.win_timer;
@@ -3430,65 +3784,65 @@ public partial class AppMain
 
     private void dmStgSlctSetActChngZonePosInit(DMS_STGSLCT_MAIN_WORK main_work, int diff)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.chng_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.chng_zone][1] + num1;
         for (uint index = num1; index < num2; ++index)
-            main_work.act_top_pos_x[(int) index] = 100f;
-        main_work.act_move_src[0] = main_work.act_top_pos_x[(int) num1];
-        uint num3 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num4 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num3;
+            main_work.act_top_pos_x[(int)index] = 100f;
+        main_work.act_move_src[0] = main_work.act_top_pos_x[(int)num1];
+        uint num3 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num4 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num3;
         for (uint index = num3; index < num4; ++index)
         {
             if (diff > 0)
             {
-                main_work.act_top_pos_x[(int) index] = 1120f;
-                main_work.act_top_pos_y[(int) index] = dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                main_work.act_top_pos_x[(int)index] = 1120f;
+                main_work.act_top_pos_y[(int)index] = dm_stgslct_act_disp_y_pos_tbl[(int)index];
             }
             else
             {
-                main_work.act_top_pos_x[(int) index] = -1120f;
-                main_work.act_top_pos_y[(int) index] = dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                main_work.act_top_pos_x[(int)index] = -1120f;
+                main_work.act_top_pos_y[(int)index] = dm_stgslct_act_disp_y_pos_tbl[(int)index];
             }
         }
 
-        main_work.act_move_src[1] = main_work.act_top_pos_x[(int) num3];
+        main_work.act_move_src[1] = main_work.act_top_pos_x[(int)num3];
     }
 
     private void dmStgSlctSetFocusChangeEfctData(DMS_STGSLCT_MAIN_WORK main_work)
     {
         int diff = 0;
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = num1 + dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
-        int num3 = (int) dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1];
-        if (((int) main_work.flag & 2048) != 0)
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = num1 + dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
+        int num3 = (int)dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1];
+        if (((int)main_work.flag & 2048) != 0)
             diff = -1;
-        else if (((int) main_work.flag & 4096) != 0)
+        else if (((int)main_work.flag & 4096) != 0)
             diff = 1;
         main_work.prev_stage = main_work.cur_stage;
         main_work.prev_disp_no = main_work.focus_disp_no;
-        if (((int) main_work.flag & 64) != 0)
+        if (((int)main_work.flag & 64) != 0)
         {
             if (main_work.cur_zone == 4U)
             {
                 for (uint index = num1; index < num2; ++index)
                 {
-                    main_work.act_move_pos_src[(int) index] = main_work.act_top_pos_y[(int) index];
-                    main_work.act_move_pos_dst[(int) index] = dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                    main_work.act_move_pos_src[(int)index] = main_work.act_top_pos_y[(int)index];
+                    main_work.act_move_pos_dst[(int)index] = dm_stgslct_act_disp_y_pos_tbl[(int)index];
                 }
             }
             else
             {
                 for (uint index = num1; index < num2; ++index)
                 {
-                    main_work.act_move_pos_src[(int) index] = main_work.act_top_pos_y[(int) index];
-                    main_work.act_move_pos_dst[(int) index] =
+                    main_work.act_move_pos_src[(int)index] = main_work.act_top_pos_y[(int)index];
+                    main_work.act_move_pos_dst[(int)index] =
                         this.dm_stgslct_act_tab_disp_y_pos_tbl[main_work.focus_disp_no];
                 }
             }
 
-            if (((int) main_work.flag & 2048) != 0 && main_work.prev_disp_no == 0 && main_work.focus_disp_no == 3)
+            if (((int)main_work.flag & 2048) != 0 && main_work.prev_disp_no == 0 && main_work.focus_disp_no == 3)
                 main_work.flag |= 128U;
-            if (((int) main_work.flag & 4096) != 0 && main_work.prev_disp_no == 3 && main_work.focus_disp_no == 0)
+            if (((int)main_work.flag & 4096) != 0 && main_work.prev_disp_no == 3 && main_work.focus_disp_no == 0)
                 main_work.flag |= 128U;
             if (main_work.focus_disp_no == 3 && main_work.prev_disp_no == 0 ||
                 main_work.focus_disp_no == 0 && main_work.prev_disp_no == 3)
@@ -3496,28 +3850,28 @@ public partial class AppMain
                 main_work.crsr_prev_idx = main_work.crsr_idx;
                 int prevDispNo = main_work.prev_disp_no;
                 main_work.crsr_idx = this.dmStgSlctGetRevisedStageCrsrNo(main_work.crsr_idx, diff,
-                    (int) main_work.cur_zone, main_work.prev_disp_no);
+                    (int)main_work.cur_zone, main_work.prev_disp_no);
                 main_work.crsr_move_src = this.dm_stgslct_act_crsr_disp_y_pos_tbl[main_work.crsr_prev_idx];
                 main_work.crsr_move_dst = this.dm_stgslct_act_crsr_disp_y_pos_tbl[main_work.crsr_idx];
                 main_work.flag &= 4294967167U;
             }
-            else if ((((int) main_work.flag & 2048) == 0 || main_work.focus_disp_no != 0 ||
-                      main_work.prev_disp_no != 0) && (((int) main_work.flag & 4096) == 0 ||
+            else if ((((int)main_work.flag & 2048) == 0 || main_work.focus_disp_no != 0 ||
+                      main_work.prev_disp_no != 0) && (((int)main_work.flag & 4096) == 0 ||
                                                        main_work.focus_disp_no != 3 || main_work.prev_disp_no != 3))
                 main_work.flag &= 4294967167U;
         }
 
-        if (((int) main_work.flag & 128) != 0)
+        if (((int)main_work.flag & 128) != 0)
         {
             main_work.crsr_prev_idx = main_work.crsr_idx;
             int prevDispNo = main_work.prev_disp_no;
-            main_work.crsr_idx = this.dmStgSlctGetRevisedStageCrsrNo(main_work.crsr_idx, diff, (int) main_work.cur_zone,
+            main_work.crsr_idx = this.dmStgSlctGetRevisedStageCrsrNo(main_work.crsr_idx, diff, (int)main_work.cur_zone,
                 main_work.prev_disp_no);
             main_work.crsr_move_src = this.dm_stgslct_act_crsr_disp_y_pos_tbl[main_work.crsr_prev_idx];
             main_work.crsr_move_dst = this.dm_stgslct_act_crsr_disp_y_pos_tbl[main_work.crsr_idx];
         }
 
-        main_work.cur_stage = (int) (main_work.crsr_idx + main_work.focus_disp_no + num1);
+        main_work.cur_stage = (int)(main_work.crsr_idx + main_work.focus_disp_no + num1);
     }
 
     private int dmStgSlctGetRevisedStageVrtclNo(int idx, int diff, int zone_no, int crsr_idx)
@@ -3535,9 +3889,9 @@ public partial class AppMain
     {
         uint num1 = 0;
         num1 = dm_stgslct_zone_act_num_tbl[zone_no][0];
-        int num2 = (int) dm_stgslct_zone_act_num_tbl[zone_no][1];
+        int num2 = (int)dm_stgslct_zone_act_num_tbl[zone_no][1];
         int num3 = idx + diff;
-        int num4 = (int) dm_stgslct_zone_act_num_tbl[zone_no][1] - 4;
+        int num4 = (int)dm_stgslct_zone_act_num_tbl[zone_no][1] - 4;
         if (num4 < 0)
             num4 = 0;
         if (num3 < 0)
@@ -3592,28 +3946,28 @@ public partial class AppMain
 
     private void dmStgSlctSetTableActiveInfo(DMS_STGSLCT_MAIN_WORK main_work, uint cnt)
     {
-        if (main_work.is_clear_stage[(int) cnt] < 0)
+        if (main_work.is_clear_stage[(int)cnt] < 0)
         {
             for (uint index = 58; index <= 60U; ++index)
-                AoActSetFrame(main_work.act[(int) index], 1f);
+                AoActSetFrame(main_work.act[(int)index], 1f);
             AoActSetFrame(main_work.act[61], 17f);
             AoActSetFrame(main_work.act[65], 17f);
         }
         else
         {
             for (uint index = 58; index <= 60U; ++index)
-                AoActSetFrame(main_work.act[(int) index], 0.0f);
-            AoActSetFrame(main_work.act[61], this.dm_stgslct_disp_msg_id_table_tbl[(int) cnt]);
-            AoActSetFrame(main_work.act[65], this.dm_stgslct_disp_msg_id_table_tbl[(int) cnt]);
-            if (main_work.hi_score[(int) cnt] == 1000000000 && main_work.cur_game_mode == 1U)
+                AoActSetFrame(main_work.act[(int)index], 0.0f);
+            AoActSetFrame(main_work.act[61], this.dm_stgslct_disp_msg_id_table_tbl[(int)cnt]);
+            AoActSetFrame(main_work.act[65], this.dm_stgslct_disp_msg_id_table_tbl[(int)cnt]);
+            if (main_work.hi_score[(int)cnt] == 1000000000 && main_work.cur_game_mode == 1U)
             {
                 for (uint index = 58; index <= 60U; ++index)
-                    AoActSetFrame(main_work.act[(int) index], 1f);
+                    AoActSetFrame(main_work.act[(int)index], 1f);
             }
             else
             {
                 for (uint index = 58; index <= 60U; ++index)
-                    AoActSetFrame(main_work.act[(int) index], 0.0f);
+                    AoActSetFrame(main_work.act[(int)index], 0.0f);
             }
         }
     }
@@ -3633,9 +3987,9 @@ public partial class AppMain
     {
         for (uint index = 0; index < 2U; ++index)
         {
-            if (main_work.obi_pos[(int) index] < -1120.0)
-                main_work.obi_pos[(int) index] = 1120f;
-            main_work.obi_pos[(int) index] += -3f;
+            if (main_work.obi_pos[(int)index] < -1120.0)
+                main_work.obi_pos[(int)index] = 1120f;
+            main_work.obi_pos[(int)index] += -3f;
         }
     }
 
@@ -3718,14 +4072,14 @@ public partial class AppMain
     private void dmStgSlctSetBgFadeEfct(DMS_STGSLCT_MAIN_WORK main_work)
     {
         int a1 = main_work.bg_fade.a;
-        if ((int) main_work.cur_zone != (int) main_work.cur_bg_id)
+        if ((int)main_work.cur_zone != (int)main_work.cur_bg_id)
         {
             main_work.flag |= 2097152U;
             main_work.next_bg_id = main_work.cur_zone;
         }
 
         int a2;
-        if (((int) main_work.flag & 2097152) != 0)
+        if (((int)main_work.flag & 2097152) != 0)
         {
             if (a1 < byte.MaxValue)
             {
@@ -3742,7 +4096,7 @@ public partial class AppMain
             a2 = a1 <= 0 ? 0 : a1 - 20;
 
         int num = MTM_MATH_CLIP(a2, 0, byte.MaxValue);
-        main_work.bg_fade.a = (byte) num;
+        main_work.bg_fade.a = (byte)num;
     }
 
     private void dmStgSlctSetZoneScrChangeEfct(DMS_STGSLCT_MAIN_WORK main_work)
@@ -3756,29 +4110,29 @@ public partial class AppMain
     private int dmStgSlctSetNextFocusAct(DMS_STGSLCT_MAIN_WORK main_work, int set_stage_id)
     {
         if (set_stage_id >= 21)
-            return (int) (uint) (dm_stgslct_zone_act_num_tbl[5][0] + (ulong) (set_stage_id - 21));
+            return (int)(uint)(dm_stgslct_zone_act_num_tbl[5][0] + (ulong)(set_stage_id - 21));
         if (set_stage_id >= 16)
             return 16;
-        uint num1 = (uint) set_stage_id;
+        uint num1 = (uint)set_stage_id;
         if (!g_gs_main_sys_info.is_first_play || g_gs_main_sys_info.game_mode == 1 ||
-            ((int) main_work.flag & 16777216) != 0)
-            return (int) num1;
-        int num2 = (int) dm_stgslct_act_zone_no_tbl[(int) num1];
-        uint num3 = dm_stgslct_zone_array_act_tbl[(int) num1];
-        for (uint index = num1 - num3; index < (uint) ((int) num1 - (int) num3 + 4); ++index)
+            ((int)main_work.flag & 16777216) != 0)
+            return (int)num1;
+        int num2 = (int)dm_stgslct_act_zone_no_tbl[(int)num1];
+        uint num3 = dm_stgslct_zone_array_act_tbl[(int)num1];
+        for (uint index = num1 - num3; index < (uint)((int)num1 - (int)num3 + 4); ++index)
         {
-            if (!GsMainSysIsStageClear((int) index))
-                return (int) index;
+            if (!GsMainSysIsStageClear((int)index))
+                return (int)index;
         }
 
         for (uint index1 = 0; index1 < 4U; ++index1)
         {
             uint num4 = index1;
-            uint num5 = dm_stgslct_zone_act_num_tbl[(int) num4][0];
+            uint num5 = dm_stgslct_zone_act_num_tbl[(int)num4][0];
             for (int index2 = 0; index2 < 4; ++index2)
             {
-                if (!GsMainSysIsStageClear((int) (num5 + index2)))
-                    return (int) (num5 + index2);
+                if (!GsMainSysIsStageClear((int)(num5 + index2)))
+                    return (int)(num5 + index2);
             }
         }
 
@@ -3796,12 +4150,12 @@ public partial class AppMain
             default:
                 if (main_work.cur_game_mode == 0U)
                 {
-                    uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-                    uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+                    uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+                    uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
                     uint num3 = 0;
                     for (uint index = num1; index < num2; ++index)
                     {
-                        if (1 == main_work.is_clear_stage[(int) index])
+                        if (1 == main_work.is_clear_stage[(int)index])
                             ++num3;
                     }
 
@@ -3827,20 +4181,20 @@ public partial class AppMain
         DMS_STGSLCT_MAIN_WORK main_work,
         int stage)
     {
-        uint num1 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][0];
-        uint num2 = dm_stgslct_zone_act_num_tbl[(int) main_work.cur_zone][1] + num1;
+        uint num1 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][0];
+        uint num2 = dm_stgslct_zone_act_num_tbl[(int)main_work.cur_zone][1] + num1;
         switch (main_work.cur_zone)
         {
             case 4:
                 main_work.focus_disp_no = 0;
                 for (uint index = num1; index < num2; ++index)
-                    main_work.act_top_pos_y[(int) index] = dm_stgslct_act_disp_y_pos_tbl[(int) index];
+                    main_work.act_top_pos_y[(int)index] = dm_stgslct_act_disp_y_pos_tbl[(int)index];
                 break;
             case 5:
                 int a = stage - 18;
                 main_work.focus_disp_no = MTM_MATH_CLIP(a, 0, 4);
                 for (uint index = num1; index < num2; ++index)
-                    main_work.act_top_pos_y[(int) index] =
+                    main_work.act_top_pos_y[(int)index] =
                         this.dm_stgslct_act_tab_disp_y_pos_tbl[main_work.focus_disp_no];
                 break;
             default:
@@ -3865,7 +4219,7 @@ public partial class AppMain
                 }
 
                 for (uint index = num1; index < num2; ++index)
-                    main_work.act_top_pos_y[(int) index] =
+                    main_work.act_top_pos_y[(int)index] =
                         this.dm_stgslct_act_tab_disp_y_pos_tbl[main_work.focus_disp_no];
                 break;
         }

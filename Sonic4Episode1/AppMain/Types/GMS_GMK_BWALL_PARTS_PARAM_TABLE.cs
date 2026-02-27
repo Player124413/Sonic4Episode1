@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private class GMS_GMK_BWALL_PARTS_PARAM_TABLE
     {

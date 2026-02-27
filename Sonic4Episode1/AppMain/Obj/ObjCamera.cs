@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static int ObjCameraInit(
      int cam_id,
@@ -80,13 +80,25 @@ public partial class AppMain
         obj_camera.aspect = AMD_SCREEN_ASPECT;
         obj_camera.fovy = NNM_DEGtoA32(45f);
         nnMakePerspectiveMatrix(obj_camera.prj_pers_mtx, obj_camera.fovy, obj_camera.aspect, obj_camera.znear, obj_camera.zfar);
-        obj_camera.scale = 5f / 64f;
-        float num1 = (float)(g_obj.disp_height * (double)obj_camera.scale * 0.5 * 1.0);
-        float num2 = num1 * obj_camera.aspect;
-        obj_camera.left = -num2;
-        obj_camera.right = num2;
-        obj_camera.bottom = -num1;
-        obj_camera.top = num1;
+
+        {
+            float dx, dy;
+
+            obj_camera.scale = 0.078125f;  // This is about 5 blocks when it's wide
+
+            dy = g_obj.disp_height * obj_camera.scale * 0.5f;
+            dx = dy * obj_camera.aspect;
+
+            obj_camera.left = -dx;
+            obj_camera.right = dx;
+            obj_camera.bottom = -dy;
+            obj_camera.top = dy;
+
+            nnMakeOrthoMatrix(obj_camera.prj_ortho_mtx,
+                obj_camera.left, obj_camera.right, obj_camera.bottom, obj_camera.top,
+                obj_camera.znear, obj_camera.zfar);
+        }
+
         nnMakeOrthoMatrix(obj_camera.prj_ortho_mtx, obj_camera.left, obj_camera.right, obj_camera.bottom, obj_camera.top, obj_camera.znear, obj_camera.zfar);
         switch (obj_camera.camera_type)
         {
@@ -288,15 +300,19 @@ public partial class AppMain
                 obsCamera.disp_ofst.x = 0.0f;
                 obsCamera.disp_ofst.y = 0.0f;
                 obsCamera.disp_ofst.z = 0.0f;
-                if (((int)obsCamera.flag & 16) != 0)
+                if (((int)obsCamera.flag & OBD_CAMERA_3D) != 0)
                 {
+                    float dx, dy;
                     nnMakePerspectiveMatrix(obsCamera.prj_pers_mtx, obsCamera.fovy, obsCamera.aspect, obsCamera.znear, obsCamera.zfar);
-                    float num1 = (float)(AMD_SCREEN_2D_WIDTH * (double)obsCamera.scale * 0.5 * 1.0);
-                    float num2 = num1 * obsCamera.aspect;
-                    obsCamera.left = -num2;
-                    obsCamera.right = num2;
-                    obsCamera.bottom = -num1;
-                    obsCamera.top = num1;
+
+                    dy = g_obj.disp_height * obsCamera.scale * 0.5f;
+                    dx = dy * obsCamera.aspect;
+
+                    obsCamera.left = -dx;
+                    obsCamera.right = dx;
+                    obsCamera.bottom = -dy;
+                    obsCamera.top = dy;
+
                     nnMakeOrthoMatrix(obsCamera.prj_ortho_mtx, obsCamera.left, obsCamera.right, obsCamera.bottom, obsCamera.top, obsCamera.znear, obsCamera.zfar);
                     switch (obsCamera.camera_type)
                     {

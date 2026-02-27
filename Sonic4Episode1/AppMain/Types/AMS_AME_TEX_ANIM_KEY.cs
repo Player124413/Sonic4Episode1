@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AMS_AME_TEX_ANIM_KEY
+    internal struct AMS_AME_TEX_ANIM_KEY
     {
         public float time;
         public float l;

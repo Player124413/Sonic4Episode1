@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXTURE_LOD_PARAM
+    internal class NNS_TEXTURE_LOD_PARAM
     {
         public int BaseLevel;
         public int MaxLevel;

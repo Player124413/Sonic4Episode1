@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_STRAT_PROB_INFO
+    internal class GMS_BOSS5_STRAT_PROB_INFO
     {
         public int strat_state;
         public int probability;

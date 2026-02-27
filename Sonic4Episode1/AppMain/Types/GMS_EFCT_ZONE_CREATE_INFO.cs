@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_EFCT_ZONE_CREATE_INFO
+    internal class GMS_EFCT_ZONE_CREATE_INFO
     {
         public GMS_EFCT_ZONE_CREATE_PARAM[] zone_create_param;
         public int num;

@@ -1,8 +1,8 @@
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public class NNS_RGBA_U32
+internal class NNS_RGBA_U32
 {
     public byte r;
     public byte g;

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void GsEnvInit()
     {
@@ -62,7 +62,7 @@ public partial class AppMain
         return g_gs_env_language;
     }
 
-    private static GSE_DECIDE_KEY GeEnvGetDecideKey()
+    public static GSE_DECIDE_KEY GeEnvGetDecideKey()
     {
         return g_gs_env_decide_key;
     }

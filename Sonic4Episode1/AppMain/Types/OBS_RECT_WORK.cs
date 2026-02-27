@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_RECT_WORK : IClearable
+    internal class OBS_RECT_WORK : IClearable
     {
         public readonly OBS_RECT rect = new OBS_RECT();
         public uint flag;

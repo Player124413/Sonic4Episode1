@@ -1,7 +1,7 @@
 ﻿using System;
 
 [Flags]
-public enum ControllerConsts : ushort
+internal enum ControllerConsts : ushort
 {
     UP = 1,
     DOWN = 2,
@@ -24,10 +24,11 @@ public enum ControllerConsts : ushort
     JUMP = A | B | X,
     SUPER_SONIC = Y,
     CONFIRM = A,
+    DECIDE = A,
     CANCEL = B
 }
 
-public struct ControllerReading
+internal struct ControllerReading
 {
     public bool connected;
     public bool allow_vibrate;
@@ -58,7 +59,7 @@ public struct ControllerReading
     public short ary;
 }
 
-public abstract class Controller
+internal abstract class Controller
 {
     public ControllerReading reading;
 

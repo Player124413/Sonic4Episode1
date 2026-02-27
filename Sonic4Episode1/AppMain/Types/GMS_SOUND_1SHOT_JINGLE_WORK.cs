@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_SOUND_1SHOT_JINGLE_WORK
+    internal class GMS_SOUND_1SHOT_JINGLE_WORK
     {
         public int bgm_fade_in_frame;
 

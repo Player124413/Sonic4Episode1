@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_FADE_OBJ_WORK : IOBS_OBJECT_WORK
+    internal class GMS_FADE_OBJ_WORK : IOBS_OBJECT_WORK
     {
         public readonly IZS_FADE_WORK fade_work = new IZS_FADE_WORK();
         public object m_pHolder;

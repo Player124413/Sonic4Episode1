@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_ACT_ACM
+    internal class AOS_ACT_ACM
     {
         public float trans_x;
         public float trans_y;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATCTRL_ENVTEXMATRIX
+    internal class NNS_MATCTRL_ENVTEXMATRIX
     {
         public readonly NNS_MATRIX texmtx = GlobalPool<NNS_MATRIX>.Alloc();
         public int texcoordsrc;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_GEAR_WORK : IOBS_OBJECT_WORK
+    internal class GMS_GMK_GEAR_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_NN_WORK obj_3d_gear_opt = new OBS_ACTION3D_NN_WORK();
         public readonly OBS_ACTION3D_NN_WORK obj_3d_gear_opt_ashiba = new OBS_ACTION3D_NN_WORK();

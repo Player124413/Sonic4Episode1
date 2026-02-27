@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Media;
 using mpp;
 using Sonic4ep1;
 
-public partial class AppMain
+internal partial class AppMain
 {
     static AppMain()
     {
@@ -16480,17 +16480,7 @@ public partial class AppMain
         5,
         0
         };
-        gm_gamedat_tbl_common = new GMS_GAMEDAT_LOAD_DATA[]
-        {
-        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 2),
-        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 3),
-        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 4),
-        new GMS_GAMEDAT_LOAD_DATA("G_COM/CPIT/CPIT_MAIN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostCockpit, -1)
-        };
-        gm_gamedat_tbl_common_info_tbl = new GMS_GAMEDAT_LOAD_INFO[]
-        {
-        new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_common, gm_gamedat_tbl_common.Length)
-        };
+
         gm_gamedat_tbl_player_sonic = new GMS_GAMEDAT_LOAD_DATA[]
         {
         new GMS_GAMEDAT_LOAD_DATA("G_COM/PLY/SON_MDL.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostPlayer, -1),
@@ -22065,6 +22055,7 @@ public partial class AppMain
         int num319 = 2;
         array21 = new ushort[4];
         array334[num319] = array21;
+        gm_player_push_jump_key_rect2 = array333;
         gm_player_push_jump_key_rect = array333;
         gm_player_push_ssonic_key_rect = new ushort[][]
         {
@@ -23890,127 +23881,7 @@ public partial class AppMain
         }
         };
         event_after_buy = false;
-        dm_title_file_lng_amb_name_tbl = new string[]
-        {
-        "DEMO/TITLE/D_TITLE_JP.AMB",
-        "DEMO/TITLE/D_TITLE_US.AMB",
-        "DEMO/TITLE/D_TITLE_FR.AMB",
-        "DEMO/TITLE/D_TITLE_IT.AMB",
-        "DEMO/TITLE/D_TITLE_GE.AMB",
-        "DEMO/TITLE/D_TITLE_SP.AMB",
-        "DEMO/TITLE/D_TITLE_FI.AMB",
-        "DEMO/TITLE/D_TITLE_PT.AMB",
-        "DEMO/TITLE/D_TITLE_RU.AMB",
-        "DEMO/TITLE/D_TITLE_CN.AMB",
-        "DEMO/TITLE/D_TITLE_HK.AMB"
-        };
-        dm_title_menu_cmn_amb_name_tbl = new string[]
-        {
-        g_dm_buy_screen_btn_amb_path,
-        "DEMO/CMN/D_CMN_OBI.AMB",
-        DMD_MANUAL_CMN_DATA_FILENAME
-        };
-        dm_title_menu_cmn_lng_amb_name_tbl = new string[]
-        {
-        "DEMO/CMN/D_CMN_MSG_JP.AMB",
-        "DEMO/CMN/D_CMN_MSG_US.AMB",
-        "DEMO/CMN/D_CMN_MSG_FR.AMB",
-        "DEMO/CMN/D_CMN_MSG_IT.AMB",
-        "DEMO/CMN/D_CMN_MSG_GE.AMB",
-        "DEMO/CMN/D_CMN_MSG_SP.AMB",
-        "DEMO/CMN/D_CMN_MSG_FI.AMB",
-        "DEMO/CMN/D_CMN_MSG_PT.AMB",
-        "DEMO/CMN/D_CMN_MSG_RU.AMB",
-        "DEMO/CMN/D_CMN_MSG_CN.AMB",
-        "DEMO/CMN/D_CMN_MSG_CN.AMB"
-        };
-        dm_title_crsr_pos_y_tbl = new float[]
-        {
-        372f,
-        50f
-        };
-        dm_title_crsr_trial_pos_y_tbl = new float[]
-        {
-        445f,
-        495f,
-        545f
-        };
-        dm_title_win_act_pos_tbl = new float[,]
-        {
-        {
-            522f,
-            280f
-        },
-        {
-            480f,
-            276f
-        },
-        {
-            480f,
-            276f
-        },
-        {
-            480f,
-            276f
-        },
-        {
-            400f,
-            274f
-        },
-        {
-            304f,
-            420f
-        },
-        {
-            656f,
-            420f
-        }
-        };
-        dm_title_g_dm_act_id_tbl = new uint[]
-        {
-        0U,
-        1U,
-        2U,
-        0U,
-        1U,
-        2U,
-        0U,
-        1U,
-        2U,
-        0U,
-        1U,
-        2U,
-        0U,
-        1U,
-        2U,
-        3U,
-        4U,
-        5U,
-        6U,
-        6U,
-        0U,
-        1U,
-        2U,
-        3U,
-        9U,
-        10U,
-        7U,
-        8U,
-        4U,
-        5U,
-        1U,
-        10U,
-        0U,
-        1U,
-        2U,
-        0U,
-        1U,
-        2U,
-        1U,
-        2U,
-        0U
-        };
-        dm_title_is_title_start = false;
+
         dm_snd_bgm_player_tcb = null;
         dm_snd_bgm_player_flag = 0U;
         DMD_OPT_CMN_DATA_FILENAME = DMD_MANUAL_CMN_DATA_FILENAME;

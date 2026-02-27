@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_FLICKER_WORK
+    internal class GMS_BOSS4_FLICKER_WORK
     {
         public readonly NNS_RGB color = new NNS_RGB();
         public readonly uint[] reserved = new uint[3];

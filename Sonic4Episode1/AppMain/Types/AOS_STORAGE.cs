@@ -1,8 +1,8 @@
 using gs;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AOS_STORAGE
+    internal class AOS_STORAGE
     {
         public bool initialized;
         public int state;

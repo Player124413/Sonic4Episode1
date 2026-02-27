@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
 
     private static int GMM_GMK_TYPE_CHECK(int gmk)

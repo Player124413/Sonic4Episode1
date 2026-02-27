@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct MP_BLOCK
+    internal struct MP_BLOCK
     {
         public ushort id;
         public ushort rot;

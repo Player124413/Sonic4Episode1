@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_START_DEMO_DATA : IClearable
+    internal class GMS_START_DEMO_DATA : IClearable
     {
         public readonly AOS_TEXTURE[] aos_texture = New<AOS_TEXTURE>(2);
         public readonly object[] demo_amb = new object[2];

@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     public static float GMD_BOSS4_CAP_ROTATE_SPD => GMM_BOSS4_PAL_SPEED(6f);
 
@@ -198,7 +198,7 @@
                 obsObjectWork.parent_obj = obj_work.parent_obj;
                 GMM_BS_OBJ(gmsBosS4CapWork).flag |= 8U;
             }
-        }
+        }   
         ++_cap_count;
         gmsBosS4CapWork.wait = 0;
     }

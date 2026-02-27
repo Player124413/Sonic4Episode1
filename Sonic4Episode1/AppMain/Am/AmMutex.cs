@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void amMutexCreate(object mutex)
     {

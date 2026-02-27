@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_BUKU_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENE_BUKU_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK ene_3d_work;
         public int spd_dec;

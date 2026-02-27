@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Media;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void AoSysInit()
     {

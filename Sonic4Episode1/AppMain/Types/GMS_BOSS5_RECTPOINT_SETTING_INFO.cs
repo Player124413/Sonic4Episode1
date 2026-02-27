@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_RECTPOINT_SETTING_INFO
+    internal class GMS_BOSS5_RECTPOINT_SETTING_INFO
     {
         public short[][] rect_size = New<short>(3, 4);
         public uint enable_bit_flag;

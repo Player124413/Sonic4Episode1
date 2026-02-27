@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static GMS_EFFECT_3DES_WORK gmBoss1EffShockwaveInit(
       GMS_BOSS1_CHAIN_WORK chain_work)

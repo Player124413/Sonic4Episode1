@@ -1,6 +1,6 @@
 ﻿using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static void DmSaveStart(uint disp_flag, bool is_first_save, bool is_task_draw)
     {
@@ -38,7 +38,7 @@ public partial class AppMain
         dmSaveInit();
     }
 
-    private static void DmSaveMenuStart(bool is_task_draw, bool is_snd_build)
+    public static void DmSaveMenuStart(bool is_task_draw, bool is_snd_build)
     {
         switch (SyGetEvtInfo().cur_evt_id)
         {

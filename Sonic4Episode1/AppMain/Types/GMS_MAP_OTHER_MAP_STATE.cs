@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_MAP_OTHER_MAP_STATE
+    internal class GMS_MAP_OTHER_MAP_STATE
     {
         public int[] map_block_num = new int[2];
         public int[] map_size = new int[2];

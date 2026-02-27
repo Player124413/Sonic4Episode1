@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class5
+    internal class NNS_MOTION_KEY_Class5
     {
         public readonly NNS_VECTOR Value = GlobalPool<NNS_VECTOR>.Alloc();
         public float Frame;

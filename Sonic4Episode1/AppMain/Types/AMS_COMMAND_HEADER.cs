@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_COMMAND_HEADER
+    internal class AMS_COMMAND_HEADER
     {
         public uint state;
         public int command_id;

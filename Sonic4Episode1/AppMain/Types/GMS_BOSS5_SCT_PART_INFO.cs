@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_SCT_PART_INFO
+    internal class GMS_BOSS5_SCT_PART_INFO
     {
         public int cnm_mode;
         public int is_local_coord;

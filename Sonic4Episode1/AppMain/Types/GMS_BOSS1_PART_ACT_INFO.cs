@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS1_PART_ACT_INFO
+    internal class GMS_BOSS1_PART_ACT_INFO
     {
         public ushort act_id;
         public byte is_maintain;

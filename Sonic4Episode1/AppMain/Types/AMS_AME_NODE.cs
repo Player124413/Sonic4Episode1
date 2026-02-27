@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_NODE
+    internal class AMS_AME_NODE
     {
         public readonly char[] name = new char[12];
         public short id;

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_ENE_HARI_WORK : IOBS_OBJECT_WORK
+    internal class GMS_ENE_HARI_WORK : IOBS_OBJECT_WORK
     {
         public GMS_ENEMY_3D_WORK ene_3d = new GMS_ENEMY_3D_WORK();
         public NNS_MATRIX jet_mtx = GlobalPool<NNS_MATRIX>.Alloc();

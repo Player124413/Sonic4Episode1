@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_PLAYER_PACKET
+    internal class GMS_PLAYER_PACKET
     {
         public VecFx32 pos = new VecFx32();
         public ushort disp_flag;

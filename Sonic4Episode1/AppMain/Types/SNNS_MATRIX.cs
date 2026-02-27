@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-public struct SNNS_MATRIX
+internal struct SNNS_MATRIX
 {
     public float M00;
     public float M01;

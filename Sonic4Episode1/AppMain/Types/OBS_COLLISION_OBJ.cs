@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_COLLISION_OBJ
+    internal class OBS_COLLISION_OBJ
     {
         public VecFx32 pos = new VecFx32();
         public VecFx32 check_pos = new VecFx32();

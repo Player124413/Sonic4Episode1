@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum DRE_TBL_WORK_TYPE
     {

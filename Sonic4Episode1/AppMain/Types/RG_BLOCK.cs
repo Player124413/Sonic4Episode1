@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct RG_BLOCK
+    internal struct RG_BLOCK
     {
         public ushort rg_num;
     }

@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class TXB_TEXFILE : NNS_TEXFILE
+    internal class TXB_TEXFILE : NNS_TEXFILE
     {
         public int name_offset;
     }

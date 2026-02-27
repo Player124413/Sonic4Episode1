@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GMK_PULLEY_MANAGER
+    internal class GMS_GMK_PULLEY_MANAGER
     {
         public readonly GMS_GMK_PULLEY_REGISTER[] reg = New<GMS_GMK_PULLEY_REGISTER>(32);
         public uint tex_id;

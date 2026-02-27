@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct A2S_SUB_USR
+    internal struct A2S_SUB_USR
     {
         public uint usr_id;
         public float usr_accele;

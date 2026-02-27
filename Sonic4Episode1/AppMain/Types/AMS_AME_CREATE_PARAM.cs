@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_AME_CREATE_PARAM : IClearable
+    internal class AMS_AME_CREATE_PARAM : IClearable
     {
         public AMS_AME_ECB ecb;
         public AMS_AME_RUNTIME runtime;

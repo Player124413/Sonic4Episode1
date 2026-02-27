@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_ARM_PART_ANIM_INFO
+    internal class GMS_BOSS5_ARM_PART_ANIM_INFO
     {
         public readonly NNS_ROTATE_A32 start_rot = new NNS_ROTATE_A32();
         public readonly NNS_ROTATE_A32 end_rot = new NNS_ROTATE_A32();

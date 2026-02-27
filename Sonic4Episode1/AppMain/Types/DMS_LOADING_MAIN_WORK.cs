@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOADING_MAIN_WORK
+    internal class DMS_LOADING_MAIN_WORK
     {
         public AOS_ACTION[] act = new AOS_ACTION[8];
         public AMS_FS arc_amb;

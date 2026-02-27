@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXINFO
+    internal class NNS_TEXINFO
     {
         public uint TexName;
         public uint GlobalIndex;

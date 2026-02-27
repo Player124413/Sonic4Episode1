@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_NODENAME
+    internal class NNS_NODENAME
     {
         public int iNode;
         public string Name;

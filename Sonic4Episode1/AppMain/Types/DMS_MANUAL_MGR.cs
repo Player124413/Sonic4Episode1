@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_MANUAL_MGR
+    internal class DMS_MANUAL_MGR
     {
         public MTS_TASK_TCB tcb;
 

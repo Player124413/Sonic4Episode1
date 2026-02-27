@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_LIGHT_TARGET_DIRECTIONAL
+    internal class NNS_LIGHT_TARGET_DIRECTIONAL
     {
         public readonly NNS_VECTOR Position = new NNS_VECTOR();
         public readonly NNS_VECTOR Target = new NNS_VECTOR();

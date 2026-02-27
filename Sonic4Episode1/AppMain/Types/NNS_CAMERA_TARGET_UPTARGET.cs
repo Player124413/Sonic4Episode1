@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_CAMERA_TARGET_UPTARGET
+    internal class NNS_CAMERA_TARGET_UPTARGET
     {
         public readonly NNS_VECTOR Position = GlobalPool<NNS_VECTOR>.Alloc();
         public readonly NNS_VECTOR Target = GlobalPool<NNS_VECTOR>.Alloc();

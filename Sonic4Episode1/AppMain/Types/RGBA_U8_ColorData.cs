@@ -1,9 +1,9 @@
 using Microsoft.Xna.Framework;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class RGBA_U8_ColorData : OpenGL.GLVertexData
+    internal class RGBA_U8_ColorData : OpenGL.GLVertexData
     {
         protected OpenGL.GLVertexElementType[] compType_ = new OpenGL.GLVertexElementType[1]
         {

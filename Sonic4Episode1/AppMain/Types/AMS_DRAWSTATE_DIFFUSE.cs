@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_DRAWSTATE_DIFFUSE
+    internal class AMS_DRAWSTATE_DIFFUSE
     {
         public int mode;
         public float r;

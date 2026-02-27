@@ -1,6 +1,6 @@
 ﻿using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void objDiffAttrSet(OBS_OBJECT_WORK pWork, uint ulAttr)
     {

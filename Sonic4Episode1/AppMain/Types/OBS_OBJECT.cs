@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_OBJECT
+    internal class OBS_OBJECT
     {
         public VecFx32 glb_scale = new VecFx32();
         public VecFx32 draw_scale = new VecFx32();

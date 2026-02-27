@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class ArrayPoolFast<T> where T : new()
+    internal class ArrayPoolFast<T> where T : new()
     {
         private List<T[]> freeArrays_ = new List<T[]>();
         private List<T[]> usedArrays_ = new List<T[]>();

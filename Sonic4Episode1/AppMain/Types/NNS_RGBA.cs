@@ -1,10 +1,10 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
 }
 
-public struct NNS_RGBA
+internal struct NNS_RGBA
 {
     public float r;
     public float g;

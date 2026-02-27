@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS5_ALARM_FADE_WORK : IOBS_OBJECT_WORK
+    internal class GMS_BOSS5_ALARM_FADE_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_BOSS5_1SHOT_TIMER alert_se_timer = new GMS_BOSS5_1SHOT_TIMER();
         public readonly GMS_FADE_OBJ_WORK fade_obj;

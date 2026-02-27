@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TRAIL_EFFECT
+    internal class AMS_TRAIL_EFFECT
     {
         public AMS_TRAIL_PARAM Work = new AMS_TRAIL_PARAM();
         public AMS_TRAIL_EFFECT pNext;

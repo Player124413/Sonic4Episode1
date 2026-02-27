@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GmkSpearData
+    internal class GmkSpearData
     {
         public const int GME_GMK_TYPE_SPEAR_U = 0;
         public const int GME_GMK_TYPE_SPEAR_D = 1;

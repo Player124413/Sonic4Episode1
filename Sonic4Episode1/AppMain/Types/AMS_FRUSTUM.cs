@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_FRUSTUM
+    internal class AMS_FRUSTUM
     {
         private Matrix viewMatrix;
         private float width;

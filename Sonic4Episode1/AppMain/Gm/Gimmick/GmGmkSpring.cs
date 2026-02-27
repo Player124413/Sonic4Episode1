@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static OBS_OBJECT_WORK GmGmkSpringInit(
         GMS_EVE_RECORD_EVENT eve_rec,
@@ -61,7 +61,8 @@
         else
         {
             int nMaterial = work.obj_3d._object.nMaterial;
-            if (nMaterial == 1)
+            // TODO: why is this needed, some weird pointer shit?
+            if (nMaterial == 1 || work.obj_3d._object.pMatPtrList[0].pMaterial is NNS_MATERIAL_GLES11_DESC)
             {
                 ((NNS_MATERIAL_GLES11_DESC)work.obj_3d._object.pMatPtrList[0].pMaterial).fFlag |= 3U;
             }

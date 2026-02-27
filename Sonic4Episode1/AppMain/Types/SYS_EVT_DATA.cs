@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class SYS_EVT_DATA
+    internal class SYS_EVT_DATA
     {
         public _init_func_ init_func;
         public _exit_func_ exit_func;

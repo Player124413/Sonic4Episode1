@@ -17,7 +17,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using System.Runtime.InteropServices.JavaScript;
 #endif
 
-public partial class SaveState
+internal partial class SaveState
 {
 #if WASM
     [JSImport("SaveState_GetSaveState", "main.js")]
@@ -303,7 +303,7 @@ public partial class SaveState
         }
     }
 
-    public struct SaveData
+    internal struct SaveData
     {
         public ushort stage_id;
         public int level;

@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct Vector3f
+    internal struct Vector3f
     {
         public float x;
         public float y;

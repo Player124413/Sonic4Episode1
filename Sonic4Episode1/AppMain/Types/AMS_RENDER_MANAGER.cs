@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_RENDER_MANAGER
+    internal class AMS_RENDER_MANAGER
     {
         public AMS_RENDER_TARGET targetp;
         public AMS_RENDER_TARGET target_now;

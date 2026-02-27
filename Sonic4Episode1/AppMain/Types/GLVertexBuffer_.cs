@@ -2,9 +2,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GLVertexBuffer_ : OpenGL.GLVertexData
+    internal class GLVertexBuffer_ : OpenGL.GLVertexData
     {
         private OpenGL.GLVertexElementType[] elementTypes_;
         private NNS_VTXARRAY_GL posArray_;

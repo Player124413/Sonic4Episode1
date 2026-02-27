@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private static void gmGmkSteamGateHit(
      OBS_RECT_WORK mine_rect,
@@ -525,7 +525,11 @@
         eve_rec.pos_x = byte.MaxValue;
         GmCameraPosSet(g_gm_main_system.resume_pos_x, g_gm_main_system.resume_pos_y, 0);
         OBS_CAMERA obj_camera = ObjCameraGet(g_obj.glb_camera_id);
-        ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - OBD_LCD_X / 2), FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - OBD_LCD_Y / 2), FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - OBD_LCD_X / 2), FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - OBD_LCD_Y / 2));
+
+        ObjObjectCameraSet(FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)),
+                            FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)),
+                            FXM_FLOAT_TO_FX32(obj_camera.disp_pos.x - (float)(OBD_LCD_X / 2)),
+                            FXM_FLOAT_TO_FX32(-obj_camera.disp_pos.y - (float)(OBD_LCD_Y / 2)));
         GmCameraSetClipCamera(obj_camera);
         return null;
     }

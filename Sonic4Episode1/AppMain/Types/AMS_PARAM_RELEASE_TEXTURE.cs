@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_PARAM_RELEASE_TEXTURE
+    internal class AMS_PARAM_RELEASE_TEXTURE
     {
         public NNS_TEXLIST texlist;
     }

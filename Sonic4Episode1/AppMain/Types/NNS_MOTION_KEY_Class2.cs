@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class2
+    internal class NNS_MOTION_KEY_Class2
     {
         public readonly NNS_MOTION_BEZIER_HANDLE Bhandle = new NNS_MOTION_BEZIER_HANDLE();
         public float Frame;

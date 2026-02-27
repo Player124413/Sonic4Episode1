@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_TEXTURE_COMBINE
+    internal class NNS_TEXTURE_COMBINE
     {
         public ushort CombineRGB;
         public ushort Source0RGB;

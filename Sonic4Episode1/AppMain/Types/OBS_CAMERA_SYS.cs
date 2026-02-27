@@ -1,8 +1,8 @@
 using System;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class OBS_CAMERA_SYS
+    internal class OBS_CAMERA_SYS
     {
         public readonly OBS_CAMERA[] obj_camera = new OBS_CAMERA[8];
         public int camera_num;

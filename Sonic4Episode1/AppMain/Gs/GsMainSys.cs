@@ -1,6 +1,6 @@
 ﻿using gs.backup;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private static void GsMainSysSystemInitEvent(object obj)
     {
@@ -58,13 +58,21 @@ public partial class AppMain
     public static void GsMainSysInfoInit(GSS_MAIN_SYS_INFO gs_main)
     {
         gs_main.Clear();
-        gs_main.sys_disp_width = _am_draw_video.disp_width;
-        gs_main.sys_disp_height = _am_draw_video.disp_height;
+        if (_am_draw_video.wide_screen)
+        {
+            gs_main.sys_disp_width = 1280.0f;//(f32)((960 * 16) / 12);
+            gs_main.sys_disp_height = 720.0f;
+        }
+        else
+        {
+            gs_main.sys_disp_width = 960.0f;
+            gs_main.sys_disp_height = 720.0f;
+        }
         gs_main.level = 1;
         gs_main.Save.Init();
     }
 
-    private static bool GsMainSysIsStageClear(int stage_id)
+    public static bool GsMainSysIsStageClear(int stage_id)
     {
         if (stage_id >= 21)
         {

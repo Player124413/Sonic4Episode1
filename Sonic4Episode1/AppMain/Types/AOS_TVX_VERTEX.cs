@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct AOS_TVX_VERTEX
+    internal struct AOS_TVX_VERTEX
     {
         public float x;
         public float y;

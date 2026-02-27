@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct DI_HEADER
+    internal struct DI_HEADER
     {
         public uint block_num;
         public DI_BLOCK[] blocks;

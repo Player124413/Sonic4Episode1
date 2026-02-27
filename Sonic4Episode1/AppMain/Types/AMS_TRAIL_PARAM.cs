@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class AMS_TRAIL_PARAM
+    internal class AMS_TRAIL_PARAM
     {
         public NNS_RGBA startColor;
         public NNS_RGBA endColor;

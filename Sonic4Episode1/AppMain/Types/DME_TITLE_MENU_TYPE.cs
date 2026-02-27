@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     private enum DME_TITLE_MENU_TYPE
     {

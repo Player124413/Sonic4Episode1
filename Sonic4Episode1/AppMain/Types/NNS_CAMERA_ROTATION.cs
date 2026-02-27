@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_CAMERA_ROTATION
+    internal class NNS_CAMERA_ROTATION
     {
         public readonly NNS_VECTOR Position = GlobalPool<NNS_VECTOR>.Alloc();
         public readonly NNS_ROTATE_A32 Rotation = new NNS_ROTATE_A32();

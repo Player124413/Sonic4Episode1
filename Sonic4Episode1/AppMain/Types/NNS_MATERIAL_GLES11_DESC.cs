@@ -1,8 +1,8 @@
 using System.IO;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_GLES11_DESC
+    internal class NNS_MATERIAL_GLES11_DESC
     {
         public uint fFlag;
         public uint User;

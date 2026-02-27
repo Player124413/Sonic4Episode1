@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MOTION_KEY_Class12
+    internal class NNS_MOTION_KEY_Class12
     {
         public float Frame;
         public uint Value;

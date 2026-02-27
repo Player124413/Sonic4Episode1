@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class DMS_LOGO_COM_LOAD_FILE_INFO
+    internal class DMS_LOGO_COM_LOAD_FILE_INFO
     {
         public string file_path;
         public post_func_Delegate post_func;

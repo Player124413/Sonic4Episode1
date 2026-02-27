@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_BOSS4_NODE_MATRIX
+    internal class GMS_BOSS4_NODE_MATRIX
     {
         public string _id = "";
         public readonly GMS_BS_CMN_BMCB_MGR mtn_mgr = new GMS_BS_CMN_BMCB_MGR();

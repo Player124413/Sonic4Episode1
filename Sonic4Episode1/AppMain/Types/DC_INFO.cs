@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public struct DC_INFO
+    internal struct DC_INFO
     {
         public byte x;
         public byte y;

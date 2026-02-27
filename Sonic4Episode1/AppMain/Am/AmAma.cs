@@ -2,8 +2,11 @@
 using System.IO;
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
+    public static void amMemFree(object obj) { }
+
+
     public static A2S_AMA_HEADER readAMAFile(string name)
     {
         using (Stream input = TitleContainer.OpenStream("Content\\" + name))

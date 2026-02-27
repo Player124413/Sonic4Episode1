@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_DECOGLARE_PARAM
+    internal class GMS_DECOGLARE_PARAM
     {
         public readonly uint color;
         public float size;

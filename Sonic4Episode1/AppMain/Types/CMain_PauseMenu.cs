@@ -2,7 +2,7 @@ using er;
 using Microsoft.Xna.Framework;
 using setting;
 
-public partial class AppMain
+internal partial class AppMain
 {
     private class CMain_PauseMenu : ITaskLinkAsv
     {
@@ -836,7 +836,7 @@ public partial class AppMain
                 AoActSortRegAction(this.act);
             }
 
-            public class BFlag
+            internal class BFlag
             {
                 public const int NoUpdate = 0;
                 public const int NoDraw = 1;

@@ -1,4 +1,4 @@
-public partial class AppMain
+internal partial class AppMain
 {
     public enum OBD_DRAW_USER_COMMAND_SORT_3DNN
     {

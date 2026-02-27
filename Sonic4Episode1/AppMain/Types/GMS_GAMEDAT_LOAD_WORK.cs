@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class GMS_GAMEDAT_LOAD_WORK
+    internal class GMS_GAMEDAT_LOAD_WORK
     {
         public GMS_GAMEDAT_LOAD_CONTEXT[] context = New<GMS_GAMEDAT_LOAD_CONTEXT>(GMD_GAMEDAT_LOAD_CONTEXT_MAX);
         public ushort[] char_id = new ushort[1];

@@ -96,7 +96,7 @@ partial class AppMain
 
     private static void gsTrophyTriggerAquisition(uint trophy_no)
     {
-        LiveFeature.getInstance().GotAchievment(achievements[(int)trophy_no].id);
+        // LiveFeature.getInstance().GotAchievment(achievements[(int)trophy_no].id);
     }
 
     private static void GsRebootInit()

@@ -1,8 +1,8 @@
 using mpp;
 
-public partial class AppMain
+internal partial class AppMain
 {
-    public class NNS_MATERIAL_COLOR
+    internal class NNS_MATERIAL_COLOR
     {
         public uint fFlag;
         public NNS_RGBA Ambient;

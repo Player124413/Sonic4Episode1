@@ -1,4 +1,4 @@
-﻿public partial class AppMain
+﻿internal partial class AppMain
 {
     private const int GME_PAD_VIB_TYPE_STOP = 0;
     private const int GME_PAD_VIB_TYPE_NORMAL = 1;

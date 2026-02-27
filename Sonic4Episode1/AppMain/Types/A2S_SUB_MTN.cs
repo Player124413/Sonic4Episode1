@@ -1,6 +1,6 @@
-public partial class AppMain
+internal partial class AppMain
 {
-    public class A2S_SUB_MTN
+    internal class A2S_SUB_MTN
     {
         public float scl_x;
         public float scl_y;

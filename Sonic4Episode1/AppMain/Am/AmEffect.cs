@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-public partial class AppMain
+internal partial class AppMain
 {
     public static int AMM_BLEND(int equ, int a, int b)
     {
