@@ -44,6 +44,7 @@ internal partial class AndroidContentManager(IServiceProvider serviceProvider) :
     public override T Load<T>(string assetName)
     {
         T t = base.Load<T>(assetName);
+
         if (t is Song song)
         {
             var filePath = GetFilePath(song);

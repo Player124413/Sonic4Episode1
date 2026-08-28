@@ -1,22 +1,23 @@
-using SDL2;
-using System; 
+using static SDL3.SDL;
+using System;
+using SDL3;
 
 static class Program
 {
-    static void Main(string[] args)
+    static int Main(string[] args)
     {
-        // Enable high DPI "Retina" support. Trust us, you'll want this.
-        SDL.SDL_SetHint("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
+        SDL_SetHint("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
 
         // Keep mouse and touch input separate.
-        SDL.SDL_SetHint(SDL.SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
-        SDL.SDL_SetHint(SDL.SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
         // Don't let the accelerometer take over controller slot 0.
-        SDL.SDL_SetHint(SDL.SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+        // SDL3.SDL.SDL_SetHint(SDL3.SDL.SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
 
         realArgs = args;
-        SDL.SDL_UIKitRunApp(0, IntPtr.Zero, FakeMain);
+        return SDL_RunApp(0, IntPtr.Zero, FakeMain, IntPtr.Zero);
     }
 
     static string[] realArgs;

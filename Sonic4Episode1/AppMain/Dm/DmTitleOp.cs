@@ -49,6 +49,10 @@
         GmGameDBuildModelBuildInit();
         dm_titleop_obj_3d_list = GmGameDBuildRegBuildModel((AMS_AMB_HEADER)dm_titleop_mapfar_data[0], (AMS_AMB_HEADER)dm_titleop_mapfar_data[1], 0U);
         dm_titleop_water_obj_3d_list = GmGameDBuildRegBuildModel((AMS_AMB_HEADER)dm_titleop_mapfar_data[3], (AMS_AMB_HEADER)dm_titleop_mapfar_data[1], 0U);
+#if GMD_MAP_FAR_USE_SEA_SHADER
+        gmMapFarLoadSeaTextures((AMS_AMB_HEADER)dm_titleop_mapfar_data[1]);
+        gmMapFarBuildSeaShader();
+#endif
     }
 
     private bool DmTitleOpBuildCheck()
@@ -408,6 +412,10 @@
         obj_work.obj_3d.command_state = 2U;
         ObjAction3dNNMaterialMotionLoad(titleopObj3DnnWork.obj_3d, 0, null, null, 1, (AMS_AMB_HEADER)dm_titleop_mapfar_data[2]);
         ObjDrawObjectActionSet3DNNMaterial(obj_work, 0);
+#if GMD_MAP_FAR_USE_SEA_SHADER
+        obj_work.obj_3d.material_cb_func = _gmMapFarSeaMaterialCallback;
+        obj_work.obj_3d.material_cb_param = null;
+#endif
         obj_work.obj_3d.mat_speed = 0.2f;
         obj_work.dir.y = 49152;
         obj_work.disp_flag |= 5308420U;
@@ -518,6 +526,9 @@
         }
     }
 
+    // Unlike the in-game far map, the title screen draws the sky in PRE_MAPFAR and the sea in
+    // MAPFAR_SEA (dmTitleOp.cpp:1360-1364), so by the time this runs the frame has something
+    // in it and the copy is worth sampling.
     private static void dmTitleOpFallShaderPreRenderUserFunc(object data)
     {
         NNS_RGBA_U8 color = new NNS_RGBA_U8(0, 0, 0, byte.MaxValue);
@@ -525,6 +536,9 @@
         if (target.width == 0)
             return;
         amRenderCopyTarget(target, color);
+#if GMD_MAP_FAR_USE_SEA_SHADER
+        _gm_map_far_sea_render_target = target;
+#endif
     }
 
     private void dmTitleOpDrawFallShaderPreSettingUserFunc(ref object data)

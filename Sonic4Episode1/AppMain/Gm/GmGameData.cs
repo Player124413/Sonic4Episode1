@@ -227,12 +227,12 @@ internal partial class AppMain
 
     public static object GmGameDatGetEnemyData(int data_no)
     {
-        return g_gm_gamedat_enemy[data_no - 658];
+        return g_gm_gamedat_enemy[data_no - GMD_DWORK_NO_ENEMY_START];
     }
 
     public static AMS_AMB_HEADER GmGameDatGetGimmickData(int data_no)
     {
-        return g_gm_gamedat_gimmick[data_no - 789];
+        return g_gm_gamedat_gimmick[data_no - GMD_DWORK_NO_GMK_START];
     }
 
     private static void GmGameDatLoadBoosBattleInit(int boss_type)

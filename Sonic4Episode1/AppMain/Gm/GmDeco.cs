@@ -1,11 +1,22 @@
 ﻿using System;
+using System.Diagnostics;
+using Microsoft.Xna.Framework.Graphics;
+using mpp;
 
 internal partial class AppMain
 {
+    private static AMS_RENDER_TARGET _gm_deco_fall_render_target;
+    private static AMS_PARAM_LOAD_TEXTURE_IMAGE _gm_deco_fall_base;
+    private static int _gm_deco_fall_log = 1;
+    private static readonly AMS_SHADER _gm_deco_fall_shader = new AMS_SHADER();
+    private static readonly MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE _gmDecoFallMaterialCallback =
+        new MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE(gmDecoFallMaterialCallback);
+
     private static void GmDecoInit()
     {
         gmDecoInitMgr();
         ClearArray(g_deco_fall_manager, 0, 16);
+        amShaderBuild("waterfall", _gm_deco_fall_shader);
     }
 
     public static void GmDecoExit()
@@ -386,6 +397,27 @@ internal partial class AppMain
         return gmDecoInitModelLoop(dec_rec, x, y, type).obj_work;
     }
 
+    // On PC the fall's material declares two texture maps, offset at unit 0 and artwork at
+    // unit 1, and NN hands both to the shader. Our material only has the artwork, and the
+    // offset map is one of the two files the mobile content dropped, so game code loads it
+    // explicitly the way dwaterLoadTexture does and the callback supplies it directly.
+    private static void gmDecoLoadFallBaseTexture(AMS_AMB_HEADER amb)
+    {
+        _gm_deco_fall_base = null;
+        if (amb == null)
+            return;
+
+        int index = amBindSearchBaseName(amb, "Z1_FALL_TEST");
+        if (index < 0)
+            return;
+
+        AMS_PARAM_LOAD_TEXTURE_IMAGE dst = new AMS_PARAM_LOAD_TEXTURE_IMAGE();
+        amTextureLoad(dst, amBindGet(amb, index, out string _),
+            System.IO.Path.GetExtension(amb.files[index]),
+            AMD_FILTER_LINEAR, AMD_FILTER_LINEAR, AMD_WRAP_REPEAT, AMD_WRAP_REPEAT);
+        _gm_deco_fall_base = dst;
+    }
+
     private static void GmDecoInitData(AMS_AMB_HEADER amb)
     {
         gmDecoDataInit();
@@ -400,6 +432,7 @@ internal partial class AppMain
         AMS_AMB_HEADER header = null;
         if (info != null)
             header = gmDecoDataGetAmbHeader();
+        gmDecoLoadFallBaseTexture(header);
         string sPath;
         if (gmDecoIsUseModel(0))
         {
@@ -893,10 +926,16 @@ internal partial class AppMain
                 target = gmDecoGetRenderWorkFront();
                 if (target == null)
                 {
-                    target = _gm_mapFar_render_work;
+                    // The C++ takes _gm_mapFar_render_work directly here, which only works on
+                    // PC because the sea already switched the bound target away from it earlier
+                    // in the frame (gmMapFar.cpp:4296). That user func is not registered in this
+                    // port, so pick whichever target we are not rendering into, as zone 3 does -
+                    // otherwise the copy is a self-copy and the shader samples its own output.
+                    target = _am_render_manager.targetp != _gm_mapFar_render_work
+                        ? _gm_mapFar_render_work
+                        : _am_draw_target;
                     if (target.width == 0)
                         return null;
-                    break;
                 }
                 break;
             case 2:
@@ -930,10 +969,12 @@ internal partial class AppMain
             case 0:
                 if (target == null)
                 {
-                    target = _gm_mapFar_render_work;
+                    // same reason as gmDecoDrawFallCopyRenderFront
+                    target = _am_render_manager.targetp != _gm_mapFar_render_work
+                        ? _gm_mapFar_render_work
+                        : _am_draw_target;
                     if (target.width == 0)
                         return null;
-                    break;
                 }
                 break;
             case 2:
@@ -952,15 +993,70 @@ internal partial class AppMain
         return target;
     }
 
+    // The C++ binds the scene copy to NNE_USER_SAMPLER_2D_1 and pushes the projection out as
+    // four user uniforms (gmDeco.cpp:6589). NN then picks a shader whose profile declares that
+    // sampler. We have no per-material shader selection, so this just records what the material
+    // callback needs and the callback binds the effect.
     private static void gmDecoDrawFallRender(
       AMS_RENDER_TARGET render_target,
       NNS_MATRIX proj_mtx)
     {
+        _gm_deco_fall_render_target = render_target;
     }
 
     private static void gmDecoDrawFallFrontUserFunc(object data)
     {
-        amDrawGetProjectionMatrix();
+        NNS_MATRIX projectionMatrix = amDrawGetProjectionMatrix();
+        AMS_RENDER_TARGET render_target = gmDecoDrawFallCopyRenderFront();
+        if (render_target == null)
+            return;
+        gmDecoDrawFallRender(render_target, projectionMatrix);
+    }
+
+    private static bool gmDecoFallMaterialCallback(NNS_DRAWCALLBACK_VAL val, object param)
+    {
+        // core first: it binds the material's textures into the wrapper's units, and the
+        // override effect needs to be handed them explicitly
+        int ret = nnPutMaterialCore(val);
+
+        if (_gm_deco_fall_render_target == null || _gm_deco_fall_render_target.target == null ||
+            !amShaderIsValid(_gm_deco_fall_shader))
+        {
+            if (--_gm_deco_fall_log <= 0)
+            {
+                _gm_deco_fall_log = 120;
+                amSystemLog($"[fall] cb hit but bailed: target={(_gm_deco_fall_render_target == null ? "null" : (_gm_deco_fall_render_target.target == null ? "no-rt" : "ok"))}" +
+                            $" shader={amShaderIsValid(_gm_deco_fall_shader)}\n");
+            }
+            return ret == 1;
+        }
+
+        // the material only carries the artwork, so it is the decal; the offset map is injected
+        Texture2D texDecal = OpenGL.mppglGetBoundTexture(0);
+        Texture2D texBase = _gm_deco_fall_base != null ? _gm_deco_fall_base.texture : null;
+
+        if (--_gm_deco_fall_log <= 0)
+        {
+            _gm_deco_fall_log = 120;
+            amSystemLog($"[fall] cb hit: decal={(texDecal == null ? "null" : texDecal.Width + "x" + texDecal.Height)}" +
+                        $" base={(texBase == null ? "null" : texBase.Width + "x" + texBase.Height)}" +
+                        $" override={(texBase != null && texDecal != null)}\n");
+        }
+
+        if (texBase == null || texDecal == null)
+            return ret == 1;
+
+        Effect effect = _gm_deco_fall_shader.effect;
+        effect.Parameters["View"].SetValue(OpenGL.mppglGetView());
+        effect.Parameters["Projection"].SetValue(OpenGL.mppglGetProjection());
+        effect.Parameters["TexBase"].SetValue(texBase);
+        effect.Parameters["TexDecal"].SetValue(texDecal);
+        effect.Parameters["TexUserSampler2D1"].SetValue(_gm_deco_fall_render_target.target);
+        effect.Parameters["BaseAlpha"].SetValue(1f);
+        effect.Parameters["DecalAlpha"].SetValue(1f);
+        OpenGL.mppglSetEffectOverride(effect);
+
+        return ret == 1;
     }
 
     private static void gmDecoDrawFallBackUserFunc(object data)
@@ -976,6 +1072,10 @@ internal partial class AppMain
     {
         ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, obj_work.obj_3d.command_state);
         ObjDraw3DNNUserFunc(_gmDecoDrawFallFrontUserFunc, null, 0, obj_work.obj_3d.command_state);
+        // _PC sets NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 here and lets NN pick the shader
+        // (gmDeco.cpp:6700); the _WII arm below it uses the callback, which is our route
+        obj_work.obj_3d.material_cb_func = _gmDecoFallMaterialCallback;
+        obj_work.obj_3d.material_cb_param = null;
         gmDecoDraw(obj_work);
     }
 
@@ -983,6 +1083,8 @@ internal partial class AppMain
     {
         ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, obj_work.obj_3d.command_state);
         ObjDraw3DNNUserFunc(_gmDecoDrawFallBackUserFunc, null, 0, obj_work.obj_3d.command_state);
+        obj_work.obj_3d.material_cb_func = _gmDecoFallMaterialCallback;
+        obj_work.obj_3d.material_cb_param = null;
         gmDecoDraw(obj_work);
     }
 
@@ -1927,6 +2029,8 @@ internal partial class AppMain
                     decoPrimDrawStack.off_y = off_y;
                     decoPrimDrawStack.disp_flag = disp_flag;
                     ++gDecoTvxWork[index].stack_num;
+
+                    Debug.Assert(gDecoTvxWork[index].stack_num < GMD_DECO_PRIM_DRAW_STACK_NUM);
                     break;
                 }
             }

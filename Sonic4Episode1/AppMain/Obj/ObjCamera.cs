@@ -86,8 +86,8 @@ internal partial class AppMain
 
             obj_camera.scale = 0.078125f;  // This is about 5 blocks when it's wide
 
-            dy = g_obj.disp_height * obj_camera.scale * 0.5f;
-            dx = dy * obj_camera.aspect;
+            dx = g_obj.disp_height * obj_camera.scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
+            dy = dx / obj_camera.aspect;
 
             obj_camera.left = -dx;
             obj_camera.right = dx;
@@ -99,7 +99,7 @@ internal partial class AppMain
                 obj_camera.znear, obj_camera.zfar);
         }
 
-        nnMakeOrthoMatrix(obj_camera.prj_ortho_mtx, obj_camera.left, obj_camera.right, obj_camera.bottom, obj_camera.top, obj_camera.znear, obj_camera.zfar);
+        //nnMakeOrthoMatrix(obj_camera.prj_ortho_mtx, obj_camera.left, obj_camera.right, obj_camera.bottom, obj_camera.top, obj_camera.znear, obj_camera.zfar);
         switch (obj_camera.camera_type)
         {
             case OBE_CAMERA_TYPE.OBE_CAMERA_TYPE_TARGET_ROLL:
@@ -305,8 +305,8 @@ internal partial class AppMain
                     float dx, dy;
                     nnMakePerspectiveMatrix(obsCamera.prj_pers_mtx, obsCamera.fovy, obsCamera.aspect, obsCamera.znear, obsCamera.zfar);
 
-                    dy = g_obj.disp_height * obsCamera.scale * 0.5f;
-                    dx = dy * obsCamera.aspect;
+                    dx = g_obj.disp_height * obsCamera.scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
+                    dy = dx / obsCamera.aspect;
 
                     obsCamera.left = -dx;
                     obsCamera.right = dx;

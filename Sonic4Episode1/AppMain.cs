@@ -1041,7 +1041,7 @@ internal partial class AppMain
     private const int GMD_DECO_DATA_INDEX_MODEL_ZONE1_GLARE = 0;
     private const int GMD_DECO_DATA_INDEX_MODEL_ZONE1_GLARE_NUM = 1;
     public const int GMD_DECO_PRIM_DRAW_WORK_NUM = 16;
-    public const int GMD_DECO_PRIM_DRAW_STACK_NUM = 128;
+    public const int GMD_DECO_PRIM_DRAW_STACK_NUM = 192;
     private const int GMD_DECO_USE_MODEL_TYPE_NORMAL = 0;
     private const int GMD_DECO_USE_MODEL_TYPE_RENDER = 1;
     private const int GMD_DECO_USE_MODEL_TYPE_NUM = 2;
@@ -2899,7 +2899,7 @@ internal partial class AppMain
     public const int FX_DIV_1_2 = 524288;
     public const int FX_SQRT_SHIFT = 10;
     public const int FX_SQRT_1_2 = 512;
- 
+
     public const int DME_SND_BGM_PLAYER_IDX_MENU = 0;
     public const int DME_SND_BGM_PLAYER_IDX_TITLE = 1;
     public const int DME_SND_BGM_PLAYER_IDX_MAX = 2;
@@ -4825,7 +4825,7 @@ internal partial class AppMain
     private const float GMD_BOSS2_EFFECT_ROLLATTACK_DISP_ROT_Y = 90f;
     private const float GMD_BOSS2_EFFECT_ROLLATTACK_DISP_OFFSET_Z = 64f;
     private const float GMD_BOSS2_SCATTER_SPEED = 1f;
-   
+
     public const int SYD_NEXT_EVT_MAX = 8;
     public const int SYD_EVT_ARG_SIZE = 8;
     public const int SYD_OVL_CONTROL_NUM = 1;
@@ -6854,7 +6854,7 @@ internal partial class AppMain
     public const int IDA_D_STFRL_END_JP_ACT_TEX_TRYAGAIN = 0;
     public const int IDA_D_STFRL_END_JP_ACT_TEX_WIN_MSG = 1;
     public const int IDA_D_STFRL_END_JP_ACT_TEX_CONTI = 2;
-  
+
     public const int IDA_G_FIX_ACT_ICON_RING = 0;
     public const int IDA_G_FIX_ACT_NUM_A_100 = 1;
     public const int IDA_G_FIX_ACT_NUM_A_10 = 2;
@@ -14270,16 +14270,6 @@ internal partial class AppMain
     private static string[][] bgmLists;
     private static int m_iBGMPreparedLevel;
     private static Dictionary<string, Song> bgmPreloadedList;
-    private static readonly GSS_SND_SYS_MAIN_INFO gs_sound_sys_main_info;
-    private static readonly GSS_SND_SCB[] gs_sound_scb_heap;
-    private static readonly byte[] gs_sound_scb_heap_usage_flag;
-    private static readonly GSS_SND_SE_HANDLE[] gs_sound_se_handle_heap;
-    private static readonly byte[] gs_sound_se_handle_heap_usage_flag;
-    private static readonly GSS_SND_SE_HANDLE gs_sound_se_handle_error;
-    private static GSS_SND_SE_HANDLE[] gs_sound_se_handle_default;
-    private static readonly float[] gs_sound_volume;
-    private static Dictionary<string, SOUND_TABLE> sound_fx_list;
-    private static Dictionary<string, SOUND_TABLE> sound_bgm_list;
     private static int g_iCurrentCachedIndex;
     private static bool g_bSoundsPrecached;
     private static bool b_bPrioritySoundsLoaded;
@@ -15465,6 +15455,7 @@ internal partial class AppMain
     private static GMS_WATER_SURFACE_MGR g_water_surface_mgr;
     private static DMAP_WATER _dmap_water;
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceTcbProcPreDrawDT;
+    private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceTcbProcDrawDT;
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceUserFuncMatrixPush;
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceUserFuncPop;
     private static readonly AMS_RENDER_TARGET _gm_mapFar_render_work;
@@ -15783,7 +15774,7 @@ internal partial class AppMain
     private static readonly GMF_BOSS4_BODY_STATE_LEAVE_FUNC[] gm_boss4_body_state_leave_func_tbl;
     private static int gm_boss4_locking;
     public static AOS_SYS_GLOBAL g_ao_sys_global;
-  
+
     private static Pool<AOS_SPRITE> AOS_SPRITE_Pool;
     private static TaskProc aoActDrawTask_TaskProc;
     private static byte[] AmaMagicId;
@@ -16464,13 +16455,12 @@ internal partial class AppMain
     {
         for (int index1 = index; index1 < length; ++index1)
         {
-            if (data[index1] != null)
-                data[index1].Clear();
+            data[index1]?.Clear();
         }
     }
 
     public static void amSystemLog(string s)
     {
-        Console.WriteLine(s);
+        Debug.WriteLine(s);
     }
 }

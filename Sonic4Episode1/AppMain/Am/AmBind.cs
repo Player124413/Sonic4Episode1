@@ -60,6 +60,19 @@ internal partial class AppMain
         return null;
     }
 
+    // File order differs between builds (the WP7 water AMB has 8 entries where PC/360 have 11),
+    // so anything the C++ reaches by a hardcoded index has to be found by name here.
+    public static int amBindSearchBaseName(AMS_AMB_HEADER header, string basename)
+    {
+        for (int index = 0; index < header.file_num; ++index)
+        {
+            string name = System.IO.Path.GetFileNameWithoutExtension(header.files[index]);
+            if (string.Compare(name, basename, StringComparison.OrdinalIgnoreCase) == 0)
+                return index;
+        }
+        return -1;
+    }
+
     private static AmbChunk amBindSearchEx(
       AMS_AMB_HEADER header,
       string exname)

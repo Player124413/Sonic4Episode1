@@ -158,6 +158,8 @@ namespace mpp
         private static AlphaTestEffect m_alphaTestEffect;
         private static SkinnedEffect m_skinnedEffect;
         private static DualTextureEffect m_dualTextureEffect;
+        private static SpriteBatch m_blitBatch;
+        private static Effect m_overrideEffect;
         private static Viewport m_viewport;
         private static Matrix m_invScreen;
         private static Texture2D m_fakeTexture;
@@ -1264,6 +1266,8 @@ namespace mpp
                 else
                     setupEffect(m_basicEffect);
             }
+            if (m_overrideEffect != null)
+                effect = m_overrideEffect;
             if (useVB)
             {
                 VertexBuffer buffer2 = buffer1.Buffer;
@@ -1460,6 +1464,8 @@ namespace mpp
             }
             else
                 setupEffect(m_basicEffect);
+            if (m_overrideEffect != null)
+                effect = m_overrideEffect;
             foreach (EffectPass pass in effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
@@ -1981,6 +1987,108 @@ namespace mpp
                 m_textures[m_textureUnits[(int)m_activeTextureUnit].BoundTexture] = Texture2D.FromStream(m_graphicsDevice, stream);
                 m_textures[m_textureUnits[(int)m_activeTextureUnit].BoundTexture].Tag = true;
             }
+        }
+
+        public static GraphicsDevice mppglGetDevice()
+        {
+            return m_graphicsDevice;
+        }
+
+        // What setupEffect hands the stock effects; an override effect needs the same,
+        // PROJECTION_CORRECTION included, or it will not line up with the rest of the scene.
+        // What nnPutMaterialCore just bound. An override effect has its own samplers, so it has
+        // to be handed the textures the material set up rather than inheriting the units.
+        public static Texture2D mppglGetBoundTexture(int unit)
+        {
+            if (unit < 0 || unit >= m_textureUnits.Length)
+                return null;
+            if (!m_textureUnits[unit].Enabled)
+                return null;
+
+            Texture2D texture;
+            return m_textures.TryGetValue(m_textureUnits[unit].BoundTexture, out texture) ? texture : null;
+        }
+
+        public static Matrix mppglGetView()
+        {
+            return m_modelViewMatrixStack.Peek();
+        }
+
+        public static Matrix mppglGetProjection()
+        {
+            return m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
+        }
+
+        // the GL current colour, which nnPutMaterialCore sets from the material diffuse. The
+        // stock effects take it as DiffuseColor; an override effect has to ask for it.
+        public static void mppglGetDiffuse(out Vector3 color, out float alpha)
+        {
+            color = m_diffuseColor;
+            alpha = m_diffuseColorAlpha;
+        }
+
+        public static void mppglGetFog(out bool enabled, out Vector3 color, out float start, out float end)
+        {
+            enabled = m_fogEnabled && 9729 == m_fogMode;
+            color = m_fogColor;
+            start = m_fogStart;
+            end = m_fogEnd;
+        }
+
+        // Substitutes a custom Effect for the stock ones. Cleared at two boundaries, and it
+        // needs both: nnPutMaterial clears per material, and amDrawExecCommand clears per
+        // command. Per material alone leaks, because nnPutMaterial is called from exactly one
+        // place and primitives never reach it. Per draw call alone drops the effect partway
+        // through any material that issues more than one draw.
+        // Flushes first because the batcher merges draws across calls and its snapshotted
+        // context does not carry the override.
+        public static void mppglSetEffectOverride(Effect effect)
+        {
+            if (m_overrideEffect == effect)
+                return;
+            flushDrawArrays();
+            m_overrideEffect = effect;
+        }
+
+        // pending batched draws would otherwise land on whichever target we switch to
+        public static void mppglSetRenderTarget(RenderTarget2D target)
+        {
+            flushDrawArrays();
+            m_graphicsDevice.SetRenderTarget(target);
+            m_viewportSet = false;
+        }
+
+        // full-screen passes that need their own effect, drawn straight on the device;
+        // the wrapper's cached blend/depth/raster/sampler all self-heal by comparison next draw
+        public static void mppglDrawUserQuad(Effect effect, VertexPositionColorTexture[] verts)
+        {
+            flushDrawArrays();
+
+            m_graphicsDevice.BlendState = BlendState.Opaque;
+            m_graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
+            m_graphicsDevice.RasterizerState = RasterizerState.CullNone;
+            m_graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+            m_graphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+            m_graphicsDevice.SamplerStates[2] = SamplerState.LinearClamp;
+
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                m_graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, verts, 0, 2);
+            }
+
+            m_viewportSet = false;
+        }
+
+        public static void mppglBlit(Texture2D src, int width, int height)
+        {
+            flushDrawArrays();
+            if (m_blitBatch == null)
+                m_blitBatch = new SpriteBatch(m_graphicsDevice);
+            m_blitBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+            m_blitBatch.Draw(src, new Rectangle(0, 0, width, height), Color.White);
+            m_blitBatch.End();
+            m_viewportSet = false;
         }
 
         public static void glTexParameteri(uint target, uint pname, int param)
@@ -3284,7 +3392,8 @@ namespace mpp
                 {
                     AddressU = TextureAddressMode.Wrap,
                     AddressV = TextureAddressMode.Wrap,
-                    AddressW = TextureAddressMode.Wrap
+                    AddressW = TextureAddressMode.Wrap,
+                    Filter = TextureFilter.Anisotropic
                 };
 
                 this.MatrixStack = new Stack<Matrix>();

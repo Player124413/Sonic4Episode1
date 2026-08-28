@@ -1428,9 +1428,14 @@
             switch (proj_type)
             {
                 case 1:
-                    float top = (float)(g_obj.disp_height * (5.0 / 64.0) * 0.5);
-                    float right = top * cam.Aspect;
-                    nnMakeOrthoMatrix(nnsMatrix2, -right, right, -top, top, cam.ZNear, cam.ZFar);
+                    //float top = (float)(g_obj.disp_height * (5.0 / 64.0) * 0.5);
+                    //float right = top * cam.Aspect;
+                    //nnMakeOrthoMatrix(nnsMatrix2, -right, right, -top, top, cam.ZNear, cam.ZFar);
+                    float scale = 0.078125f;    // ワイド時に横5ブロック分がこれぐらい
+                    float dx, dy;
+                    dx = g_obj.disp_height * scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
+                    dy = dx / cam.Aspect;
+                    nnMakeOrthoMatrix(nnsMatrix2, -dx, dx, -dy, dy, cam.ZNear, cam.ZFar);
                     param3DnnSetCamera.prj_mtx.Assign(nnsMatrix2);
                     break;
                 default:

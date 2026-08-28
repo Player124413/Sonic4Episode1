@@ -149,15 +149,25 @@ internal partial class AppMain
       int pos_x,
       int pos_y)
     {
-        if ((eve_rec.flag & 1) != 0)
-            g_gm_main_system.map_fcol.left = (pos_x >> 12) + eve_rec.left * 2;
-        if ((eve_rec.flag & 4) != 0)
-            g_gm_main_system.map_fcol.right = (pos_x >> 12) + eve_rec.left * 2 + eve_rec.width * 2;
-        if ((eve_rec.flag & 2) != 0)
-            g_gm_main_system.map_fcol.top = (pos_y >> 12) + eve_rec.top * 2;
-        if ((eve_rec.flag & 8) == 0)
-            return;
-        g_gm_main_system.map_fcol.bottom = (pos_y >> 12) + eve_rec.top * 2 + eve_rec.height * 2;
+        if ((eve_rec.flag & GMD_GMK_SCR_LMT_RELEASE_LEFT) != 0)
+        {
+            g_gm_main_system.map_fcol.left = (pos_x >> FX32_SHIFT) + (int)(eve_rec.left) * 2;
+        }
+
+        if ((eve_rec.flag & GMD_GMK_SCR_LMT_RELEASE_RIGHT) != 0)
+        {
+            g_gm_main_system.map_fcol.right = (pos_x >> FX32_SHIFT) + (int)(eve_rec.left) * 2 + (int)(eve_rec.width) * 2;
+        }
+
+        if ((eve_rec.flag & GMD_GMK_SCR_LMT_RELEASE_TOP) != 0)
+        {
+            g_gm_main_system.map_fcol.top = (pos_y >> FX32_SHIFT) + (int)(eve_rec.top) * 2;
+        }
+
+        if ((eve_rec.flag & GMD_GMK_SCR_LMT_RELEASE_BOTTOM) != 0)
+        {
+            g_gm_main_system.map_fcol.bottom = (pos_y >> FX32_SHIFT) + (int)(eve_rec.top) * 2 + (int)(eve_rec.height) * 2;
+        }
     }
 
     private static void gmGmkCamScrLimitSetting(OBS_OBJECT_WORK obj_work)
@@ -175,7 +185,7 @@ internal partial class AppMain
         int lcd_width = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_WIDTH / 2) * obsCamera.scale) >> FX32_SHIFT;
         int lcd_height = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_HEIGHT / 2) * obsCamera.scale) >> FX32_SHIFT;
         byte num7 = 1;
-        if ((Convert.ToInt32(obj_work.user_flag) & 1) != 0 && g_gm_main_system.map_fcol.left != gmkCamScrLimitWork.limit_setting.limit_rect[0])
+        if (((obj_work.user_flag) & 1) != 0 && g_gm_main_system.map_fcol.left != gmkCamScrLimitWork.limit_setting.limit_rect[0])
         {
             int num8 = num1 - lcd_width;
             if (num8 > gmkCamScrLimitWork.limit_setting.limit_rect[0])
@@ -193,7 +203,7 @@ internal partial class AppMain
             }
             num7 = 0;
         }
-        if ((Convert.ToInt32(obj_work.user_flag) & 4) != 0 && g_gm_main_system.map_fcol.right != gmkCamScrLimitWork.limit_setting.limit_rect[2])
+        if (((obj_work.user_flag) & 4) != 0 && g_gm_main_system.map_fcol.right != gmkCamScrLimitWork.limit_setting.limit_rect[2])
         {
             int num8 = num1 + lcd_width;
             if (num8 < gmkCamScrLimitWork.limit_setting.limit_rect[2])
@@ -211,7 +221,7 @@ internal partial class AppMain
             }
             num7 = 0;
         }
-        if ((Convert.ToInt32(obj_work.user_flag) & 2) != 0 && g_gm_main_system.map_fcol.top != gmkCamScrLimitWork.limit_setting.limit_rect[1])
+        if (((obj_work.user_flag) & 2) != 0 && g_gm_main_system.map_fcol.top != gmkCamScrLimitWork.limit_setting.limit_rect[1])
         {
             int num8 = num2 - lcd_height;
             if (num8 > gmkCamScrLimitWork.limit_setting.limit_rect[1])
@@ -229,7 +239,7 @@ internal partial class AppMain
             }
             num7 = 0;
         }
-        if ((Convert.ToInt32(obj_work.user_flag) & 8) != 0 && g_gm_main_system.map_fcol.bottom != gmkCamScrLimitWork.limit_setting.limit_rect[3])
+        if (((obj_work.user_flag) & 8) != 0 && g_gm_main_system.map_fcol.bottom != gmkCamScrLimitWork.limit_setting.limit_rect[3])
         {
             int num8 = num2 + lcd_height;
             if (num8 < gmkCamScrLimitWork.limit_setting.limit_rect[3])

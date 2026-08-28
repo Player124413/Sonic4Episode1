@@ -10,5 +10,6 @@ internal partial class AppMain
         public int height;
         public float aspect;
         public RenderTarget2D target;
+        public uint tex_name;
     }
 }

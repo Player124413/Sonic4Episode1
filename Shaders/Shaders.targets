@@ -1,0 +1,66 @@
+<Project>
+
+  <!--
+    Compiles Shaders\*.fx to D3D9 effect blobs and copies them next to the game as
+    Content\Shaders\*.fxb.
+
+    FNA's ContentManager resolves Content.Load<Effect>("Shaders\name") to a raw .fxb:
+    effectExtensions in Submodules/FNA/src/Content/ContentManager.cs:98 lists ".fxb", and
+    the loader falls through to new Effect(device, data) at :362. So no .xnb wrapper and
+    no MGCB is needed for the FNA-family backends.
+
+    MonoGame has no such fallthrough and needs MGCB-built .xnb; that path is not wired up
+    yet, so the Android backend will log a shader load failure and fall back.
+  -->
+
+  <PropertyGroup>
+    <ShadersDir>$(MSBuildThisFileDirectory)</ShadersDir>
+    <ShaderOutDir>$(ShadersDir)FNA\</ShaderOutDir>
+    <!-- SM2 keeps us inside Reach; the effects are small enough to fit ps_2_0 -->
+    <ShaderModel Condition="'$(ShaderModel)' == ''">SM2</ShaderModel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ShaderSource Include="$(ShadersDir)*.fx" />
+  </ItemGroup>
+
+  <Target Name="LocateFxc">
+    <ItemGroup>
+      <FxcCandidate Include="$(MSBuildProgramFiles32)\Windows Kits\10\bin\*\x64\fxc.exe" />
+      <FxcCandidate Include="$(ProgramFiles)\Windows Kits\10\bin\*\x64\fxc.exe" />
+    </ItemGroup>
+    <PropertyGroup>
+      <!-- item batching in a property takes the last match, i.e. the newest SDK -->
+      <FxcPath>%(FxcCandidate.FullPath)</FxcPath>
+    </PropertyGroup>
+    <Message Condition="'$(FxcPath)' != ''" Importance="low" Text="Using fxc: $(FxcPath)" />
+    <Warning Condition="'$(FxcPath)' == ''" Text="fxc.exe not found; shaders will not be rebuilt. Install the Windows SDK if you need to change them." />
+  </Target>
+
+  <!-- the condition belongs on the Exec, not the target: MSBuild evaluates a target's
+       Condition before running DependsOnTargets, so gating here would skip LocateFxc -->
+  <Target Name="CompileShaders"
+          DependsOnTargets="LocateFxc"
+          BeforeTargets="BeforeBuild"
+          Inputs="@(ShaderSource);$(ShadersDir)Macros.fxh"
+          Outputs="@(ShaderSource->'$(ShaderOutDir)%(Filename).fxb')">
+    <MakeDir Condition="'$(FxcPath)' != ''" Directories="$(ShaderOutDir)" />
+    <Exec Condition="'$(FxcPath)' != ''"
+          Command="&quot;$(FxcPath)&quot; /nologo /T fx_2_0 /D $(ShaderModel)=1 /Fo &quot;$(ShaderOutDir)%(ShaderSource.Filename).fxb&quot; &quot;%(ShaderSource.FullPath)&quot;" />
+  </Target>
+
+  <!-- Globbed inside a target, after CompileShaders has run. At project-evaluation time a
+       newly added shader has no .fxb yet, so a plain ItemGroup here would silently skip it
+       until the second build. -->
+  <Target Name="CollectShaderContent" AfterTargets="CompileShaders" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <ShaderBlob Include="$(ShaderOutDir)*.fxb" />
+      <!-- metadata is qualified with the item name; a bare %(Filename) here batches over every
+           existing Content item and drags unrelated files into Content\Shaders -->
+      <Content Include="@(ShaderBlob)"
+               Link="Content\Shaders\%(ShaderBlob.Filename)%(ShaderBlob.Extension)"
+               CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>

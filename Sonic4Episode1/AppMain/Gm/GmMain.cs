@@ -7,10 +7,10 @@ internal partial class AppMain
 {
     public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f;
     public const float GMD_CAMERA_UP_SCALE_MAX = 0.3371917f;
-#if true
+#if false
     public const float GMD_CAMERA_SCALE = (0.078125f * 2.19089f * GMD_OBJ_DRAW_SCALE);
 #else
-    public const float GMD_CAMERA_SCALE = 0.6743833f;
+    public const float GMD_CAMERA_SCALE = 0.5469176375f;
 #endif
 
     public const short GMD_OBJ_CLIP_LCD_X = 383;
@@ -504,6 +504,11 @@ internal partial class AppMain
         // GC.Collect();
         // GC.WaitForPendingFinalizers();
         // GC.Collect();
+
+#if NET9_0_OR_GREATER
+        GC.Collect(2, GCCollectionMode.Aggressive, true, true);
+#else
+#endif
     }
 
     private static void gmMainDataBuildWait(MTS_TASK_TCB tcb)

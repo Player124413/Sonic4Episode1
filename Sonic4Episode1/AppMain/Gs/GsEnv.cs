@@ -6,45 +6,45 @@ internal partial class AppMain
     {
         g_gs_env_region = GsEnvGetRegionIphone();
         g_gs_env_language = GsEnvGetLanguageIphone();
-        switch (g_gs_env_language)
-        {
-            case 0:
-                Sonic4ep1.Strings.Culture = new CultureInfo("ja-JP");
-                break;
-            case 1:
-                Sonic4ep1.Strings.Culture = new CultureInfo("en-US");
-                break;
-            case 2:
-                Sonic4ep1.Strings.Culture = new CultureInfo("fr-FR");
-                break;
-            case 3:
-                Sonic4ep1.Strings.Culture = new CultureInfo("it-IT");
-                break;
-            case 4:
-                Sonic4ep1.Strings.Culture = new CultureInfo("de-DE");
-                break;
-            case 5:
-                Sonic4ep1.Strings.Culture = new CultureInfo("es-ES");
-                break;
-            case 6:
-                Sonic4ep1.Strings.Culture = new CultureInfo("fi-FI");
-                break;
-            case 7:
-                Sonic4ep1.Strings.Culture = new CultureInfo("pt-BR");
-                break;
-            case 8:
-                Sonic4ep1.Strings.Culture = new CultureInfo("ru-RU");
-                break;
-            case 9:
-                Sonic4ep1.Strings.Culture = new CultureInfo("zh-CN");
-                break;
-            case 10:
-                Sonic4ep1.Strings.Culture = new CultureInfo("zh-TW");
-                break;
-            default:
-                Sonic4ep1.Strings.Culture = new CultureInfo("en");
-                break;
-        }
+        //switch (g_gs_env_language)
+        //{
+        //    case 0:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("ja-JP");
+        //        break;
+        //    case 1:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("en-US");
+        //        break;
+        //    case 2:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("fr-FR");
+        //        break;
+        //    case 3:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("it-IT");
+        //        break;
+        //    case 4:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("de-DE");
+        //        break;
+        //    case 5:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("es-ES");
+        //        break;
+        //    case 6:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("fi-FI");
+        //        break;
+        //    case 7:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("pt-BR");
+        //        break;
+        //    case 8:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("ru-RU");
+        //        break;
+        //    case 9:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("zh-CN");
+        //        break;
+        //    case 10:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("zh-TW");
+        //        break;
+        //    default:
+        //        Sonic4ep1.Strings.Culture = new CultureInfo("en");
+        //        break;
+        //}
     }
 
     private static GSE_REGION GsEnvGetRegion()

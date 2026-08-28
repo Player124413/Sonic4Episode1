@@ -7959,6 +7959,8 @@ internal partial class AppMain
 
     private static int nnPutMaterial(NNS_DRAWCALLBACK_VAL val)
     {
+        // every material starts on the stock effects; a callback opts in for its own meshset
+        mpp.OpenGL.mppglSetEffectOverride(null);
         return nngMaterialCallbackFunc != null ? nngMaterialCallbackFunc(val) : nnPutMaterialCore(val);
     }
 

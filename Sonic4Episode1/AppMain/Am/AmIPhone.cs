@@ -18,7 +18,8 @@ internal partial class AppMain
 
         float width = bbWidth;
         float height = bbHeight;
-        amRenderInit();
+        amRenderInit(bbWidth, bbHeight);
+        amRenderCreateWork(bbWidth, bbHeight);
         NNS_MATRIX mtx = GlobalPool<NNS_MATRIX>.Alloc();
         NNS_VECTOR nnsVector = new NNS_VECTOR(0.0f, 0.0f, -1f);
         NNS_RGBA nnsRgba = new NNS_RGBA(1f, 1f, 1f, 1f);
@@ -65,7 +66,6 @@ internal partial class AppMain
         //}
 
 
-        amRenderInit();
         GlobalPool<NNS_MATRIX>.Release(mtx);
     }
 

@@ -559,7 +559,7 @@
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work;
         ObjObjectCopyAction3dNNModel(obj_work, gm_gmk_slot_obj_3d_list[3], gmsEnemy3DWork.obj_3d);
-        ObjAction3dNNMaterialMotionLoad(gmsEnemy3DWork.obj_3d, 0, null, null, 0, (AMS_AMB_HEADER)ObjDataGet(875).pData, 1, 1);
+        ObjAction3dNNMaterialMotionLoad(gmsEnemy3DWork.obj_3d, 0, null, null, 0, (AMS_AMB_HEADER)ObjDataGet(GMD_DWORK_NO_GMK_SLOT_MAT).pData, 1, 1);
         ObjDrawAction3dActionSet3DNNMaterial(gmsEnemy3DWork.obj_3d, 0);
         obj_work.pos.z = -135168;
         obj_work.move_flag |= 256U;
@@ -574,13 +574,13 @@
 
     private static void GmGmkSlotBuild()
     {
-        gm_gmk_slot_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(873), GmGameDatGetGimmickData(874), 0U);
+        gm_gmk_slot_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(GMD_DWORK_NO_GMK_SLOT_MODEL), GmGameDatGetGimmickData(GMD_DWORK_NO_GMK_SLOT_TEX), 0U);
         slot_start_call = 0;
     }
 
     private static void GmGmkSlotFlush()
     {
-        AMS_AMB_HEADER gimmickData = GmGameDatGetGimmickData(873);
+        AMS_AMB_HEADER gimmickData = GmGameDatGetGimmickData(GMD_DWORK_NO_GMK_SLOT_MODEL);
         GmGameDBuildRegFlushModel(gm_gmk_slot_obj_3d_list, gimmickData.file_num);
     }
 

@@ -36,8 +36,7 @@ namespace Sonic4Episode1.Android
         {
             _dialog?.Hide();
 
-            var packLocation = Path.Combine(_assetPackManager.GetPackLocation("content").Path(), "assets");
-            DirectoryRoot.Root = packLocation;
+            DirectoryRoot.Root = Path.Combine(_assetPackManager.GetPackLocation("content").Path(), "assets");
             _game.Run();
         }
 
@@ -63,7 +62,7 @@ namespace Sonic4Episode1.Android
             var assetsFolderPath = assetPackPath?.AssetsPath() ?? null;
             if (assetsFolderPath is null)
             {
-                var result = await _assetPackManager.Fetch(new string[] { "content" })
+                var result = await _assetPackManager.Fetch(["content"])
                      .AsAsync<AssetPackStates>();
             }
             else

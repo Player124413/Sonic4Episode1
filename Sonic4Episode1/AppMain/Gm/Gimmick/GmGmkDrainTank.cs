@@ -98,93 +98,154 @@
 
     private static void gmGmkDrainTankInInit(OBS_OBJECT_WORK obj_work)
     {
-        GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)obj_work;
+        GMS_ENEMY_3D_WORK gimmick_work = (GMS_ENEMY_3D_WORK)obj_work;
         ObjObjectFieldRectSet(obj_work, -16, 0, 0, 14);
-        gmsEnemy3DWork.ene_com.col_work.obj_col.obj = gmsEnemy3DWork.ene_com.obj_work;
-        gmsEnemy3DWork.ene_com.col_work.obj_col.width = 16;
-        gmsEnemy3DWork.ene_com.col_work.obj_col.height = 32;
-        gmsEnemy3DWork.ene_com.col_work.obj_col.ofst_x = -16;
-        gmsEnemy3DWork.ene_com.col_work.obj_col.ofst_y = -32;
+        gimmick_work.ene_com.col_work.obj_col.obj = gimmick_work.ene_com.obj_work;
+        gimmick_work.ene_com.col_work.obj_col.width = 16;
+        gimmick_work.ene_com.col_work.obj_col.height = 32;
+        gimmick_work.ene_com.col_work.obj_col.ofst_x = -16;
+        gimmick_work.ene_com.col_work.obj_col.ofst_y = -32;
         obj_work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkDrainTankDrawFuncIn);
         obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkDrainTankInMainReady);
-        obj_work.disp_flag |= 4194304U;
-        gmsEnemy3DWork.obj_3d.command_state = 8U;
-        obj_work.pos.z = 1441792;
+        obj_work.disp_flag |= OBD_DISP_NODIRFLIP;
+        gimmick_work.obj_3d.command_state = OBD_DRAW_CMD_STATE_POST_WATER;
+        obj_work.pos.z = GMD_OBJ_DEFAULT_POS_Z_N_FRONT + 32 * FX32_ONE * 2;
     }
 
     private static void gmGmkDrainTankOutInit(OBS_OBJECT_WORK obj_work)
     {
-        GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)obj_work;
+        GMS_ENEMY_3D_WORK gimmick_work = (GMS_ENEMY_3D_WORK)obj_work;
         ObjObjectFieldRectSet(obj_work, 0, 0, 32, 16);
         obj_work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkDrainTankDrawFuncOut);
         gmGmkDrainTankOutChangeModeReady(obj_work);
         obj_work.disp_flag |= 4194304U;
         obj_work.move_flag |= 128U;
         obj_work.flag |= 16U;
-        gmsEnemy3DWork.obj_3d.command_state = 8U;
+        gimmick_work.obj_3d.command_state = 8U;
         obj_work.pos.z = 1441792;
-        GmWaterSurfaceRequestChangeWaterLevel((ushort)FX_FX32_TO_F32(obj_work.pos.y - 196608), 0, false);
+        GmWaterSurfaceRequestChangeWaterLevel((ushort)FX_FX32_TO_F32(obj_work.pos.y - GMD_GMK_DRAIN_TANK_OFFSET_WATER_LEVEL), 0, false);
         GmWaterSurfaceSetFlagEnableRef(false);
         mtTaskChangeTcbDestructor(obj_work.tcb, new GSF_TASK_PROCEDURE(gmGmkDrainTankTcbDestOut));
     }
 
     private static void gmGmkDrainTankSplashInit(OBS_OBJECT_WORK obj_work)
     {
-        obj_work.disp_flag |= 4194304U;
-        obj_work.move_flag = 8448U;
+        obj_work.disp_flag |= OBD_DISP_NODIRFLIP;
+        obj_work.move_flag = OBD_MOVE_NOMOVE | OBD_MOVE_NOCOL;
+
         ObjDrawObjectActionSet3DNNMaterial(obj_work, 0);
-        obj_work.pos.z = 262144;
-        obj_work.disp_flag |= 134217728U;
-        obj_work.obj_3d.drawflag |= 8388608U;
+
+        obj_work.pos.z = GMD_OBJ_GIMMICK_POS_Z + 64 * FX32_ONE;
+
+        obj_work.disp_flag |= OBD_DISP_DRAWSTATE;
+        obj_work.obj_3d.drawflag |= NND_DRAWOBJ_MATCTRL_ALPHA;
         obj_work.obj_3d.draw_state.alpha.alpha = 1f;
-        obj_work.user_timer = 60;
+        obj_work.user_timer = GMD_GMK_DRAINTANK_SPLASH_ALPHA_TIME;
         obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkDrainTankSplashMainFunc);
         obj_work.ppMove = null;
-        GMS_EFFECT_3DES_WORK gmsEffect3DesWork1 = GmEfctZoneEsCreate(obj_work, 2, 34);
-        gmsEffect3DesWork1.efct_com.obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkDrainTankSplashEffectMain);
-        gmsEffect3DesWork1.efct_com.obj_work.move_flag = 384U;
-        gmsEffect3DesWork1.efct_com.obj_work.pos.y += -131072;
-        gmsEffect3DesWork1.efct_com.obj_work.pos.z = obj_work.pos.z + 131072;
-        gmsEffect3DesWork1.efct_com.obj_work.spd.x = 49152;
-        gmsEffect3DesWork1.efct_com.obj_work.spd.y = 12288;
-        gmsEffect3DesWork1.efct_com.obj_work.spd_add.x = -1376;
-        gmsEffect3DesWork1.efct_com.obj_work.spd_add.y = 0;
-        GMS_EFFECT_3DES_WORK gmsEffect3DesWork2 = GmEfctZoneEsCreate(obj_work, 2, 35);
-        gmsEffect3DesWork2.efct_com.obj_work.pos.y += -65536;
-        gmsEffect3DesWork2.efct_com.obj_work.pos.z = obj_work.pos.z + 131072;
+
+        GMS_EFFECT_3DES_WORK effect_work_water = GmEfctZoneEsCreate(obj_work, GSD_MAIN_ZONE_TYPE_3, GME_EFCT_Z03_IDX_WATER);
+        effect_work_water.efct_com.obj_work.ppFunc = gmGmkDrainTankSplashEffectMain;
+        effect_work_water.efct_com.obj_work.move_flag = OBD_MOVE_NOCOL | OBD_MOVE_FALL;
+        effect_work_water.efct_com.obj_work.pos.y += GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_OFFSET_Y;
+        effect_work_water.efct_com.obj_work.pos.z = obj_work.pos.z + GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_OFFSET_Z;
+        effect_work_water.efct_com.obj_work.spd.x = GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_SPEED_X;
+        effect_work_water.efct_com.obj_work.spd.y = GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_SPEED_Y;
+        effect_work_water.efct_com.obj_work.spd_add.x = GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_SPEED_ADD_X;
+        effect_work_water.efct_com.obj_work.spd_add.y = GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_SPEED_ADD_Y;
+
+        GMS_EFFECT_3DES_WORK effect_work_water_2 = GmEfctZoneEsCreate(obj_work, GSD_MAIN_ZONE_TYPE_3, GME_EFCT_Z03_IDX_WATER_02);
+        effect_work_water_2.efct_com.obj_work.pos.y += GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_2_OFFSET_Y;
+        effect_work_water_2.efct_com.obj_work.pos.z = obj_work.pos.z + GMD_GMK_DRAIN_TANK_SPLASH_EFFECT_2_OFFSET_Z;
     }
 
     private static void gmGmkDrainTankDrawFuncIn(OBS_OBJECT_WORK obj_work)
     {
-        ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, 8U);
+        ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, NNE_PROJECTION_TYPE_ORTHO, OBD_DRAW_CMD_STATE_POST_WATER);
         ObjDrawActionSummary(obj_work);
     }
 
     private static void gmGmkDrainTankDrawFuncOut(OBS_OBJECT_WORK obj_work)
     {
-        if (((int)obj_work.disp_flag & 32) == 0)
+        if (((int)obj_work.disp_flag & OBD_DISP_NODISP) == 0)
         {
-            GMS_GMK_DRAIN_TANK_OUT_WORK drainTankOutWork = (GMS_GMK_DRAIN_TANK_OUT_WORK)obj_work;
-            int num1 = ((-(int)FX_FX32_TO_F32(drainTankOutWork.base_pos_y) - 64) / 64 - 1) * 64;
-            int num2 = ((int)FX_FX32_TO_F32(drainTankOutWork.base_pos_x) - 96) / 64 * 64;
-            int num3 = num2 - 152;
-            int num4 = num1 + 96;
-            int num5 = num2 + 64;
-            ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, 9U);
-            GmWaterSurfaceDrawNoWaterField(FX_FX32_TO_F32(obj_work.pos.x), -FX_FX32_TO_F32(obj_work.pos.y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT, FX_FX32_TO_F32(obj_work.pos.x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, -FX_FX32_TO_F32(obj_work.pos.y) - GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT);
-            GmWaterSurfaceDrawNoWaterField(num2, -FX_FX32_TO_F32(drainTankOutWork.base_pos_y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT, FX_FX32_TO_F32(drainTankOutWork.base_pos_x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, num4);
-            GmWaterSurfaceDrawNoWaterField(FX_FX32_TO_F32(drainTankOutWork.base_pos_x) - GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, num1, FX_FX32_TO_F32(drainTankOutWork.base_pos_x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, num1 - GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT);
-            GmWaterSurfaceDrawNoWaterField(num3 - GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, -FX_FX32_TO_F32(drainTankOutWork.base_pos_y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT, num3, num1);
-            GmWaterSurfaceDrawNoWaterField(num5, num4, num5 + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH, num1);
+            GMS_GMK_DRAIN_TANK_OUT_WORK out_work = (GMS_GMK_DRAIN_TANK_OUT_WORK)obj_work;//下座標（出口の座標から逆算。mapブロックサイズ）
+            int bottom = -(int)FX_FX32_TO_F32(out_work.base_pos_y) - GMD_GMK_DRAIN_TANK_WATER_CLIP_B;
+            bottom /= GMD_GMK_DRAIN_TANK_MAP_SIZE;
+            bottom = (bottom - 1) * GMD_GMK_DRAIN_TANK_MAP_SIZE;
+
+            //右座標（出口の座標から逆算。mapブロックサイズ）
+            int right = (int)FX_FX32_TO_F32(out_work.base_pos_x) - GMD_GMK_DRAIN_TANK_WATER_CLIP_R;
+            right /= GMD_GMK_DRAIN_TANK_MAP_SIZE;
+            right = (right) * GMD_GMK_DRAIN_TANK_MAP_SIZE;
+
+            //左座標（出口の座標から逆算。mapブロックサイズ）
+            int left = right - GMD_GMK_DRAIN_TANK_WATER_CLIP_L;
+
+            //出口付近の上座標
+            int top_out = bottom + GMD_GMK_DRAIN_TANK_WATER_CLIP_OUT_HEIGHT;
+
+            //出口付近の左座標
+            int right_out = right + GMD_GMK_DRAIN_TANK_WATER_CLIP_OUT_WIDTH;
+
+
+
+            //カメラ
+            ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, NNE_PROJECTION_TYPE_ORTHO, OBD_DRAW_CMD_STATE_PRE_WATER);
+
+            //出口オブジェクトより右
+            GmWaterSurfaceDrawNoWaterField(
+                FX_FX32_TO_F32(obj_work.pos.x),
+                (float)(-FX_FX32_TO_F32(obj_work.pos.y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT),
+                (float)(FX_FX32_TO_F32(obj_work.pos.x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)(-FX_FX32_TO_F32(obj_work.pos.y) - GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT)
+                );
+
+            //出口より右上	
+            GmWaterSurfaceDrawNoWaterField(
+                (float)right,
+                (float)(-FX_FX32_TO_F32(out_work.base_pos_y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT),
+                (float)(FX_FX32_TO_F32(out_work.base_pos_x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)top_out
+                );
+
+            //装置より下
+            GmWaterSurfaceDrawNoWaterField(
+                (float)(FX_FX32_TO_F32(out_work.base_pos_x) - GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)bottom,
+                (float)(FX_FX32_TO_F32(out_work.base_pos_x) + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)(bottom - GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT)
+                );
+
+            //装置より左
+            GmWaterSurfaceDrawNoWaterField(
+                (float)(left - GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)(-FX_FX32_TO_F32(out_work.base_pos_y) + GMD_GMK_DRAIN_TANK_DRAW_WATER_HEIGHT),
+                (float)left,
+                (float)bottom
+                );
+
+            //装置より右
+            GmWaterSurfaceDrawNoWaterField(
+                (float)right_out,
+                (float)top_out,
+                (float)(right_out + GMD_GMK_DRAIN_TANK_DRAW_WATER_WIDTH),
+                (float)bottom
+                );
         }
-        ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, 8U);
+
+        //-------------------------------------------
+        //オブジェクトを描画
+        //-------------------------------------------
+        //カメラ
+        ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, NNE_PROJECTION_TYPE_ORTHO, OBD_DRAW_CMD_STATE_POST_WATER);
         ObjDrawActionSummary(obj_work);
     }
 
     private static void gmGmkDrainTankTcbDestOut(MTS_TASK_TCB tcb)
     {
         GmWaterSurfaceSetFlagEnableRef(true);
-        g_gm_main_system.game_flag &= 4294959103U;
+        g_gm_main_system.game_flag &= ~GMD_GAME_FLAG_WATER_LEVEL_EFCT_OFF;
         GmEnemyDefaultExit(tcb);
     }
 
@@ -209,7 +270,7 @@
         GMS_PLAYER_WORK gmsPlayerWork = g_gm_main_system.ply_work[0];
         if (((int)gmsPlayerWork.player_flag & 1024) != 0)
             return;
-        if (gmGmkDrainTankInCheckDeleteTask(obj_work, 1843200, 1228800))
+        if (gmGmkDrainTankInCheckDeleteTask(obj_work, GMD_GMK_DRAIN_TANK_DELETE_TASK_DISTANCE_X_NORMAL, GMD_GMK_DRAIN_TANK_DELETE_TASK_DISTANCE_Y_NORMAL))
         {
             gmGmkDrainTankInRequestDeleteTask(obj_work);
         }

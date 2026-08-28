@@ -26259,6 +26259,7 @@ internal partial class AppMain
         g_water_surface_mgr = null;
         _dmap_water = null;
         _gmWaterSurfaceTcbProcPreDrawDT = new OBF_DRAW_USER_DT_FUNC(gmWaterSurfaceTcbProcPreDrawDT);
+        _gmWaterSurfaceTcbProcDrawDT = new OBF_DRAW_USER_DT_FUNC(gmWaterSurfaceTcbProcDrawDT);
         _gmWaterSurfaceUserFuncMatrixPush = new OBF_DRAW_USER_DT_FUNC(gmWaterSurfaceUserFuncMatrixPush);
         _gmWaterSurfaceUserFuncPop = new OBF_DRAW_USER_DT_FUNC(gmWaterSurfaceUserFuncPop);
         _gm_mapFar_render_work = new AMS_RENDER_TARGET();

@@ -3,11 +3,16 @@ using System.Globalization;
 #if WASM
 using System.Text.Json.Serialization;
 #endif
+
+#if !AOT
 using System.Xml.Serialization;
+#endif
 
 namespace gs
 {
+#if !AOT
     [XmlRoot("Sonic4Save")]
+#endif
     internal class Sonic4Save
     {
         public Sonic4Save()
@@ -29,37 +34,102 @@ namespace gs
                 SpecialStages[i] = new SpecialStage();
             }
         }
-
-        [XmlElement("System")] public System System { get; set; }
-        [XmlElement("Options")] public gsOptions Options { get; set; }
-        [XmlElement("Remaster")] public Remaster Remaster { get; set; }
-        [XmlElement("Debug")] public Debug Debug { get; set; }
-        [XmlElement("Stage")] public Stage[] Stages { get; set; }
-        [XmlElement("SpecialStage")] public SpecialStage[] SpecialStages { get; set; }
+#if !AOT
+        [XmlElement("System")]
+#endif
+        public System System { get; set; }
+#if !AOT
+        [XmlElement("Options")]
+#endif
+        public gsOptions Options { get; set; }
+#if !AOT
+        [XmlElement("Remaster")]
+#endif
+        public Remaster Remaster { get; set; }
+#if !AOT
+        [XmlElement("Debug")]
+#endif
+        public Debug Debug { get; set; }
+#if !AOT
+        [XmlElement("Stage")]
+#endif
+        public Stage[] Stages { get; set; }
+#if !AOT
+        [XmlElement("SpecialStage")]
+#endif
+        public SpecialStage[] SpecialStages { get; set; }
     }
 
     internal class System
     {
-        [XmlElement("Lives")] public uint Lives { get; set; } = 3;
-        [XmlElement("Killed")] public uint Killed { get; set; } = 0;
-        [XmlElement("ClearCount")] public uint ClearCount { get; set; } = 0;
-        [XmlElement("Announce")] public Announce Announce { get; set; } = new Announce();
+#if !AOT
+        [XmlElement("Lives")]
+#endif
+        public uint Lives { get; set; } = 3;
+#if !AOT
+        [XmlElement("Killed")] 
+#endif
+        public uint Killed { get; set; } = 0;
+#if !AOT
+        [XmlElement("ClearCount")]
+#endif
+        public uint ClearCount { get; set; } = 0;
+#if !AOT
+        [XmlElement("Announce")] 
+#endif
+        public Announce Announce { get; set; } = new Announce();
     }
 
     internal class Announce
     {
-        [XmlElement("ZoneSelect")] public bool ZoneSelect { get; set; }
-        [XmlElement("Zone1Boss")] public bool Zone1Boss { get; set; }
-        [XmlElement("Zone2Boss")] public bool Zone2Boss { get; set; }
-        [XmlElement("Zone3Boss")] public bool Zone3Boss { get; set; }
-        [XmlElement("Zone4Boss")] public bool Zone4Boss { get; set; }
-        [XmlElement("FinalZone")] public bool FinalZone { get; set; }
-        [XmlElement("SpecialStage")] public bool SpecialStage { get; set; }
-        [XmlElement("SuperSonic")] public bool SuperSonic { get; set; }
-        [XmlElement("SpecialStageTilt")] public bool SpecialStageTiltControls { get; set; }
-        [XmlElement("SpecialStageFlick")] public bool SpecialStageFlickControls { get; set; }
-        [XmlElement("MinecartTiltControls")] public bool MinecartTiltControls { get; set; }
-        [XmlElement("MinecartFlickControls")] public bool MinecartFlickControls { get; set; }
+#if !AOT
+        [XmlElement("ZoneSelect")]
+#endif
+        public bool ZoneSelect { get; set; }
+#if !AOT
+        [XmlElement("Zone1Boss")]
+#endif
+        public bool Zone1Boss { get; set; }
+#if !AOT
+        [XmlElement("Zone2Boss")] 
+#endif
+        public bool Zone2Boss { get; set; }
+#if !AOT
+        [XmlElement("Zone3Boss")] 
+#endif
+        public bool Zone3Boss { get; set; }
+#if !AOT
+        [XmlElement("Zone4Boss")]
+#endif
+        public bool Zone4Boss { get; set; }
+#if !AOT
+        [XmlElement("FinalZone")] 
+#endif
+        public bool FinalZone { get; set; }
+#if !AOT
+        [XmlElement("SpecialStage")] 
+#endif
+        public bool SpecialStage { get; set; }
+#if !AOT
+        [XmlElement("SuperSonic")] 
+#endif
+        public bool SuperSonic { get; set; }
+#if !AOT
+        [XmlElement("SpecialStageTilt")]
+#endif
+        public bool SpecialStageTiltControls { get; set; }
+#if !AOT
+        [XmlElement("SpecialStageFlick")] 
+#endif
+        public bool SpecialStageFlickControls { get; set; }
+#if !AOT
+        [XmlElement("MinecartTiltControls")]
+#endif
+        public bool MinecartTiltControls { get; set; }
+#if !AOT
+        [XmlElement("MinecartFlickControls")] 
+#endif
+        public bool MinecartFlickControls { get; set; }
     }
 
     internal class Stage
@@ -73,24 +143,47 @@ namespace gs
                 StageRecords[i] = new StageRecord();
             }
         }
-
-        [XmlAttribute("New")] public bool New { get; set; }
-        [XmlAttribute("HighScoreSuperSonic")] public bool HighScoreSuperSonic { get; set; }
-        [XmlAttribute("BestTimeSuperSonic")] public bool BestTimeSuperSonic { get; set; }
-        [XmlAttribute("UsedSuperSonic")] public bool UsedSuperSonic { get; set; }
-        [XmlElement("StageRecord")] public StageRecord[] StageRecords { get; set; }
+        
+#if !AOT
+        [XmlAttribute("New")]
+#endif
+        public bool New { get; set; }
+#if !AOT
+        [XmlAttribute("HighScoreSuperSonic")] 
+#endif
+        public bool HighScoreSuperSonic { get; set; }
+#if !AOT
+        [XmlAttribute("BestTimeSuperSonic")] 
+#endif
+        public bool BestTimeSuperSonic { get; set; }
+#if !AOT
+        [XmlAttribute("UsedSuperSonic")] 
+#endif
+        public bool UsedSuperSonic { get; set; }
+#if !AOT
+        [XmlElement("StageRecord")] 
+#endif
+        public StageRecord[] StageRecords { get; set; }
     }
 
     internal class StageRecord
     {
-        [XmlAttribute("HighScore")] public uint HighScore { get; set; }
-        [XmlIgnore] public TimeSpan BestTime { get; set; }
+#if !AOT
+        [XmlAttribute("HighScore")] 
+#endif
+        public uint HighScore { get; set; }
+#if !AOT
+        [XmlIgnore]
+#endif
+        public TimeSpan BestTime { get; set; }
 
         //[Browsable(false)]
 #if WASM
         [JsonIgnore]
 #endif
+#if !AOT
         [XmlAttribute("BestTime")]
+#endif
         public string BestTimeString
         {
             get => BestTime.ToString("c");
@@ -102,15 +195,26 @@ namespace gs
 
     internal class SpecialStage
     {
-        [XmlAttribute("EmeraldStage")] public uint EmeraldStage { get; set; }
-        [XmlAttribute("HighScore")] public uint HighScore { get; set; }
-        [XmlIgnore] public TimeSpan BestTime { get; set; }
+#if !AOT
+        [XmlAttribute("EmeraldStage")] 
+#endif
+        public uint EmeraldStage { get; set; }
+#if !AOT
+        [XmlAttribute("HighScore")]
+#endif
+        public uint HighScore { get; set; }
+#if !AOT
+        [XmlIgnore] 
+#endif
+        public TimeSpan BestTime { get; set; }
 
         //[Browsable(false)]
 #if WASM
         [JsonIgnore]
 #endif
+#if !AOT
         [XmlAttribute("BestTime")]
+#endif
         public string BestTimeString
         {
             get => BestTime.ToString("c");
@@ -122,27 +226,66 @@ namespace gs
 
     internal class gsOptions
     {
-        [XmlElement("Vibration")] public bool Vibration { get; set; } = true;
-        [XmlElement("BGMVolume")] public float BGMVolume { get; set; } = 1;
-        [XmlElement("SEVolume")] public float SEVolume { get; set; } = 1;
-        [XmlElement("ControlStyle")] public ControlType ControlType { get; set; } = ControlType.VirtualPadUp;
+#if !AOT
+        [XmlElement("Vibration")] 
+#endif
+        public bool Vibration { get; set; } = true;
+#if !AOT
+        [XmlElement("BGMVolume")] 
+#endif
+        public float BGMVolume { get; set; } = 1;
+#if !AOT
+        [XmlElement("SEVolume")]
+#endif
+        public float SEVolume { get; set; } = 1;
+#if !AOT
+        [XmlElement("ControlStyle")] 
+#endif
+        public ControlType ControlType { get; set; } = ControlType.VirtualPadUp;
     }
 
     internal class Remaster
     {
-        [XmlElement("LoopCamera")] public bool LoopCamera { get; set; } = false;
-        [XmlElement("BetterSoundEffects")] public bool BetterSoundEffects { get; set; } = true;
-        [XmlElement("ModernSoundEffects")] public bool ModernSoundEffects { get; set; } = false;
-        [XmlElement("BetterGears")] public bool BetterGears { get; set; } = true;
-        [XmlElement("BetterMusic")] public bool BetterMusic { get; set; } = true;
-        [XmlElement("BugFixes")] public bool BugFixes { get; set; } = true;
-        [XmlElement("Misc")] public bool Misc { get; set; } = true;
-        [XmlElement("iPhoneMenus")] public bool iPhoneMenus { get; set; } = false;
+#if !AOT
+        [XmlElement("LoopCamera")] 
+#endif
+        public bool LoopCamera { get; set; } = false;
+#if !AOT
+        [XmlElement("BetterSoundEffects")] 
+#endif
+        public bool BetterSoundEffects { get; set; } = true;
+#if !AOT
+        [XmlElement("ModernSoundEffects")] 
+#endif
+        public bool ModernSoundEffects { get; set; } = false;
+#if !AOT
+        [XmlElement("BetterGears")] 
+#endif
+        public bool BetterGears { get; set; } = true;
+#if !AOT
+        [XmlElement("BetterMusic")]
+#endif
+        public bool BetterMusic { get; set; } = true;
+#if !AOT
+        [XmlElement("BugFixes")] 
+#endif
+        public bool BugFixes { get; set; } = true;
+#if !AOT
+        [XmlElement("Misc")]
+#endif
+        public bool Misc { get; set; } = true;
+#if !AOT
+        [XmlElement("iPhoneMenus")]
+#endif
+        public bool iPhoneMenus { get; set; } = false;
     }
 
     internal class Debug
     {
-        [XmlElement("GodMode")] public bool GodMode { get; set; } = false;
+#if !AOT
+        [XmlElement("GodMode")] 
+#endif
+        public bool GodMode { get; set; } = false;
     }
 
     public enum ControlType

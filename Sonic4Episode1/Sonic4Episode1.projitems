@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmEndian.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmFs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmLighting.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmShader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmModel.cs" />
@@ -178,9 +179,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_SET_TEXOFFSET.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_SORT_DRAW_OBJECT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_VERTEX_BUFFER_OBJECT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_CREATE_SHADER.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_RELEASE_SHADER.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_REGISTLIST.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_RENDER_MANAGER.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_RENDER_TARGET.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_SHADER.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_RGBA8888.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_RGBA8888_Buf.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_TASK.cs" />

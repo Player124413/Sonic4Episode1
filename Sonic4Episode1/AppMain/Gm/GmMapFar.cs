@@ -1,10 +1,40 @@
-﻿internal partial class AppMain
+﻿#if GMD_MAP_FAR_USE_SEA_SHADER
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using mpp;
+#endif
+
+internal partial class AppMain
 {
+#if GMD_MAP_FAR_USE_SEA_SHADER
+	private static int _gm_map_far_sea_log = 1;
+	private static AMS_RENDER_TARGET _gm_map_far_sea_render_target;
+	private static AMS_PARAM_LOAD_TEXTURE_IMAGE _gm_map_far_sea_base;
+	private static AMS_PARAM_LOAD_TEXTURE_IMAGE _gm_map_far_sea_color;
+	private static readonly AMS_SHADER _gm_map_far_sea_shader = new AMS_SHADER();
+	private static readonly MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE _gmMapFarSeaMaterialCallback =
+		new MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE(gmMapFarSeaMaterialCallback);
+	private static readonly OBF_DRAW_USER_DT_FUNC _gmMapFarDrawSeaUserFunc =
+		new OBF_DRAW_USER_DT_FUNC(gmMapFarDrawSeaUserFunc);
+#endif
+
 	public static void GmMapFarInitData(AMS_AMB_HEADER amb)
 	{
 		gmMapFarDataInit();
 		gmMapFarDataSetAmbHeader(amb);
+#if GMD_MAP_FAR_USE_SEA_SHADER
+		gmMapFarBuildSeaShader();
+#endif
 	}
+
+#if GMD_MAP_FAR_USE_SEA_SHADER
+	// the title screen draws the same sea model but never goes through GmMapFarInitData
+	private static void gmMapFarBuildSeaShader()
+	{
+		if (!amShaderIsValid(_gm_map_far_sea_shader))
+			amShaderBuild("sea", _gm_map_far_sea_shader);
+	}
+#endif
 
 	private static void GmMapFarBuildData()
 	{
@@ -1108,6 +1138,13 @@
 	{
 		OBS_ACTION3D_NN_WORK obj3d = pWork.obj_3d;
 		int stageId = gmMapFarGetStageId();
+		// the C++ passes OBD_DRAW_CMD_STATE_MAPFAR literally (gmMapFar.cpp:4181); the object
+		// carries that same state and going through it is what the working deco path does
+#if GMD_MAP_FAR_USE_SEA_SHADER
+		ObjDraw3DNNUserFunc(_gmMapFarDrawSeaUserFunc, null, 0, obj3d.command_state);
+		obj3d.material_cb_func = _gmMapFarSeaMaterialCallback;
+		obj3d.material_cb_param = null;
+#endif
 		pWork.disp_flag |= 4U;
 		pWork.disp_flag |= 13705472U;
 		if (stageId != 0 && stageId != 1 && (stageId != 2 && stageId == 3))
@@ -1118,13 +1155,115 @@
 		ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
 	}
 
+#if GMD_MAP_FAR_USE_SEA_SHADER
+	// The C++ switches the bound target to _am_draw_target and clears it (gmMapFar.cpp:4296),
+	// leaving the scene so far in _gm_mapFar_render_work to sample. That relies on the PC's
+	// frame structure; here amDrawBegin binds _gm_mapFar_render_work and amDrawDisplay blits
+	// whatever is bound at the end, so switching mid-frame drops everything drawn before this
+	// point and the display keeps the previous frame. Copy into the other target instead and
+	// keep rendering where we were, which is what the deco falls do.
+	//
+	// The projection goes out as four user uniforms in the C++ (gmMapFar.cpp:4319) because NN
+	// has no matrix binding; we read it back in the callback instead.
 	private static void gmMapFarDrawSeaUserFunc(object data)
 	{
-		NNS_RGBA_U8 color = new NNS_RGBA_U8(0, 0, 0, byte.MaxValue);
-		amDrawGetProjectionMatrix();
+		_gm_map_far_sea_render_target = null;
+
+		AMS_RENDER_TARGET target = _am_render_manager.targetp != _gm_mapFar_render_work
+			? _gm_mapFar_render_work
+			: _am_draw_target;
+		if (target == null || target.width == 0)
+			return;
+
 		amDrawEndScene();
-		amRenderSetTarget(_am_draw_target, AMD_RENDER_CLEAR_COLOR | AMD_RENDER_CLEAR_DEPTH, color);
+		amRenderCopyTarget(target, g_deco_rendaer_target_color);
+		_gm_map_far_sea_render_target = target;
 	}
+
+	// SEA_REFRACT and SEA_COLOR are the pair the mobile content dropped in favour of the
+	// scrolling SEA_U_D/SEA_V_D fake, so they are loaded by name the way the deco fall's
+	// offset map is rather than coming off the material.
+	//
+	// They live in MAPFAR_TEX.AMB, not alongside it: dmTitleOpLoadPostFuncMapFar walks every
+	// entry of the outer archive and readAMBFile's each one, so a non-archive entry there
+	// parses as the old format and reads a garbage string length.
+	private static void gmMapFarLoadSeaTextures(AMS_AMB_HEADER amb)
+	{
+		_gm_map_far_sea_base = gmMapFarLoadSeaTexture(amb, "SEA_REFRACT", AMD_WRAP_REPEAT);
+		_gm_map_far_sea_color = gmMapFarLoadSeaTexture(amb, "SEA_COLOR", AMD_WRAP_REPEAT);
+	}
+
+	private static AMS_PARAM_LOAD_TEXTURE_IMAGE gmMapFarLoadSeaTexture(AMS_AMB_HEADER amb, string basename, int wrap)
+	{
+		if (amb == null)
+			return null;
+
+		int index = amBindSearchBaseName(amb, basename);
+		if (index < 0)
+			return null;
+
+		AMS_PARAM_LOAD_TEXTURE_IMAGE dst = new AMS_PARAM_LOAD_TEXTURE_IMAGE();
+		amTextureLoad(dst, amBindGet(amb, index, out string _),
+			System.IO.Path.GetExtension(amb.files[index]),
+			AMD_FILTER_LINEAR, AMD_FILTER_LINEAR, wrap, wrap);
+		return dst;
+	}
+
+	private static bool gmMapFarSeaMaterialCallback(NNS_DRAWCALLBACK_VAL val, object param)
+	{
+		int ret = nnPutMaterialCore(val);
+
+		if (_gm_map_far_sea_render_target == null || _gm_map_far_sea_render_target.target == null ||
+			!amShaderIsValid(_gm_map_far_sea_shader))
+		{
+			if (--_gm_map_far_sea_log <= 0)
+			{
+				_gm_map_far_sea_log = 120;
+				amSystemLog($"[sea] cb hit but bailed: target={(_gm_map_far_sea_render_target == null ? "null" : (_gm_map_far_sea_render_target.target == null ? "no-rt" : "ok"))}" +
+							$" shader={amShaderIsValid(_gm_map_far_sea_shader)}\n");
+			}
+			return ret == 1;
+		}
+
+		Texture2D texBase = _gm_map_far_sea_base != null ? _gm_map_far_sea_base.texture : null;
+		Texture2D texDecal = _gm_map_far_sea_color != null ? _gm_map_far_sea_color.texture : null;
+
+		if (--_gm_map_far_sea_log <= 0)
+		{
+			_gm_map_far_sea_log = 120;
+			OpenGL.mppglGetDiffuse(out Vector3 dc, out float da);
+			OpenGL.mppglGetFog(out bool fe, out Vector3 fc, out float fs, out float ff);
+			amSystemLog($"[sea] cb hit: refract={(texBase == null ? "null" : texBase.Width + "x" + texBase.Height)}" +
+						$" color={(texDecal == null ? "null" : texDecal.Width + "x" + texDecal.Height)}" +
+						$" diffuse=({dc.X:F2},{dc.Y:F2},{dc.Z:F2}) a={da:F2}" +
+						$" fog={fe} col=({fc.X:F2},{fc.Y:F2},{fc.Z:F2}) range={fs:F1}..{ff:F1}\n");
+		}
+
+		if (texBase == null || texDecal == null)
+			return ret == 1;
+
+		OpenGL.mppglGetFog(out bool fogEnabled, out Vector3 fogColor, out float fogStart, out float fogEnd);
+		OpenGL.mppglGetDiffuse(out Vector3 diffuseColor, out float diffuseAlpha);
+
+		Effect effect = _gm_map_far_sea_shader.effect;
+		effect.Parameters["View"].SetValue(OpenGL.mppglGetView());
+		effect.Parameters["Projection"].SetValue(OpenGL.mppglGetProjection());
+		effect.Parameters["TexBase"].SetValue(texBase);
+		effect.Parameters["TexDecal"].SetValue(texDecal);
+		effect.Parameters["TexUserSampler2D1"].SetValue(_gm_map_far_sea_render_target.target);
+		effect.Parameters["BaseAlpha"].SetValue(1f);
+		effect.Parameters["DecalAlpha"].SetValue(1f);
+		effect.Parameters["FogColor"].SetValue(fogColor);
+		effect.Parameters["FogStart"].SetValue(fogStart);
+		effect.Parameters["FogEnd"].SetValue(fogEnd);
+		effect.Parameters["FogEnabled"].SetValue(fogEnabled ? 1f : 0f);
+		effect.Parameters["DiffuseColor"].SetValue(diffuseColor);
+		effect.Parameters["DiffuseAlpha"].SetValue(diffuseAlpha);
+		OpenGL.mppglSetEffectOverride(effect);
+
+		return ret == 1;
+	}
+#endif
 
 	private static void gmMapFarZone1Build()
 	{
@@ -1140,6 +1279,9 @@
 		AMS_AMB_HEADER mdl_amb2 = readAMBFile(amBindGet(ambHeader, 3, out sPath));
 		mdl_amb2.dir = sPath;
 		info.obj_3d_list_render = GmGameDBuildRegBuildModel(mdl_amb2, tex_amb, draw_flag);
+#if GMD_MAP_FAR_USE_SEA_SHADER
+		gmMapFarLoadSeaTextures(tex_amb);
+#endif
 	}
 
 	private static bool gmMapFarZone1CheckLoading()
@@ -1194,6 +1336,10 @@
 		{
 			uint num3 = g_map_far_zone_1_scene_obj_data[index];
 			OBS_ACTION3D_NN_WORK obj_3d_work = index != 0 ? info.obj_3d_list[(int)num3] : info.obj_3d_list_render[(int)num3];
+			// gmMapFar.cpp:4657 is "i >= GMD_MAP_FAR_OBJ_INDEX_ZONE_1_SEA ? MAPFAR : PRE_MAPFAR".
+			// On PC that index is 4, so the four mirrored _B_ models land in PRE_MAPFAR and the
+			// sea plus the real sky and rocks in MAPFAR. The iPhone enum drops the _B_ group and
+			// puts SEA at 0, which makes the PRE_MAPFAR arm unreachable. Faithful either way.
 			uint command_state = index < 0 ? 1U : 2U;
 			uint mat_motion_index = g_map_far_zone_1_scene_obj_data_mat_motion[index];
 			AMS_AMB_HEADER mat_amb_header = null;

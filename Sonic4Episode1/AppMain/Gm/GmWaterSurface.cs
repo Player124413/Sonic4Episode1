@@ -12,8 +12,13 @@
             return;
         dwaterInit();
         AMS_AMB_HEADER ambHeader = gmWaterSurfaceDataGetAmbHeader();
-        AoTexBuild(_dmap_water.tex_color, readAMBFile(amBindGet(ambHeader, ambHeader.file_num - 1)));
-        AoTexLoad(_dmap_water.tex_color);
+        dwaterLoadTexture(ambHeader);
+        int baseIndex = amBindSearchBaseName(ambHeader, "GMK_WATER_BASE_TEX");
+        if (baseIndex >= 0)
+        {
+            AoTexBuild(_dmap_water.tex_base, (AMS_AMB_HEADER)amBindGet(ambHeader, baseIndex));
+            AoTexLoad(_dmap_water.tex_base);
+        }
         dwaterSetObjectAMB(ambHeader, ambHeader);
         dwaterLoadObject(0U);
     }
@@ -26,7 +31,10 @@
         if (gmWaterSurfaceGameSystemGetZoneType(gmWaterSurfaceGameSystemGetStageId()) == 2)
         {
             GMS_WATER_SURFACE_DATA info = gmWaterSurfaceDataGetInfo();
-            if (!AoTexIsLoaded(_dmap_water.tex_color))
+            // a missing texture must not stall loading; the draw falls back instead
+            if (!AoTexIsLoaded(_dmap_water.tex_base))
+                flag = false;
+            else if (_dmap_water.tex_color != null && _dmap_water.tex_color.texture == null)
                 flag = false;
             else if (!info.flag_load_object)
             {
@@ -61,7 +69,8 @@
     {
         if (gmWaterSurfaceGameSystemGetZoneType(gmWaterSurfaceGameSystemGetStageId()) != 2)
             return;
-        AoTexRelease(_dmap_water.tex_color);
+        AoTexRelease(_dmap_water.tex_base);
+        dwaterReleaseTexture();
     }
 
     private static void GmWaterSurfaceRelease()
@@ -78,7 +87,7 @@
         bool flag = true;
         if (gmWaterSurfaceGameSystemGetZoneType(gmWaterSurfaceGameSystemGetStageId()) == 2 && _dmap_water != null)
         {
-            if (!AoTexIsReleased(_dmap_water.tex_color))
+            if (!AoTexIsReleased(_dmap_water.tex_base))
                 flag = false;
             else if (_dmap_water.regist_index == -1)
             {
@@ -400,101 +409,114 @@
             ObjDraw3DNNUserFunc(_gmWaterSurfaceTcbProcPreDrawDT, null, 0, 9U);
             ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, 9U);
             ObjDraw3DNNSetCameraEx(6, 1, 4U);
-            AMS_PARAM_DRAW_PRIMITIVE prim = GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Alloc();
-            prim.aTest = 0;
-            prim.zMask = 1;
-            prim.zTest = 1;
-            prim.ablend = 1;
-            prim.bldSrc = 770;
-            prim.bldDst = 1;
-            prim.bldMode = 32774;
-            NNS_PRIM3D_PCT_ARRAY nnsPriM3DPctArray = amDrawAlloc_NNS_PRIM3D_PCT(18);
-            NNS_PRIM3D_PCT[] buffer = nnsPriM3DPctArray.buffer;
-            int offset = nnsPriM3DPctArray.offset;
-            OBS_CAMERA obsCamera2 = ObjCameraGet(0);
-            float x2 = obsCamera2.disp_pos.x;
-            float Y = -work.now_water_level;
-            float f32 = FX_FX32_TO_F32(1310720);
-            float num1 = obsCamera2.znear + 1f;
-            float num2 = 300f;
-            float num3 = Y - (obsCamera2.disp_pos.y - 300f);
-            uint num4 = AMD_RGBA8888(byte.MaxValue, byte.MaxValue, byte.MaxValue, 96);
-            for (int index1 = 0; index1 < 3; ++index1)
+            if (dwaterCanDrawShaded())
             {
-                float num5 = num1 * (index1 + 1);
-                int index2 = offset + index1 * 6;
-                buffer[index2].Pos.Assign(x2 - num2, Y, f32 - num5);
-                buffer[1 + index2].Pos.Assign(x2 + num2, Y, f32 - num5);
-                buffer[2 + index2].Pos.Assign(x2 - num2, Y - num3, f32 - num5);
-                buffer[5 + index2].Pos.Assign(x2 + num2, Y - num3, f32 - num5);
-                buffer[index2].Col = num4;
-                buffer[1 + index2].Col = num4;
-                buffer[2 + index2].Col = num4;
-                buffer[5 + index2].Col = num4;
-                float s;
-                float c;
-                nnSinCos(NNM_DEGtoA32(_dmap_water.speed_surface * 360f), out s, out c);
-                float num6 = (float)(num2 * 2.0 / 128.0 * 0.5);
-                float num7;
-                float num8;
-                float num9;
-                float num10;
-                if (index1 == 0)
-                {
-                    float num11 = x2 / 270f;
-                    num7 = num11 - ((int)num11 - _dmap_water.speed_surface);
-                    num8 = num7 + num6;
-                    num9 = 0.3f;
-                    num10 = (float)(num9 + num3 / 128.0 * 0.5 + c / 5.0);
-                }
-                else if (index1 == 1)
-                {
-                    float num11 = x2 / 270f;
-                    num8 = num11 - ((int)num11 + _dmap_water.speed_surface * 2f);
-                    num7 = num8 - num6 * 0.75f;
-                    num9 = 1f;
-                    num10 = (float)(num9 - num3 * 0.75 / 128.0 * 0.5 + s / 5.0);
-                }
-                else
-                {
-                    num7 = 11f / 64f;
-                    num8 = num7 + 1f / 128f;
-                    num9 = 0.5f;
-                    num10 = num9 + 1f / 128f;
-                    buffer[index2].Col = AMD_RGBA8888(32, 176, 64, 112);
-                    buffer[1 + index2].Col = buffer[index2].Col;
-                    buffer[2 + index2].Col = buffer[index2].Col;
-                    buffer[5 + index2].Col = buffer[index2].Col;
-                }
-                buffer[index2].Tex.u = num7;
-                buffer[index2].Tex.v = num9;
-                buffer[1 + index2].Tex.u = num8;
-                buffer[1 + index2].Tex.v = num9;
-                buffer[2 + index2].Tex.u = num7;
-                buffer[2 + index2].Tex.v = num10;
-                buffer[5 + index2].Tex.u = num8;
-                buffer[5 + index2].Tex.v = num10;
-                buffer[3 + index2] = buffer[1 + index2];
-                buffer[4 + index2] = buffer[2 + index2];
+                ObjDraw3DNNUserFunc(_gmWaterSurfaceTcbProcDrawDT, null, 0, 4U);
             }
-            prim.format3D = 4;
-            prim.type = 0;
-            prim.vtxPCT3D = nnsPriM3DPctArray;
-            prim.count = 18;
-            prim.sortZ = -num1;
-            prim.texId = 0;
-            prim.texlist = _dmap_water.tex_color.texlist;
-            prim.uwrap = 0;
-            prim.vwrap = 0;
-            gmWaterSurfaceMatrixPush(4U);
-            ObjDraw3DNNDrawPrimitive(prim, 4U);
-            gmWaterSurfaceMatrixPop(4U);
+            else
+            {
+                gmWaterSurfaceDrawFallbackSurface(work);
+            }
             if (!flag)
                 dwaterDrawSurface(4U, drawflag);
             ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, 4U);
             ObjDraw3DNNUserFunc(new OBF_DRAW_USER_DT_FUNC(gmWaterSurfaceTcbProcPostDrawDT), null, 0, 8U);
-            GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Release(prim);
         }
+    }
+
+    // The _IPHONE flat surface quad (gmWaterSurface.cpp:1404), kept as the no-shader path.
+    private static void gmWaterSurfaceDrawFallbackSurface(GMS_WATER_SURFACE_INFO work)
+    {
+        AMS_PARAM_DRAW_PRIMITIVE prim = GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Alloc();
+        prim.aTest = 0;
+        prim.zMask = 1;
+        prim.zTest = 1;
+        prim.ablend = 1;
+        prim.bldSrc = 770;
+        prim.bldDst = 1;
+        prim.bldMode = 32774;
+        NNS_PRIM3D_PCT_ARRAY nnsPriM3DPctArray = amDrawAlloc_NNS_PRIM3D_PCT(18);
+        NNS_PRIM3D_PCT[] buffer = nnsPriM3DPctArray.buffer;
+        int offset = nnsPriM3DPctArray.offset;
+        OBS_CAMERA obsCamera2 = ObjCameraGet(0);
+        float x2 = obsCamera2.disp_pos.x;
+        float Y = -work.now_water_level;
+        float f32 = FX_FX32_TO_F32(1310720);
+        float num1 = obsCamera2.znear + 1f;
+        float num2 = 300f;
+        float num3 = Y - (obsCamera2.disp_pos.y - 300f);
+        uint num4 = AMD_RGBA8888(byte.MaxValue, byte.MaxValue, byte.MaxValue, 96);
+        for (int index1 = 0; index1 < 3; ++index1)
+        {
+            float num5 = num1 * (index1 + 1);
+            int index2 = offset + index1 * 6;
+            buffer[index2].Pos.Assign(x2 - num2, Y, f32 - num5);
+            buffer[1 + index2].Pos.Assign(x2 + num2, Y, f32 - num5);
+            buffer[2 + index2].Pos.Assign(x2 - num2, Y - num3, f32 - num5);
+            buffer[5 + index2].Pos.Assign(x2 + num2, Y - num3, f32 - num5);
+            buffer[index2].Col = num4;
+            buffer[1 + index2].Col = num4;
+            buffer[2 + index2].Col = num4;
+            buffer[5 + index2].Col = num4;
+            float s;
+            float c;
+            nnSinCos(NNM_DEGtoA32(_dmap_water.speed_surface * 360f), out s, out c);
+            float num6 = (float)(num2 * 2.0 / 128.0 * 0.5);
+            float num7;
+            float num8;
+            float num9;
+            float num10;
+            if (index1 == 0)
+            {
+                float num11 = x2 / 270f;
+                num7 = num11 - ((int)num11 - _dmap_water.speed_surface);
+                num8 = num7 + num6;
+                num9 = 0.3f;
+                num10 = (float)(num9 + num3 / 128.0 * 0.5 + c / 5.0);
+            }
+            else if (index1 == 1)
+            {
+                float num11 = x2 / 270f;
+                num8 = num11 - ((int)num11 + _dmap_water.speed_surface * 2f);
+                num7 = num8 - num6 * 0.75f;
+                num9 = 1f;
+                num10 = (float)(num9 - num3 * 0.75 / 128.0 * 0.5 + s / 5.0);
+            }
+            else
+            {
+                num7 = 11f / 64f;
+                num8 = num7 + 1f / 128f;
+                num9 = 0.5f;
+                num10 = num9 + 1f / 128f;
+                buffer[index2].Col = AMD_RGBA8888(32, 176, 64, 112);
+                buffer[1 + index2].Col = buffer[index2].Col;
+                buffer[2 + index2].Col = buffer[index2].Col;
+                buffer[5 + index2].Col = buffer[index2].Col;
+            }
+            buffer[index2].Tex.u = num7;
+            buffer[index2].Tex.v = num9;
+            buffer[1 + index2].Tex.u = num8;
+            buffer[1 + index2].Tex.v = num9;
+            buffer[2 + index2].Tex.u = num7;
+            buffer[2 + index2].Tex.v = num10;
+            buffer[5 + index2].Tex.u = num8;
+            buffer[5 + index2].Tex.v = num10;
+            buffer[3 + index2] = buffer[1 + index2];
+            buffer[4 + index2] = buffer[2 + index2];
+        }
+        prim.format3D = 4;
+        prim.type = 0;
+        prim.vtxPCT3D = nnsPriM3DPctArray;
+        prim.count = 18;
+        prim.sortZ = -num1;
+        prim.texId = 0;
+        prim.texlist = _dmap_water.tex_base.texlist;
+        prim.uwrap = 0;
+        prim.vwrap = 0;
+        gmWaterSurfaceMatrixPush(4U);
+        ObjDraw3DNNDrawPrimitive(prim, 4U);
+        gmWaterSurfaceMatrixPop(4U);
+        GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Release(prim);
     }
 
     private static void gmWaterSurfaceMatrixPush(uint command_state)

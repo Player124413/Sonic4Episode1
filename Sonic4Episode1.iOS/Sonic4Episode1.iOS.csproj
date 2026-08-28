@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -8,16 +8,54 @@
     <IsAotCompatible>true</IsAotCompatible>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
-    <NoWarn>1701;1702;CA1416;</NoWarn>
+    <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
     
     <!--
       Enable full trimming in Release mode.
       To learn more, see: https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
     -->
     <TrimMode Condition="'$(Configuration)' == 'Release'">full</TrimMode>
+    <ProvisioningType>manual</ProvisioningType>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <MtouchExtraArgs>--cxx --gcc_flags "-framework AudioToolbox -framework AVFoundation -framework CoreGraphics -framework QuartzCore -framework CoreMedia -framework CoreVideo -framework CoreBluetooth -framework CoreHaptics -framework CoreMotion -framework OpenGLES -framework Metal -weak_framework GameController"</MtouchExtraArgs>
+    <_ExportSymbolsExplicitly>false</_ExportSymbolsExplicitly>
+    <OptimizePNGs>false</OptimizePNGs>
+  </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+
+    <NativeReference Include="..\Dependencies\FNA\lib-iphone\libFAudio.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\Dependencies\FNA\lib-iphone\libFNA3D.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\Dependencies\FNA\lib-iphone\libmojoshader.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\Dependencies\FNA\lib-iphone\libSDL3.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\Dependencies\FNA\lib-iphone\libtheorafile.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    
+    <Content Include="..\Content\bin\DesktopGLHD\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
+  
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 </Project>

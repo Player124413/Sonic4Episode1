@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Xna.Framework.Graphics;
 using mpp;
 
 internal partial class AppMain
@@ -22,6 +23,8 @@ internal partial class AppMain
     private const int AMD_ZFUNC_LEQUAL = 515;
     private const int AMD_WRAP_CLAMP = 33071;
     private const int AMD_WRAP_REPEAT = 10497;
+    // GL_LINEAR; the C++ only defines AMD_FILTER_* on the non-iPhone branches (amDraw.h:211-242)
+    private const int AMD_FILTER_LINEAR = 9729;
     private const int AMD_ZFUNC_DEFAULT = 515;
     public const int AMD_USE_VIRTUAL_RESOLUTION_2D = 1;
     public const int AMD_REGIST_NONE = 0;
@@ -105,7 +108,10 @@ internal partial class AppMain
 
     public static uint AMD_FCOLTORGBA8888(float r, float g, float b, float a)
     {
-        return (uint)(((int)(uint)(r * (double)byte.MaxValue) & byte.MaxValue) << 24 | ((int)(uint)(g * (double)byte.MaxValue) & byte.MaxValue) << 16 | ((int)(uint)(b * (double)byte.MaxValue) & byte.MaxValue) << 8 | (int)(uint)(a * (double)byte.MaxValue) & byte.MaxValue);
+        return (uint)(((int)(uint)(r * (double)byte.MaxValue) & byte.MaxValue) << 24 | 
+               ((int)(uint)(g * (double)byte.MaxValue) & byte.MaxValue) << 16 | 
+               ((int)(uint)(b * (double)byte.MaxValue) & byte.MaxValue) << 8 |
+               (int)(uint)(a * (double)byte.MaxValue) & byte.MaxValue);
     }
 
     public static float AMD_DISPLAY_WIDTH
@@ -405,7 +411,7 @@ internal partial class AppMain
 
     public bool amDrawBegin()
     {
-        return this.amDrawBegin(null, AMD_RENDER_CLEAR_COLOR | AMD_RENDER_CLEAR_DEPTH, null, 1f, 0);
+        return this.amDrawBegin(amRenderGetWork(), AMD_RENDER_CLEAR_COLOR | AMD_RENDER_CLEAR_DEPTH, null, 1f, 0);
     }
 
     public bool amDrawBegin(
@@ -508,6 +514,7 @@ internal partial class AppMain
         while (num4 > 0)
         {
             AMS_COMMAND_HEADER command = (~arrayPointer1).command;
+            OpenGL.mppglSetEffectOverride(null);
             if (command.command_id >= 0)
                 _am_draw_command_sort(command, 0U);
             else
@@ -533,10 +540,10 @@ internal partial class AppMain
         AMS_RENDER_TARGET amsRenderTarget = amRenderSetTarget(null);
         if (target == null)
             target = amsRenderTarget;
-        if (target != null)
-            amRenderSetTexture(0, target, index);
+        if (target != null && target.target != null)
+            OpenGL.mppglBlit(target.target, _am_render_default.width, _am_render_default.height);
         _am_draw_offset_x = 0;
-        
+
     }
 
     private static void amDrawInitDisplayList()
@@ -798,6 +805,10 @@ internal partial class AppMain
             AMS_COMMAND_HEADER ch = (AMS_COMMAND_HEADER)array[index + 1];
             if ((int)ch.state == (int)state)
             {
+                // A material callback may leave a custom effect armed. Bounding it to one
+                // command stops primitives and other objects inheriting it, while still
+                // letting it span every draw a single material issues.
+                OpenGL.mppglSetEffectOverride(null);
                 if (ch.command_id >= 0)
                     _am_draw_command_func(ch, drawflag);
                 else
@@ -1534,24 +1545,24 @@ internal partial class AppMain
 
     private static void _amDrawSortPrimitive2D(AMS_COMMAND_HEADER command, uint drawflag)
     {
-        AMS_PARAM_DRAW_PRIMITIVE paramDrawPrimitive = (AMS_PARAM_DRAW_PRIMITIVE)command.param;
+        AMS_PARAM_DRAW_PRIMITIVE param = (AMS_PARAM_DRAW_PRIMITIVE)command.param;
         NNS_MATRIX sortPrimitive2DMtx = _amDrawSortPrimitive2D_mtx;
-        nnMakeOrthoMatrix(sortPrimitive2DMtx, 0.0f, 720f, 1080f, 0.0f, 1f, 3f);
+        nnMakeOrthoMatrix(sortPrimitive2DMtx, 0.0f, g_ao_act_wide_h, g_ao_act_wide_w, 0.0f, 1.0f, 3.0f);
         amDrawSetProjection(sortPrimitive2DMtx, 1);
-        if (paramDrawPrimitive.texlist != null && paramDrawPrimitive.texId != -1)
+        if (param.texlist != null && param.texId != -1)
         {
-            nnSetPrimitiveTexNum(paramDrawPrimitive.texlist, paramDrawPrimitive.texId);
+            nnSetPrimitiveTexNum(param.texlist, param.texId);
             nnSetPrimitiveTexState(0, 0, 0, 0);
         }
         _amDrawSetPrimitive2DParam(command, drawflag);
-        nnBeginDrawPrimitive2D(paramDrawPrimitive.format2D, paramDrawPrimitive.ablend);
-        switch (paramDrawPrimitive.format2D)
+        nnBeginDrawPrimitive2D(param.format2D, param.ablend);
+        switch (param.format2D)
         {
             case 1:
-                nnDrawPrimitive2D(paramDrawPrimitive.type, paramDrawPrimitive.vtxPC2D, paramDrawPrimitive.count, paramDrawPrimitive.zOffset);
+                nnDrawPrimitive2D(param.type, param.vtxPC2D, param.count, param.zOffset);
                 break;
             case 2:
-                nnDrawPrimitive2D(paramDrawPrimitive.type, paramDrawPrimitive.vtxPCT2D, paramDrawPrimitive.count, paramDrawPrimitive.zOffset);
+                nnDrawPrimitive2D(param.type, param.vtxPCT2D, param.count, param.zOffset);
                 break;
         }
         nnEndDrawPrimitive2D();
@@ -1716,7 +1727,7 @@ internal partial class AppMain
         while (num >= 0)
         {
             if ((~arrayPointer).TexName != 0U)
-                OpenGL.glDeleteTextures(1, new uint[1] { (~arrayPointer).TexName });
+                OpenGL.glDeleteTextures(1, [(~arrayPointer).TexName]);
             --num;
             --arrayPointer;
         }
@@ -1765,19 +1776,31 @@ internal partial class AppMain
 
     private static void _amDrawCreateShader(AMS_REGISTLIST regist)
     {
-        mppAssertNotImpl();
+        AMS_PARAM_CREATE_SHADER param = (AMS_PARAM_CREATE_SHADER)regist.param;
+        if (param != null && param.shader != null && param.shader.effect == null && !param.shader.failed)
+        {
+            param.shader.effect = amShaderLoadEffect(param.name);
+            param.shader.failed = param.shader.effect == null;
+        }
         regist.command_id = 0;
     }
 
     private static void _amDrawReleaseShader(AMS_REGISTLIST regist)
     {
-        mppAssertNotImpl();
+        AMS_PARAM_RELEASE_SHADER param = (AMS_PARAM_RELEASE_SHADER)regist.param;
+        if (param != null && param.shader != null && param.shader.effect != null)
+        {
+            param.shader.effect.Dispose();
+            param.shader.effect = null;
+        }
+        regist.command_id = 0;
     }
 
     private static void _amDrawLoadTextureImage(AMS_REGISTLIST regist)
     {
-        mppAssertNotImpl();
-        AMS_PARAM_LOAD_TEXTURE_IMAGE loadTextureImage = (AMS_PARAM_LOAD_TEXTURE_IMAGE)regist.param;
+        AMS_PARAM_LOAD_TEXTURE_IMAGE param = (AMS_PARAM_LOAD_TEXTURE_IMAGE)regist.param;
+        if (param != null && param.texture == null && param.image != null)
+            param.texture = amTextureDecode(param.image, param.offset, param.size, param.ext);
         regist.command_id = 0;
     }
 
@@ -1881,14 +1904,81 @@ internal partial class AppMain
         return _am_default_stack;
     }
 
-    private static void amRenderInit()
+    // Reach caps textures at 2048; a screen-sized target on a larger display would exceed it.
+    private const int AMD_RENDER_SIZE_MAX = 2048;
+
+    private static void amRenderInit(int width, int height)
     {
-        AMS_RENDER_MANAGER amsRenderManager = new AMS_RENDER_MANAGER();
-        AMS_RENDER_TARGET amsRenderTarget = new AMS_RENDER_TARGET();
-        AMS_RENDER_TARGET amRenderDefault = _am_render_default;
-        AMS_RENDER_MANAGER amRenderManager = _am_render_manager;
-        amRenderManager.targetp = _am_render_default;
-        amRenderManager.target_now = _am_render_default;
+        AMS_RENDER_TARGET def = _am_render_default;
+        def.flag = 0U;
+        def.surface_num = 1;
+        def.width = width;
+        def.height = height;
+        def.aspect = height != 0 ? width / (float)height : 1f;
+        def.target = null;
+        def.tex_name = 0U;
+
+        AMS_RENDER_MANAGER manager = _am_render_manager;
+        manager.targetp = def;
+        manager.target_now = def;
+    }
+
+    private static AMS_RENDER_TARGET amRenderCreate(
+      AMS_RENDER_TARGET target,
+      int width,
+      int height,
+      uint flag)
+    {
+        if (target == null)
+            target = new AMS_RENDER_TARGET();
+
+        GraphicsDevice device = OpenGL.mppglGetDevice();
+        if (device == null)
+            return target;
+
+        if (width > AMD_RENDER_SIZE_MAX)
+            width = AMD_RENDER_SIZE_MAX;
+        if (height > AMD_RENDER_SIZE_MAX)
+            height = AMD_RENDER_SIZE_MAX;
+
+        // amIPhoneInitNN re-runs on every window resize
+        if (target.target != null)
+        {
+            target.target.Dispose();
+            target.target = null;
+        }
+
+        target.flag = flag;
+        target.surface_num = 1;
+        target.width = width;
+        target.height = height;
+        target.aspect = height != 0 ? width / (float)height : 1f;
+
+        // the scene is built across many binds per frame, so contents must survive a rebind
+        target.target = new RenderTarget2D(
+            device, width, height, false,
+            SurfaceFormat.Color, DepthFormat.Depth24Stencil8,
+            0, RenderTargetUsage.PreserveContents);
+
+        if (target.tex_name == 0U)
+            OpenGL.glGenTexture(out target.tex_name);
+        return target;
+    }
+
+    // main.cpp:476-495 creates only _gm_mapFar_render_work and leaves _am_draw_target zeroed, so
+    // the ping-pong in gmWaterSurface.cpp:1198-1211 always lands on a width==0 target and bails.
+    // Both halves have to be real for the effects to have anywhere to copy to.
+    private static void amRenderCreateWork(int width, int height)
+    {
+        amRenderCreate(_gm_mapFar_render_work, width, height,
+            AMD_RENDER_FLAG_RESOLVE_COLOR0 | AMD_RENDER_FLAG_USE_DEPTH);
+        amRenderCreate(_am_draw_target, width, height,
+            AMD_RENDER_FLAG_RESOLVE_COLOR0 | AMD_RENDER_FLAG_USE_DEPTH);
+    }
+
+    private static AMS_RENDER_TARGET amRenderGetWork()
+    {
+        return _gm_mapFar_render_work.width != 0 ? _gm_mapFar_render_work : null;
     }
 
     private static AMS_RENDER_TARGET amRenderSetTarget(
@@ -1911,16 +2001,48 @@ internal partial class AppMain
       float z,
       int stencil)
     {
-        return null;
+        if (target == null)
+            target = _am_render_default;
+
+        AMS_RENDER_MANAGER manager = _am_render_manager;
+        AMS_RENDER_TARGET prev = manager.targetp;
+        if (prev == target)
+            return prev != _am_render_default ? prev : null;
+
+        OpenGL.mppglSetRenderTarget(target.target);
+        manager.targetp = target;
+        manager.target_now = target;
+        OpenGL.glViewport(0, 0, target.width, target.height);
+
+        return prev != _am_render_default ? prev : null;
     }
 
     private static void amRenderSetTexture(int slot, AMS_RENDER_TARGET target, int index)
     {
+        if (target == null || target.target == null || target.tex_name == 0U)
+            return;
+
+        OpenGL.glActiveTexture((uint)(33984 + slot));
+        OpenGL.glBindTexture(3553U, target.tex_name);
+        OpenGL.mppglTexImage2D(target.target);
     }
 
     private static void amRenderCopyTarget(
       AMS_RENDER_TARGET target,
       NNS_RGBA_U8 color)
     {
+        if (target == null || target.target == null)
+            return;
+
+        AMS_RENDER_TARGET src = _am_render_manager.targetp;
+        if (src == null || src == target)
+            return;
+        // the backbuffer cannot be sampled, so there is nothing to copy from
+        if (src.target == null)
+            return;
+
+        AMS_RENDER_TARGET prev = amRenderSetTarget(target);
+        OpenGL.mppglBlit(src.target, target.width, target.height);
+        amRenderSetTarget(prev ?? _am_render_default);
     }
 }

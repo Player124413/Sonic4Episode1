@@ -94,6 +94,8 @@ internal partial class AppMain
         br.BaseStream.Seek(16L, SeekOrigin.Current);
         amsAmeHeader.node = new AMS_AME_NODE[amsAmeHeader.node_num];
         br.BaseStream.Seek(amsAmeHeader.node_ofst, SeekOrigin.Begin);
+
+        // TODO: why is this a dictionary not an array?
         Dictionary<uint, AMS_AME_NODE> dictionary = new Dictionary<uint, AMS_AME_NODE>(amsAmeHeader.node_num);
         for (int index1 = 0; index1 < amsAmeHeader.node_num; ++index1)
         {

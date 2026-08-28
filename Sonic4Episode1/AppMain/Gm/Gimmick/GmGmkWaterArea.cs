@@ -9,19 +9,23 @@
         ushort water_level = (ushort)((uint)eve_rec.left * 100U + (uint)eve_rec.top);
         ushort time = 0;
         ushort flag = eve_rec.flag;
+
         for (ushort index = 0; 10 > index; ++index)
         {
             if ((flag & 1) != 0)
                 time += (ushort)(index + 1U);
             flag >>= 1;
         }
+
         if (gmGmkWaterAreaGetType(eve_rec) == 0U)
         {
             if (gmGmkWaterAreaCheckRestart(pos_x, pos_y))
                 GmWaterSurfaceRequestChangeWaterLevel(water_level, (ushort)(time * 60U), false);
-            eve_rec.pos_x = byte.MaxValue;
+
+            eve_rec.pos_x = GMD_EVE_RECORD_CMD_SKIP;
             return null;
         }
+
         GMS_ENEMY_3D_WORK gimmick_work = gmGmkWaterAreaLoadObj(eve_rec, pos_x, pos_y, type);
         gmGmkWaterAreaInit(gimmick_work, water_level, time);
         return (OBS_OBJECT_WORK)gimmick_work;

@@ -1,7 +1,10 @@
 ﻿<Directives>
 	<Application>
 		<Assembly Name="FNA">
-			<Type Name="Microsoft.Xna.Framework.Content.ByteReader" Dynamic="Required All"/>
+      <Type Name="Microsoft.Xna.Framework.Content.SoundEffectReader" Dynamic="Required All"/>
+      <Type Name="Microsoft.Xna.Framework.Content.SongReader" Dynamic="Required All"/>
+      <Type Name="Microsoft.Xna.Framework.Content.Int32Reader" Dynamic="Required All"/>
+      <!--<Type Name="Microsoft.Xna.Framework.Content.ByteReader" Dynamic="Required All"/>
 			<Type Name="Microsoft.Xna.Framework.Content.SByteReader" Dynamic="Required All"/>
 			<Type Name="Microsoft.Xna.Framework.Content.DateTimeReader" Dynamic="Required All"/>
 			<Type Name="Microsoft.Xna.Framework.Content.DecimalReader" Dynamic="Required All"/>
@@ -28,10 +31,7 @@
 			<Type Name="Microsoft.Xna.Framework.Content.EnumReader`1[[Microsoft.Xna.Framework.Graphics.Blend,FNA]]" Dynamic="Required All"/>
 			<Type Name="Microsoft.Xna.Framework.Content.NullableReader`1[[Microsoft.Xna.Framework.Rectangle,FNA]]" Dynamic="Required All"/>
 			<Type Name="Microsoft.Xna.Framework.Content.ExternalReferenceReader" Dynamic="Required All"/>
-			<Type Name="Microsoft.Xna.Framework.Content.SoundEffectReader" Dynamic="Required All"/>
-			<Type Name="Microsoft.Xna.Framework.Content.SongReader" Dynamic="Required All"/>
-			<Type Name="Microsoft.Xna.Framework.Content.Int32Reader" Dynamic="Required All"/>
-			<Type Name="Microsoft.Xna.Framework.Content.SingleReader" Dynamic="Required All"/>
+			<Type Name="Microsoft.Xna.Framework.Content.SingleReader" Dynamic="Required All"/>-->
 		</Assembly>
 	</Application>
 </Directives>

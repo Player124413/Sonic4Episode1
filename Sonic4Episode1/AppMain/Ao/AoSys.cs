@@ -7,7 +7,7 @@ internal partial class AppMain
     {
         g_ao_sys_global.is_show_ui = false;
         g_ao_sys_global.is_signin_changed = false;
-        if (!MediaPlayer.GameHasControl || MediaPlayer.State == MediaState.Playing)
+        if (!Microsoft.Xna.Framework.Media.MediaPlayer.GameHasControl || Microsoft.Xna.Framework.Media.MediaPlayer.State == MediaState.Playing)
         {
             g_ao_sys_global.is_playing_device_bgm_music = true;
             List<string> stringList = new List<string>();

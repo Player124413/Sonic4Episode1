@@ -371,6 +371,7 @@ internal partial class AppMain
 
             value.makeAmbHeader();
             value.stat = 3;
+            value.stream?.Dispose();
             value.stream = null;
             ams_fsList.RemoveFirst();
             if (value.callback != null)            

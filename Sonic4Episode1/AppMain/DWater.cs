@@ -1,5 +1,11 @@
-﻿internal partial class AppMain
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using mpp;
+
+internal partial class AppMain
 {
+    private static readonly VertexPositionColorTexture[] _dwater_verts = new VertexPositionColorTexture[4];
+
     private static int dwaterInit()
     {
         if (_dmap_water == null)
@@ -12,6 +18,7 @@
         _dmap_water.regist_index = -1;
         _dmap_water.repeat_pos_x = 280f;
         dwaterSetColor(0.65f, 1f, 0.75f);
+        _dmap_water.regist_index = amShaderBuild("water", _dmap_water.shader);
         return _dmap_water.regist_index;
     }
 
@@ -77,13 +84,42 @@
         return num1;
     }
 
-    private static int dwaterLoadTexture(
-      object water_image,
-      int water_size,
-      object color_image,
-      int color_size)
+    // The C++ reaches these by index 4 and 5 (gmWaterSurface.cpp:482), which only holds for the
+    // 11-entry PC/360 archive. Ours has 8 and, as shipped, has neither texture in it at all.
+    private static int dwaterLoadTexture(AMS_AMB_HEADER amb)
     {
-        return 0;
+        _dmap_water.tex_water = dwaterLoadNamedTexture(amb, "WATER_A", AMD_WRAP_REPEAT);
+        _dmap_water.tex_color = dwaterLoadNamedTexture(amb, "WATERCOLOR", AMD_WRAP_CLAMP);
+        return _dmap_water.tex_water != null && _dmap_water.tex_color != null ? 1 : 0;
+    }
+
+    // The shaded pass needs its two DDS textures and a compiled effect. WP7 has no custom
+    // shaders at all, and any build whose water archive predates them lacks the textures, so
+    // both fall back to the flat surface quad.
+    private static bool dwaterCanDrawShaded()
+    {
+        return amShaderIsValid(_dmap_water.shader)
+            && _dmap_water.tex_water != null && _dmap_water.tex_water.texture != null
+            && _dmap_water.tex_color != null && _dmap_water.tex_color.texture != null;
+    }
+
+    private static AMS_PARAM_LOAD_TEXTURE_IMAGE dwaterLoadNamedTexture(
+      AMS_AMB_HEADER amb,
+      string basename,
+      int wrap)
+    {
+        int index = amBindSearchBaseName(amb, basename);
+        if (index < 0)
+        {
+            amSystemLog($"[WARN] water texture '{basename}' not in {amb.file_num}-entry archive\n");
+            return null;
+        }
+
+        AMS_PARAM_LOAD_TEXTURE_IMAGE dst = new AMS_PARAM_LOAD_TEXTURE_IMAGE();
+        amTextureLoad(dst, amBindGet(amb, index, out string _),
+            System.IO.Path.GetExtension(amb.files[index]),
+            AMD_FILTER_LINEAR, AMD_FILTER_LINEAR, wrap, wrap);
+        return dst;
     }
 
     private static int dwaterRelease()
@@ -100,8 +136,13 @@
         return num;
     }
 
+    // ARGB, matching the _PC | _XBOX | _WII packing at gmWaterSurface.cpp:2038
     private static void dwaterSetColor(float r, float g, float b)
     {
+        uint cr = (uint)(r * 255f) & byte.MaxValue;
+        uint cg = (uint)(g * 255f) & byte.MaxValue;
+        uint cb = (uint)(b * 255f) & byte.MaxValue;
+        _dmap_water.color = (cr << 16) | (cg << 8) | cb | 0xFF000000U;
     }
 
     private static void dwaterUpdate(
@@ -211,22 +252,112 @@
         amMatrixPop();
     }
 
+    // gmWaterSurface.cpp:2355, the _PC | _XBOX branch
     private static void dwaterDrawWater(AMS_RENDER_TARGET texture)
     {
-        DMAP_PARAM_WATER drawParam = _dmap_water.draw_param;
+        DMAP_PARAM_WATER param = _dmap_water.draw_param;
+        if (param == null || texture == null || texture.target == null)
+            return;
+        if (!amShaderIsValid(_dmap_water.shader))
+            return;
+        if (_dmap_water.tex_water == null || _dmap_water.tex_water.texture == null)
+            return;
+        if (_dmap_water.tex_color == null || _dmap_water.tex_color.texture == null)
+            return;
+
         amDrawPushState();
-        NNS_VECTOR nnsVector = new NNS_VECTOR(0.0f, drawParam.pos_dy, -0.5f);
-        nnTransformVector(nnsVector, amDrawGetProjectionMatrix(), nnsVector);
-        double drawU = drawParam.draw_u;
-        double drawV = drawParam.draw_v;
-        double repeatU = drawParam.repeat_u;
-        double scale1 = drawParam.scale;
-        double repeatV = drawParam.repeat_v;
-        double scale2 = drawParam.scale;
-        double y = nnsVector.y;
-        int rotZ = drawParam.rot_z;
-        int color = (int)drawParam.color;
+
+        NNS_VECTOR pos = new NNS_VECTOR(0.0f, param.pos_dy, -0.5f);
+        nnTransformVector(pos, amDrawGetProjectionMatrix(), pos);
+
+        float ofst_u = param.draw_u;
+        float ofst_v = param.draw_v;
+        float water_u = param.repeat_u * 0.5f * param.scale;
+        float water_v = param.repeat_v * param.scale;
+        // The C++ assumes pos.y lands in [-1,1], but this port's ortho cameras yield half-range
+        // NDC (+/-0.5 across the visible height), so everything downstream is 2x short.
+        // Measured: ndc.y 0.363 -> surface at ~148px, -0.505 -> ~1086px on a 1080 backbuffer.
+        float dy = pos.y * 2.0f;
+        float water_ou = 0.0f;
+
+        float w = AMD_SCREEN_WIDTH;
+        float h = AMD_SCREEN_HEIGHT;
+        float dv = dy * -0.5f + 0.5f;
+        float ox = w * 0.5f;
+        float oy = h * 0.5f;
+
+        NNS_MATRIX mtx = GlobalPool<NNS_MATRIX>.Alloc();
+        nnMakeRotateZMatrix(mtx, param.rot_z);
+
+        // top pair carry alpha 0, bottom pair alpha 255; the vertex shader reads that as the
+        // ramp coordinate, the way the PS3 build does (gmWaterSurface.cpp:372-380)
+        Color top = dwaterUnpackColor(param.color, 0);
+        Color bottom = dwaterUnpackColor(param.color, byte.MaxValue);
+
+        NNS_VECTOR src = GlobalPool<NNS_VECTOR>.Alloc();
+        NNS_VECTOR dst = GlobalPool<NNS_VECTOR>.Alloc();
+        float baseX = -1.15f * 0.5f * w;
+
+        src.x = baseX;
+        src.y = dy * 0.5f * h;
+        src.z = 0.0f;
+        nnTransformVector(dst, mtx, src);
+        _dwater_verts[0] = new VertexPositionColorTexture(
+            new Vector3(ox + dst.x, oy - dst.y, 0.0f), top,
+            new Vector2(water_ou - water_u + ofst_u, dv + ofst_v));
+
+        src.x = -src.x;
+        nnTransformVector(dst, mtx, src);
+        _dwater_verts[1] = new VertexPositionColorTexture(
+            new Vector3(ox + dst.x, oy - dst.y, 0.0f), top,
+            new Vector2(water_ou + water_u + ofst_u, dv + ofst_v));
+
+        src.x = baseX;
+        src.y += src.x * 2.0f;
+        nnTransformVector(dst, mtx, src);
+        _dwater_verts[2] = new VertexPositionColorTexture(
+            new Vector3(ox + dst.x, oy - dst.y, 0.0f), bottom,
+            new Vector2(water_ou - water_u + ofst_u, water_v + dv + ofst_v));
+
+        src.x = -src.x;
+        nnTransformVector(dst, mtx, src);
+        _dwater_verts[3] = new VertexPositionColorTexture(
+            new Vector3(ox + dst.x, oy - dst.y, 0.0f), bottom,
+            new Vector2(water_ou + water_u + ofst_u, water_v + dv + ofst_v));
+
+        Effect effect = _dmap_water.shader.effect;
+        effect.Parameters["MatrixTransform"].SetValue(Matrix.CreateOrthographicOffCenter(0f, w, h, 0f, 0f, 1f));
+        effect.Parameters["TexColor"].SetValue(texture.target);
+        effect.Parameters["TexOffset"].SetValue(_dmap_water.tex_water.texture);
+        effect.Parameters["TexGray"].SetValue(_dmap_water.tex_color.texture);
+        OpenGL.mppglDrawUserQuad(effect, _dwater_verts);
+
+        GlobalPool<NNS_VECTOR>.Release(dst);
+        GlobalPool<NNS_VECTOR>.Release(src);
+        GlobalPool<NNS_MATRIX>.Release(mtx);
+
         amDrawPopState();
+    }
+
+    private static Color dwaterUnpackColor(uint argb, byte alpha)
+    {
+        return new Color((byte)(argb >> 16), (byte)(argb >> 8), (byte)argb, alpha);
+    }
+
+    private static void dwaterReleaseTexture()
+    {
+        if (_dmap_water == null)
+            return;
+        if (_dmap_water.tex_water != null && _dmap_water.tex_water.texture != null)
+        {
+            _dmap_water.tex_water.texture.Dispose();
+            _dmap_water.tex_water = null;
+        }
+        if (_dmap_water.tex_color != null && _dmap_water.tex_color.texture != null)
+        {
+            _dmap_water.tex_color.texture.Dispose();
+            _dmap_water.tex_color = null;
+        }
     }
 
     private static void _dwaterSetParam(AMS_TCB tcbp)

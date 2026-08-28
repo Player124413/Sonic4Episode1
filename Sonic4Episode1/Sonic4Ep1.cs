@@ -73,8 +73,10 @@ public class Sonic4Ep1 : Game
         AppMain.storePath = storePath = ""; // unused, works via IsolatedStorage
 #elif WINDOWS_UAP
         AppMain.storePath = storePath = Windows.Storage.ApplicationData.Current.RoamingFolder.Path;
-#elif ANDROID || IOS
+#elif ANDROID
         AppMain.storePath = storePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+#elif IOS
+        AppMain.storePath = storePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 #else
         AppMain.storePath = storePath = System.IO.Directory.GetCurrentDirectory();
 #endif
@@ -83,7 +85,7 @@ public class Sonic4Ep1 : Game
 #if WINDOWSPHONE7_5
         this.graphics.PreferredBackBufferWidth = 533;
         this.graphics.PreferredBackBufferHeight = 320;
-#elif IOS || ANDROID || WINDOWS_UAP
+#elif IOS || WINDOWS_UAP
         this.graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         this.graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 #else
@@ -101,6 +103,18 @@ public class Sonic4Ep1 : Game
         {
             e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
             e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
+
+#if ANDROID
+            var largestSupported = e.GraphicsDeviceInformation.Adapter.SupportedDisplayModes
+                .OrderByDescending(m => m.Width * m.Height)
+                .FirstOrDefault(m => m.Format == SurfaceFormat.Color);
+
+            if (largestSupported != null)
+            {
+                this.graphics.PreferredBackBufferWidth = largestSupported.Width;
+                this.graphics.PreferredBackBufferHeight = largestSupported.Height;
+            }
+#endif
         };
 
 #if ANDROID
@@ -115,7 +129,7 @@ public class Sonic4Ep1 : Game
         this.Activated += new EventHandler<EventArgs>(OnActivated);
         this.Deactivated += new EventHandler<EventArgs>(OnDeactivated);
 
-        this.Window.Title = "Sonic 4 - Episode I";
+        this.Window.Title = "SONIC THE HEDGEHOG 4: Episode I";
         this.Window.AllowUserResizing = true;
         this.Window.ClientSizeChanged += OnClientSizeChanged;
     }
@@ -204,7 +218,7 @@ public class Sonic4Ep1 : Game
         AppMain.isForeground = true;
 
         if (storeSystemVolume)
-            deviceMusicVolume = MediaPlayer.Volume;
+            deviceMusicVolume = Microsoft.Xna.Framework.Media.MediaPlayer.Volume;
 
         if (((int)(AppMain.g_gm_main_system?.game_flag ?? 0) & 64) == 0)
             AppMain.g_pause_flag = true;

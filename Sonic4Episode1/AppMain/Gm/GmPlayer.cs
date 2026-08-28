@@ -1015,12 +1015,12 @@ internal partial class AppMain
     private static void GmPlayerWalkActionSet(GMS_PLAYER_WORK ply_work)
     {
         int num = MTM_MATH_ABS(ply_work.obj_work.spd_m);
-        bool flag = false;
+        bool b_max_dash = false;
         short z = (short)ply_work.obj_work.dir.z;
         if (((int)ply_work.obj_work.disp_flag & 1) == 0 && z > 4096 || ((int)ply_work.obj_work.disp_flag & 1) != 0 &&
             z < -4096 && ((int)ply_work.gmk_flag & 131072) == 0)
         {
-            flag = true;
+            b_max_dash = true;
             ply_work.maxdash_timer = 122880;
         }
 
@@ -1039,7 +1039,7 @@ internal partial class AppMain
             if ((ply_work.player_flag & 512) == 0)
                 GmPlyEfctCreateDash1Dust(ply_work);
         }
-        else if (num < ply_work.spd4 && (flag || ply_work.maxdash_timer != 0))
+        else if (num < ply_work.spd4 && (b_max_dash || ply_work.maxdash_timer != 0))
         {
             act_state = 22;
             GmPlyEfctCreateRollDash(ply_work);
