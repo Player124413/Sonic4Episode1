@@ -66,7 +66,7 @@
         return tcb.work is IOBS_OBJECT_WORK ? ((IOBS_OBJECT_WORK)tcb.work).Cast() : (OBS_OBJECT_WORK)tcb.work;
     }
 
-    private static void mtTaskChangeTcbProcedure(
+    internal static void mtTaskChangeTcbProcedure(
       MTS_TASK_TCB tcb,
       GSF_TASK_PROCEDURE proc)
     {

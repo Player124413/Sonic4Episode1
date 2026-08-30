@@ -214,12 +214,12 @@ internal partial class AppMain
 #endif
     }
 
-    private static void AoPresenceSet()
+    internal static void AoPresenceSet()
     {
         AoPresenceSet(GsGetMainSysInfo().stage_id, GsTrialIsTrial());
     }
 
-    private static void AoPresenceSet(int presence, bool is_trial)
+    internal static void AoPresenceSet(int presence, bool is_trial)
     {
 #if HAS_DISCORD
         if (g_discordActivity == null) return;

@@ -21,14 +21,21 @@ internal partial class AppMain
         if (data is A2S_AMA_HEADER)
             return (A2S_AMA_HEADER)data;
         AmbChunk ambChunk = (AmbChunk)data;
-        return readAMAFile(ambChunk.array, ambChunk.offset);
+        return readAMAFile(ambChunk.array, ambChunk.offset, ambChunk.amb != null && ambChunk.amb.big_endian);
     }
 
     public static A2S_AMA_HEADER readAMAFile(byte[] data, int offset)
     {
+        return readAMAFile(data, offset, false);
+    }
+
+    public static A2S_AMA_HEADER readAMAFile(byte[] data, int offset, bool bigEndian)
+    {
         using (MemoryStream memoryStream = new MemoryStream(data, offset, data.Length - offset))
         {
-            using (BinaryReader br = new BinaryReader(memoryStream))
+            using (BinaryReader br = bigEndian
+                ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                : new BinaryReader(memoryStream))
                 return readAMAFile(br);
         }
     }
@@ -620,6 +627,9 @@ internal partial class AppMain
                 }
             }
         }
+        a2SAmaHeader.act_names = readNameTable(br, a2SAmaHeader.act_name_tbl_offset, a2SAmaHeader.act_num);
+        a2SAmaHeader.node_names = readNameTable(br, a2SAmaHeader.node_name_tbl_offset, a2SAmaHeader.node_num);
+
         readAMAFile_nodeHash.Clear();
         readAMAFile_actHash.Clear();
         readAMAFile_mtnHash.Clear();
@@ -638,6 +648,29 @@ internal partial class AppMain
         return a2SAmaHeader;
     }
 
+    private static string[] readNameTable(BinaryReader br, int offset, uint count)
+    {
+        if (offset == 0 || count == 0)
+            return null;
+
+        var offsets = new int[count];
+        br.BaseStream.Seek(offset, SeekOrigin.Begin);
+        for (int index = 0; index < count; ++index)
+            offsets[index] = br.ReadInt32();
+
+        var names = new string[count];
+        for (int index = 0; index < count; ++index)
+        {
+            if (offsets[index] <= 0 || offsets[index] >= br.BaseStream.Length)
+                continue;
+
+            br.BaseStream.Seek(offsets[index], SeekOrigin.Begin);
+            names[index] = readChars(br);
+        }
+
+        return names;
+    }
+
     private static void skipString(BinaryReader br)
     {
         do
@@ -647,19 +680,11 @@ internal partial class AppMain
 
     private static string readChars(BinaryReader br)
     {
-        int length = 0;
-        while (true)
-        {
-            char ch = br.ReadChar();
-            if (ch != char.MinValue)
-            {
-                readChars_name[length] = ch;
-                ++length;
-            }
-            else
-                break;
-        }
-        return new string(readChars_name, 0, length);
+        var name = new System.Text.StringBuilder(32);
+        for (char ch = br.ReadChar(); ch != char.MinValue; ch = br.ReadChar())
+            name.Append(ch);
+
+        return name.ToString();
     }
 
 }

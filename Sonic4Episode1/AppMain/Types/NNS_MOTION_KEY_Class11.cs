@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family S32_1: float frame, one Sint32. Node hide.
     internal class NNS_MOTION_KEY_Class11
     {
         public float Frame;

@@ -1,0 +1,309 @@
+endian = "little"
+
+files = [
+  "D_STGSLCT.TXB",
+  "D_STGSLCT_ARROW01.PVR",
+  "D_STGSLCT_ARROW02.PVR",
+  "D_STGSLCT_ICON_SONIC.PVR",
+  "D_STGSLCT_LINE01.PVR",
+  "D_STGSLCT_NUM01.PVR",
+  "D_STGSLCT_NUM02.PVR",
+  "D_STGSLCT_TAB02.PVR",
+  "D_STGSLCT_TAB03.PVR",
+  "D_STGSLCT_TAB04.PVR",
+  "D_STGSLCT_TAB06.PVR",
+  "D_STGSLCT_TAB07.PVR",
+  "D_STGSLCT_TAB09.PVR",
+  "D_STGSLCT_TAB11.PVR",
+  "D_STGSLCT_TAB12.PVR",
+  "D_STGSLCT_ICON_EMER.PVR",
+  "D_STGSLCT_ICON_HATENA.PVR",
+  "D_STGSLCT_SCR_Z1A1.PVR",
+  "D_STGSLCT_SCR_Z1A2.PVR",
+  "D_STGSLCT_SCR_Z1A3.PVR",
+  "D_STGSLCT_SCR_Z2A1.PVR",
+  "D_STGSLCT_SCR_Z2A2.PVR",
+  "D_STGSLCT_SCR_Z2A3.PVR",
+  "D_STGSLCT_SCR_Z3A1.PVR",
+  "D_STGSLCT_SCR_Z3A2.PVR",
+  "D_STGSLCT_SCR_Z3A3.PVR",
+  "D_STGSLCT_SCR_Z4A1.PVR",
+  "D_STGSLCT_SCR_Z4A2.PVR",
+  "D_STGSLCT_SCR_Z4A3.PVR",
+  "D_STGSLCT_SCR_Z5A1.PVR",
+  "D_STGSLCT_SCR_Z6A1.PVR",
+  "D_STGSLCT_SCR_1.PVR",
+  "D_STGSLCT_SCR_2.PVR",
+  "D_STGSLCT_SCR_3.PVR",
+  "D_STGSLCT_TAB_SCORE.PVR",
+  "D_STGSLCT_TEX_SCTM_JP.PVR",
+  "D_STGSLCT_BG_Z1_LT.PVR",
+  "D_STGSLCT_BG_Z2_LT.PVR",
+  "D_STGSLCT_BG_Z3_LT.PVR",
+  "D_STGSLCT_BG_Z4_LT.PVR",
+  "D_STGSLCT_BG_Z5_LT.PVR",
+  "D_STGSLCT_BG_Z6_LT.PVR",
+  "D_STGSLCT_BG_Z1_LB.PVR",
+  "D_STGSLCT_BG_Z2_LB.PVR",
+  "D_STGSLCT_BG_Z3_LB.PVR",
+  "D_STGSLCT_BG_Z4_LB.PVR",
+  "D_STGSLCT_BG_Z5_LB.PVR",
+  "D_STGSLCT_BG_Z6_LB.PVR",
+  "D_STGSLCT_BG_Z1_RT.PVR",
+  "D_STGSLCT_BG_Z2_RT.PVR",
+  "D_STGSLCT_BG_Z3_RT.PVR",
+  "D_STGSLCT_BG_Z4_RT.PVR",
+  "D_STGSLCT_BG_Z5_RT.PVR",
+  "D_STGSLCT_BG_Z6_RT.PVR",
+  "D_STGSLCT_BG_Z1_RB.PVR",
+  "D_STGSLCT_BG_Z2_RB.PVR",
+  "D_STGSLCT_BG_Z3_RB.PVR",
+  "D_STGSLCT_BG_Z4_RB.PVR",
+  "D_STGSLCT_BG_Z5_RB.PVR",
+  "D_STGSLCT_BG_Z6_RB.PVR",
+  "D_STGSLCT_TEX_Z1_1_JP.PVR",
+  "D_STGSLCT_TEX_Z2_1_JP.PVR",
+  "D_STGSLCT_TEX_Z3_1_JP.PVR",
+  "D_STGSLCT_TEX_Z4_1_JP.PVR",
+  "D_STGSLCT_TEX_FINAL_1_JP.PVR",
+  "D_STGSLCT_TEX_Z1_2_JP.PVR",
+  "D_STGSLCT_TEX_Z2_2_JP.PVR",
+  "D_STGSLCT_TEX_Z3_2_JP.PVR",
+  "D_STGSLCT_TEX_Z4_2_JP.PVR",
+  "D_STGSLCT_TEX_FINAL_JP.PVR",
+  "D_STGSLCT_BG.PVR",
+  "D_STGSLCT_TEX_Z1_S_JP.PVR",
+  "D_STGSLCT_TEX_Z2_S_JP.PVR",
+  "D_STGSLCT_TEX_Z3_S_JP.PVR",
+  "D_STGSLCT_TEX_Z4_S_JP.PVR",
+  "D_STGSLCT_TEX_Z5_S_JP.PVR",
+  "STGSLCT_EFFECTS.PVR",
+]
+
+[file.1]  # D_STGSLCT_ARROW01.PVR
+type = 11
+
+[file.2]  # D_STGSLCT_ARROW02.PVR
+type = 11
+
+[file.3]  # D_STGSLCT_ICON_SONIC.PVR
+type = 11
+
+[file.4]  # D_STGSLCT_LINE01.PVR
+type = 11
+
+[file.5]  # D_STGSLCT_NUM01.PVR
+type = 11
+
+[file.6]  # D_STGSLCT_NUM02.PVR
+type = 11
+
+[file.7]  # D_STGSLCT_TAB02.PVR
+type = 11
+
+[file.8]  # D_STGSLCT_TAB03.PVR
+type = 11
+
+[file.9]  # D_STGSLCT_TAB04.PVR
+type = 11
+
+[file.10]  # D_STGSLCT_TAB06.PVR
+type = 11
+
+[file.11]  # D_STGSLCT_TAB07.PVR
+type = 11
+
+[file.12]  # D_STGSLCT_TAB09.PVR
+type = 11
+
+[file.13]  # D_STGSLCT_TAB11.PVR
+type = 11
+
+[file.14]  # D_STGSLCT_TAB12.PVR
+type = 11
+
+[file.15]  # D_STGSLCT_ICON_EMER.PVR
+type = 11
+
+[file.16]  # D_STGSLCT_ICON_HATENA.PVR
+type = 11
+
+[file.17]  # D_STGSLCT_SCR_Z1A1.PVR
+type = 11
+
+[file.18]  # D_STGSLCT_SCR_Z1A2.PVR
+type = 11
+
+[file.19]  # D_STGSLCT_SCR_Z1A3.PVR
+type = 11
+
+[file.20]  # D_STGSLCT_SCR_Z2A1.PVR
+type = 11
+
+[file.21]  # D_STGSLCT_SCR_Z2A2.PVR
+type = 11
+
+[file.22]  # D_STGSLCT_SCR_Z2A3.PVR
+type = 11
+
+[file.23]  # D_STGSLCT_SCR_Z3A1.PVR
+type = 11
+
+[file.24]  # D_STGSLCT_SCR_Z3A2.PVR
+type = 11
+
+[file.25]  # D_STGSLCT_SCR_Z3A3.PVR
+type = 11
+
+[file.26]  # D_STGSLCT_SCR_Z4A1.PVR
+type = 11
+
+[file.27]  # D_STGSLCT_SCR_Z4A2.PVR
+type = 11
+
+[file.28]  # D_STGSLCT_SCR_Z4A3.PVR
+type = 11
+
+[file.29]  # D_STGSLCT_SCR_Z5A1.PVR
+type = 11
+
+[file.30]  # D_STGSLCT_SCR_Z6A1.PVR
+type = 11
+
+[file.31]  # D_STGSLCT_SCR_1.PVR
+type = 11
+
+[file.32]  # D_STGSLCT_SCR_2.PVR
+type = 11
+
+[file.33]  # D_STGSLCT_SCR_3.PVR
+type = 11
+
+[file.34]  # D_STGSLCT_TAB_SCORE.PVR
+type = 11
+
+[file.35]  # D_STGSLCT_TEX_SCTM_JP.PVR
+type = 11
+
+[file.36]  # D_STGSLCT_BG_Z1_LT.PVR
+type = 11
+
+[file.37]  # D_STGSLCT_BG_Z2_LT.PVR
+type = 11
+
+[file.38]  # D_STGSLCT_BG_Z3_LT.PVR
+type = 11
+
+[file.39]  # D_STGSLCT_BG_Z4_LT.PVR
+type = 11
+
+[file.40]  # D_STGSLCT_BG_Z5_LT.PVR
+type = 11
+
+[file.41]  # D_STGSLCT_BG_Z6_LT.PVR
+type = 11
+
+[file.42]  # D_STGSLCT_BG_Z1_LB.PVR
+type = 11
+
+[file.43]  # D_STGSLCT_BG_Z2_LB.PVR
+type = 11
+
+[file.44]  # D_STGSLCT_BG_Z3_LB.PVR
+type = 11
+
+[file.45]  # D_STGSLCT_BG_Z4_LB.PVR
+type = 11
+
+[file.46]  # D_STGSLCT_BG_Z5_LB.PVR
+type = 11
+
+[file.47]  # D_STGSLCT_BG_Z6_LB.PVR
+type = 11
+
+[file.48]  # D_STGSLCT_BG_Z1_RT.PVR
+type = 11
+
+[file.49]  # D_STGSLCT_BG_Z2_RT.PVR
+type = 11
+
+[file.50]  # D_STGSLCT_BG_Z3_RT.PVR
+type = 11
+
+[file.51]  # D_STGSLCT_BG_Z4_RT.PVR
+type = 11
+
+[file.52]  # D_STGSLCT_BG_Z5_RT.PVR
+type = 11
+
+[file.53]  # D_STGSLCT_BG_Z6_RT.PVR
+type = 11
+
+[file.54]  # D_STGSLCT_BG_Z1_RB.PVR
+type = 11
+
+[file.55]  # D_STGSLCT_BG_Z2_RB.PVR
+type = 11
+
+[file.56]  # D_STGSLCT_BG_Z3_RB.PVR
+type = 11
+
+[file.57]  # D_STGSLCT_BG_Z4_RB.PVR
+type = 11
+
+[file.58]  # D_STGSLCT_BG_Z5_RB.PVR
+type = 11
+
+[file.59]  # D_STGSLCT_BG_Z6_RB.PVR
+type = 11
+
+[file.60]  # D_STGSLCT_TEX_Z1_1_JP.PVR
+type = 11
+
+[file.61]  # D_STGSLCT_TEX_Z2_1_JP.PVR
+type = 11
+
+[file.62]  # D_STGSLCT_TEX_Z3_1_JP.PVR
+type = 11
+
+[file.63]  # D_STGSLCT_TEX_Z4_1_JP.PVR
+type = 11
+
+[file.64]  # D_STGSLCT_TEX_FINAL_1_JP.PVR
+type = 11
+
+[file.65]  # D_STGSLCT_TEX_Z1_2_JP.PVR
+type = 11
+
+[file.66]  # D_STGSLCT_TEX_Z2_2_JP.PVR
+type = 11
+
+[file.67]  # D_STGSLCT_TEX_Z3_2_JP.PVR
+type = 11
+
+[file.68]  # D_STGSLCT_TEX_Z4_2_JP.PVR
+type = 11
+
+[file.69]  # D_STGSLCT_TEX_FINAL_JP.PVR
+type = 11
+
+[file.70]  # D_STGSLCT_BG.PVR
+type = 11
+
+[file.71]  # D_STGSLCT_TEX_Z1_S_JP.PVR
+type = 11
+
+[file.72]  # D_STGSLCT_TEX_Z2_S_JP.PVR
+type = 11
+
+[file.73]  # D_STGSLCT_TEX_Z3_S_JP.PVR
+type = 11
+
+[file.74]  # D_STGSLCT_TEX_Z4_S_JP.PVR
+type = 11
+
+[file.75]  # D_STGSLCT_TEX_Z5_S_JP.PVR
+type = 11
+
+[file.76]  # STGSLCT_EFFECTS.PVR
+type = 11

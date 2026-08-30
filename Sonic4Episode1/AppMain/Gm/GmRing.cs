@@ -50,11 +50,14 @@
     public const int GMD_RING_BLINK_TIMER = 32;
     public const int GMD_RING_DAMAGE_NUM_MAX = 4;
 
-    private const bool RING_AS_MODEL = false;
+    public const string GMD_RING_MDL_FILENAME = "G_COM/RING/RING_MDL.AMB";
+
+    // the 3D ring model only exists in the console variant, mobile ships a UV-scrolled billboard
+    private static bool gm_ring_as_model;
 
     public static GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_common = new GMS_GAMEDAT_LOAD_DATA[]
     {
-        new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 2),
+        new GMS_GAMEDAT_LOAD_DATA(GMD_RING_MDL_FILENAME, gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 2),
         new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 3),
         new GMS_GAMEDAT_LOAD_DATA("G_COM/RING/RING_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostRing, 4),
         new GMS_GAMEDAT_LOAD_DATA("G_COM/CPIT/CPIT_MAIN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostCockpit, -1)
@@ -67,6 +70,7 @@
 
     public static void GmRingBuild()
     {
+        gm_ring_as_model = amFsResolvedVariant(GMD_RING_MDL_FILENAME) == AMD_FS_VARIANT_CONSOLE;
         gm_ring_obj_3d = new OBS_ACTION3D_NN_WORK();
         ObjAction3dNNModelLoad(gm_ring_obj_3d, null, null, 0, readAMBFile((AMS_FS)ObjDataGet(GMD_DWORK_NO_RING_MODEL).pData), null, readAMBFile((AMS_FS)ObjDataGet(GMD_DWORK_NO_RING_TEX).pData), 0U);
     }
@@ -88,8 +92,7 @@
 
     public static void GmRingFlush()
     {
-        if (!RING_AS_MODEL)
-            ObjAction3dNNMotionRelease(gm_ring_obj_3d);
+        ObjAction3dNNMotionRelease(gm_ring_obj_3d);
         ObjAction3dNNModelRelease(gm_ring_obj_3d);
     }
 
@@ -97,11 +100,8 @@
     {
         if (!ObjAction3dNNModelLoadCheck(gm_ring_obj_3d))
             return 0;
-        if (!RING_AS_MODEL)
-        {
-            if (gm_ring_obj_3d.mat_mtn[0] == null)
-                ObjAction3dNNMaterialMotionLoad(gm_ring_obj_3d, 0, null, null, 0, readAMBFile(ObjDataGet(GMD_DWORK_NO_RING_MAT).pData));
-        }
+        if (!gm_ring_as_model && gm_ring_obj_3d.mat_mtn[0] == null)
+            ObjAction3dNNMaterialMotionLoad(gm_ring_obj_3d, 0, null, null, 0, readAMBFile(ObjDataGet(GMD_DWORK_NO_RING_MAT).pData));
         return 1;
     }
 
@@ -199,21 +199,35 @@
         gm_ring_sys_work.rec_func = new _rec_func_(gmRingHitFuncNormal);
         gm_ring_sys_work.col_func = new _ring_work_func_delegate_(gmRingMoveCollsion);
         gm_ring_sys_work.ref_spd_base = 8192;
+
+        if (gm_ring_as_model)
+            gmRingInitModel();
+        else
+            gmRingInitBillboard();
+    }
+
+    // the model draws per ring, so it has no batch to open or flush and leaves those two null
+    private static void gmRingInitModel()
+    {
         gm_ring_sys_work.ring_draw_func = new _ring_work_func_delegate_(gmRingDrawFuncRing3D);
+        gm_ring_sys_work.ring_update_func = new _ring_sys_func_delegate_(gmRingUpdateSpinModel);
+    }
 
+    private static void gmRingInitBillboard()
+    {
+        gm_ring_sys_work.ring_draw_func = new _ring_work_func_delegate_(gmRingDrawFuncRingBillboard);
+        gm_ring_sys_work.ring_update_func = new _ring_sys_func_delegate_(gmRingUpdateSpinBillboard);
+        gm_ring_sys_work.ring_draw_begin_func = new _ring_sys_func_delegate_(gmRingDrawBeginBillboard);
+        gm_ring_sys_work.ring_draw_end_func = new _ring_sys_func_delegate_(gmRingDrawEndBillboard);
 
-        if (!RING_AS_MODEL)
-        {
-            gm_ring_sys_work.se_wait = 0;
-            gm_ring_sys_work.color = uint.MaxValue;
-            if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
-                gm_ring_sys_work.color = 4292927743U;
-            else if (g_gs_main_sys_info.stage_id == 14)
-                gm_ring_sys_work.color = 3233857791U;
-            gm_ring_sys_work.dir = 49152;
-            ObjDrawAction3dActionSet3DNNMaterial(gm_ring_obj_3d, 0);
-        }
-
+        gm_ring_sys_work.se_wait = 0;
+        gm_ring_sys_work.color = uint.MaxValue;
+        if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
+            gm_ring_sys_work.color = 4292927743U;
+        else if (g_gs_main_sys_info.stage_id == 14)
+            gm_ring_sys_work.color = 3233857791U;
+        gm_ring_sys_work.dir = GMD_RING_ROT_FRONT;
+        ObjDrawAction3dActionSet3DNNMaterial(gm_ring_obj_3d, 0);
     }
 
     private static void gmRingMain(MTS_TASK_TCB tcb)
@@ -231,7 +245,7 @@
 
         if (gm_ring_sys_work.se_wait > 0)
             --gm_ring_sys_work.se_wait;
-        gmRingDrawBegin();
+        gm_ring_sys_work.ring_draw_begin_func?.Invoke();
 
         if (ObjObjectPauseCheck(0U) != 0U)
         {
@@ -254,7 +268,7 @@
             DrawRingList(gm_ring_sys_work.damage_ring_list_start);
             DrawRingList(gm_ring_sys_work.slot_ring_list_start);
 
-            gmRingDrawEnd();
+            gm_ring_sys_work.ring_draw_end_func?.Invoke();
 
             if (!(betterSfx || modernSfx))
                 gm_ring_sys_work.ring_se_cnt = 0;
@@ -319,17 +333,7 @@
         ring_rect.back = GMD_RING_HIT_BACK;
         ring_rect.front = GMD_RING_HIT_FRONT;
 
-        if (RING_AS_MODEL)
-        {
-            gm_ring_sys_work.dir += GMD_RING_ROT_SPD;
-            var motion_flag = OBD_DISP_REPEAT;
-            ObjDrawAction3DNNMaterialUpdate(gm_ring_obj_3d, ref motion_flag);
-        }
-        else
-        {
-            if (++gm_ring_sys_work.draw_ring_uv_frame >= 64)
-                gm_ring_sys_work.draw_ring_uv_frame = 0;
-        }
+        gm_ring_sys_work.ring_update_func();
 
         if (((int)g_gm_main_system.ply_work[0].player_flag & GMD_PLF_TRUCK_RIDE) != 0)
         {
@@ -516,7 +520,7 @@
                 }
             }
         }
-        gmRingDrawEnd();
+        gm_ring_sys_work.ring_draw_end_func?.Invoke();
         if (!(betterSfx || modernSfx))
             gm_ring_sys_work.ring_se_cnt = 0;
     }
@@ -532,16 +536,23 @@
         return ObjRectCheck(ply_rect, ring_rect);
     }
 
-    private static void gmRingDrawBegin()
+    private static void gmRingUpdateSpinModel()
     {
-        if (RING_AS_MODEL)
-            return;
-
-        gm_ring_sys_work.draw_ring_count = 0;
-        return;
+        gm_ring_sys_work.dir += GMD_RING_ROT_SPD;
     }
 
-    private static void gmRingDrawEnd()
+    private static void gmRingUpdateSpinBillboard()
+    {
+        if (++gm_ring_sys_work.draw_ring_uv_frame >= GMD_RING_ROLL_UV_FRAME_MAX)
+            gm_ring_sys_work.draw_ring_uv_frame = 0;
+    }
+
+    private static void gmRingDrawBeginBillboard()
+    {
+        gm_ring_sys_work.draw_ring_count = 0;
+    }
+
+    private static void gmRingDrawEndBillboard()
     {
         if (gm_ring_sys_work.draw_ring_count <= 0 || !GmMainIsDrawEnable())
             return;
@@ -551,91 +562,72 @@
         dir.y = gm_ring_sys_work.dir;
         dir.z = GmMainGetObjectRotation();
 
-
-        if (RING_AS_MODEL)
+        GMS_RING_SYS_WORK gmRingSysWork = gm_ring_sys_work;
+        uint drawRingCount = gm_ring_sys_work.draw_ring_count;
+        SNNS_VECTOR disp_pos;
+        ObjCameraDispPosGet(0, out disp_pos);
+        float s1;
+        float c1;
+        nnSinCos(dir.z - 8192, out s1, out c1);
+        s1 *= 13.57638f;
+        float num1 = c1 * 13.57638f;
+        float s2;
+        float c2;
+        nnSinCos(dir.z - 24576, out s2, out c2);
+        float num2 = s2 * 13.57638f;
+        float num3 = c2 * 13.57638f;
+        VecFx32 vecFx32 = new VecFx32(gmRingSysWork.draw_ring_pos[0]);
+        SNNS_MATRIX snnsMatrix = new SNNS_MATRIX();
+        nnMakeUnitMatrix(ref snnsMatrix);
+        nnTranslateMatrix(ref snnsMatrix, ref snnsMatrix, FX_FX32_TO_F32(vecFx32.x), -FX_FX32_TO_F32(vecFx32.y), FX_FX32_TO_F32(vecFx32.z));
+        var dat = _AMS_PARAM_DRAW_PRIMITIVE;
+        dat.type = 1;
+        dat.count = 6 * (int)drawRingCount - 2;
+        dat.ablend = 0;
+        dat.bldSrc = 768;
+        dat.bldDst = 774;
+        dat.bldMode = 32774;
+        dat.aTest = 1;
+        dat.zMask = 0;
+        dat.zTest = 1;
+        dat.noSort = 1;
+        dat.texlist = gm_ring_obj_3d.texlist;
+        dat.texId = 0;
+        dat.uwrap = 1;
+        dat.vwrap = 1;
+        uint color = gm_ring_sys_work.color;
+        dat.vtxPCT3D = amDrawAlloc_NNS_PRIM3D_PCT(dat.count);
+        NNS_PRIM3D_PCT[] buffer = dat.vtxPCT3D.buffer;
+        int offset = dat.vtxPCT3D.offset;
+        dat.format3D = 4;
+        for (int index1 = 0; index1 < drawRingCount; ++index1)
         {
-            VecFx32 scale;
-            uint disp_flag = OBD_DISP_STOP;
-
-            scale.x = FX32_ONE;
-            scale.y = FX32_ONE;
-            scale.z = FX32_ONE;
-
-            //	model draw
-            for (int i = 0; i < gm_ring_sys_work.draw_ring_count; ++i)
-            {
-                ObjDrawAction3DNN(gm_ring_obj_3d, gm_ring_sys_work.draw_ring_pos[i], dir, scale, ref disp_flag);
-            }
+            int index2 = offset + 6 * index1;
+            ushort num4 = (ushort)(gm_ring_sys_work.draw_ring_uv_frame / 4U);
+            buffer[index2].Tex.u = buffer[index2 + 1].Tex.u = gm_ring_roll_uv[0][num4];
+            buffer[index2 + 2].Tex.u = buffer[index2 + 3].Tex.u = gm_ring_roll_uv[0][num4] + 0.25f;
+            buffer[index2].Tex.v = buffer[index2 + 2].Tex.v = gm_ring_roll_uv[1][num4];
+            buffer[index2 + 1].Tex.v = buffer[index2 + 3].Tex.v = gm_ring_roll_uv[1][num4] + 0.25f;
+            buffer[index2].Col = color;
+            buffer[index2 + 1].Col = buffer[index2 + 2].Col = buffer[index2 + 3].Col = buffer[index2].Col;
+            buffer[index2].Pos.x = s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+            buffer[index2 + 1].Pos.x = num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+            buffer[index2 + 2].Pos.x = -num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+            buffer[index2 + 3].Pos.x = -s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
+            buffer[index2].Pos.y = num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+            buffer[index2 + 1].Pos.y = num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+            buffer[index2 + 2].Pos.y = -num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+            buffer[index2 + 3].Pos.y = -num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
+            buffer[index2].Pos.z = buffer[index2 + 1].Pos.z = buffer[index2 + 2].Pos.z = buffer[index2 + 3].Pos.z = FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].z - vecFx32.z) - 1f;
+            if (index1 != 0)
+                buffer[index2 - 1] = buffer[index2];
+            if (index1 + 1 < drawRingCount)
+                buffer[index2 + 4] = buffer[index2 + 3];
         }
-        else
-        {
-            GMS_RING_SYS_WORK gmRingSysWork = gm_ring_sys_work;
-            uint drawRingCount = gm_ring_sys_work.draw_ring_count;
-            SNNS_VECTOR disp_pos;
-            ObjCameraDispPosGet(0, out disp_pos);
-            float s1;
-            float c1;
-            nnSinCos(dir.z - 8192, out s1, out c1);
-            s1 *= 13.57638f;
-            float num1 = c1 * 13.57638f;
-            float s2;
-            float c2;
-            nnSinCos(dir.z - 24576, out s2, out c2);
-            float num2 = s2 * 13.57638f;
-            float num3 = c2 * 13.57638f;
-            VecFx32 vecFx32 = new VecFx32(gmRingSysWork.draw_ring_pos[0]);
-            SNNS_MATRIX snnsMatrix = new SNNS_MATRIX();
-            nnMakeUnitMatrix(ref snnsMatrix);
-            nnTranslateMatrix(ref snnsMatrix, ref snnsMatrix, FX_FX32_TO_F32(vecFx32.x), -FX_FX32_TO_F32(vecFx32.y), FX_FX32_TO_F32(vecFx32.z));
-            var dat = _AMS_PARAM_DRAW_PRIMITIVE;
-            dat.type = 1;
-            dat.count = 6 * (int)drawRingCount - 2;
-            dat.ablend = 0;
-            dat.bldSrc = 768;
-            dat.bldDst = 774;
-            dat.bldMode = 32774;
-            dat.aTest = 1;
-            dat.zMask = 0;
-            dat.zTest = 1;
-            dat.noSort = 1;
-            dat.texlist = gm_ring_obj_3d.texlist;
-            dat.texId = 0;
-            dat.uwrap = 1;
-            dat.vwrap = 1;
-            uint color = gm_ring_sys_work.color;
-            dat.vtxPCT3D = amDrawAlloc_NNS_PRIM3D_PCT(dat.count);
-            NNS_PRIM3D_PCT[] buffer = dat.vtxPCT3D.buffer;
-            int offset = dat.vtxPCT3D.offset;
-            dat.format3D = 4;
-            for (int index1 = 0; index1 < drawRingCount; ++index1)
-            {
-                int index2 = offset + 6 * index1;
-                ushort num4 = (ushort)(gm_ring_sys_work.draw_ring_uv_frame / 4U);
-                buffer[index2].Tex.u = buffer[index2 + 1].Tex.u = gm_ring_roll_uv[0][num4];
-                buffer[index2 + 2].Tex.u = buffer[index2 + 3].Tex.u = gm_ring_roll_uv[0][num4] + 0.25f;
-                buffer[index2].Tex.v = buffer[index2 + 2].Tex.v = gm_ring_roll_uv[1][num4];
-                buffer[index2 + 1].Tex.v = buffer[index2 + 3].Tex.v = gm_ring_roll_uv[1][num4] + 0.25f;
-                buffer[index2].Col = color;
-                buffer[index2 + 1].Col = buffer[index2 + 2].Col = buffer[index2 + 3].Col = buffer[index2].Col;
-                buffer[index2].Pos.x = s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-                buffer[index2 + 1].Pos.x = num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-                buffer[index2 + 2].Pos.x = -num2 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-                buffer[index2 + 3].Pos.x = -s1 + FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].x - vecFx32.x);
-                buffer[index2].Pos.y = num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-                buffer[index2 + 1].Pos.y = num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-                buffer[index2 + 2].Pos.y = -num3 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-                buffer[index2 + 3].Pos.y = -num1 - FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].y - vecFx32.y);
-                buffer[index2].Pos.z = buffer[index2 + 1].Pos.z = buffer[index2 + 2].Pos.z = buffer[index2 + 3].Pos.z = FX_FX32_TO_F32(gmRingSysWork.draw_ring_pos[index1].z - vecFx32.z) - 1f;
-                if (index1 != 0)
-                    buffer[index2 - 1] = buffer[index2];
-                if (index1 + 1 < drawRingCount)
-                    buffer[index2 + 4] = buffer[index2 + 3];
-            }
-            dat.sortZ = nnDistanceVector(ref buffer[offset].Pos, ref disp_pos);
-            amMatrixPush(ref snnsMatrix);
-            ObjDraw3DNNDrawPrimitive(dat);
-            amMatrixPop();
-        }
+        dat.sortZ = nnDistanceVector(ref buffer[offset].Pos, ref disp_pos);
+        amMatrixPush(ref snnsMatrix);
+        ObjDraw3DNNDrawPrimitive(dat);
+        amMatrixPop();
     }
 
     private static void gmRingDest(MTS_TASK_TCB tcb)
@@ -813,19 +805,17 @@
         dir.y = gm_ring_sys_work.dir;
         dir.z = (ushort)-obsCamera.roll;
 
-        if (RING_AS_MODEL)
-        {
-            uint disp_flag = 0;
-            ObjDrawAction3DNN(gm_ring_obj_3d, ring_work.pos, dir, ring_work.scale, ref disp_flag);
-        }
-        else
-        {
-            int drawRingCount = gm_ring_sys_work.draw_ring_count;
-            gm_ring_sys_work.draw_ring_pos[drawRingCount].x = ring_work.pos.x;
-            gm_ring_sys_work.draw_ring_pos[drawRingCount].y = ring_work.pos.y;
-            gm_ring_sys_work.draw_ring_pos[drawRingCount].z = ring_work.pos.z;
-            ++gm_ring_sys_work.draw_ring_count;
-        }
+        uint disp_flag = 0;
+        ObjDrawAction3DNN(gm_ring_obj_3d, ring_work.pos, dir, ring_work.scale, ref disp_flag);
+    }
+
+    private static void gmRingDrawFuncRingBillboard(GMS_RING_WORK ring_work)
+    {
+        int drawRingCount = gm_ring_sys_work.draw_ring_count;
+        gm_ring_sys_work.draw_ring_pos[drawRingCount].x = ring_work.pos.x;
+        gm_ring_sys_work.draw_ring_pos[drawRingCount].y = ring_work.pos.y;
+        gm_ring_sys_work.draw_ring_pos[drawRingCount].z = ring_work.pos.z;
+        ++gm_ring_sys_work.draw_ring_count;
     }
 
     private static void GmRingGetSE()

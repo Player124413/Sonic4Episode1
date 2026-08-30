@@ -1,4 +1,6 @@
-﻿internal partial class AppMain
+﻿using System;
+
+internal partial class AppMain
 {
     private static void ObjAction3dNNModelLoad(
      OBS_ACTION3D_NN_WORK obj_3d,
@@ -95,7 +97,7 @@
         dest_obj_3d.reg_index = -1;
     }
 
-    private static void ObjObjectCopyAction3dNNModel(
+    internal static void ObjObjectCopyAction3dNNModel(
       OBS_OBJECT_WORK obj_work,
       OBS_ACTION3D_NN_WORK src_obj_3d,
       OBS_ACTION3D_NN_WORK dest_obj_3d)
@@ -297,19 +299,18 @@
             obj_3d.mtn[reg_file_id] = obj;
             if (data_work != null)
                 obj_3d.mtn_data_work[reg_file_id] = data_work;
+
+            AMS_AMB_HEADER amb = obj is AMS_AMB_HEADER || obj is AMS_FS ? readAMBFile(obj) : null;
             if (obj_3d.motion == null)
-                obj_3d.motion = amMotionCreate(obj_3d._object, motion_num, mmotion_num, marge ? 1 : 0);
-            switch (obj)
             {
-                case AMS_AMB_HEADER _:
-                case AMS_FS _:
-                    AMS_AMB_HEADER amb = readAMBFile(obj);
-                    amMotionRegistFile(obj_3d.motion, reg_file_id, amb);
-                    break;
-                default:
-                    amMotionRegistFile(obj_3d.motion, reg_file_id, obj);
-                    break;
+                int capacity = Math.Max(motion_num, mppCountArchiveMotions(amb));
+                obj_3d.motion = amMotionCreate(obj_3d._object, capacity, mmotion_num, marge ? 1 : 0);
             }
+
+            if (amb != null)
+                amMotionRegistFile(obj_3d.motion, reg_file_id, amb);
+            else
+                amMotionRegistFile(obj_3d.motion, reg_file_id, obj);
         }
     }
 
@@ -339,7 +340,7 @@
         ObjAction3dNNMotionLoad(obj_work.obj_3d, reg_file_id, marge, data_work, filename, index, archive, motion_num, mmotion_num);
     }
 
-    private static void ObjAction3dNNMaterialMotionLoad(
+    internal static void ObjAction3dNNMaterialMotionLoad(
       OBS_ACTION3D_NN_WORK obj_3d,
       int reg_file_id,
       OBS_DATA_WORK data_work,
@@ -350,7 +351,7 @@
         ObjAction3dNNMaterialMotionLoad(obj_3d, reg_file_id, data_work, filename, index, archive, 64, 16);
     }
 
-    private static void ObjAction3dNNMaterialMotionLoad(
+    internal static void ObjAction3dNNMaterialMotionLoad(
       OBS_ACTION3D_NN_WORK obj_3d,
       int reg_file_id,
       OBS_DATA_WORK data_work,
@@ -400,13 +401,18 @@
             obj_3d.mat_mtn[reg_file_id] = obj;
             if (data_work != null)
                 obj_3d.mat_mtn_data_work[reg_file_id] = data_work;
+
+            AMS_AMB_HEADER amb = obj is AMS_AMB_HEADER || obj is AMS_FS ? readAMBFile(obj) : null;
             if (obj_3d.motion == null)
-                obj_3d.motion = amMotionCreate(obj_3d._object, motion_num, mmotion_num, 0);
+            {
+                int capacity = Math.Max(mmotion_num, reg_file_id + mppCountArchiveMotions(amb));
+                obj_3d.motion = amMotionCreate(obj_3d._object, motion_num, capacity, 0);
+            }
+
             switch (obj)
             {
                 case AMS_AMB_HEADER _:
                 case AMS_FS _:
-                    AMS_AMB_HEADER amb = readAMBFile(obj);
                     amMotionMaterialRegistFile(obj_3d.motion, reg_file_id, amb);
                     break;
                 default:

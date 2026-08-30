@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family F1: float frame, one float. Single axis; all three together is Class5.
     internal struct NNS_MOTION_KEY_Class1
     {
         public float Frame;

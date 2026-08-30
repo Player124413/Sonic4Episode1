@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family BezierF1: F1 plus a Bezier handle
     internal class NNS_MOTION_KEY_Class2
     {
         public readonly NNS_MOTION_BEZIER_HANDLE Bhandle = new NNS_MOTION_BEZIER_HANDLE();

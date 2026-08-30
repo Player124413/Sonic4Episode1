@@ -103,11 +103,23 @@ internal partial class AppMain
         return (fSpd >> 1) + (fSpd >> 2);
     }
 
+    // model type count varies by asset set (mobile ships IPHONE/SPINJUMP, PC does not), so this
+    // comes from the loaded archive rather than a build-time constant
+    private static int gm_ply_model_type_num = GMD_PLY_MODEL_TYPE_MAX;
+
+    // folds model types the loaded asset set doesn't have back to NORMAL
+    private static int gmPlayerModelType(int char_id, int act_state)
+    {
+        int type = g_gm_player_model_tbl[char_id][act_state];
+        return type < gm_ply_model_type_num ? type : GMD_PLY_MODEL_TYPE_NORMAL;
+    }
+
     private static void GmPlayerBuild()
     {
         AMS_AMB_HEADER archive1 = readAMBFile((AMS_FS)g_gm_player_data_work[0][0].pData);
         AMS_AMB_HEADER amb_tex1 = readAMBFile((AMS_FS)g_gm_player_data_work[0][1].pData);
         g_gm_ply_son_obj_3d_list = New<OBS_ACTION3D_NN_WORK>(archive1.file_num);
+        gm_ply_model_type_num = Math.Min(archive1.file_num, GMD_PLY_MODEL_TYPE_MAX);
         ArrayPointer<OBS_ACTION3D_NN_WORK> arrayPointer =
             new ArrayPointer<OBS_ACTION3D_NN_WORK>(g_gm_ply_son_obj_3d_list);
         int index1 = 0;
@@ -424,7 +436,7 @@ internal partial class AppMain
         {
             OBS_ACTION3D_NN_WORK[] obsActioN3DNnWorkArray = gm_ply_obj_3d_list_tbl[ply_work.char_id][index1];
             int index2 = 0;
-            while (index2 < 4)
+            while (index2 < gm_ply_model_type_num)
             {
                 ObjCopyAction3dNNModel(obsActioN3DNnWorkArray[index2], arrayPointer);
                 (~arrayPointer).blend_spd = 0.25f;
@@ -441,21 +453,20 @@ internal partial class AppMain
         ObjObjectAction3dNNMotionLoad(objWork, 0, true, g_gm_player_data_work[ply_work.player_id][4], null, 0, null,
             136, 16);
         objWork.disp_flag |= 16777728U;
-        for (int index = 1; index < 8; ++index)
+        for (int index = 1; index < gm_ply_model_type_num * 2; ++index)
             ply_work.obj_3d_work[index].motion = ply_work.obj_3d_work[0].motion;
         GmPlayerSetModel(ply_work, 0);
     }
 
     private static void GmPlayerSetModel(GMS_PLAYER_WORK ply_work, int model_set)
     {
-        ply_work.obj_3d[0] = ply_work.obj_3d_work[model_set * 4];
-        ply_work.obj_3d[1] = ply_work.obj_3d_work[model_set * 4 + 1];
-        ply_work.obj_3d[2] = ply_work.obj_3d_work[model_set * 4 + 2];
-        ply_work.obj_3d[3] = ply_work.obj_3d_work[model_set * 4 + 3];
+        for (int type = 0; type < gm_ply_model_type_num; ++type)
+            ply_work.obj_3d[type] = ply_work.obj_3d_work[model_set * gm_ply_model_type_num + type];
+
         int index = ply_work.act_state;
         if (index == -1)
             index = 0;
-        ply_work.obj_work.obj_3d = ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][index]];
+        ply_work.obj_work.obj_3d = ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, index)];
     }
 
     private static void GmPlayerStateInit(GMS_PLAYER_WORK ply_work)
@@ -945,14 +956,14 @@ internal partial class AppMain
     {
         ply_work.prev_act_state = ply_work.act_state;
         ply_work.act_state = act_state;
-        ply_work.obj_work.obj_3d = ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][act_state]];
+        ply_work.obj_work.obj_3d = ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, act_state)];
         ply_work.obj_work.obj_3d.motion._object = ply_work.obj_work.obj_3d._object;
         int id = ((int)ply_work.obj_work.disp_flag & 1) == 0
             ? g_gm_player_motion_right_tbl[ply_work.char_id][act_state]
             : g_gm_player_motion_left_tbl[ply_work.char_id][act_state];
         if (ply_work.prev_act_state != -1 &&
-            g_gm_player_model_tbl[ply_work.char_id][act_state] ==
-            g_gm_player_model_tbl[ply_work.char_id][ply_work.prev_act_state] &&
+            gmPlayerModelType(ply_work.char_id, act_state) ==
+            gmPlayerModelType(ply_work.char_id, ply_work.prev_act_state) &&
             (g_gm_player_mtn_blend_setting_tbl[ply_work.char_id][ply_work.prev_act_state] != 0 &&
              g_gm_player_mtn_blend_setting_tbl[ply_work.char_id][act_state] != 0))
         {

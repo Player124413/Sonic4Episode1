@@ -1,5 +1,6 @@
 internal partial class AppMain
 {
+    // NN key family Quat_4: float frame, a quaternion. Not read by NNS_SUBMOTION yet, no fixture has any.
     internal class NNS_MOTION_KEY_Class7
     {
         public float Frame;

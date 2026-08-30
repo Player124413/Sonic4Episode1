@@ -205,8 +205,27 @@ internal partial class AppMain
         main_work.proc_menu_update = new _saveproc_input_update(dmSaveProcCreateAct);
     }
 
+    // mobile has no win_line, tex_wintitle or tex_ok at all; the C++ maps all three to 0 there
+    // (dmSave.cpp:296). tex_msg01..03 exist in both but sit at different ids.
+    private static readonly uint[] dm_save_act_id_tbl_console = new uint[]
+    {
+        IDA_D_CMN_WIN_ACT_WIN_LINE_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_WINTITLE_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_MSG01_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_MSG02_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_MSG03_PC,
+        IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC
+    };
+
     private static void dmSaveProcCreateAct(DMS_SAVE_MAIN_WORK main_work)
     {
+        var act_id_tbl = amFsAllVariant(
+            AMD_FS_VARIANT_CONSOLE,
+            DMD_MANUAL_CMN_DATA_FILENAME,
+            dm_save_menu_cmn_lng_amb_name_tbl[GsEnvGetLanguage()])
+            ? dm_save_act_id_tbl_console
+            : g_dm_act_id_tbl;
+
         for (uint index = 0; index < 6U; ++index)
         {
             A2S_AMA_HEADER ama;
@@ -223,7 +242,7 @@ internal partial class AppMain
             }
 
             AoActSetTexture(AoTexGetTexList(tex));
-            main_work.act[(int) index] = AoActCreate(ama, g_dm_act_id_tbl[(int) index]);
+            main_work.act[(int) index] = AoActCreate(ama, act_id_tbl[(int) index]);
             dm_save_act[(int) index] = main_work.act[(int) index];
         }
 

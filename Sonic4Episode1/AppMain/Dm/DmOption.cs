@@ -169,9 +169,13 @@ internal partial class AppMain
     {
         main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/OPTION/D_OPTION.AMB");
         main_work.arc_amb_fs[1] = amFsReadBackground(dm_opt_main_lng_amb_name_tbl[GsEnvGetLanguage()]);
+        // pinned to the base archives: g_dm_act_id_tbl_opt is the mobile vocabulary and forks from
+        // entry 0 on console (dmOption.cpp:909). drop the pin when that table gains a console pair.
         for (int index = 0; index < 4; ++index)
-            main_work.arc_cmn_amb_fs[index] = amFsReadBackground(dm_opt_menu_cmn_amb_name_tbl[index]);
-        main_work.arc_cmn_amb_fs[4] = amFsReadBackground(dm_opt_menu_cmn_lng_amb_name_tbl[GsEnvGetLanguage()]);
+            main_work.arc_cmn_amb_fs[index] =
+                amFsReadBackgroundAs(dm_opt_menu_cmn_amb_name_tbl[index], AMD_FS_VARIANT_BASE);
+        main_work.arc_cmn_amb_fs[4] = amFsReadBackgroundAs(
+            dm_opt_menu_cmn_lng_amb_name_tbl[GsEnvGetLanguage()], AMD_FS_VARIANT_BASE);
         main_work.manual_arc_amb_fs[0] = amFsReadBackground("DEMO/MANUAL/D_MANUAL.AMB");
         main_work.manual_arc_amb_fs[1] = amFsReadBackground(dm_opt_manual_file_lng_amb_name_tbl[GsEnvGetLanguage()]);
         main_work.proc_update = new DMS_OPT_MAIN_WORK._proc_update_(dmOptProcLoadWait);

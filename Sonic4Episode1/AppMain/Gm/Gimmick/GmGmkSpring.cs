@@ -61,16 +61,10 @@
         else
         {
             int nMaterial = work.obj_3d._object.nMaterial;
-            // TODO: why is this needed, some weird pointer shit?
-            if (nMaterial == 1 || work.obj_3d._object.pMatPtrList[0].pMaterial is NNS_MATERIAL_GLES11_DESC)
+            for (int index2 = 0; index2 < nMaterial; ++index2)
             {
-                ((NNS_MATERIAL_GLES11_DESC)work.obj_3d._object.pMatPtrList[0].pMaterial).fFlag |= 3U;
-            }
-            else
-            {
-                NNS_MATERIAL_GLES11_DESC[] pMaterial = (NNS_MATERIAL_GLES11_DESC[])work.obj_3d._object.pMatPtrList[0].pMaterial;
-                for (int index2 = 0; index2 < nMaterial; ++index2)
-                    pMaterial[index2].fFlag |= 3U;
+                NNS_MATERIALPTR matptr = work.obj_3d._object.pMatPtrList[index2];
+                mppSetMaterialFlag(matptr, mppMaterialFlag(matptr) | 3U);
             }
         }
         work.flag |= 1073741824U;

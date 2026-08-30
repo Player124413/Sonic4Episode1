@@ -119,7 +119,7 @@ partial class AppMain
         return false;
     }
 
-    private static void GsRebootSetTitle()
+    internal static void GsRebootSetTitle()
     {
     }
 

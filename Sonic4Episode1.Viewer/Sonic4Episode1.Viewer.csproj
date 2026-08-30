@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- mirrors Sonic4Episode1.FNA minus HAS_DISCORD; AoPresence.cs guards all of it -->
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
+  </PropertyGroup>
+
+  <!-- real NN: the viewer parses with the same code the game does -->
+  <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+
+  <!-- brings the nnstdshader permutations in as Content\Shaders\*.fxb, along with the game's
+       three stock effects, which cost nothing here -->
+  <Import Project="..\Shaders\Shaders.targets" />
+
+  <ItemGroup>
+    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <!-- FNA needs these beside the exe; the game project's copies were placed by hand -->
+  <ItemGroup>
+    <None Include="..\Dependencies\FNA\lib\FNA3D.dll;..\Dependencies\FNA\lib\SDL3.dll;..\Dependencies\FNA\lib\FAudio.dll"
+          Link="%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

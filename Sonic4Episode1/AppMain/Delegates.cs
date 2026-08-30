@@ -139,6 +139,8 @@ internal partial class AppMain
 
     public delegate void _ring_work_func_delegate_(GMS_RING_WORK gms_ring_work);
 
+    public delegate void _ring_sys_func_delegate_();
+
     public delegate ushort _rec_func_(OBS_RECT obs_rect1, OBS_RECT obs_rect2);
 
     public delegate void OBS_RECT_WORK_Delegate1(

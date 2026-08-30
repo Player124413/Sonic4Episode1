@@ -1,0 +1,1781 @@
+/*---------------------------------------------------------------------------
+
+    NN Library for DirectX G2.0 Standard Pixel Shader
+
+    Copyright (C) 2008 SEGA Corporation Creative Center Graphics Sect.
+    All Rights Reserved.
+
+    Module  : NN Standard Shader
+    File    : nnstdshader.psh
+    Create  : 2008/05/12 Ver.0.01.00
+    Modify  : 2008/09/05 Ver.1.00.01
+                ドライバの不具合と思われる原因不明の現象が発生した為 frac 関数をコメントして
+                次のように変更して回避した。
+	              lerps = tp.xy - floor(tp.xy);
+                不具合が発生したビデオカードは
+                ・Quadro FX 4500(ドライバ169.96)
+    Modify  : 2008/09/24 Ver.1.00.02 NND_OPT_NORMALMAP_AXLY が宣言されてないときデフォルト宣言がなかったので追加。
+    Modify  : 2008/11/07 Ver.1.00.03 ２面ライティングの不具合修正。
+    Modify  : 2009/03/03 Ver.1.00.04 警告メッセージを取り除いた。
+    Modify  : 2009/06/16 Ver.1.00.05 整理。
+    Version : 1.00.05
+    Note    : 
+
+---------------------------------------------------------------------------*/
+#pragma warning(disable:3557)	// warning X3557: Loop only executes for 1 iteration(s), forcing loop to unroll
+
+/*------ Declarations (プロファイル定数) ----------------------------------*/
+
+/* 変換後法線正規化 */
+#ifndef NND_PROF_NORMALIZE_VTX_NORMAL
+	#define NND_PROF_NORMALIZE_VTX_NORMAL		(1)			/* bool */
+#endif
+
+/* 変換後法線再スケール */
+#ifndef NND_PROF_RESCALE_NORMAL
+	#define NND_PROF_RESCALE_NORMAL				(0)			/* bool */
+#endif
+
+/* 頂点スペキュラーカラー */
+#ifndef NND_PROF_VTX_SPECULAR
+	#define NND_PROF_VTX_SPECULAR				(1)			/* bool */
+#endif
+
+/* 最大パラレルライト数 */
+#ifndef NND_PROF_MAX_PARALLEL_LIGHT
+	#define NND_PROF_MAX_PARALLEL_LIGHT			(4)			/* int 0～4 */
+#endif
+
+/* 最大ポイントライト数 */
+#ifndef NND_PROF_MAX_POINT_LIGHT
+	#define NND_PROF_MAX_POINT_LIGHT			(2)			/* int 0～4 */
+#endif
+
+/* 最大スポットライト数 */
+#ifndef NND_PROF_MAX_SPOT_LIGHT
+	#define NND_PROF_MAX_SPOT_LIGHT				(1)			/* int 0～4 */
+#endif
+
+#define NND_PROF_MAX_LIGHT						( NND_PROF_MAX_PARALLEL_LIGHT + NND_PROF_MAX_POINT_LIGHT + NND_PROF_MAX_SPOT_LIGHT )
+
+/* ライトアンビエントパラメータ有効 */
+#ifndef NND_PROF_LIGHT_AMBIENT
+	#define NND_PROF_LIGHT_AMBIENT				(0)			/* bool */
+#endif
+
+/* ポイントライト距離減衰モデル */
+#ifndef NND_PROF_POINTLIGHT_DISTATTEN
+	#define NND_PROF_POINTLIGHT_DISTATTEN		(0)
+										/* 0: 減衰なし 1: 逆 2: 逆２乗 */
+#endif
+
+/* スポットライト距離減衰モデル */
+#ifndef NND_PROF_SPOTLIGHT_DISTATTEN
+	#define NND_PROF_SPOTLIGHT_DISTATTEN		(0)
+										/* 0: 減衰なし 1: 逆 2: 逆２乗 */
+#endif
+
+/* 従法線を法線接線から計算 */
+#ifndef NND_PROF_CALC_VTX_BINORMAL
+	#define NND_PROF_CALC_VTX_BINORMAL			(1)			/* bool */
+#endif
+
+/* フォグモデル */
+#ifndef NND_PROF_FOG_MODEL	
+	#define NND_PROF_FOG_MODEL					(0)			/* 0:フォグなし 1:LINEAR 2:EXP 3:EXP2 */
+#endif
+
+/* 距離フォグ */
+#ifndef NND_PROF_DISTANCE_FOG
+	#define NND_PROF_DISTANCE_FOG				(1)			/* bool */
+#endif
+
+/* フラグメント単位のフォグ計算 */
+#ifndef NND_PROF_FRAG_FOG
+	#define NND_PROF_FRAG_FOG					(1)			/* bool */
+#endif
+
+/* 最大ユーザーユニフォーム数 */
+#ifndef NND_PROF_MAX_USER_UNIFORM
+	#define NND_PROF_MAX_USER_UNIFORM			(4)			/* int */
+#endif
+
+/*------ Declarations (シェーダ最適化プロファイル定数) --------------------*/
+
+/* 頂点カラーあるなし */
+#ifndef NND_OPT_VTX_COLOR
+	#define NND_OPT_VTX_COLOR					(0)			/* bool 0:頂点カラーなし 1:頂点カラーあり */
+#endif
+
+/* 頂点変換方式 */
+#ifndef NND_OPT_VTX_TFM_MODE
+	#define NND_OPT_VTX_TFM_MODE				(0)
+#endif
+#define NND_OPT_VTX_TFM_MODE_RIGID				(0)		// リジット
+#define NND_OPT_VTX_TFM_MODE_PLIABLE_B4			(1)		// プライアブル
+#define NND_OPT_VTX_TFM_MODE_PLIABLE_B32		(2)		// プライアブル
+#define NND_OPT_VTX_TFM_MODE_TFM				(3)		// -
+
+/* ライティングをする */
+#ifndef NND_OPT_LIGHTING
+	#define NND_OPT_LIGHTING					(1)			/* bool */
+#endif
+
+/* フラグメント単位ライティングをする */
+#ifndef NND_OPT_FRAG_LIGHTING
+	#define NND_OPT_FRAG_LIGHTING				(1)			/* bool */
+#endif
+
+/* フラグメント単位ライティングパラレルライト数 */
+#ifndef NND_OPT_NUM_FRAG_PARALLEL_LIGHT
+	#define NND_OPT_NUM_FRAG_PARALLEL_LIGHT		(1)
+#endif
+
+/* フラグメント単位ライティングポイントライト数 */
+#ifndef NND_OPT_NUM_FRAG_POINT_LIGHT
+	#define NND_OPT_NUM_FRAG_POINT_LIGHT		(0)
+#endif
+
+/* フラグメント単位ライティングスポットライト数 */
+#ifndef NND_OPT_NUM_FRAG_SPOT_LIGHT
+	#define NND_OPT_NUM_FRAG_SPOT_LIGHT			(0)
+#endif
+
+/* スペキュラ有効 */
+#ifndef NND_OPT_SPECULAR
+	#define NND_OPT_SPECULAR					(1)			/* bool */
+#endif
+
+/* 二面ライティングを行なう */
+#ifndef NND_OPT_TWOSIDED_LIGHTING
+	#define NND_OPT_TWOSIDED_LIGHTING			(0)			/* bool */
+#endif
+
+/* 接線、従法線を計算する */
+#ifndef NND_OPT_TANGENT_SPACE
+	#define NND_OPT_TANGENT_SPACE				(0)			/* bool */
+#endif
+
+/* 圧縮タンジェントスペース法線マップを使用する */
+#ifndef NND_OPT_NORMALMAP_AXLY
+	#define NND_OPT_NORMALMAP_AXLY				(0)			/* bool */
+#endif
+
+/* テクスチャ座標の最大数 */
+#ifndef NND_OPT_MAX_TEXCOORD
+	#define NND_OPT_MAX_TEXCOORD				(0)			/* int 0～4 */
+#endif
+
+/* テクスチャマップの最大数 */
+#ifndef NND_OPT_MAX_TEXMAP
+	#define NND_OPT_MAX_TEXMAP					(0)
+#endif
+
+/* 法線マップインデックス */
+#ifndef NND_OPT_TEX_NORMAL
+	#define NND_OPT_TEX_NORMAL					(-1)
+#endif
+
+/* 法線マップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_NORMAL
+	#define NND_OPT_TEXCOORD_NORMAL				(-1)
+#endif
+
+/* ベースディフューズマップインデックス */
+#ifndef NND_OPT_TEX_BASE
+	#define NND_OPT_TEX_BASE					(-1)
+#endif
+
+/* ベースディフューズテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_BASE
+	#define NND_OPT_TEXCOORD_BASE				(-1)
+#endif
+
+/* デカールマップインデックス */
+#ifndef NND_OPT_TEX_DECAL
+	#define NND_OPT_TEX_DECAL					(-1)
+#endif
+
+/* デカールマップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_DECAL
+	#define NND_OPT_TEXCOORD_DECAL				(-1)
+#endif
+
+/* デカールマップ２インデックス */
+#ifndef NND_OPT_TEX_DECAL2
+	#define NND_OPT_TEX_DECAL2					(-1)
+#endif
+
+/* デカールマップ２テクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_DECAL2
+	#define NND_OPT_TEXCOORD_DECAL2				(-1)
+#endif
+
+/* デカールマップ３インデックス */
+#ifndef NND_OPT_TEX_DECAL3
+	#define NND_OPT_TEX_DECAL3					(-1)
+#endif
+
+/* デカールマップ３テクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_DECAL3
+	#define NND_OPT_TEXCOORD_DECAL3				(-1)
+#endif
+
+/* スペキュラマップインデクス */
+#ifndef NND_OPT_TEX_SPECULAR
+	#define NND_OPT_TEX_SPECULAR				(-1)
+#endif
+
+/* スペキュラマップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_SPECULAR
+	#define NND_OPT_TEXCOORD_SPECULAR			(-1)
+#endif
+
+/* スペキュラ光沢度マップインデクス */
+#ifndef NND_OPT_TEX_SHININESS
+	#define NND_OPT_TEX_SHININESS				(-1)
+#endif
+
+/* スペキュラ光沢度マップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_SHININESS
+	#define NND_OPT_TEXCOORD_SHININESS			(-1)
+#endif
+
+/* 双方物面環境マップインデクス */
+#ifndef NND_OPT_TEX_DUALPARABOLOID
+	#define NND_OPT_TEX_DUALPARABOLOID			(-1)
+#endif
+
+#if 0 /* 2008.06.23(必要ない) */
+/* 双方物面環境マップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_DUALPARABOLOID
+	#define NND_OPT_TEXCOORD_DUALPARABOLOID		(-1)
+#endif
+#endif
+
+/* 環境マスクマップインデクス */
+#ifndef NND_OPT_TEX_ENVMASK
+	#define NND_OPT_TEX_ENVMASK					(-1)
+#endif
+
+/* 環境マスクマップテクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_ENVMASK
+	#define NND_OPT_TEXCOORD_ENVMASK			(-1)
+#endif
+
+/* 乗算テクスチャインデックス */
+#ifndef NND_OPT_TEX_MODULATE
+	#define NND_OPT_TEX_MODULATE				(-1)
+#endif
+
+/* 乗算テクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_MODULATE
+	#define NND_OPT_TEXCOORD_MODULATE			(-1)
+#endif
+
+/* 加算テクスチャインデックス */
+#ifndef NND_OPT_TEX_ADD
+	#define NND_OPT_TEX_ADD						(-1)
+#endif
+
+/* 加算テクスチャ座標種別 */
+#ifndef NND_OPT_TEXCOORD_ADD
+	#define NND_OPT_TEXCOORD_ADD				(-1)
+#endif
+
+/* 不透明度テクスチャインデックス */
+#ifndef NND_OPT_TEX_OPACITY
+	#define NND_OPT_TEX_OPACITY					(-1)
+#endif
+
+/* 不透明度テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_OPACITY
+	#define NND_OPT_TEXCOORD_OPACITY			(-1)
+#endif
+
+/* シャドウマップインデックス */
+#ifndef NND_OPT_TEX_SHADOW
+	#define NND_OPT_TEX_SHADOW					(-1)
+#endif
+
+/* シャドウマップ２インデックス */
+#ifndef NND_OPT_TEX_SHADOW2
+	#define NND_OPT_TEX_SHADOW2					(-1)
+#endif
+
+/* ユーザーマップ１インデックス */
+#ifndef NND_OPT_TEX_USER1
+	#define NND_OPT_TEX_USER1					(-1)
+#endif
+
+/* ユーザーマップ１テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER1
+	#define NND_OPT_TEXCOORD_USER1				(-1)
+#endif
+
+/* ユーザーマップ２インデックス */
+#ifndef NND_OPT_TEX_USER2
+	#define NND_OPT_TEX_USER2					(-1)
+#endif
+
+/* ユーザーマップ２テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER2
+	#define NND_OPT_TEXCOORD_USER2				(-1)
+#endif
+
+/* ユーザーマップ３インデックス */
+#ifndef NND_OPT_TEX_USER3
+	#define NND_OPT_TEX_USER3					(-1)
+#endif
+
+/* ユーザーマップ３テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER3
+	#define NND_OPT_TEXCOORD_USER3				(-1)
+#endif
+
+/* ユーザーマップ４インデックス */
+#ifndef NND_OPT_TEX_USER4
+	#define NND_OPT_TEX_USER4					(-1)
+#endif
+
+/* ユーザーマップ４テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER4
+	#define NND_OPT_TEXCOORD_USER4				(-1)
+#endif
+
+/* ユーザーマップ５インデックス */
+#ifndef NND_OPT_TEX_USER5
+	#define NND_OPT_TEX_USER5					(-1)
+#endif
+
+/* ユーザーマップ５テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER5
+	#define NND_OPT_TEXCOORD_USER5				(-1)
+#endif
+
+/* ユーザーマップ６インデックス */
+#ifndef NND_OPT_TEX_USER6
+	#define NND_OPT_TEX_USER6					(-1)
+#endif
+
+/* ユーザーマップ６テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER6
+	#define NND_OPT_TEXCOORD_USER6				(-1)
+#endif
+
+/* ユーザーマップ７インデックス */
+#ifndef NND_OPT_TEX_USER7
+	#define NND_OPT_TEX_USER7					(-1)
+#endif
+
+/* ユーザーマップ７テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER7
+	#define NND_OPT_TEXCOORD_USER7				(-1)
+#endif
+
+/* ユーザーマップ８インデックス */
+#ifndef NND_OPT_TEX_USER8
+	#define NND_OPT_TEX_USER8					(-1)
+#endif
+
+/* ユーザーマップ８テクスチャ座標インデックス */
+#ifndef NND_OPT_TEXCOORD_USER8
+	#define NND_OPT_TEXCOORD_USER8				(-1)
+#endif
+
+/* ユーザーサンプラー２Ｄマップ１インデックス */
+#ifndef NND_OPT_TEX_SAMPLER2D1
+	#define NND_OPT_TEX_SAMPLER2D1				(-1)
+#endif
+
+/* ユーザーサンプラー２Ｄマップ２インデックス */
+#ifndef NND_OPT_TEX_SAMPLER2D2
+	#define NND_OPT_TEX_SAMPLER2D2				(-1)
+#endif
+
+/* ユーザーサンプラー３Ｄマップ１インデックス */
+#ifndef NND_OPT_TEX_SAMPLER3D1
+	#define NND_OPT_TEX_SAMPLER3D1				(-1)
+#endif
+
+/* ユーザーサンプラー３Ｄマップ２インデックス */
+#ifndef NND_OPT_TEX_SAMPLER3D2
+	#define NND_OPT_TEX_SAMPLER3D2				(-1)
+#endif
+
+/* ユーザーサンプラーキューブマップ１インデックス */
+#ifndef NND_OPT_TEX_SAMPLERCUBE1
+	#define NND_OPT_TEX_SAMPLERCUBE1			(-1)
+#endif
+
+/* ユーザーサンプラーキューブマップ２インデックス */
+#ifndef NND_OPT_TEX_SAMPLERCUBE2
+	#define NND_OPT_TEX_SAMPLERCUBE2			(-1)
+#endif
+
+/****************************/
+/* ユーザープロファイル定数 */
+/****************************/
+#ifndef NND_USER_PROFILE
+	#define NND_USER_PROFILE					(0)			/* 0 .. 15 */
+#endif
+
+/* スペキュラカラー定数 */
+#if NND_OPT_SPECULAR
+#define NND_OUTPUT_COLOR_NUM					(2)
+#else
+#define NND_OUTPUT_COLOR_NUM					(1)
+#endif
+
+/* バンプスフィアマップ */
+#if ( NND_OPT_FRAG_LIGHTING && \
+    ( ( NND_OPT_TEXCOORD_ADD == -1 ) || \
+      ( NND_OPT_TEXCOORD_BASE == -1 ) || \
+      ( NND_OPT_TEXCOORD_DECAL == -1 ) || \
+      ( NND_OPT_TEXCOORD_DECAL2 == -1 ) || \
+      ( NND_OPT_TEXCOORD_DECAL3 == -1 ) || \
+      ( NND_OPT_TEXCOORD_SPECULAR == -1 ) || \
+      ( NND_OPT_TEXCOORD_SHININESS == -1 ) || \
+      ( NND_OPT_TEXCOORD_MODULATE == -1 ) || \
+      ( NND_OPT_TEXCOORD_ADD == -1 ) || \
+      ( NND_OPT_TEXCOORD_OPACITY == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER1 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER2 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER3 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER4 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER5 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER6 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER7 == -1 ) || \
+      ( NND_OPT_TEXCOORD_USER8 == -1 ) ) )
+#define NND_FRAG_SPHEREMAP (1)
+static float2 g_SphereMapTexCoord;
+#else
+#define NND_FRAG_SPHEREMAP (0)
+#endif
+
+/* 双方物面マップ */
+#if ( NND_OPT_TEX_DUALPARABOLOID != -1 || \
+    ( ( NND_OPT_TEXCOORD_ADD == -3 ) || \
+      ( NND_OPT_TEXCOORD_BASE == -3 ) || \
+      ( NND_OPT_TEXCOORD_DECAL == -3 ) || \
+      ( NND_OPT_TEXCOORD_DECAL2 == -3 ) || \
+      ( NND_OPT_TEXCOORD_DECAL3 == -3 ) || \
+      ( NND_OPT_TEXCOORD_SPECULAR == -3 ) || \
+      ( NND_OPT_TEXCOORD_SHININESS == -3 ) || \
+      ( NND_OPT_TEXCOORD_MODULATE == -3 ) || \
+      ( NND_OPT_TEXCOORD_ADD == -3 ) || \
+      ( NND_OPT_TEXCOORD_OPACITY == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER1 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER2 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER3 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER4 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER5 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER6 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER7 == -3 ) || \
+      ( NND_OPT_TEXCOORD_USER8 == -3 ) ) )
+#define NND_FRAG_DUALPARAMAP (1)
+static float2 g_DualParaMapTexCoord;
+#else
+#define NND_FRAG_DUALPARAMAP (0)
+#endif
+
+/*------ Declarations (入力ＵＶ座標の算出) --------------------------------*/
+
+#include "nnstdshader/nnduv_def.h" /* 2008.06.03(追加) */
+
+/*------ Declarations (セマンティックス番号の算出) ------------------------*/
+
+#define TEXCOORD_TAIL		0
+
+#if NND_OPT_FRAG_LIGHTING || NND_PROF_FOG_MODEL || NND_FRAG_DUALPARAMAP
+#define TEXCOORD_VIEWPOSFOG		TEXCOORD0
+#undef  TEXCOORD_TAIL
+#define TEXCOORD_TAIL			1
+#endif
+
+#if NND_OPT_TWOSIDED_LIGHTING
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_BACKCOL	TEXCOORD0
+	#undef  TEXCOORD_TAIL
+	#if NND_OPT_SPECULAR
+	#define TEXCOORD_TAIL			2
+	#else
+	#define TEXCOORD_TAIL			1
+	#endif
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_BACKCOL	TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#if NND_OPT_SPECULAR
+	#define TEXCOORD_TAIL			3
+	#else
+	#define TEXCOORD_TAIL			2
+	#endif
+#endif
+#endif
+
+#if NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_NRMVEC		TEXCOORD0
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		1
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_NRMVEC		TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		2
+#elif TEXCOORD_TAIL == 2
+	#define TEXCOORD_NRMVEC		TEXCOORD2
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		3
+#elif TEXCOORD_TAIL == 3
+	#define TEXCOORD_NRMVEC		TEXCOORD3
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		4
+#else
+	// TEXCOORD の最大値は８
+	#error TEXCOORD_NRMVEC セマンティックスが不正です
+#endif
+#endif
+
+#if NND_OPT_TANGENT_SPACE
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_TAN		TEXCOORD0
+	#define TEXCOORD_BNRM		TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		2
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_TAN		TEXCOORD1
+	#define TEXCOORD_BNRM		TEXCOORD2
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		3
+#elif TEXCOORD_TAIL == 2
+	#define TEXCOORD_TAN		TEXCOORD2
+	#define TEXCOORD_BNRM		TEXCOORD3
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		4
+#elif TEXCOORD_TAIL == 3
+	#define TEXCOORD_TAN		TEXCOORD3
+	#define TEXCOORD_BNRM		TEXCOORD4
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		5
+#elif TEXCOORD_TAIL == 4
+	#define TEXCOORD_TAN		TEXCOORD4
+	#define TEXCOORD_BNRM		TEXCOORD5
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL		6
+#else
+	// TEXCOORD の最大値は８
+	#error TEXCOORD_TAN TEXCOORD_BNRM セマンティックスが不正です
+#endif
+#endif
+
+#if NND_OPT_MAX_TEXMAP > 0
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_UV		TEXCOORD0
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 0 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_UV		TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 1 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 2
+	#define TEXCOORD_UV		TEXCOORD2
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 2 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 3
+	#define TEXCOORD_UV		TEXCOORD3
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 3 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 4
+	#define TEXCOORD_UV		TEXCOORD4
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 4 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 5
+	#define TEXCOORD_UV		TEXCOORD5
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 5 + NND_MAX_UV )
+#elif TEXCOORD_TAIL == 6
+	#define TEXCOORD_UV		TEXCOORD6
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	( 6 + NND_MAX_UV )
+#else
+	// TEXCOORD の最大値は８
+	#error TEXCOORD_UV セマンティックスが不正です
+#endif
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if ( NND_OPT_TEX_SHADOW != -1 )
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_SHADOW	TEXCOORD0
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	1
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_SHADOW	TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	2
+#elif TEXCOORD_TAIL == 2
+	#define TEXCOORD_SHADOW	TEXCOORD2
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	3
+#elif TEXCOORD_TAIL == 3
+	#define TEXCOORD_SHADOW	TEXCOORD3
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	4
+#elif TEXCOORD_TAIL == 4
+	#define TEXCOORD_SHADOW	TEXCOORD4
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	5
+#elif TEXCOORD_TAIL == 5
+	#define TEXCOORD_SHADOW	TEXCOORD5
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	6
+#elif TEXCOORD_TAIL == 6
+	#define TEXCOORD_SHADOW	TEXCOORD6
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	7
+#elif TEXCOORD_TAIL == 7
+	#define TEXCOORD_SHADOW	TEXCOORD7
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	8
+#else
+	// TEXCOORD の最大値は８
+	#error TEXCOORD_UV セマンティックスが不正です
+#endif
+#endif
+
+#if ( NND_OPT_TEX_SHADOW2 != -1 )
+#if   TEXCOORD_TAIL == 0
+	#define TEXCOORD_SHADOW2	TEXCOORD0
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	1
+#elif TEXCOORD_TAIL == 1
+	#define TEXCOORD_SHADOW2	TEXCOORD1
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	2
+#elif TEXCOORD_TAIL == 2
+	#define TEXCOORD_SHADOW2	TEXCOORD2
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	3
+#elif TEXCOORD_TAIL == 3
+	#define TEXCOORD_SHADOW2	TEXCOORD3
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	4
+#elif TEXCOORD_TAIL == 4
+	#define TEXCOORD_SHADOW2	TEXCOORD4
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	5
+#elif TEXCOORD_TAIL == 5
+	#define TEXCOORD_SHADOW2	TEXCOORD5
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	6
+#elif TEXCOORD_TAIL == 6
+	#define TEXCOORD_SHADOW2	TEXCOORD6
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	7
+#elif TEXCOORD_TAIL == 7
+	#define TEXCOORD_SHADOW2	TEXCOORD7
+	#undef  TEXCOORD_TAIL
+	#define TEXCOORD_TAIL	8
+#else
+	// TEXCOORD の最大値は８
+	#error TEXCOORD_UV セマンティックスが不正です
+#endif
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+/*------ Declarations (共有出力レジスター割り当て) -------------------------*/
+
+#define NND_SUFFIX_VPOS			xyz
+#define NND_SUFFIX_FOG			w
+
+/*------ Pixel Shader Input Structure -------------------------------------*/
+
+/* ピクセルシェーダ出力構造体 */
+struct PS_INPUT{
+#if NND_OPT_FRAG_LIGHTING || NND_PROF_FOG_MODEL || NND_FRAG_DUALPARAMAP
+	float4 ViewPosFog						: TEXCOORD_VIEWPOSFOG;	// varying vec4 nnglvViewPositionFog;
+#endif
+
+#if !( NND_OPT_TWOSIDED_LIGHTING )
+	float4 FrontCol [NND_OUTPUT_COLOR_NUM ]	: COLOR0;				// 0:varying vec4 gl_Color, 1:varying vec4 gl_SecondaryColor
+#else
+	float  vFace							: VFACE;				// varying bool gl_FrontFacing
+	float4 FrontCol[ NND_OUTPUT_COLOR_NUM ]	: COLOR0;				// 0:varying vec4 gl_Color, 1:varying vec4 gl_SecondaryColor
+	float4 BackCol[ NND_OUTPUT_COLOR_NUM ]	: TEXCOORD_BACKCOL;		// 0:varying vec4 gl_Color, 1:varying vec4 gl_SecondaryColor
+#endif
+	
+#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
+	float3 NrmVec							: TEXCOORD_NRMVEC;		// varying vec3 nnglvNormal;
+#endif
+
+#if NND_OPT_TANGENT_SPACE
+	float3 Tan								: TEXCOORD_TAN;			// varying vec3 nnglvTangent;
+	float3 BNrm								: TEXCOORD_BNRM;		// varying vec3 nnglvBinormal;
+#endif
+
+#if NND_UV_NUM > 0
+	float4 UV[ NND_MAX_UV ]					: TEXCOORD_UV;			// varying vec4 gl_TexCoord[0..1] 
+#endif
+
+#if ( NND_OPT_TEX_SHADOW != -1 )
+	float4 TexShadow						: TEXCOORD_SHADOW;
+#endif
+
+#if ( NND_OPT_TEX_SHADOW2 != -1 )
+	float4 TexShadow2						: TEXCOORD_SHADOW2;
+#endif
+};
+
+/*------ Pixel Shader Output Structure ------------------------------------*/
+
+/* ピクセルシェーダ出力構造体 */
+struct PS_OUTPUT{
+	float4 Col	: COLOR0;
+};
+
+/*------ Fixed Structure --------------------------------------------------*/
+
+/* マテリアル */
+struct MATERIAL_PARAMETERS{
+	float4	ambient;
+	float4	diffuse;
+	float4	specular;
+	float4	emission;
+	float	shininess;
+};
+
+/* ライト */
+struct LIGHT_SOURCE_PARAMETERS{
+	float4	ambient;
+	float4	diffuse;
+	float4	specular;
+	float4	position;
+	float4	halfVector;
+	float3	spotDirection;
+	float	spotExponent;
+	float	spotCutoff;
+	float	spotCosCutoff;
+	float	constantAttenuation;
+	float	linearAttenuation;
+	float	quadraticAttenuation;
+};
+
+/*  */
+struct LIGHT_MODEL_PRODUCTS{
+	float4	sceneColor;
+};
+
+/* フォッグ */
+struct FOG_PARAMETERS{
+	float4	color;
+	float	density;
+	float	start;
+	float	end;
+	float	scale;
+};
+
+/*------ Fixed Variable ( GL Built-in ) -----------------------------------*/
+
+#if NND_OPT_MAX_TEXMAP
+uniform float4x4				u_TextureMatrix[NND_OPT_MAX_TEXMAP];
+#endif
+
+uniform MATERIAL_PARAMETERS		u_FrontMaterial;
+
+#if NND_PROF_FOG_MODEL
+uniform	FOG_PARAMETERS			u_Fog;
+#endif
+
+#if NND_PROF_MAX_LIGHT
+uniform LIGHT_SOURCE_PARAMETERS u_LightSource [NND_PROF_MAX_LIGHT];
+#endif
+
+#if NND_OPT_FRAG_LIGHTING && NND_OPT_LIGHTING
+uniform LIGHT_MODEL_PRODUCTS	u_FrontLightModelProduct;
+#endif
+
+/*------ Fixed Variable ( GL User-define ) --------------------------------*/
+
+#if NND_PROF_MAX_POINT_LIGHT
+uniform float		u_PointLightFallOffEnd[ NND_PROF_MAX_POINT_LIGHT ];		// ポイントライト減衰終了距離
+uniform float		u_PointLightFallOffScale[ NND_PROF_MAX_POINT_LIGHT ];	// ポイントライト減衰スケール
+#endif
+
+#if NND_OPT_TEX_BASE != -1
+uniform float		u_TexBaseAlpha;				// ベースディフューズマップ不透明度
+#endif
+#if NND_OPT_TEX_DECAL != -1
+uniform float		u_TexDecalAlpha;			// デカールテクスチャ不透明度
+#endif
+#if NND_OPT_TEX_DECAL2 != -1
+uniform float		u_TexDecal2Alpha;			// デカールテクスチャ２不透明度
+#endif
+#if NND_OPT_TEX_DECAL3 != -1
+uniform float		u_TexDecal3Alpha;			// デカールテクスチャ３不透明度
+#endif
+#if NND_OPT_TEX_SHININESS != -1
+uniform float		u_TexShininessLevel;		// スペキュラ光沢度レベル
+#endif
+#if NND_OPT_TEX_DUALPARABOLOID != -1
+uniform float		u_TexDualParaboloidLevel;	// 双方物面環境マップ強度
+#endif
+#if NND_OPT_TEX_ADD != -1
+uniform float		u_TexAddLevel;				// 加算マップ強度
+#endif
+#if NND_OPT_TEX_SHADOW != -1
+uniform float3		u_TexShadowColor;			// シャドウカラー
+#endif
+#if NND_OPT_TEX_SHADOW2 != -1
+uniform float3		u_TexShadow2Color;			// シャドウ２カラー 
+#endif
+#if NND_OPT_TEX_USER1 != -1
+uniform float		u_TexUser1Param;			// ユーザーマップ１パラメータ
+#endif
+#if NND_OPT_TEX_USER2 != -1
+uniform float		u_TexUser2Param;			// ユーザーマップ２パラメータ
+#endif
+#if NND_OPT_TEX_USER3 != -1
+uniform float		u_TexUser3Param;			// ユーザーマップ３パラメータ
+#endif
+#if NND_OPT_TEX_USER4 != -1
+uniform float		u_TexUser4Param;			// ユーザーマップ４パラメータ
+#endif
+#if NND_OPT_TEX_USER5 != -1
+uniform float		u_TexUser5Param;			// ユーザーマップ５パラメータ
+#endif
+#if NND_OPT_TEX_USER6 != -1
+uniform float		u_TexUser6Param;			// ユーザーマップ６パラメータ
+#endif
+#if NND_OPT_TEX_USER7 != -1
+uniform float		u_TexUser7Param;			// ユーザーマップ７パラメータ
+#endif
+#if NND_OPT_TEX_USER8 != -1
+uniform float		u_TexUser8Param;			// ユーザーマップ８パラメータ
+#endif
+
+uniform float3x3	u_DualParaboloidMatrix;		// 双方物面マップ用マトリクス
+
+#if ( NND_PROF_MAX_USER_UNIFORM > 0 )
+uniform float4		u_UserUniform[NND_PROF_MAX_USER_UNIFORM];	// ユーザーユニフォーム変数
+#endif
+
+/*------ Sampler Object ---------------------------------------------------*/
+
+#include "nnstdshader/sampler_def.h"	/* 2008.05.29(追加) */
+
+/* 法線マップ */
+#if ( NND_OPT_TEX_NORMAL != -1 )
+sampler2D s_texNormal :register(SAMPLER_NORMAL);
+#endif
+
+/* ベースディフューズマップ */
+#if ( NND_OPT_TEX_BASE != -1 )
+sampler2D s_texBase :register(SAMPLER_BASE);
+#endif
+
+/* デカールマップ */
+#if ( NND_OPT_TEX_DECAL != -1 )
+sampler2D s_texDecal :register(SAMPLER_DECAL);
+#endif
+
+/* デカールマップ２ */
+#if ( NND_OPT_TEX_DECAL2 != -1 )
+sampler2D s_texDecal2 :register(SAMPLER_DECAL2);
+#endif
+
+/* デカールマップ３ */
+#if ( NND_OPT_TEX_DECAL3 != -1 )
+sampler2D s_texDecal3 :register(SAMPLER_DECAL3);
+#endif
+
+/* スペキュラマップ */
+#if ( NND_OPT_TEX_SPECULAR != -1 )
+sampler2D s_texSpecular :register(SAMPLER_SPECULAR);
+#endif
+
+/* スペキュラ光沢度マップ */
+#if ( NND_OPT_TEX_SHININESS != -1 )
+sampler2D s_texShininess :register(SAMPLER_SHININESS);
+#endif
+
+/* 双方物面環境マップ */
+#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
+sampler2D s_texDualParaboloid :register(SAMPLER_DUALPARA);
+#endif
+
+/* 環境マスクマップ */
+#if ( NND_OPT_TEX_ENVMASK != -1 )
+sampler2D s_texEnvMask :register(SAMPLER_ENVMASK);
+#endif
+
+/* 乗算テクスチャ */
+#if ( NND_OPT_TEX_MODULATE != -1 )
+sampler2D s_texModulate :register(SAMPLER_MODULATE);
+#endif
+
+/* 加算テクスチャ */
+#if ( NND_OPT_TEX_ADD != -1 )
+sampler2D s_texAdd :register(SAMPLER_ADD);
+#endif
+
+/* 不透明度テクスチャ */
+#if ( NND_OPT_TEX_OPACITY != -1 )
+sampler2D s_texOpacity :register(SAMPLER_OPACITY);
+#endif
+
+/* ユーザーマップ１テクスチャ */
+#if ( NND_OPT_TEX_USER1 != -1 )
+sampler2D s_texUser1 :register(SAMPLER_USER1);
+#endif
+
+/* ユーザーマップ２テクスチャ */
+#if ( NND_OPT_TEX_USER2 != -1 )
+sampler2D s_texUser2 :register(SAMPLER_USER2);
+#endif
+
+/* ユーザーマップ３テクスチャ */
+#if ( NND_OPT_TEX_USER3 != -1 )
+sampler2D s_texUser3 :register(SAMPLER_USER3);
+#endif
+
+/* ユーザーマップ４テクスチャ */
+#if ( NND_OPT_TEX_USER4 != -1 )
+sampler2D s_texUser4 :register(SAMPLER_USER4);
+#endif
+
+/* ユーザーマップ５テクスチャ */
+#if ( NND_OPT_TEX_USER5 != -1 )
+sampler2D s_texUser5 :register(SAMPLER_USER5);
+#endif
+
+/* ユーザーマップ６テクスチャ */
+#if ( NND_OPT_TEX_USER6 != -1 )
+sampler2D s_texUser6 :register(SAMPLER_USER6);
+#endif
+
+/* ユーザーマップ７テクスチャ */
+#if ( NND_OPT_TEX_USER7 != -1 )
+sampler2D s_texUser7 :register(SAMPLER_USER7);
+#endif
+
+/* ユーザーマップ８テクスチャ */
+#if ( NND_OPT_TEX_USER8 != -1 )
+sampler2D s_texUser8 :register(SAMPLER_USER8);
+#endif
+
+/* シャドウマップ */
+#if ( NND_OPT_TEX_SHADOW != -1 )
+sampler2D s_texShadow :register(SAMPLER_SHADOW);
+#endif
+
+/* シャドウマップ */
+#if ( NND_OPT_TEX_SHADOW2 != -1 )
+sampler2D s_texShadow2 :register(SAMPLER_SHADOW2);
+#endif
+
+/* ユーザーサンプラー２Ｄマップ１ */
+#if ( NND_OPT_TEX_SAMPLER2D1 != -1 )
+sampler2D s_texUserSampler2D1 :register(SAMPLER_SAMPLER2D1);
+#endif
+
+/* ユーザーサンプラー２Ｄマップ２ */
+#if ( NND_OPT_TEX_SAMPLER2D2 != -1 )
+sampler2D s_texUserSampler2D2 :register(SAMPLER_SAMPLER2D2);
+#endif
+
+/* ユーザーサンプラー３Ｄマップ１ */
+#if ( NND_OPT_TEX_SAMPLER3D1 != -1 )
+sampler3D s_texUserSampler3D1 :register(SAMPLER_SAMPLER3D1);
+#endif
+
+/* ユーザーサンプラー３Ｄマップ２ */
+#if ( NND_OPT_TEX_SAMPLER3D2 != -1 )
+sampler3D s_texUserSampler3D2 :register(SAMPLER_SAMPLER3D2);
+#endif
+
+/* ユーザーサンプラーキューブマップ１ */
+#if ( NND_OPT_TEX_SAMPLERCUBE1 != -1 )
+samplerCUBE s_texUserSamplerCube1 :register(SAMPLER_SAMPLERCUBE1);
+#endif
+
+/* ユーザーサンプラーキューブマップ２ */
+#if ( NND_OPT_TEX_SAMPLERCUBE2 != -1 )
+samplerCUBE s_texUserSamplerCube2 :register(SAMPLER_SAMPLERCUBE2);
+#endif
+
+/*------ Global Variable --------------------------------------------------*/
+
+static PS_INPUT	 g_Input;	// ピクセルシェーダー入力
+static PS_OUTPUT g_Output;	// ピクセルシェーダー出力
+
+static float4 g_VtxDiffCol;	// 
+// 頂点シェーダから出力されるスペキュラーについて
+//   頂点単位のシェーディングの場合
+//     スペキュラーがないとき float4( 0.0, 0.0, 0.0, 0.0)
+//   ピクセル単位のシェーディングの場合
+//     スペキュラーがないとき float4( 1.0, 1.0, 1.0, 1.0)
+//
+//   ※スペキュラーがないときは実際には出力されていない
+//     従ってこれを参考にしてプログラムを実装すること
+//
+static float4 g_VtxSpecCol = float4( 0.0, 0.0, 0.0, 0.0);
+
+static float3 g_FragColor;	// 計算中フラグメントカラー
+static float  g_FragAlpha;	// 計算中フラグメントアルファ
+
+#if NND_OPT_FRAG_LIGHTING || ( NND_OPT_TEX_NORMAL != -1 ) || NND_FRAG_DUALPARAMAP
+/* フラグメント単位ライティング用 */
+static float3 g_FragNormal;
+
+static float3 g_FragDiffuse  = float3( 0.0, 0.0, 0.0 );
+static float3 g_FragSpecular = float3( 0.0, 0.0, 0.0 );
+
+static float3 g_Normal;		// 法線
+static float3 g_EyeDir;		// 視線方向
+#endif
+
+/* 接空間 */
+#if NND_OPT_TANGENT_SPACE
+static float3 g_Tangent;
+static float3 g_Binormal;
+#endif
+
+/* ライトアンビエント */
+#if ( NND_OPT_FRAG_LIGHTING && NND_PROF_LIGHT_AMBIENT )
+static float3 g_FragAmbient = float3( 0.0, 0.0, 0.0 );
+#endif
+
+// 法線マップ
+#if ( NND_OPT_TEX_NORMAL != -1 )
+static float4 g_smpNormal;
+#endif
+// ベースディフューズマップ
+static float4 g_smpBase;
+//  デカールマップ
+#if ( NND_OPT_TEX_DECAL != -1 )
+static float4 g_smpDecal;
+#endif
+/* デカールマップ２ */
+#if ( NND_OPT_TEX_DECAL2 != -1 )
+static float4 g_smpDecal2;
+#endif
+/* デカールマップ３ */
+#if ( NND_OPT_TEX_DECAL3 != -1 )
+static float4 g_smpDecal3;
+#endif
+// スペキュラマップ
+#if ( NND_OPT_TEX_SPECULAR != -1 )
+static float4 g_smpSpecular;
+#endif
+// スペキュラ光沢度マップ
+#if ( NND_OPT_TEX_SHININESS != -1 )
+static float4 g_smpShininess;
+#endif
+// 双方物面環境マップ
+#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
+static float4 g_smpDualParaboloid;
+#endif
+// 環境マスクマップ
+#if ( NND_OPT_TEX_ENVMASK != -1 )
+static float4 g_smpEnvMask;
+#endif
+// 乗算テクスチャ
+#if ( NND_OPT_TEX_MODULATE != -1 )
+static float4 g_smpModulate;
+#endif
+// 加算テクスチャ
+#if ( NND_OPT_TEX_ADD != -1 )
+static float4 g_smpAdd;
+#endif
+// 不透明度テクスチャ
+#if ( NND_OPT_TEX_OPACITY != -1 )
+static float4	g_smpOpacity;
+#endif
+// シャドウマップ
+#if ( NND_OPT_TEX_SHADOW != -1 )
+static float4 g_smpShadow;
+#endif
+// シャドウマップ
+#if ( NND_OPT_TEX_SHADOW2 != -1 )
+static float4 g_smpShadow2;
+#endif
+// ユーザーマップ１テクスチャ
+#if ( NND_OPT_TEX_USER1 != -1 )
+static float4 g_smpUser1;
+#endif
+// ユーザーマップ２テクスチャ
+#if ( NND_OPT_TEX_USER2 != -1 )
+static float4 g_smpUser2;
+#endif
+// ユーザーマップ３テクスチャ
+#if ( NND_OPT_TEX_USER3 != -1 )
+static float4 g_smpUser3;
+#endif
+// ユーザーマップ４テクスチャ
+#if ( NND_OPT_TEX_USER4 != -1 )
+static float4 g_smpUser4;
+#endif
+// ユーザーマップ５テクスチャ
+#if ( NND_OPT_TEX_USER5 != -1 )
+static float4 g_smpUser5;
+#endif
+// ユーザーマップ６テクスチャ
+#if ( NND_OPT_TEX_USER6 != -1 )
+static float4 g_smpUser6;
+#endif
+// ユーザーマップ７テクスチャ
+#if ( NND_OPT_TEX_USER7 != -1 )
+static float4 g_smpUser7;
+#endif
+// ユーザーマップ８テクスチャ
+#if ( NND_OPT_TEX_USER8 != -1 )
+static float4 g_smpUser8;
+#endif
+
+/*------ Functions --------------------------------------------------------*/
+//
+float4 shadow2DProj(sampler2D s, float4 t)
+{
+#if 0
+	float4 shadow;
+	shadow = tex2Dproj( s, t );
+	shadow = step(t.z/t.w, shadow.r);
+	return(shadow);
+#else
+	float3 tp;
+	float3 tx, ty;
+	float2 lerps;
+	//
+	tp = t.xyz / t.w;
+	//
+#if 0 /* 2008.09.05 */
+	lerps = frac(tp.xy);
+#else
+	/*
+	  ドライバの不具合と思われる原因不明の現象が発生した為 frac 関数をコメントして
+	  次のように変更して回避した。
+	  不具合が発生したビデオカードは
+	  ・Quadro FX 4500(ドライバ169.96)
+	 */
+	lerps = tp.xy - floor(tp.xy);
+#endif
+	//
+	tx = ddx(tp);
+	ty = ddy(tp);
+	// [X, Y, Z] = [x, y][tx.x, tx.y, tx.z]
+	//                   [ty.x, ty.y, ty.z]
+	float3 ofs[3];
+	// x=1, y=0
+	ofs[0] = tx;
+	// x=0, y=1
+	ofs[1] = ty;
+	// x=1, y=1
+	ofs[2] = tx + ty;
+	//
+	float4 shadow[4], texDepth;
+	// tp.x, tp.y
+	texDepth  = tex2D( s, tp.xy );
+	shadow[0] = step(tp.z, texDepth.r);
+	// tp.x+1, tp.y
+	texDepth  = tex2D( s, tp.xy+ofs[0].xy );
+	shadow[1] = step(tp.z+ofs[0].z, texDepth.r);
+	// tp.x, tp.y+1
+	texDepth  = tex2D( s, tp.xy+ofs[1].xy );
+	shadow[2] = step(tp.z+ofs[1].z, texDepth.r);
+	// tp.x+1, tp.y+1
+	texDepth  = tex2D( s, tp.xy+ofs[2].xy );
+	shadow[3] = step(tp.z+ofs[2].z, texDepth.r);
+	//
+	float4 sha;
+	// バイリニア補間
+	sha = lerp(lerp(shadow[0], shadow[1], lerps.x),
+			   lerp(shadow[2], shadow[3], lerps.x), lerps.y);
+	// 平均
+	//sha = (shadow[0] + shadow[1] + shadow[2] + shadow[3]) * 0.25;
+	return(sha);
+#endif
+}
+
+/* スフィアマップ */
+#if ( NND_FRAG_SPHEREMAP )
+float2 CalcSphereMapTexCoord( void )
+{
+	float3 r;
+	float2 r2;
+#if 0 /* 2008.06.06(バグ修正) */
+	r = reflect( g_EyeDir, g_Normal );
+#else
+	r = reflect( g_EyeDir, g_FragNormal);
+#endif
+	r.z += 1.0;
+	r2 = ( normalize(r).xy ) * float2(0.5, -0.5) + float2(0.5, 0.5);
+	return(r2);
+}
+#endif
+
+/* 双方物面マップ計算 */
+#if ( NND_FRAG_DUALPARAMAP )
+float2 CalcDualParaMapTexCoord( void )
+{
+	float3 r;
+	float2 st;
+	float s1, izi;
+
+	/* 反射計算 */
+	r = reflect( g_EyeDir, g_FragNormal );
+
+	/* テクスチャマトリクスで変換（通常はワールド座標に変換） */
+#if 0 /* 2008.06.04 */
+	r = mul( r, u_TextureMatrix[ NND_OPT_TEX_DUALPARABOLOID ] );
+#else
+	r = mul( r, u_DualParaboloidMatrix );
+#endif
+
+	/* デュアルパラボロイド変換 */
+	izi = 1.0 + abs( r.z );
+	st = r.xy * float2( 1.0, -1.0 ) / izi;
+
+	/* テクスチャの左右半分ずつに２枚並べる補正 */
+	st = ( st + float2(1.0, 1.0) ) * 0.5;
+	s1 = step( 0.0, r.z );
+	st.x = ( 0.5 - s1 ) * st.x;
+	return st;
+}
+#endif
+
+/* 入力ベクトルを正規化します */
+void NrmInput(void)
+{
+	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
+	/* 視線方向 */
+	g_EyeDir = normalize( g_Input.ViewPosFog.NND_SUFFIX_VPOS );
+	#endif
+
+	/* 接空間 */
+	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
+	g_Normal = normalize( g_Input.NrmVec );
+		#if NND_OPT_TANGENT_SPACE
+		g_Tangent = normalize( g_Input.Tan );
+		g_Binormal = normalize( g_Input.BNrm );
+		#endif
+	#endif
+}
+
+/* テクスチャサンプリング */
+void SampleTexMap(void)
+{
+	/* 法線マップ */
+	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
+		#if ( NND_OPT_TEX_NORMAL != -1 )
+		g_smpNormal  = tex2D( s_texNormal, g_Input.UV[ NND_UV_NO_NORMAL ].NND_UV_SUFFIX_NORMAL );
+
+		/* 法線取得 */
+			#if NND_OPT_NORMALMAP_AXLY
+			/* 圧縮タンジェントスペース法線マップの場合 */
+			g_smpNormal = ( g_smpNormal - 0.5 ) * 2.0;
+			float3 tannormal = float3( g_smpNormal.a, g_smpNormal.r, sqrt( 1.0 -
+					( g_smpNormal.a*g_smpNormal.a + g_smpNormal.r*g_smpNormal.r ) ) );
+			tannormal = normalize( tannormal );
+			#else
+			/* 通常の法線マップの場合 */
+			float3 tannormal = normalize( g_smpNormal.rgb - 0.5 );
+			#endif
+			/* 法線をカメラ座標系に変換 */
+			#if NND_OPT_TANGENT_SPACE
+			g_FragNormal = tannormal.x * g_Tangent
+								+ tannormal.y * g_Binormal
+									+ tannormal.z * g_Normal;
+			g_FragNormal = normalize( g_FragNormal );
+			#else
+			/* 本来はここは通らない */
+			g_FragNormal = tannormal;
+			#endif
+		#else
+		/* フラグメント単位ライティングの場合（法線マップなし） */
+		g_FragNormal = g_Normal;
+		#endif
+	#endif
+
+	/* 環境マップ用テクスチャ座標計算 */
+	#if ( NND_FRAG_SPHEREMAP )
+		g_SphereMapTexCoord = CalcSphereMapTexCoord();
+	#endif
+	#if ( NND_FRAG_DUALPARAMAP )
+		g_DualParaMapTexCoord = CalcDualParaMapTexCoord();
+	#endif
+
+	/* 環境マスクマップ */
+	#if ( NND_OPT_TEX_ENVMASK != -1 )
+	g_smpEnvMask = tex2D( s_texEnvMask, g_Input.UV[ NND_UV_NO_ENVMASK ].NND_UV_SUFFIX_ENVMASK );
+	#endif
+
+	/* ベースディフューズマップ */
+	#if ( NND_OPT_TEX_BASE != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_BASE == -1 )
+		g_smpBase = tex2D( s_texBase, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_BASE == -3 )
+		g_smpBase = tex2D( s_texBase, g_DualParaMapTexCoord );
+		#else
+		g_smpBase = tex2D( s_texBase, g_Input.UV[ NND_UV_NO_BASE ].NND_UV_SUFFIX_BASE );
+		#endif
+		#if ( ( NND_OPT_TEX_ENVMASK != -1 ) && ( ( NND_OPT_TEXCOORD_BASE == -1 ) || ( NND_OPT_TEXCOORD_BASE == -3 ) ) )
+		g_smpBase = lerp( float4( 1.0, 1.0, 1.0, 1.0 ), g_smpBase, g_smpEnvMask.r );
+		#endif
+
+	/* ベースディフューズマップ不透明度 */
+	g_smpBase.a *= u_TexBaseAlpha;
+	#else
+	/* ベーステクスチャがない場合はデフォルトのベース色を使用する */
+	g_smpBase = float4( 1.0, 1.0, 1.0, 1.0 );
+	#endif
+
+	/* デカールマップ */
+	#if ( NND_OPT_TEX_DECAL != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL == -1 )
+		g_smpDecal = tex2D( s_texDecal, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_DECAL == -3 )
+		g_smpDecal = tex2D( s_texDecal, g_DualParaMapTexCoord );
+		#else
+		g_smpDecal = tex2D( s_texDecal, g_Input.UV[ NND_UV_NO_DECAL ].NND_UV_SUFFIX_DECAL );
+		#endif
+	/* デカールマップ不透明度 */
+	g_smpDecal.a *= u_TexDecalAlpha;
+		#if ( ( NND_OPT_TEXCOORD_DECAL == -1 || NND_OPT_TEXCOORD_DECAL == -3 ) && NND_OPT_TEX_ENVMASK != -1 )
+		g_smpDecal.a *= g_smpEnvMask.r;
+		#endif
+	#endif
+
+	/* デカールマップ２ */
+	#if ( NND_OPT_TEX_DECAL2 != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL2 == -1 )
+		g_smpDecal2 = tex2D( s_texDecal2, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_DECAL2 == -3 )
+		g_smpDecal2 = tex2D( s_texDecal2, g_DualParaMapTexCoord );
+		#else
+		g_smpDecal2 = tex2D( s_texDecal2, g_Input.UV[ NND_UV_NO_DECAL2 ].NND_UV_SUFFIX_DECAL2 );
+		#endif
+	/* デカールマップ２不透明度 */
+	g_smpDecal2.a *= u_TexDecal2Alpha;
+		#if ( ( NND_OPT_TEXCOORD_DECAL2 == -1 || NND_OPT_TEXCOORD_DECAL2 == -3 ) && NND_OPT_TEX_ENVMASK != -1 )
+		g_smpDecal2.a *= g_smpEnvMask.r;
+		#endif
+	#endif
+
+	/* デカールマップ３ */
+	#if ( NND_OPT_TEX_DECAL3 != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL3 == -1 )
+		g_smpDecal3 = tex2D( s_texDecal3, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_DECAL3 == -3 )
+		g_smpDecal3 = tex2D( s_texDecal3, g_DualParaMapTexCoord );
+		#else
+		g_smpDecal3 = tex2D( s_texDecal3, g_Input.UV[ NND_UV_NO_DECAL3 ].NND_UV_SUFFIX_DECAL3 );
+		#endif
+	/* デカールマップ３不透明度 */
+	g_smpDecal3.a *= u_TexDecal3Alpha;
+		#if ( ( NND_OPT_TEXCOORD_DECAL3 == -1 || NND_OPT_TEXCOORD_DECAL3 == -1 ) && NND_OPT_TEX_ENVMASK != -1 )
+		g_smpDecal3.a *= g_smpEnvMask.r;
+		#endif
+	#endif
+
+	/* スペキュラマップ */
+	#if ( NND_OPT_TEX_SPECULAR != -1 )
+		g_smpSpecular = tex2D( s_texSpecular, g_Input.UV[ NND_UV_NO_SPECULAR ].NND_UV_SUFFIX_SPECULAR );
+	#endif
+
+	/* スペキュラ光沢度マップ */
+	#if ( NND_OPT_TEX_SHININESS != -1 )
+		g_smpShininess = tex2D( s_texShininess, g_Input.UV[ NND_UV_NO_SHININESS ].NND_UV_SUFFIX_SHININESS );
+	#endif
+	
+	/* 乗算テクスチャ */
+	#if ( NND_OPT_TEX_MODULATE != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_MODULATE == -1 )
+		g_smpModulate = tex2D( s_texModulate, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_MODULATE == -3 )
+		g_smpModulate = tex2D( s_texModulate, g_DualParaMapTexCoord );
+		#else
+		g_smpModulate = tex2D( s_texModulate, g_Input.UV[ NND_UV_NO_MODULATE ].NND_UV_SUFFIX_MODULATE );
+		#endif
+		/* 環境マスクマップ適用 */
+		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_MODULATE == -1 || NND_OPT_TEXCOORD_MODULATE == -3 ) )
+			g_smpModulate = float4( 1.0, 1.0, 1.0, 1.0 )
+				- ( float4( 1.0, 1.0, 1.0, 1.0 ) - g_smpModulate ) * g_smpEnvMask.r;
+		#endif
+	#endif
+
+	/* 加算テクスチャ */
+	#if ( NND_OPT_TEX_ADD != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_ADD == -1 )
+		g_smpAdd = tex2D( s_texAdd, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_ADD == -3 )
+		g_smpAdd = tex2D( s_texAdd, g_DualParaMapTexCoord );
+		#else
+		g_smpAdd = tex2D( s_texAdd, g_Input.UV[ NND_UV_NO_ADD ].NND_UV_SUFFIX_ADD );
+		#endif
+		/* 加算マップ強度 */
+		g_smpAdd *= u_TexAddLevel;
+		/* 環境マスクマップ適用 */
+		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_ADD == -1 || NND_OPT_TEXCOORD_ADD == -3 ) )
+		g_smpAdd *= g_smpEnvMask.r;
+		#endif
+	#endif
+
+	/* 双方物面環境マップ */
+	#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
+	g_smpDualParaboloid = tex2D( s_texDualParaboloid, g_DualParaMapTexCoord );
+		#if ( NND_OPT_TEX_ENVMASK != -1 )
+		g_smpDualParaboloid *= g_smpEnvMask.r;
+		#endif
+	/* 双方物面環境マップ強度 */
+	g_smpDualParaboloid *= u_TexDualParaboloidLevel;
+	#endif
+
+	/* シャドウマップテクスチャ */
+	#if ( NND_OPT_TEX_SHADOW != -1 )
+		g_smpShadow = shadow2DProj(s_texShadow, g_Input.TexShadow);
+	#endif
+
+	/* シャドウマップ２テクスチャ */
+	#if ( NND_OPT_TEX_SHADOW2 != -1 )
+		g_smpShadow2 = shadow2DProj(s_texShadow2, g_Input.TexShadow2);
+	#endif
+
+	/* 不透明度テクスチャ */
+	#if ( NND_OPT_TEX_OPACITY != -1 )
+		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_OPACITY == -1 )
+		g_smpOpacity = tex2D( s_texOpacity, g_SphereMapTexCoord );
+		#elif ( NND_OPT_TEXCOORD_OPACITY == -3 )
+		g_smpOpacity = tex2D( s_texOpacity, g_DualParaMapTexCoord );
+		#else
+		g_smpOpacity = tex2D( s_texOpacity, g_Input.UV[ NND_UV_NO_OPACITY ].NND_UV_SUFFIX_OPACITY );
+		#endif
+		/* 環境マスクマップ適用 */
+		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_OPACITY == -1 || NND_OPT_TEXCOORD_OPACITY == -3 ) )
+		g_smpOpacity *= ( 1.0 - g_smpEnvMask.r );
+		#endif
+	#endif
+
+	/* ベースおよびデカール貼り */
+	#if ( NND_OPT_TEX_DECAL3 != -1 )
+	g_FragColor = lerp( lerp( lerp( g_smpBase.rgb, g_smpDecal.rgb, g_smpDecal.a ),
+					g_smpDecal2.rgb, g_smpDecal2.a ), g_smpDecal3.rgb, g_smpDecal3.a );
+	#elif ( NND_OPT_TEX_DECAL2 != -1 )
+	g_FragColor = lerp( lerp( g_smpBase.rgb, g_smpDecal.rgb, g_smpDecal.a ),
+												g_smpDecal2.rgb, g_smpDecal2.a );
+	#elif ( NND_OPT_TEX_DECAL != -1 )
+	g_FragColor = lerp( g_smpBase.rgb, g_smpDecal.rgb, g_smpDecal.a );
+	#else
+	g_FragColor = g_smpBase.rgb;
+	#endif
+}
+
+/* ライト計算 */
+void CalcLight(void)
+{
+	#if !( NND_OPT_TWOSIDED_LIGHTING )
+		g_VtxDiffCol = g_Input.FrontCol[0];
+		#if NND_OPT_SPECULAR
+			g_VtxSpecCol = g_Input.FrontCol[1];
+		#endif
+	#else
+		/* DirextX は右回りが表として処理されますが、
+		   DXG20 は左回りを表としているので、
+		   vFace は逆の意味になります */
+		g_VtxDiffCol = ( g_Input.vFace < 0.0 ? g_Input.FrontCol[0] : g_Input.BackCol[0] );
+		#if NND_OPT_SPECULAR
+			g_VtxSpecCol = ( g_Input.vFace < 0.0 ? g_Input.FrontCol[1] : g_Input.BackCol[1] );
+		#endif
+	#endif
+
+	#if NND_OPT_FRAG_LIGHTING && NND_OPT_LIGHTING
+	/* フラグメント単位ライティング */
+
+		#if ( NND_OPT_NUM_FRAG_PARALLEL_LIGHT > 0 )
+		/* パラレルライトの計算 */
+		for ( int litno = 0;
+					litno < NND_OPT_NUM_FRAG_PARALLEL_LIGHT; litno++ ){
+			float3 litdir = u_LightSource[ litno ].position.xyz;
+			/* ディフューズ計算 */
+			float fdiff = dot ( g_FragNormal, litdir );
+			//fdiff = max( fdiff, 0.0 );
+			fdiff = clamp( fdiff, 0.0, 1.0 );
+			g_FragDiffuse += fdiff * u_LightSource[ litno ].diffuse.rgb;
+			/* スペキュラ計算 */
+			#if NND_OPT_SPECULAR
+			float3 halfvec = normalize(	litdir - g_EyeDir );
+			g_FragSpecular += u_LightSource[ litno ].specular.rgb *
+					pow(    abs(
+							//max( dot( halfvec, g_FragNormal ), 0.0 ),
+							clamp( dot( halfvec, g_FragNormal ), 0.0, 1.0 ) ),
+							#if ( NND_OPT_TEX_SHININESS != -1 )
+								u_TexShininessLevel * g_smpShininess.r
+								* u_FrontMaterial.shininess
+							#else
+								u_FrontMaterial.shininess
+							#endif
+					);
+			#endif
+			#if ( NND_PROF_LIGHT_AMBIENT )
+			/* アンビエント */
+			g_FragAmbient += u_LightSource[litno].ambient.rgb;
+			#endif
+		}
+		#endif
+
+		#if ( NND_OPT_NUM_FRAG_POINT_LIGHT > 0 )
+		{
+		/* ポイントライトの計算 */
+		for ( int litno = NND_OPT_NUM_FRAG_PARALLEL_LIGHT;
+				litno < NND_OPT_NUM_FRAG_PARALLEL_LIGHT
+									+ NND_OPT_NUM_FRAG_POINT_LIGHT; litno ++ )
+		{
+			float diffcnt, speccnt, dist, attn;
+			float3 litpos, litdir;
+			int unino;
+
+			/* ライト位置 */
+			litpos = u_LightSource[ litno ].position.xyz - g_Input.ViewPosFog.NND_SUFFIX_VPOS;
+
+			/* 減衰度 */
+			dist = length( litpos );
+			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 0 )
+			/* 減衰なし */
+			attn = 1.0;
+			#endif
+			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 1 )
+			/* 逆 */
+			attn = 1.0 / dist;
+			#endif
+			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 2 )
+			/* 逆２乗 */
+			attn = 1.0 / ( dist * dist );
+			#endif
+			/* フォールオフ */
+			unino = litno - NND_OPT_NUM_FRAG_PARALLEL_LIGHT;
+			attn *= clamp(
+					( u_PointLightFallOffEnd[ unino ] - dist )
+						* u_PointLightFallOffScale[ unino ], 0.0, 1.0 );
+
+			/* ライト方向 */
+			litdir = normalize( litpos );
+
+			/* ディフューズ成分 */
+			//diffcnt = max( dot( g_FragNormal, litdir ), 0.0 );
+			diffcnt = clamp( dot( g_FragNormal, litdir ), 0.0, 1.0 );
+			g_FragDiffuse += u_LightSource[litno].diffuse.rgb * diffcnt * attn;
+
+			/* スペキュラ計算 */
+			#if NND_OPT_SPECULAR
+			float3 halfvec = normalize( litdir - g_EyeDir );
+			g_FragSpecular += u_LightSource[ litno ].specular.rgb *
+					pow(    abs(
+							//max( dot( halfvec, g_FragNormal ), 0.0 ),
+							clamp( dot( halfvec, g_FragNormal ), 0.0, 1.0 ) ),
+							#if ( NND_OPT_TEX_SHININESS != -1 )
+								u_TexShininessLevel * g_smpShininess.r
+												* u_FrontMaterial.shininess
+							#else
+								u_FrontMaterial.shininess
+							#endif
+					) * attn;
+			#endif
+			#if ( NND_PROF_LIGHT_AMBIENT )
+			/* アンビエント */
+			g_FragAmbient += u_LightSource[litno].ambient.rgb * attn;
+			#endif
+		}
+		}
+		#endif
+
+		/* ディフューズ、アンビエント、エミッション成分 */
+		#if ( NND_OPT_TEX_SHADOW != -1 )
+			/* シャドウマップの場合 */
+			float3 shadowcolor = max( g_smpShadow.rgb, u_TexShadowColor.rgb );
+
+			#if ( NND_OPT_TEX_SHADOW2 != -1 )
+				/* シャドウマップ２がある場合 */
+				shadowcolor *= max( g_smpShadow2.rgb, u_TexShadow2Color.rgb );
+			#endif
+			#if ( NND_PROF_LIGHT_AMBIENT )
+				g_FragColor *= ( g_FragDiffuse * g_VtxDiffCol.rgb * shadowcolor
+								+ u_FrontLightModelProduct.sceneColor.rgb
+								+ g_FragAmbient.rgb );
+
+			#else
+				g_FragColor *= ( g_FragDiffuse * g_VtxDiffCol.rgb * shadowcolor
+								+ u_FrontLightModelProduct.sceneColor.rgb );
+			#endif
+		#else
+			#if ( NND_PROF_LIGHT_AMBIENT )
+				g_FragColor *= ( g_FragDiffuse * g_VtxDiffCol.rgb
+			 					+ u_FrontLightModelProduct.sceneColor.rgb
+								+ g_FragAmbient.rgb );
+			#else
+				g_FragColor *= ( g_FragDiffuse * g_VtxDiffCol.rgb
+			 					+ u_FrontLightModelProduct.sceneColor.rgb );
+			#endif
+		#endif
+
+		/* スペキュラ成分 */
+		#if ( NND_OPT_TEX_SPECULAR != -1 )
+		/* スペキュラマップ */
+		g_FragSpecular *= g_smpSpecular.rgb;
+		#endif
+		#if ( NND_OPT_TEX_SHADOW != -1 )
+			/* シャドウマップの場合 */
+			#if NND_OPT_SPECULAR
+				g_FragColor += g_FragSpecular * shadowcolor
+							* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
+			#else
+				g_FragColor += g_FragSpecular * shadowcolor
+					       * u_FrontMaterial.specular.rgb;
+			#endif
+		#else
+			#if NND_OPT_SPECULAR
+				g_FragColor += g_FragSpecular
+							* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
+			#else
+				g_FragColor += g_FragSpecular * u_FrontMaterial.specular.rgb;
+			#endif
+		#endif
+
+	#else
+	
+	/* 頂点単位ライティング */
+	/* ディフューズ */
+		#if ( NND_OPT_TEX_SHADOW != -1 )
+		/* シャドウマップの場合 */
+		float3 shadowcolor = max( g_smpShadow.rgb, u_TexShadowColor.rgb );
+		#if ( NND_OPT_TEX_SHADOW2 != -1 )
+			/* シャドウマップ２がある場合 */
+			shadowcolor *= max( g_smpShadow2.rgb, u_TexShadow2Color.rgb );
+		#endif
+		g_FragColor *= g_VtxDiffCol.rgb * shadowcolor;
+		#else
+		g_FragColor *= g_VtxDiffCol.rgb;
+		#endif
+	/* スペキュラ */
+		#if ( NND_OPT_TEX_SPECULAR != -1 )
+		/* スペキュラマップ */
+			#if ( NND_OPT_TEX_SHADOW != -1 )
+			/* シャドウマップの場合 */
+			g_FragColor += g_smpSpecular.rgb * shadowcolor
+					* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
+			#else
+			g_FragColor += g_smpSpecular.rgb
+					* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
+			#endif
+		#else
+			#if ( NND_OPT_TEX_SHADOW != -1 )
+			/* シャドウマップの場合 */
+			g_FragColor += g_VtxSpecCol.rgb * shadowcolor
+								* u_FrontMaterial.specular.rgb;
+			#else
+			g_FragColor += g_VtxSpecCol.rgb
+								* u_FrontMaterial.specular.rgb;
+			#endif
+		#endif
+		
+	#endif
+}
+
+/* テクスチャフィルターを掛けます */
+void BlendTexFilter(void)
+{
+	/* 乗算テクスチャ */
+	#if ( NND_OPT_TEX_MODULATE != -1 )
+	g_FragColor *= g_smpModulate.rgb;
+	#endif
+
+	/* 加算テクスチャ */
+	#if ( NND_OPT_TEX_ADD != -1 )
+	g_FragColor += g_smpAdd.rgb;
+	#endif
+
+	/* 双方物面環境マップテクスチャ */
+	#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
+	g_FragColor += g_smpDualParaboloid.rgb;
+	#endif
+}
+
+/* アルファ値の算出 */
+void CalcAlpha(void)
+{
+	/* ベーステクスチャ */
+	#if ( NND_OPT_TEX_DECAL3 != -1 )
+	g_FragAlpha = 1.0 - (1.0-g_smpBase.a) * (1.0-g_smpDecal.a) 
+							* (1.0-g_smpDecal2.a) * (1.0-g_smpDecal3.a);
+	#elif ( NND_OPT_TEX_DECAL2 != -1 )
+	g_FragAlpha = 1.0 -
+					(1.0-g_smpBase.a) * (1.0-g_smpDecal.a) * (1.0-g_smpDecal2.a);
+	#elif ( NND_OPT_TEX_DECAL != -1 )
+	g_FragAlpha = g_smpBase.a + g_smpDecal.a - g_smpBase.a * g_smpDecal.a;
+	#else
+	g_FragAlpha = g_smpBase.a;
+	#endif
+	/* 不透明度テクスチャ */
+	#if ( NND_OPT_TEX_OPACITY != -1 )
+	g_FragAlpha *= g_smpOpacity.r;
+	#endif
+	/* 乗算テクスチャアルファ */
+	#if ( NND_OPT_TEX_MODULATE != -1 )
+	g_FragAlpha *= g_smpModulate.a;
+	#endif
+	/* 頂点カラーおよびマテリアルのアルファ */
+	g_FragAlpha *= g_VtxDiffCol.a;
+
+	/* カラークランプ */
+	g_FragColor = clamp( g_FragColor, 0.0, 1.0 );
+}
+
+/* フォッグ計算 */
+void CalcFog(void)
+{
+	/* 頂点フォグ */
+	#if ( !( NND_PROF_FRAG_FOG ) && ( NND_PROF_FOG_MODEL ) )
+		g_FragColor = lerp( u_Fog.color.rgb, g_FragColor , g_Input.ViewPosFog.NND_SUFFIX_FOG );
+	#endif
+
+	/* フラグメント単位フォグ */
+	#if ( NND_PROF_FRAG_FOG && NND_PROF_FOG_MODEL )
+		float fogd;
+		#if ( NND_PROF_FOG_MODEL == 1 )
+			fogd = ( u_Fog.end - g_Input.ViewPosFog.NND_SUFFIX_FOG ) * u_Fog.scale;
+		#elif ( NND_PROF_FOG_MODEL == 2 )
+			fogd = exp2( -u_Fog.density * g_Input.ViewPosFog.NND_SUFFIX_FOG * 1.442695 );
+		#elif ( NND_PROF_FOG_MODEL == 3 )
+			fogd = exp2( -u_Fog.density * u_Fog.density
+							* g_Input.ViewPosFog.NND_SUFFIX_FOG * g_Input.ViewPosFog.NND_SUFFIX_FOG * 1.442695 );
+		#endif
+		fogd = clamp( fogd, 0.0, 1.0 );
+		g_FragColor = lerp( u_Fog.color.rgb, g_FragColor, fogd );
+	#endif
+}
+
+/* 最終出力カラーの設定 */
+void SetFinalColor(void)
+{
+	g_Output.Col.rgb = g_FragColor;		// フラグメントカラー出力
+	g_Output.Col.a   = g_FragAlpha;		// フラグメントアルファ出力
+}
+
+/**************************/
+/* ピクセルシェーダメイン */
+/**************************/
+PS_OUTPUT main(PS_INPUT Input)
+{
+	g_Input = Input;
+
+	NrmInput();				// 入力ベクトルを正規化します	
+	SampleTexMap();			// テクスチャサンプリング
+	CalcLight();			// ライト計算
+	BlendTexFilter();		// テクスチャフィルターを掛けます
+	CalcAlpha();			// アルファ値の算出
+	CalcFog();				// フォッグ計算
+	SetFinalColor();		// 最終出力カラーの設定
+	return( g_Output );
+}
+
+/*-------------------------------------------------------------------------*/

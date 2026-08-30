@@ -2,7 +2,7 @@
 
 internal partial class AppMain
 {
-    private enum DME_TITLE_ACT
+    internal enum DME_TITLE_ACT
     {
         ACT_BTN_L = 0,
         ACT_BTN_C,
@@ -24,9 +24,10 @@ internal partial class AppMain
         ACT_GAME_BTN_L, // 0x00000011
         ACT_GAME_BTN_R, // 0x00000012
         ACT_LANG, // 0x00000013
-        ACT_TEX_START, // 0x00000013
+        // C++ aliased these onto the member above; keep them equal or every value after drifts
+        ACT_TEX_START = ACT_LANG, // 0x00000013
         ACT_NONE, // 0x00000014
-        ACT_TEX_GAME, // 0x00000014
+        ACT_TEX_GAME = ACT_NONE, // 0x00000014
         ACT_TEX_TUDUKI, // 0x00000015
         ACT_TEX_OPTION, // 0x00000016
         ACT_TEX_KANZENBAN, // 0x00000017
@@ -50,7 +51,7 @@ internal partial class AppMain
         ACT_NUM, // 0x00000029
     }
 
-    private enum DME_TITLE_ACT_REG
+    internal enum DME_TITLE_ACT_REG
     {
         ACT_MENU_CRSR = 0,
 	    ACT_TEX_START,

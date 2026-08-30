@@ -1,5 +1,6 @@
 internal partial class AppMain
 {
+    // NN key family BezierA32_1: A32_1 plus a Bezier handle
     internal class NNS_MOTION_KEY_Class9
     {
         public readonly NNS_MOTION_BEZIER_HANDLE Bhandle = new NNS_MOTION_BEZIER_HANDLE();

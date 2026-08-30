@@ -18,8 +18,16 @@
     <AndroidPackageFormat>aab</AndroidPackageFormat>
     <AndroidBundleToolExtraArgs>--local-testing</AndroidBundleToolExtraArgs>
   </PropertyGroup>
+  <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
+  <PropertyGroup>
+    <ContentProfile>mobile-hd</ContentProfile>
+    <ContentItemType>AndroidAsset</ContentItemType>
+  </PropertyGroup>
+  <Import Project="..\Content.targets" />
+
   <ItemGroup>
-    <AndroidAsset Include="..\Content\bin\DesktopGLHD\**\*.*" AssetPack="content" DeliveryType="FastFollow">
+    <AndroidAsset Condition="'$(SkipContentCopy)' != 'true'"
+                  Include="$(ContentDir)**\*.*" AssetPack="content" DeliveryType="FastFollow">
       <Link>Assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AndroidAsset>
     <PackageReference Include="DdsKtxXna.MonoGame" Version="0.4.4" />

@@ -12,7 +12,7 @@ internal partial class AppMain
         }
     }
 
-    private static bool DmCmnBackupIsLoadFinished()
+    internal static bool DmCmnBackupIsLoadFinished()
     {
         //AppMain.GSS_MAIN_SYS_INFO mainSysInfo = AppMain.GsGetMainSysInfo();
         //if (!AppMain.AoStorageLoadIsFinished())
@@ -21,7 +21,7 @@ internal partial class AppMain
         return true;
     }
 
-    private static bool DmCmnBackupIsLoadSuccessed()
+    internal static bool DmCmnBackupIsLoadSuccessed()
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         bool flag;
@@ -63,12 +63,12 @@ internal partial class AppMain
         }
     }
 
-    private static bool DmCmnBackupIsSaveFinished()
+    internal static bool DmCmnBackupIsSaveFinished()
     {
         return true;
     }
 
-    private static bool DmCmnBackupIsSaveSuccessed()
+    internal static bool DmCmnBackupIsSaveSuccessed()
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         bool flag;

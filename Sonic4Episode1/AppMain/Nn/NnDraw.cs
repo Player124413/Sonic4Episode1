@@ -412,7 +412,22 @@ internal partial class AppMain
         }
     }
 
+    // NN never mixes backends in one build; we load both, so the vertex list says which this object is
     private static void nnDrawObject(
+        NNS_OBJECT obj,
+        NNS_MATRIX[] mtxpal,
+        uint[] nodestatlist,
+        uint subobjtype,
+        uint flag,
+        uint alternativeLighting)
+    {
+        if (obj.nVtxList > 0 && obj.pVtxListPtrList[0].pVtxList is NNS_VTXLIST_DX_DESC)
+            nnDrawObjectStdShader(obj, mtxpal, nodestatlist, subobjtype, flag);
+        else
+            nnDrawObjectGL(obj, mtxpal, nodestatlist, subobjtype, flag, alternativeLighting);
+    }
+
+    private static void nnDrawObjectGL(
         NNS_OBJECT obj,
         NNS_MATRIX[] mtxpal,
         uint[] nodestatlist,
@@ -476,7 +491,7 @@ internal partial class AppMain
                         {
                             nngDrawCallBackVal.iPrevMaterial = pMeshset.iMaterial;
                             nngDrawCallBackVal.iPrevVtxList = pMeshset.iVtxList;
-                            if (((int)pVtxListPtr.fType & 1) != 0)
+                            if (pVtxListPtr.pVtxList is NNS_VTXLIST_GL_DESC glVtxList)
                             {
                                 if (((int)flag & 768) != 0)
                                 {
@@ -486,8 +501,7 @@ internal partial class AppMain
                                 {
                                     if (((int)pSubobj.fType & 512) != 0)
                                     {
-                                        NNS_VTXLIST_GL_DESC pVtxList = (NNS_VTXLIST_GL_DESC)pVtxListPtr.pVtxList;
-                                        int nMatrix = pVtxList.nMatrix;
+                                        int nMatrix = glVtxList.nMatrix;
                                         OpenGL.glEnable(34880U);
                                         OpenGL.glMatrixMode(34880U);
                                         for (uint matrixpaletteindex = 0;
@@ -496,7 +510,7 @@ internal partial class AppMain
                                         {
                                             OpenGL.glCurrentPaletteMatrixOES(matrixpaletteindex);
                                             Matrix matrix =
-                                                (Matrix)mtxpal[pVtxList.pMatrixIndices[(int)matrixpaletteindex]];
+                                                (Matrix)mtxpal[glVtxList.pMatrixIndices[(int)matrixpaletteindex]];
                                             OpenGL.glLoadMatrixf(ref matrix);
                                         }
                                     }
@@ -519,9 +533,9 @@ internal partial class AppMain
                                     nnDrawObjectPrimitiveList(pPrimListPtr, flag);
                                 }
                             }
-                            else
+                            else if (((int)pVtxListPtr.fType & 16711680) != 0)
                             {
-                                int num4 = (int)pVtxListPtr.fType & 16711680;
+                                NNM_ASSERT(false, "not support common vertex type\n");
                             }
 
                             if (nngDrawCallBackVal.bReDraw == 0)
@@ -1196,9 +1210,34 @@ internal partial class AppMain
         mppAssertNotImpl();
     }
 
+    // fFlag has no shared base type across the three material descriptors
+    private static uint mppMaterialFlag(NNS_MATERIALPTR matptr)
+    {
+        switch (matptr.pMaterial)
+        {
+            case NNS_MATERIAL_STDSHADER_DESC stdshader: return stdshader.fFlag;
+            case NNS_MATERIAL_GLES11_DESC gles11: return gles11.fFlag;
+            case NNS_MATERIAL_DESC desc: return desc.fFlag;
+            default: return 0;
+        }
+    }
+
+    private static void mppSetMaterialFlag(NNS_MATERIALPTR matptr, uint fFlag)
+    {
+        switch (matptr.pMaterial)
+        {
+            case NNS_MATERIAL_STDSHADER_DESC stdshader: stdshader.fFlag = fFlag; break;
+            case NNS_MATERIAL_GLES11_DESC gles11: gles11.fFlag = fFlag; break;
+            case NNS_MATERIAL_DESC desc: desc.fFlag = fFlag; break;
+        }
+    }
+
     private static int nnPutMaterialCore(NNS_DRAWCALLBACK_VAL val)
     {
         NNS_MATERIALPTR pMaterial1 = val.pMaterial;
+        if (pMaterial1.pMaterial is NNS_MATERIAL_STDSHADER_DESC)
+            return nnPutMaterialCoreStdShader(val);
+
         if (((int)val.DrawFlag & 29440) != 0)
         {
             nnPutDisableTexturesGL();
@@ -1225,7 +1264,7 @@ internal partial class AppMain
                         OpenGL.glCullFace(1029U);
                         break;
                     default:
-                        if (((int)((NNS_MATERIAL_DESC)pMaterial1.pMaterial).fFlag & 1) != 0)
+                        if ((mppMaterialFlag(pMaterial1) & 1) != 0)
                         {
                             OpenGL.glDisable(2884U);
                             break;
@@ -1242,9 +1281,9 @@ internal partial class AppMain
                         nnPutWireColor();
                         break;
                     case 8192:
-                        if (((int)pMaterial1.fType & 8) != 0)
+                        if (pMaterial1.pMaterial is NNS_MATERIAL_GLES11_DESC gles11Material)
                         {
-                            nnPutColorNTexture(((NNS_MATERIAL_GLES11_DESC)pMaterial1.pMaterial).nTex);
+                            nnPutColorNTexture(gles11Material.nTex);
                             break;
                         }
 
@@ -1269,9 +1308,8 @@ internal partial class AppMain
             nnInitPreviousMaterialValueGL();
         else if (val.iMaterial == val.iPrevMaterial)
             return 1;
-        if (((int)pMaterial1.fType & 8) != 0)
+        if (pMaterial1.pMaterial is NNS_MATERIAL_GLES11_DESC pMaterial2)
         {
-            NNS_MATERIAL_GLES11_DESC pMaterial2 = (NNS_MATERIAL_GLES11_DESC)pMaterial1.pMaterial;
             uint fFlag = pMaterial2.fFlag;
             if ((int)fFlag != (int)nnmaterialcore.nngPreMatFlag)
                 nnPutMaterialFlagGL(val, fFlag);
@@ -1284,18 +1322,17 @@ internal partial class AppMain
             else
                 nnPutDisableTexturesGL();
         }
-        else if (((int)pMaterial1.fType & 1) != 0)
+        else if (pMaterial1.pMaterial is NNS_MATERIAL_DESC pMaterial3)
         {
-            NNS_MATERIAL_DESC pMaterial2 = (NNS_MATERIAL_DESC)pMaterial1.pMaterial;
-            uint fFlag = pMaterial2.fFlag;
+            uint fFlag = pMaterial3.fFlag;
             if ((int)fFlag != (int)nnmaterialcore.nngPreMatFlag)
                 nnPutMaterialFlagGL(val, fFlag);
-            if (pMaterial2.pColor != nnmaterialcore.nngpPreMatColor)
-                nnPutMaterialColorGL(1032U, val, (NNS_MATERIAL_STDSHADER_COLOR)pMaterial2.pColor);
-            if (pMaterial2.pLogic != nnmaterialcore.nngpPreMatLogic)
-                nnPutMaterialLogicGL(val, pMaterial2.pLogic);
+            if (pMaterial3.pColor != nnmaterialcore.nngpPreMatColor)
+                nnPutMaterialColorGL(1032U, val, (NNS_MATERIAL_STDSHADER_COLOR)pMaterial3.pColor);
+            if (pMaterial3.pLogic != nnmaterialcore.nngpPreMatLogic)
+                nnPutMaterialLogicGL(val, pMaterial3.pLogic);
             if (((int)val.DrawFlag & 2048) == 0)
-                nnPutMaterialTexturesGL(val, pMaterial2.pTexDesc, pMaterial2.nTex);
+                nnPutMaterialTexturesGL(val, pMaterial3.pTexDesc, pMaterial3.nTex);
             else
                 nnPutDisableTexturesGL();
         }
@@ -1671,7 +1708,7 @@ internal partial class AppMain
                 nnCalcMotionFrame(out dstframe, submot.fIPType, submot.StartKeyFrame, submot.EndKeyFrame, frame) != 0)
             {
                 if (((int)submot.fType & 30720) != 0)
-                    rflag |= nnCalcMotionRotate(submot, dstframe, ref rv, rq, rtype);
+                    rflag |= nnCalcMotionRotate(submot, dstframe, ref rv, ref rq, rtype);
                 else if (((int)submot.fType & 1792) != 0)
                     tflag |= nnCalcMotionTranslate(submot, dstframe, tv);
                 else if (((int)submot.fType & 229376) != 0)
@@ -2548,7 +2585,7 @@ internal partial class AppMain
     {
         for (int index1 = 0; index1 < nVtxList; ++index1)
         {
-            if (((int)srcvlist[index1].fType & 1) != 0)
+            if (srcvlist[index1].pVtxList is NNS_VTXLIST_GL_DESC)
             {
                 NNS_VTXLIST_GL_DESC pVtxList = (NNS_VTXLIST_GL_DESC)srcvlist[index1].pVtxList;
                 NNS_VTXLIST_GL_DESC pVtxDesc = null;
@@ -2626,7 +2663,7 @@ internal partial class AppMain
         {
             if (dstplist != null)
                 dstplist[index].fType = srcplist[0].fType | 2U;
-            if (((int)srcplist[index].fType & 1) != 0)
+            if (srcplist[index].pPrimList is NNS_PRIMLIST_GL_DESC)
             {
                 NNS_PRIMLIST_GL_DESC pPrimList = (NNS_PRIMLIST_GL_DESC)srcplist[index].pPrimList;
                 NNS_PRIMLIST_GL_DESC pPrimDesc = null;
@@ -2740,9 +2777,9 @@ internal partial class AppMain
             for (int index = 0; index < obj.nVtxList; ++index)
             {
                 NNS_VTXLISTPTR pVtxListPtr = obj.pVtxListPtrList[index];
-                if (((int)pVtxListPtr.fType & 1) != 0)
+                if (pVtxListPtr.pVtxList is NNS_VTXLIST_GL_DESC glVtxDesc)
                 {
-                    nnBindBufferVertexDescGL((NNS_VTXLIST_GL_DESC)pVtxListPtr.pVtxList, flag);
+                    nnBindBufferVertexDescGL(glVtxDesc, flag);
                     pVtxListPtr.fType |= 16U;
                 }
                 else
@@ -2752,9 +2789,9 @@ internal partial class AppMain
             for (int index = 0; index < obj.nPrimList; ++index)
             {
                 NNS_PRIMLISTPTR pPrimListPtr = obj.pPrimListPtrList[index];
-                if (((int)pPrimListPtr.fType & 1) != 0)
+                if (pPrimListPtr.pPrimList is NNS_PRIMLIST_GL_DESC glPrimDesc)
                 {
-                    nnBindBufferPrimitiveDescGL((NNS_PRIMLIST_GL_DESC)pPrimListPtr.pPrimList, flag);
+                    nnBindBufferPrimitiveDescGL(glPrimDesc, flag);
                     pPrimListPtr.fType |= 2U;
                 }
                 else
@@ -2770,21 +2807,15 @@ internal partial class AppMain
         for (int index = 0; index < obj.nVtxList; ++index)
         {
             NNS_VTXLISTPTR pVtxListPtr = obj.pVtxListPtrList[index];
-            if (((int)pVtxListPtr.fType & 16) != 0)
-                OpenGL.glDeleteBuffers(1,
-                [
-                    ((NNS_VTXLIST_GL_DESC) pVtxListPtr.pVtxList).BufferName
-                ]);
+            if (((int)pVtxListPtr.fType & 16) != 0 && pVtxListPtr.pVtxList is NNS_VTXLIST_GL_DESC glVtxDesc)
+                OpenGL.glDeleteBuffers(1, [glVtxDesc.BufferName]);
         }
 
         for (int index = 0; index < obj.nPrimList; ++index)
         {
             NNS_PRIMLISTPTR pPrimListPtr = obj.pPrimListPtrList[index];
-            if (((int)pPrimListPtr.fType & 2) != 0)
-                OpenGL.glDeleteBuffers(1,
-                [
-                    ((NNS_PRIMLIST_GL_DESC) pPrimListPtr.pPrimList).BufferName
-                ]);
+            if (((int)pPrimListPtr.fType & 2) != 0 && pPrimListPtr.pPrimList is NNS_PRIMLIST_GL_DESC glPrimDesc)
+                OpenGL.glDeleteBuffers(1, [glPrimDesc.BufferName]);
         }
     }
 
@@ -4262,7 +4293,7 @@ internal partial class AppMain
       [1f, 0.0f, 1f],
       [1f, 0.0f, 0.0f]
         ];
-        if (((int)vlistptr.fType & 1) != 0)
+        if (vlistptr.pVtxList is NNS_VTXLIST_GL_DESC)
         {
             NNS_VTXLIST_GL_DESC pVtxList = (NNS_VTXLIST_GL_DESC)vlistptr.pVtxList;
             int index1 = 0;
@@ -4276,9 +4307,9 @@ internal partial class AppMain
         }
         else
         {
-            if (((int)vlistptr.fType & 16711680) == 0)
+            if (!(vlistptr.pVtxList is NNS_VTXLIST_COMMON_DESC commonVtxDesc))
                 return;
-            switch (((NNS_VTXLIST_COMMON_DESC)vlistptr.pVtxList).List0.fType & 15872U)
+            switch (commonVtxDesc.List0.fType & 15872U)
             {
                 case 0:
                     OpenGL.glColor3fv(numArray[0]);

@@ -1,0 +1,185 @@
+# Where each provenance lives, and what each profile emits.
+#
+# A profile names one `base`, which decides member order and is never reordered, and any number of
+# `variants`, appended as a single nested #AMB each so no index moves. A profile with no variants
+# reproduces its base exactly.
+#
+# Roots are machine-local and this is the only place they are written down. Nothing else in the repo
+# should carry an absolute path to a game install.
+
+# the shipped WP7 XAP, pristine original of this repo's own lineage
+[source.wp7-orig]
+root = "E:/Downloads/S4E1-WP7-orig/00103-Sonic-4-Episode-I-v1.2/Content"
+
+# see Content.Src/README.md: derivable in principle, not yet in practice
+[source.staged]
+root = "Content.Src/staged"
+
+# authored member replacements, laid out as `unpack` writes a tree; see Content.Src/patches
+[source.patches]
+root = "Content.Src/patches"
+
+# the retail iPad HD bundle, used directly. Not E:/Stuff/S4E1HD/hog.app, which is contaminated
+# with archives from the 2011 SD build - see docs/content-catalog.md
+[source.ios-hd]
+root = "E:/Downloads/Sonic_The_Hedgehog_4_Episode_I_HD_(v1.1_LP_os32)-iNFiN1Ty/Payload/hog.app"
+drop_sibling_suffix = "_M"
+
+# AmbTextureConverter's PNG conversion of the contaminated bundle, kept as a comparison reference
+[source.ios-hd-converted]
+root = "Content/bin/DesktopGLHD/Content"
+
+# texture oracle for transcoding, not a base: index-identical to ios-hd-converted, so the PVR
+# behind any shipped PNG is recoverable by basename and position
+[source.ios-hd-raw]
+root = "E:/Stuff/S4E1HD/hog.app"
+
+[source.ios-sd-raw]
+root = "E:/Downloads/Sonic4 epI-(com.sega.sonic4)-1.2-(iOS_3.0)-c7a616d5fc6d122b4fcb2f62b63e0fb2/Payload/hog.app"
+
+[source.pc]
+root = "C:/Program Files (x86)/Steam/steamapps/common/Sonic the Hedgehog 4 EP 1"
+
+[source.xbla]
+root = "C:/Users/wamwo/Downloads/Sonic_the_Hedgehog_4_-_Episode_I_(Feb_6,_2010_prototype)/Sonic_4_Episode_1(2Builds)/Sonic_4_Episode_1/58410A07/000D0000/data"
+
+
+# Each profile declares what it will produce and what its tree may contain. `encode` is walked in
+# order and the first format whose predicate holds wins; an empty `encode` is the identity profile,
+# where no candidate ever applies and every member passes through untouched. `accept` is what
+# `check` asserts per member. `heads` names the consumers, so a profile cannot declare a format its
+# consumers cannot load: everything but FNA throws on any DDS at AmTexture.cs:144.
+
+# what iOS and Android ship today, normalised to #AMB. The wp7-orig overlay adds the five language
+# archives iOS never shipped: an overlay only emits what the base does not already have.
+[profile.mobile-hd]
+base     = "ios-hd"
+overlays = ["wp7-orig"]
+patches  = ["patches"]
+variants = []
+heads    = ["fna", "android"]
+textures = { encode = ["png"], accept = ["png"] }
+audio    = "ogg"
+
+# desktop, with the console model and texture sets alongside the mobile ones so a runtime toggle
+# can pick either. Encoding to bc trades disk space for VRAM and skips PNG decode at load; bc2 is
+# accepted but never encoded, since DXT3 arrives from the variants and re-encoding lossy data is
+# the one move the model forbids.
+#
+# the staged overlay is required here: on desktop `iphone_menus` is false, so DmTitle and GmRing
+# load PC-only archives that are not in the ios-hd base.
+#
+# variants are named archive by archive on purpose. DmStgSlct and DmOption are not ported yet and
+# pin themselves to the base, so nothing they load may appear here. Neither may the player set: PC
+# ships 212 motions against the iPad's 130 and they diverge at index 2.
+[profile.desktop-hd]
+base     = "ios-hd"
+overlays = ["staged", "wp7-orig"]
+patches  = ["patches"]
+variants = [
+  { source = "pc", name = "console", archives = ["G_COM/RING/RING_MDL.AMB", "G_COM/RING/RING_TEX.AMB"] },
+  # menus come from xbla, not pc: Steam's D_CMN_BTN carries a second _key set and runs to 28 actions
+  # where XBLA and mobile both have 15, so only xbla's ids line up with the tables in the port.
+  # D_CMN_BG/BTN/OBI are id-identical to mobile, only D_CMN_WIN and D_CMN_MSG actually differ.
+  # the ring stays on pc because its model is LE DXG20; xbla's is big-endian Xenon and unhandled.
+  # flip because these are sprite art drawn through the GL layer (AoAct.aoActDrawSprState), which
+  # the ring model above is not.
+  { source = "xbla", name = "console", flip = true, archives = [
+    "DEMO/TITLE/D_TITLE.AMB",
+    "DEMO/TITLE/D_TITLE_JP.AMB",
+    "DEMO/TITLE/D_TITLE_US.AMB",
+    "DEMO/TITLE/D_TITLE_FR.AMB",
+    "DEMO/TITLE/D_TITLE_IT.AMB",
+    "DEMO/TITLE/D_TITLE_GE.AMB",
+    "DEMO/TITLE/D_TITLE_SP.AMB",
+    "DEMO/CMN/D_CMN_BG.AMB",
+    "DEMO/CMN/D_CMN_BTN.AMB",
+    "DEMO/CMN/D_CMN_OBI.AMB",
+    "DEMO/CMN/D_CMN_WIN.AMB",
+    "DEMO/CMN/D_CMN_MSG_JP.AMB",
+    "DEMO/CMN/D_CMN_MSG_US.AMB",
+    "DEMO/CMN/D_CMN_MSG_FR.AMB",
+    "DEMO/CMN/D_CMN_MSG_IT.AMB",
+    "DEMO/CMN/D_CMN_MSG_GE.AMB",
+    "DEMO/CMN/D_CMN_MSG_SP.AMB",
+    # stage select. xbla ships six languages against the mobile set's eleven, and that is on
+    # purpose: amFsAllVariant drops the whole screen back to mobile in CN/FI/HK/PT/RU rather than
+    # letting a console D_STGSLCT reach tables that index the mobile one. Ids measured in
+    # docs/stgslct-action-ids.md, 89 console actions against 80 mobile with only index 0 shared.
+    "DEMO/STGSLCT/D_STGSLCT.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_JP.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_US.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_FR.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_IT.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_GE.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_SP.AMB",
+    # the startup screens ride the same rule; parity measured in docs/startup-screen-variants.md
+    "DEMO/LOGO/D_LOGO_SEGA_JP.AMB",
+    "DEMO/LOGO/D_LOGO_SEGA_US_EU.AMB",
+    "DEMO/LOGO/D_LOGO_SONIC.AMB",
+    "DEMO/LOADING/D_LOADING.AMB",
+  ] },
+]
+heads    = ["fna"]
+textures = { encode = ["bc1", "bc3"], accept = ["bc1", "bc2", "bc3", "png"] }
+audio    = "ogg"
+
+# the WP7-lineage set, for the XNA and UWP heads. None of those heads can load DDS (AmTexture.cs:144
+# throws), so this normalises to PNG even though the staged overlay brings in DXT1 members
+[profile.desktop-sd]
+base     = "wp7-orig"
+overlays = ["staged"]
+variants = []
+heads    = ["fna", "xna", "wp7", "uwp"]
+textures = { encode = ["png"], accept = ["png"] }
+audio    = "ogg"
+
+# same as desktop-hd but with textures left alone, for isolating a texture problem from everything
+# else the pipeline does: if a bug shows here too, it is not the BC transcode
+[profile.desktop-hd-raw]
+base     = "ios-hd"
+overlays = ["staged", "wp7-orig"]
+variants = [
+  { source = "pc", name = "console", archives = ["G_COM/RING/RING_MDL.AMB", "G_COM/RING/RING_TEX.AMB"] },
+  # menus come from xbla, not pc: Steam's D_CMN_BTN carries a second _key set and runs to 28 actions
+  # where XBLA and mobile both have 15, so only xbla's ids line up with the tables in the port.
+  # D_CMN_BG/BTN/OBI are id-identical to mobile, only D_CMN_WIN and D_CMN_MSG actually differ.
+  # the ring stays on pc because its model is LE DXG20; xbla's is big-endian Xenon and unhandled.
+  { source = "xbla", name = "console", archives = [
+    "DEMO/TITLE/D_TITLE.AMB",
+    "DEMO/TITLE/D_TITLE_JP.AMB",
+    "DEMO/TITLE/D_TITLE_US.AMB",
+    "DEMO/TITLE/D_TITLE_FR.AMB",
+    "DEMO/TITLE/D_TITLE_IT.AMB",
+    "DEMO/TITLE/D_TITLE_GE.AMB",
+    "DEMO/TITLE/D_TITLE_SP.AMB",
+    "DEMO/CMN/D_CMN_BG.AMB",
+    "DEMO/CMN/D_CMN_BTN.AMB",
+    "DEMO/CMN/D_CMN_OBI.AMB",
+    "DEMO/CMN/D_CMN_WIN.AMB",
+    "DEMO/CMN/D_CMN_MSG_JP.AMB",
+    "DEMO/CMN/D_CMN_MSG_US.AMB",
+    "DEMO/CMN/D_CMN_MSG_FR.AMB",
+    "DEMO/CMN/D_CMN_MSG_IT.AMB",
+    "DEMO/CMN/D_CMN_MSG_GE.AMB",
+    "DEMO/CMN/D_CMN_MSG_SP.AMB",
+    # stage select. xbla ships six languages against the mobile set's eleven, and that is on
+    # purpose: amFsAllVariant drops the whole screen back to mobile in CN/FI/HK/PT/RU rather than
+    # letting a console D_STGSLCT reach tables that index the mobile one. Ids measured in
+    # docs/stgslct-action-ids.md, 89 console actions against 80 mobile with only index 0 shared.
+    "DEMO/STGSLCT/D_STGSLCT.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_JP.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_US.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_FR.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_IT.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_GE.AMB",
+    "DEMO/STGSLCT/D_STGSLCT_SP.AMB",
+    # the startup screens ride the same rule; parity measured in docs/startup-screen-variants.md
+    "DEMO/LOGO/D_LOGO_SEGA_JP.AMB",
+    "DEMO/LOGO/D_LOGO_SEGA_US_EU.AMB",
+    "DEMO/LOGO/D_LOGO_SONIC.AMB",
+    "DEMO/LOADING/D_LOADING.AMB",
+  ] },
+]
+textures = { encode = [], accept = ["png", "bc1", "bc2", "bc3", "rgba32", "bgra32", "l8", "pvr"] }
+audio    = "ogg"

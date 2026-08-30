@@ -144,51 +144,47 @@ internal partial class AppMain
     }
     internal class CMain : CMainTask<CMain>
     {
-        public static readonly int[] c_return_table = new int[2]
-        {
-      0,
-      1
-        };
+        public static readonly int[] c_return_table = [0, 1];
         private static SLocalUnfoldTable[] c_local_unfold_table = new SLocalUnfoldTable[6]
         {
-      new SLocalUnfoldTable(EMemFile.Type.None, 0U),
-      new SLocalUnfoldTable(EMemFile.Type.None, 0U),
-      new SLocalUnfoldTable(EMemFile.Type.Global, 0U),
-      new SLocalUnfoldTable(EMemFile.Type.Global, 1U),
-      new SLocalUnfoldTable(EMemFile.Type.Lang, 0U),
-      new SLocalUnfoldTable(EMemFile.Type.Lang, 1U)
+            new SLocalUnfoldTable(EMemFile.Type.None, 0U),
+            new SLocalUnfoldTable(EMemFile.Type.None, 0U),
+            new SLocalUnfoldTable(EMemFile.Type.Global, IDB_D_BUY_SCREEN_D_COMP_AMA),
+            new SLocalUnfoldTable(EMemFile.Type.Global, IDB_D_BUY_SCREEN_D_COMP_AMB),
+            new SLocalUnfoldTable(EMemFile.Type.Lang, IDB_D_BUY_SCREEN_JP_D_COMP_JP_AMA),
+            new SLocalUnfoldTable(EMemFile.Type.Lang, IDB_D_BUY_SCREEN_JP_D_COMP_JP_AMB)
         };
         public static readonly SLocalCreateActionTable[] c_local_create_action_table = new SLocalCreateActionTable[9]
         {
-      new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, 0),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 0),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 1),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 2),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 3),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 4),
-      new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, 5),
-      new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, 1),
-      new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, 2)
+            new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, IDA_D_COMP_JP_ACT_BG),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_BUY_L),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_BUY_C),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_BUY_R),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_RETURN_L),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_RETURN_C),
+            new SLocalCreateActionTable(EFile.EFileEnum.GlobalAma, ETex.Type.Global, IDA_D_COMP_ACT_BTN_RETURN_R),
+            new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, IDA_D_COMP_JP_ACT_TEX_BUY),
+            new SLocalCreateActionTable(EFile.EFileEnum.LangAma, ETex.Type.Lang, IDA_D_COMP_JP_ACT_TEX_RETURN)
         };
         public static readonly EAct.Type[] c_local_create_trg_table = new EAct.Type[2]
         {
-      EAct.Type.BuyCenter,
-      EAct.Type.CancelCenter
+            EAct.Type.BuyCenter,
+            EAct.Type.CancelCenter
         };
         public static readonly EAct.Type[][] c_btn_action_table = new EAct.Type[2][]
         {
-      new EAct.Type[3]
-      {
-        EAct.Type.BuyLeft,
-        EAct.Type.BuyCenter,
-        EAct.Type.BuyRight
-      },
-      new EAct.Type[3]
-      {
-        EAct.Type.CancelLeft,
-        EAct.Type.CancelCenter,
-        EAct.Type.CancelRight
-      }
+            new EAct.Type[3]
+            {
+                EAct.Type.BuyLeft,
+                EAct.Type.BuyCenter,
+                EAct.Type.BuyRight
+            },
+            new EAct.Type[3]
+            {
+                EAct.Type.CancelLeft,
+                EAct.Type.CancelCenter,
+                EAct.Type.CancelRight
+            }
         };
         private BitArray m_flag = new BitArray(8);
         private readonly AMS_FS[] m_fs = new AMS_FS[2];
@@ -357,8 +353,8 @@ internal partial class AppMain
         {
             EFile.EFileEnum[] efileEnumArray = new EFile.EFileEnum[2]
             {
-        EFile.EFileEnum.GlobalAmb,
-        EFile.EFileEnum.LangAmb
+                EFile.EFileEnum.GlobalAmb,
+                EFile.EFileEnum.LangAmb
             };
             for (int index = 0; index < 2; ++index)
             {

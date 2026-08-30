@@ -78,7 +78,7 @@ internal partial class AppMain
                     else
                     {
                         texbuf = amTextureDecode(amb.data, amb.offsets[index],
-                            amb.data.Length - amb.offsets[index], ext);
+                            amb.lengths[index], ext);
                         amb.buf[index] = texbuf;
                     }
                 }
@@ -109,8 +109,27 @@ internal partial class AppMain
         return amDrawRegistCommand(1, paramLoadTexture);
     }
 
+    private const uint MPP_DDS_MAGIC = 0x20534444;
+    private const uint MPP_DDSD_PITCH = 0x8;
+    private const uint MPP_DDSD_LINEARSIZE = 0x80000;
+
+    private static void mppNormaliseDdsFlags(byte[] data, int offset)
+    {
+        if (offset + 12 > data.Length || BitConverter.ToUInt32(data, offset) != MPP_DDS_MAGIC)
+            return;
+
+        uint flags = BitConverter.ToUInt32(data, offset + 8);
+        if ((flags & (MPP_DDSD_PITCH | MPP_DDSD_LINEARSIZE)) != (MPP_DDSD_PITCH | MPP_DDSD_LINEARSIZE))
+            return;
+
+        BitConverter.GetBytes(flags & ~MPP_DDSD_PITCH).CopyTo(data, offset + 8);
+    }
+
     public static Texture2D amTextureDecode(byte[] data, int offset, int length, string ext)
     {
+        if (ext.Equals(".dds", StringComparison.InvariantCultureIgnoreCase))
+            mppNormaliseDdsFlags(data, offset);
+
         using var memoryStream = new MemoryStream(data, offset, length);
         if (ext.Equals(".dds", StringComparison.InvariantCultureIgnoreCase))
         {

@@ -81,7 +81,7 @@ internal partial class AppMain
             return this;
         }
 
-        public static NNS_OBJECT ReadGLES11(BinaryReader reader, long data0Pos)
+        public static NNS_OBJECT Read(BinaryReader reader, long data0Pos, NNE_PLATFORM platform)
         {
             NNS_OBJECT nnsObject = new NNS_OBJECT();
             nnsObject.Center.x = reader.ReadSingle();
@@ -99,13 +99,20 @@ internal partial class AppMain
                 for (int index = 0; index < nnsObject.nMaterial; ++index)
                 {
                     bool transparentMaterial;
-                    nnsObject.pMatPtrList[index] = NNS_MATERIALPTR.Read(reader, data0Pos, out transparentMaterial);
+                    nnsObject.pMatPtrList[index] = NNS_MATERIALPTR.Read(reader, data0Pos, platform, out transparentMaterial);
                     flag |= transparentMaterial;
                 }
                 if (flag)
                 {
                     for (int index = 0; index < nnsObject.nMaterial; ++index)
-                        ((NNS_MATERIAL_GLES11_DESC)nnsObject.pMatPtrList[index].pMaterial).fFlag |= 1U;
+                    {
+                        if (nnsObject.pMatPtrList[index].pMaterial is NNS_MATERIAL_GLES11_DESC gles11)
+                            gles11.fFlag |= 1U;
+                        else if (nnsObject.pMatPtrList[index].pMaterial is NNS_MATERIAL_STDSHADER_DESC stdshader)
+                            stdshader.fFlag |= 1U;
+                        else if (nnsObject.pMatPtrList[index].pMaterial is NNS_MATERIAL_DESC desc)
+                            desc.fFlag |= 1U;
+                    }
                 }
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
@@ -117,7 +124,7 @@ internal partial class AppMain
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num2, SeekOrigin.Begin);
                 for (int index = 0; index < nnsObject.nVtxList; ++index)
-                    nnsObject.pVtxListPtrList[index] = NNS_VTXLISTPTR.Read(reader, data0Pos);
+                    nnsObject.pVtxListPtrList[index] = NNS_VTXLISTPTR.Read(reader, data0Pos, platform);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             nnsObject.nPrimList = reader.ReadInt32();
@@ -128,7 +135,7 @@ internal partial class AppMain
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num3, SeekOrigin.Begin);
                 for (int index = 0; index < nnsObject.nPrimList; ++index)
-                    nnsObject.pPrimListPtrList[index] = NNS_PRIMLISTPTR.Read(reader, data0Pos);
+                    nnsObject.pPrimListPtrList[index] = NNS_PRIMLISTPTR.Read(reader, data0Pos, platform);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             nnsObject.nNode = reader.ReadInt32();
@@ -152,7 +159,7 @@ internal partial class AppMain
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num5, SeekOrigin.Begin);
                 for (int index = 0; index < nnsObject.nSubobj; ++index)
-                    nnsObject.pSubobjList[index] = NNS_SUBOBJ.Read(reader, data0Pos);
+                    nnsObject.pSubobjList[index] = NNS_SUBOBJ.Read(reader, data0Pos, platform);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             nnsObject.nTex = reader.ReadInt32();

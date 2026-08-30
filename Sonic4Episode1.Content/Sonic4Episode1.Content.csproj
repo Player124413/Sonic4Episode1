@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>s4content</AssemblyName>
+    <RootNamespace>Sonic4Episode1.Content</RootNamespace>
+    <!-- must match Sonic4Episode1.Viewer and .Tests so the shared code compiles the same way -->
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;CS0168;CS0219;CS0162;CS0642;CA2022;</NoWarn>
+  </PropertyGroup>
+
+  <!-- real AmFs: the tool reads archives with the same code the game does, which is the whole
+       point of it living here rather than in a separate solution -->
+  <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tomlyn" Version="0.19.0" />
+    <!-- decode, BC encode, mip generation and format conversion in one place. Windows-only native
+         interop, which is fine for a build-time tool. -->
+    <PackageReference Include="DirectXTexNet" Version="1.0.7" />
+  </ItemGroup>
+
+</Project>

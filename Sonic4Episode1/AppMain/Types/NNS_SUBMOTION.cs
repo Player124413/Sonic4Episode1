@@ -107,106 +107,117 @@ internal partial class AppMain
             return submotion;
         }
 
+        // key layout comes from the axis bits and angle type alone, matching nnCalcMotionTranslate/
+        // Scale/Rotate; interpolation type must not enter into it
         private static void ReadNodeMotionKeyFrames(
           BinaryReader reader,
           NNS_SUBMOTION submotion)
         {
-            uint frameType = submotion.fType & NND_SMOTTYPE_FRAME_MASK; // 16 bit integer or floating point
-            uint animType = submotion.fType & NND_SMOTTYPE_VALUETYPE_MASK;
+            uint fType = submotion.fType;
             uint interpType = submotion.fIPType & NND_SMOTIPTYPE_IP_MASK;
-            if (((int)animType & NND_SMOTTYPE_TRANSLATION_MASK) != 0)
+
+            // spline/Bezier keys are wider records, none of the classes below describe them
+            if (interpType == NND_SMOTIPTYPE_SPLINE || interpType == NND_SMOTIPTYPE_BEZIER
+                || interpType == NND_SMOTIPTYPE_SI_SPLINE)
             {
-                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
-                {
-                    switch (interpType)
-                    {
-                        case NND_SMOTIPTYPE_SPLINE:
-                        case NND_SMOTIPTYPE_BEZIER:
-                            throw new NotImplementedException("Investigation needed");
-                        default:
-                            submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
-                            break;
-                    }
-                }
-                else
-                {
-                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
-                        throw new NotImplementedException("Investigation needed");
-                    throw new NotImplementedException("Investigation needed");
-                }
+                throw new NotImplementedException(
+                    $"submotion fType 0x{fType:X} interpolation 0x{interpType:X} keys carry handles we do not read");
             }
-            else if (((int)animType & NND_SMOTTYPE_ROTATION_MASK) != 0)
+
+            uint translation = fType & NND_SMOTTYPE_TRANSLATION_MASK;
+            if (translation != 0)
             {
-                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
-                {
-                    submotion.pKeyList = NNS_MOTION_KEY_Class13.Read(reader, submotion.nKeyFrame);
-                }
-                else if (NND_SMOTTYPE_FRAME_SINT16 != frameType)
-                {
-                    throw new NotImplementedException("Investigation needed");
-                }
-                else if (interpType == NND_SMOTIPTYPE_SPLINE)
-                {
-                    throw new NotImplementedException("Investigation needed");
-                }
-                else if (interpType == NND_SMOTIPTYPE_QUAT_LERP)
+                ReadVectorOrScalar(reader, submotion, translation == NND_SMOTTYPE_TRANSLATION_MASK);
+                return;
+            }
+
+            uint scaling = fType & NND_SMOTTYPE_SCALING_MASK;
+            if (scaling != 0)
+            {
+                ReadVectorOrScalar(reader, submotion, scaling == NND_SMOTTYPE_SCALING_MASK);
+                return;
+            }
+
+            uint rotation = fType & NND_SMOTTYPE_ROTATION_MASK;
+            if (rotation != 0)
+            {
+                ReadRotation(reader, submotion, rotation);
+                return;
+            }
+
+            if ((fType & NND_SMOTTYPE_USER_MASK) != 0)
+                throw new NotImplementedException($"submotion fType 0x{fType:X} carries user keys we do not read");
+
+            if ((fType & NND_SMOTTYPE_NODEHIDE) != 0)
+            {
+                submotion.pKeyList = NNS_MOTION_KEY_Class11.Read(reader, submotion.nKeyFrame);
+                CheckKeySize(submotion, 8);
+                return;
+            }
+
+            throw new NotImplementedException($"submotion fType 0x{fType:X} has no known key layout");
+        }
+
+        // F3 when all three axes are animated together, F1 for a single axis
+        private static void ReadVectorOrScalar(BinaryReader reader, NNS_SUBMOTION submotion, bool allAxes)
+        {
+            if (allAxes)
+            {
+                submotion.pKeyList = NNS_MOTION_KEY_Class5.Read(reader, submotion.nKeyFrame);
+                CheckKeySize(submotion, 16);
+            }
+            else
+            {
+                submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
+                CheckKeySize(submotion, 8);
+            }
+        }
+
+        private static void ReadRotation(BinaryReader reader, NNS_SUBMOTION submotion, uint rotation)
+        {
+            if (rotation == NND_SMOTTYPE_QUATERNION)
+            {
+                throw new NotImplementedException(
+                    $"submotion fType 0x{submotion.fType:X} carries quaternion keys (Class7) we do not read");
+            }
+
+            const uint allAxesMask =
+                NND_SMOTTYPE_ROTATION_X | NND_SMOTTYPE_ROTATION_Y | NND_SMOTTYPE_ROTATION_Z;
+            bool allAxes = rotation == allAxesMask;
+
+            if ((submotion.fType & NND_SMOTTYPE_ANGLE_MASK) == NND_SMOTTYPE_ANGLE_ANGLE16)
+            {
+                if (allAxes)
                 {
                     submotion.pKeyList = NNS_MOTION_KEY_Class16.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 8);
                 }
                 else
                 {
                     submotion.pKeyList = NNS_MOTION_KEY_Class14.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 4);
                 }
-
+                return;
             }
-            else if (((int)animType & NND_SMOTTYPE_SCALING_MASK) != 0)
+
+            if (allAxes)
             {
-                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
-                {
-                    switch (interpType)
-                    {
-                        case 1:
-                        case 16:
-                            throw new NotImplementedException("Investigation needed");
-                        default:
-                            submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
-                            break;
-                    }
-                }
-                else
-                {
-                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
-                        throw new NotImplementedException("Investigation needed");
-                    throw new NotImplementedException("Investigation needed");
-                }
+                submotion.pKeyList = NNS_MOTION_KEY_Class13.Read(reader, submotion.nKeyFrame);
+                CheckKeySize(submotion, 16);
+                return;
             }
-            else
+
+            submotion.pKeyList = NNS_MOTION_KEY_Class8.Read(reader, submotion.nKeyFrame);
+            CheckKeySize(submotion, 8);
+        }
+
+        private static void CheckKeySize(NNS_SUBMOTION submotion, int expected)
+        {
+            if (submotion.KeySize != 0 && submotion.KeySize != expected)
             {
-                if (((int)animType & NND_SMOTTYPE_USER_MASK) != 0)
-                {
-                    if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
-                        throw new NotImplementedException("Investigation needed");
-                    if (NND_SMOTTYPE_FRAME_SINT16 == frameType)
-                        throw new NotImplementedException("Investigation needed");
-                    throw new NotImplementedException("Investigation needed");
-                }
-
-                if (((int)animType & NND_SMOTIPTYPE_OFFSET) == 0)
-                    throw new NotImplementedException("Investigation needed");
-
-                if (NND_SMOTTYPE_FRAME_FLOAT == frameType)
-                {
-                    submotion.pKeyList = NNS_MOTION_KEY_Class11.Read(reader, submotion.nKeyFrame);
-                }
-                else
-                {
-                    if (NND_SMOTTYPE_FRAME_SINT16 != frameType)
-                        throw new NotImplementedException("Investigation needed");
-
-                    if (submotion.KeySize != 8)
-                        throw new NotImplementedException("Investigation needed");
-                    submotion.pKeyList = NNS_MOTION_KEY_Class16.Read(reader, submotion.nKeyFrame);
-                }
+                throw new InvalidDataException(
+                    $"submotion fType 0x{submotion.fType:X} states KeySize {submotion.KeySize}"
+                    + $" but the layout chosen for it is {expected} bytes");
             }
         }
 
@@ -243,115 +254,80 @@ internal partial class AppMain
             throw new NotImplementedException();
         }
 
+        // dispatches on fType & 0xFFFFFF00, matching nnCalcMaterialMotion's per-field switch
         private static void ReadMaterialMotionKeyFrames(
           BinaryReader reader,
           NNS_SUBMOTION submotion)
         {
-            int fType1 = (int)submotion.fType;
-            int fType2 = (int)submotion.fType;
-            uint animType = submotion.fType & NND_SMOTTYPE_VALUETYPE_MASK;
+            // Bezier of a single float is Class2; nothing describes Bezier/spline for multi-component fields
             uint interpType = submotion.fIPType & NND_SMOTIPTYPE_IP_MASK;
+            bool bezier = interpType == NND_SMOTIPTYPE_BEZIER;
 
-            if (((int)animType & 256) != 0)
-                throw new NotImplementedException("Investigation needed");
-            if (((int)animType & NND_SMOTTYPE_DIFFUSE_MASK) != 0)
+            if (interpType == NND_SMOTIPTYPE_SPLINE || interpType == NND_SMOTIPTYPE_SI_SPLINE)
             {
-                switch (interpType)
-                {
-                    case 1:
-                    case 16:
-                    label_8:
-                        throw new NotImplementedException("Investigation needed");
-                    default:
-                        switch (submotion.KeySize)
-                        {
-                            case 8:
-                                submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
-                                return;
-                            case 16:
-                                submotion.pKeyList = NNS_MOTION_KEY_Class5.Read(reader, submotion.nKeyFrame);
-                                return;
-                            default:
-                                goto label_8;
-                        }
-                }
+                throw new NotImplementedException(
+                    $"material submotion fType 0x{submotion.fType:X} interpolation 0x{interpType:X}"
+                    + " keys carry handles we do not read");
             }
-            else
+
+            switch (submotion.fType & 0xFFFFFF00U)
             {
-                if (((int)animType & 4096) != 0)
-                    throw new NotImplementedException("Investigation needed");
-                if (((int)animType & NND_SMOTTYPE_SPECULAR_MASK) != 0)
-                {
-                    switch (interpType)
+                case NND_SMOTTYPE_DIFFUSE_MASK:
+                case NND_SMOTTYPE_SPECULAR_MASK:
+                case NND_SMOTTYPE_AMBIENT_MASK:
+                    submotion.pKeyList = NNS_MOTION_KEY_Class5.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 16);
+                    return;
+
+                case NND_SMOTTYPE_OFFSET_MASK:
+                    submotion.pKeyList = NNS_MOTION_KEY_Class4.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 12);
+                    return;
+
+                // hide and the texture index are the two integer valued fields
+                case NND_SMOTTYPE_HIDE:
+                case NND_SMOTTYPE_TEXTURE_INDEX:
+                    submotion.pKeyList = NNS_MOTION_KEY_Class11.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 8);
+                    return;
+
+                case NND_SMOTTYPE_MATCLBK_USER:
+                    throw new NotImplementedException(
+                        $"material submotion fType 0x{submotion.fType:X} carries user keys (Class12)"
+                        + " we do not read");
+
+                case NND_SMOTTYPE_DIFFUSE_R:
+                case NND_SMOTTYPE_DIFFUSE_G:
+                case NND_SMOTTYPE_DIFFUSE_B:
+                case NND_SMOTTYPE_ALPHA:
+                case NND_SMOTTYPE_SPECULAR_R:
+                case NND_SMOTTYPE_SPECULAR_G:
+                case NND_SMOTTYPE_SPECULAR_B:
+                case NND_SMOTTYPE_SPECULAR_LEVEL:
+                case NND_SMOTTYPE_SPECULAR_GLOSS:
+                case NND_SMOTTYPE_AMBIENT_R:
+                case NND_SMOTTYPE_AMBIENT_G:
+                case NND_SMOTTYPE_AMBIENT_B:
+                case NND_SMOTTYPE_TEXTURE_BLEND:
+                case NND_SMOTTYPE_OFFSET_U:
+                case NND_SMOTTYPE_OFFSET_V:
+                    if (bezier)
                     {
-                        case 1:
-                        case 16:
-                            throw new NotImplementedException("Investigation needed");
-                        default:
-                            submotion.pKeyList = NNS_MOTION_KEY_Class5.Read(reader, submotion.nKeyFrame);
-                            break;
+                        submotion.pKeyList = NNS_MOTION_KEY_Class2.Read(reader, submotion.nKeyFrame);
+                        CheckKeySize(submotion, 24);
+                        return;
                     }
-                }
-                else
-                {
-                    if (((int)animType & NND_MOTIONTYPE_NOREPEAT) != 0)
-                        throw new NotImplementedException("Investigation needed");
-                    if (((int)animType & NND_MOTIONTYPE_CONSTREPEAT) != 0)
-                        throw new NotImplementedException("Investigation needed");
-                    if (((int)animType & NND_SMOTTYPE_AMBIENT_MASK) != 0)
-                    {
-                        switch (interpType)
-                        {
-                            case 1:
-                            case 16:
-                                throw new NotImplementedException("Investigation needed");
-                            default:
-                                submotion.pKeyList = NNS_MOTION_KEY_Class5.Read(reader, submotion.nKeyFrame);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        if (((int)animType & 2097152) != 0)
-                            throw new NotImplementedException("Investigation needed");
-                        if (((int)animType & NND_SMOTTYPE_TEXTURE_BLEND) != 0)
-                        {
-                            switch (interpType)
-                            {
-                                case 1:
-                                    break;
-                                case 16:
-                                    break;
-                                default:
-                                    if (submotion.KeySize != 8)
-                                        break;
-                                    submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
-                                    break;
-                            }
-                        }
-                        else if (((int)animType & NND_SMOTTYPE_OFFSET_MASK) != 0)
-                        {
-                            switch (interpType)
-                            {
-                                case 1:
-                                    throw new NotImplementedException("Investigation needed");
-                                case 16:
-                                    submotion.pKeyList = NNS_MOTION_KEY_Class2.Read(reader, submotion.nKeyFrame);
-                                    break;
-                                default:
-                                    submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            if (((int)animType & NND_SMOTTYPE_MATCLBK_USER) != 0)
-                                throw new NotImplementedException("Investigation needed");
-                            throw new NotImplementedException("Investigation needed");
-                        }
-                    }
-                }
+
+                    submotion.pKeyList = NNS_MOTION_KEY_Class1.Read(reader, submotion.nKeyFrame);
+                    CheckKeySize(submotion, 8);
+                    return;
+
+                default:
+                    throw new NotImplementedException(
+                        $"material submotion fType 0x{submotion.fType:X} names no field the"
+                        + " evaluator handles");
             }
         }
+
     }
 }

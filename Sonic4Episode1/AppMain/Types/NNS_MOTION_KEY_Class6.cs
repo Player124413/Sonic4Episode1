@@ -1,5 +1,6 @@
 internal partial class AppMain
 {
+    // float frame, an RGB triple. No interpolator in this port references it.
     internal class NNS_MOTION_KEY_Class6
     {
         public readonly NNS_RGB Value = new NNS_RGB();

@@ -1,6 +1,6 @@
 ﻿internal partial class AppMain
 {
-    private MTS_TASK_TCB DmLogoComLoadFileCreate(
+    internal MTS_TASK_TCB DmLogoComLoadFileCreate(
         Reference<MTS_TASK_TCB> load_tcb_addr)
     {
         MTS_TASK_TCB mtsTaskTcb = MTM_TASK_MAKE_TCB(null, new GSF_TASK_PROCEDURE(this.dmLogoComDataLoadDest), 0U, ushort.MaxValue, 4096U, 0, () => new DMS_LOGO_COM_LOAD_WORK(), "DM_LC_LOAD");
@@ -10,7 +10,7 @@
         return mtsTaskTcb;
     }
 
-    private void DmLogoComLoadFileReg(
+    internal void DmLogoComLoadFileReg(
       Reference<MTS_TASK_TCB> tcb,
       DMS_LOGO_COM_LOAD_FILE_INFO[] file_info,
       int file_num)
@@ -29,7 +29,7 @@
         }
     }
 
-    private void DmLogoComLoadFileStart(Reference<MTS_TASK_TCB> tcb)
+    internal void DmLogoComLoadFileStart(Reference<MTS_TASK_TCB> tcb)
     {
         mtTaskChangeTcbProcedure(tcb.Target, new GSF_TASK_PROCEDURE(this.dmLogoComDataLoadMain));
     }

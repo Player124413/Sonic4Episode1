@@ -14,7 +14,7 @@ internal partial class AppMain
             return new NNS_BINCNK_NOF0HEADER()
             {
                 Id = reader.ReadUInt32(),
-                OfsNextId = reader.ReadInt32(),
+                OfsNextId = readChunkOfsNextId(reader),
                 nData = reader.ReadInt32(),
                 Pad = reader.ReadInt32()
             };

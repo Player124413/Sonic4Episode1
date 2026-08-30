@@ -24,6 +24,9 @@
     <ShaderSource Include="$(ShadersDir)*.fx" />
   </ItemGroup>
 
+  <!-- the NN standard shader is not built here, run Shaders/nn/Build-Permutations.ps1
+       to produce its permutations into Shaders/FNA/nnstd/ -->
+
   <Target Name="LocateFxc">
     <ItemGroup>
       <FxcCandidate Include="$(MSBuildProgramFiles32)\Windows Kits\10\bin\*\x64\fxc.exe" />
@@ -49,16 +52,25 @@
           Command="&quot;$(FxcPath)&quot; /nologo /T fx_2_0 /D $(ShaderModel)=1 /Fo &quot;$(ShaderOutDir)%(ShaderSource.Filename).fxb&quot; &quot;%(ShaderSource.FullPath)&quot;" />
   </Target>
 
-  <!-- Globbed inside a target, after CompileShaders has run. At project-evaluation time a
-       newly added shader has no .fxb yet, so a plain ItemGroup here would silently skip it
-       until the second build. -->
-  <Target Name="CollectShaderContent" AfterTargets="CompileShaders" BeforeTargets="AssignTargetPaths">
+  <!-- globbed inside a target so a shader added this build has its .fxb by the time this runs.
+       DependsOnTargets, not AfterTargets: both this and CompileShaders are pinned before
+       AssignTargetPaths, and an AfterTargets edge between targets pinned to the same point
+       doesn't hold, the glob ran first and missed the file -->
+  <Target Name="CollectShaderContent"
+          DependsOnTargets="CompileShaders"
+          BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <ShaderBlob Include="$(ShaderOutDir)*.fxb" />
       <!-- metadata is qualified with the item name; a bare %(Filename) here batches over every
            existing Content item and drags unrelated files into Content\Shaders -->
       <Content Include="@(ShaderBlob)"
                Link="Content\Shaders\%(ShaderBlob.Filename)%(ShaderBlob.Extension)"
+               CopyToOutputDirectory="PreserveNewest" />
+
+      <!-- own subdirectory since mppLoadStdShader opens a permutation by its shader key name -->
+      <NnStdShaderBlob Include="$(ShaderOutDir)nnstd\*.fxb" />
+      <Content Include="@(NnStdShaderBlob)"
+               Link="Content\Shaders\nnstd\%(NnStdShaderBlob.Filename)%(NnStdShaderBlob.Extension)"
                CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
   </Target>

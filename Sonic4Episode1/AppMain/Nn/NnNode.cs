@@ -15,7 +15,7 @@
         nngNodeUserMotionTriggerTime = t;
     }
 
-    private static void nnSetUpNodeStatusList(uint[] nodestatlist, int num, uint flag)
+    public static void nnSetUpNodeStatusList(uint[] nodestatlist, int num, uint flag)
     {
         for (int index = 0; index < num; ++index)
             nodestatlist[index] = flag;

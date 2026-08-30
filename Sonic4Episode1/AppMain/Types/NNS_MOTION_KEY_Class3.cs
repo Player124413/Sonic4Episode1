@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family SISplineF1: F1 plus an SI spline handle
     internal class NNS_MOTION_KEY_Class3
     {
         public readonly NNS_MOTION_SI_SPLINE_HANDLE Shandle = new NNS_MOTION_SI_SPLINE_HANDLE();

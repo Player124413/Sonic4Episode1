@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family F3: float frame, three floats. Three axis translation/scale; single axis is Class1.
     internal class NNS_MOTION_KEY_Class5
     {
         public readonly NNS_VECTOR Value = GlobalPool<NNS_VECTOR>.Alloc();

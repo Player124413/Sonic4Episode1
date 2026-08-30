@@ -1,0 +1,11 @@
+# Assets are not committed, their descriptors are. Git sees the directory structure and every
+# _archive.toml; everything else stays local and comes from a provenance root or a build.
+*
+!*/
+!_archive.toml
+!.gitignore
+!README.md
+
+# Patches are the exception: an authored fix is not reproducible from any provenance root, so it is
+# the one kind of asset that has to be committed.
+!patches/**

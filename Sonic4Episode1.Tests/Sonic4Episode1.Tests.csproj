@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- must match Sonic4Episode1.Viewer so the shared code compiles the same way -->
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;CS0168;CS0219;CS0162;CS0642;CA2022;</NoWarn>
+  </PropertyGroup>
+
+  <!-- real NN: tests exercise the same parsers the game uses -->
+  <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
+    <!-- compiled in rather than referenced: both projects import the same projitems, and neither of
+         these files touches DirectXTexNet, so the test host never loads the native DLL -->
+    <Compile Include="..\Sonic4Episode1.Content\TextureFormat.cs" Link="TextureFormat.cs" />
+    <Compile Include="..\Sonic4Episode1.Content\TexturePlan.cs" Link="TexturePlan.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

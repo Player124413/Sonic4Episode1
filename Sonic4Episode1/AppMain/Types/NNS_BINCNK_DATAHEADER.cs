@@ -14,7 +14,7 @@ internal partial class AppMain
             return new NNS_BINCNK_DATAHEADER()
             {
                 Id = reader.ReadUInt32(),
-                OfsNextId = reader.ReadInt32(),
+                OfsNextId = readChunkOfsNextId(reader),
                 OfsMainData = reader.ReadInt32(),
                 Version = reader.ReadInt32()
             };

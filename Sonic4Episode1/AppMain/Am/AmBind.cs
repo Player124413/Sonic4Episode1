@@ -27,12 +27,12 @@ internal partial class AppMain
         return ambChunk;
     }
 
-    private static AmbChunk amBindGet(AMS_FS header, int index)
+    internal static AmbChunk amBindGet(AMS_FS header, int index)
     {
         return amBindGet(header, index, out string _);
     }
 
-    private static AmbChunk amBindGet(
+    internal static AmbChunk amBindGet(
       AMS_FS header,
       int index,
       out string sPath)

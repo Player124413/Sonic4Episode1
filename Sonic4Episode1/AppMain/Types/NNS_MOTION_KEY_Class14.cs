@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family A16_1: Sint16 frame, one Angle16. Single axis; three together is Class16, don't confuse them.
     internal struct NNS_MOTION_KEY_Class14
     {
         public short Frame;

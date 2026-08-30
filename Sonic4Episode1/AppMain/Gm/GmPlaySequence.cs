@@ -1490,9 +1490,9 @@ internal partial class AppMain
                 ply_work.gmk_flag &= 4293918719U;
                 GmPlayerActionChange(ply_work, 73);
             }
-            else if (ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][0]].act_id[0] !=
+            else if (ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 0)].act_id[0] !=
                      g_gm_player_motion_right_tbl[ply_work.char_id][0] &&
-                     ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][73]].act_id[0] !=
+                     ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 73)].act_id[0] !=
                      g_gm_player_motion_right_tbl[ply_work.char_id][73])
             {
                 if (((int) ply_work.gmk_flag & 1048576) != 0)
@@ -1511,7 +1511,7 @@ internal partial class AppMain
 
     private static void gmPlySeqTruckFwMain(GMS_PLAYER_WORK ply_work)
     {
-        if (ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][73]].act_id[0] ==
+        if (ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 73)].act_id[0] ==
             g_gm_player_motion_right_tbl[ply_work.char_id][73] &&
             ((int) ply_work.obj_work.disp_flag & 8) != 0)
         {
@@ -1606,7 +1606,7 @@ internal partial class AppMain
             ply_work.obj_work.obj_3d.frame[0] = ply_work.obj_work.obj_3d.frame[1] = num;
         }
 
-        if (ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][73]].act_id[0] !=
+        if (ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 73)].act_id[0] !=
             g_gm_player_motion_right_tbl[ply_work.char_id][73] ||
             ((int) ply_work.obj_work.disp_flag & 8) == 0)
             return;
@@ -1626,7 +1626,7 @@ internal partial class AppMain
 
     private static void GmPlySeqInitTruckFall(GMS_PLAYER_WORK ply_work)
     {
-        if (ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][40]].act_id[0] !=
+        if (ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 40)].act_id[0] !=
             g_gm_player_motion_right_tbl[ply_work.char_id][40])
         {
             GmPlayerActionChange(ply_work, 40);
@@ -1651,7 +1651,7 @@ internal partial class AppMain
 
     private static void GmPlySeqInitTruckJump(GMS_PLAYER_WORK ply_work)
     {
-        if (ply_work.obj_3d[g_gm_player_model_tbl[ply_work.char_id][40]].act_id[0] !=
+        if (ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, 40)].act_id[0] !=
             g_gm_player_motion_right_tbl[ply_work.char_id][40])
         {
             GmPlayerActionChange(ply_work, 40);

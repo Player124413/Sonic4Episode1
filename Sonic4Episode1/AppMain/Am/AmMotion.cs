@@ -138,6 +138,21 @@ internal partial class AppMain
             amsMotionFile2.motion_num = amMotionSetup(motion1, buf);
     }
 
+    public static int mppCountArchiveMotions(AMS_AMB_HEADER amb)
+    {
+        if (amb == null || amb.buf == null)
+            return 0;
+
+        int count = 0;
+        for (int index = 0; index < amb.file_num; ++index)
+        {
+            if (amb.buf[index] is NNS_MOTION)
+                ++count;
+        }
+
+        return count;
+    }
+
     public static int amMotionSetup(
       ArrayPointer<NNS_MOTION> motion,
       AMS_AMB_HEADER amb)
@@ -163,7 +178,7 @@ internal partial class AppMain
         motion = null;
         using (MemoryStream memoryStream = new MemoryStream(buf.array, buf.offset, buf.array.Length - buf.offset))
         {
-            BinaryReader reader = new BinaryReader(memoryStream);
+            BinaryReader reader = mppOpenNnChunk(memoryStream);
             NNS_BINCNK_FILEHEADER bincnkFileheader = NNS_BINCNK_FILEHEADER.Read(reader);
             long ofsData;
             reader.BaseStream.Seek(ofsData = bincnkFileheader.OfsData, SeekOrigin.Begin);
@@ -176,13 +191,20 @@ internal partial class AppMain
             {
                 switch (bincnkDataheader.Id)
                 {
-                    case 1095584078:
-                    case 1129138510:
-                    case 1330465102:
+                    case NND_CHUNK_MOTION_GLES11:
+                    case NND_CHUNK_CAMERA_MOTION_GLES11:
+                    case NND_CHUNK_MATERIAL_MOTION_GLES11:
+                    case NND_CHUNK_MOTION_DXG20:
+                    case NND_CHUNK_CAMERA_MOTION_DXG20:
+                    case NND_CHUNK_MATERIAL_MOTION_DXG20:
+                    case NND_CHUNK_MOTION_XE:
+                    case NND_CHUNK_CAMERA_MOTION_XE:
+                    case NND_CHUNK_MATERIAL_MOTION_XE:
                         reader.BaseStream.Seek(data0Pos + bincnkDataheader.OfsMainData, SeekOrigin.Begin);
                         motion = NNS_MOTION.Read(reader, data0Pos);
                         break;
-                    case 1145980238:
+                    case NND_CHUNK_NEND_GLES11:
+                    case NND_CHUNK_NEND_XE:
                         return;
                 }
                 ++nChunk;
@@ -197,7 +219,7 @@ internal partial class AppMain
         AmbChunk ambChunk = (AmbChunk)_buf;
         using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.array.Length - ambChunk.offset))
         {
-            BinaryReader reader = new BinaryReader(memoryStream);
+            BinaryReader reader = mppOpenNnChunk(memoryStream);
             ArrayPointer<NNS_MOTION> arrayPointer = motion;
             int num = 0;
             arrayPointer.SetPrimitive(null);
@@ -213,15 +235,22 @@ internal partial class AppMain
             {
                 switch (bincnkDataheader.Id)
                 {
-                    case 1095584078:
-                    case 1129138510:
-                    case 1330465102:
+                    case NND_CHUNK_MOTION_GLES11:
+                    case NND_CHUNK_CAMERA_MOTION_GLES11:
+                    case NND_CHUNK_MATERIAL_MOTION_GLES11:
+                    case NND_CHUNK_MOTION_DXG20:
+                    case NND_CHUNK_CAMERA_MOTION_DXG20:
+                    case NND_CHUNK_MATERIAL_MOTION_DXG20:
+                    case NND_CHUNK_MOTION_XE:
+                    case NND_CHUNK_CAMERA_MOTION_XE:
+                    case NND_CHUNK_MATERIAL_MOTION_XE:
                         reader.BaseStream.Seek(data0Pos + bincnkDataheader.OfsMainData, SeekOrigin.Begin);
                         arrayPointer.SetPrimitive(NNS_MOTION.Read(reader, data0Pos));
                         ++arrayPointer;
                         ++num;
                         break;
-                    case 1145980238:
+                    case NND_CHUNK_NEND_GLES11:
+                    case NND_CHUNK_NEND_XE:
                         goto label_6;
                 }
                 ++nChunk;
@@ -330,9 +359,15 @@ internal partial class AppMain
       int file_id,
       AMS_AMB_HEADER amb)
     {
+        // skip non-motion members, mmtn is sized by the caller's compile-time count
         int fileNum = amb.file_num;
-        for (int index = 0; index < fileNum; ++index)
-            motion.mmtn[file_id + index] = (NNS_MOTION)amb.buf[index];
+        int slot = file_id;
+        for (int index = 0; index < fileNum && slot < motion.mmtn.Length; ++index)
+        {
+            if (amb.buf[index] is NNS_MOTION mmotion)
+                motion.mmtn[slot++] = mmotion;
+        }
+
         motion.mmotion_id = file_id;
         motion.mmotion_frame = 0.0f;
         motion.mmobj_size = 0U;

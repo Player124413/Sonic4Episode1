@@ -1,7 +1,14 @@
+using System.Buffers.Binary;
 using System.IO;
 
 internal partial class AppMain
 {
+    // OfsNextId is little-endian on every platform, unlike the rest of this header
+    internal static int readChunkOfsNextId(BinaryReader reader)
+    {
+        return BinaryPrimitives.ReadInt32LittleEndian(reader.ReadBytes(4));
+    }
+
     internal class NNS_BINCNK_FILEHEADER
     {
         public uint Id;
@@ -18,7 +25,7 @@ internal partial class AppMain
             return new NNS_BINCNK_FILEHEADER()
             {
                 Id = reader.ReadUInt32(),
-                OfsNextId = reader.ReadInt32(),
+                OfsNextId = readChunkOfsNextId(reader),
                 nChunk = reader.ReadInt32(),
                 OfsData = reader.ReadInt32(),
                 SizeData = reader.ReadInt32(),

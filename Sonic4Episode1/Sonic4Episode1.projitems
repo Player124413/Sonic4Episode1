@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmIPhone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ak\AkMath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmAme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmbWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmBind.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmCri.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmDraw.cs" />
@@ -57,13 +58,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoPresence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Delegates.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmStageSelect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_DWORK_NO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_GAME_FLAG.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLY_SEQ_STATE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_TASK_PRIO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnConsts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnDrawObjectStdShader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnMaterialCoreStdShader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderBind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderName.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderProfile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderSampler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive2DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive3DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnMakeRotateMatrixQuaternion.cs" />
@@ -262,7 +268,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_MANUAL_DATA_TYPE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_SAVE_ACT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_STFRL_ACT.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_STGSLCT_ACT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_TITLE_ACT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_TITLE_DATA_TYPE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_TITLE_MENU_TYPE.cs" />
@@ -293,7 +298,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_STFRL_MGR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_STFRL_RING_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_STFRL_SONIC_WORK.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_STGSLCT_MAIN_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_TITLE_MAIN_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_TITLEOP_MGR_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_TITLEOP_OBJ_3DNN_WORK.cs" />
@@ -657,6 +661,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_COMMON_PW4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_COMMON_TEXCOORD2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_COMMON_WEIGHT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNE_PLATFORM.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_COMMON_WEIGHT2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_COMPILED_SHADER_PROFILE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_CONFIG_GL.cs" />
@@ -688,6 +693,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_STDSHADER_COLOR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_STDSHADER_DESC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_STDSHADER_LOGIC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_STDSHADER_TEXMAP_DESC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIAL_TEXMAP_DESC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_MATERIALNAME.cs" />
@@ -742,6 +748,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_PRIMLIST_COMMON_TRIANGLE_QUAD_LIST.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_PRIMLIST_COMMON_TRIANGLE_STRIP.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_PRIMLIST_GL_DESC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_PRIMTYPE_DX_STRIPLIST.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_PRIMLISTPTR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_QUATERNION.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_RGB.cs" />
@@ -781,6 +788,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXARRAY_GL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXLIST_COMMON_ARRAY.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXLIST_COMMON_DESC.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXLIST_DX_DESC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXLIST_GL_DESC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\NNS_VTXLISTPTR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\OBD_DRAW_USER_COMMAND_3DNN.cs" />
@@ -861,7 +869,19 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnCalcMotionRotate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadPolarHandle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadVirtualPad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)dm\DmStgSlct.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlct.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctConsts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctDraw.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctEffects.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctInit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctInput.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctLoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctProcs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctSelection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTouch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)External\PVRGlobal.cs" />
@@ -1076,6 +1096,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dbg\CPadEmu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DoubleType`2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DXStripList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DXVertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DXVertexArrays.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EndianBinaryReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EndianBinaryWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NnStdShaderEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgAoAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgBase`1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgFlick.cs" />

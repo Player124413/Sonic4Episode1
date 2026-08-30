@@ -98,7 +98,7 @@
         GsSoundStopBgm(dm_sound_jingle_scb, fade_frame);
     }
 
-    private static void DmSoundSetVolumeSE(float volume)
+    internal static void DmSoundSetVolumeSE(float volume)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         float vol = volume == 0.0 ? 0.0f : volume / 10f;
@@ -106,7 +106,7 @@
         GsSoundSetVolume(1, vol);
     }
 
-    private static void DmSoundSetVolumeBGM(float volume)
+    internal static void DmSoundSetVolumeBGM(float volume)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         float vol = volume == 0.0 ? 0.0f : volume / 10f;

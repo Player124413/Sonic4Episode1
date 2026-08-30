@@ -13,17 +13,17 @@
     {
     }
 
-    private static void AoAccountClearCurrentId()
+    internal static void AoAccountClearCurrentId()
     {
         g_ao_account_current_id = -1;
     }
 
-    private static void AoAccountSetCurrentIdStart(uint id)
+    internal static void AoAccountSetCurrentIdStart(uint id)
     {
         g_ao_account_current_id = (int)id;
     }
 
-    private static bool AoAccountSetCurrentIdIsFinished()
+    internal static bool AoAccountSetCurrentIdIsFinished()
     {
         return true;
     }

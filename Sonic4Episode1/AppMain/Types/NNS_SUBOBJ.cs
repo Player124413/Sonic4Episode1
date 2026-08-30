@@ -36,7 +36,7 @@ internal partial class AppMain
             return this;
         }
 
-        public static NNS_SUBOBJ Read(BinaryReader reader, long data0Pos)
+        public static NNS_SUBOBJ Read(BinaryReader reader, long data0Pos, NNE_PLATFORM platform)
         {
             NNS_SUBOBJ nnsSubobj = new NNS_SUBOBJ();
             nnsSubobj.fType = reader.ReadUInt32();
@@ -48,7 +48,7 @@ internal partial class AppMain
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num1, SeekOrigin.Begin);
                 for (int index = 0; index < nnsSubobj.nMeshset; ++index)
-                    nnsSubobj.pMeshsetList[index] = NNS_MESHSET.Read(reader);
+                    nnsSubobj.pMeshsetList[index] = NNS_MESHSET.Read(reader, platform);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             nnsSubobj.nTex = reader.ReadInt32();

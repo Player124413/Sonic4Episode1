@@ -459,7 +459,7 @@ internal partial class AppMain
         _am_draw_in_scene = 0;
     }
 
-    private static void amDrawSetBGColor(NNS_RGBA_U8 bgColor)
+    internal static void amDrawSetBGColor(NNS_RGBA_U8 bgColor)
     {
         _am_draw_bg_color = bgColor;
     }
@@ -772,7 +772,7 @@ internal partial class AppMain
         nnSetProjection(proj_mtx, proj_type);
     }
 
-    private static NNS_MATRIX amDrawGetProjectionMatrix()
+    internal static NNS_MATRIX amDrawGetProjectionMatrix()
     {
         return _am_draw_proj_mtx;
     }
@@ -788,7 +788,7 @@ internal partial class AppMain
         amTaskReset(_am_draw_task);
     }
 
-    private static void amDrawExecCommand(uint state)
+    internal static void amDrawExecCommand(uint state)
     {
         amDrawExecCommand(state, 0U);
     }
@@ -805,9 +805,7 @@ internal partial class AppMain
             AMS_COMMAND_HEADER ch = (AMS_COMMAND_HEADER)array[index + 1];
             if ((int)ch.state == (int)state)
             {
-                // A material callback may leave a custom effect armed. Bounding it to one
-                // command stops primitives and other objects inheriting it, while still
-                // letting it span every draw a single material issues.
+                // clears a custom effect a material callback left armed, so it can't leak past this command
                 OpenGL.mppglSetEffectOverride(null);
                 if (ch.command_id >= 0)
                     _am_draw_command_func(ch, drawflag);
@@ -1740,13 +1738,21 @@ internal partial class AppMain
     private static void _amDrawVertexBufferObject(AMS_REGISTLIST regist)
     {
         AMS_PARAM_VERTEX_BUFFER_OBJECT vertexBufferObject = (AMS_PARAM_VERTEX_BUFFER_OBJECT)regist.param;
-        int num = (int)nnBindBufferObjectGL(vertexBufferObject.obj, vertexBufferObject.srcobj, vertexBufferObject.bindflag);
+        NNS_OBJECT srcobj = vertexBufferObject.srcobj;
+        if (srcobj.nVtxList > 0 && srcobj.pVtxListPtrList[0].pVtxList is NNS_VTXLIST_DX_DESC)
+            nnVertexBufferObjectDXG20(vertexBufferObject.obj, srcobj, vertexBufferObject.bindflag);
+        else
+            nnBindBufferObjectGL(vertexBufferObject.obj, srcobj, vertexBufferObject.bindflag);
         regist.command_id = 0;
     }
 
     private static void _amDrawDeleteVertexObject(AMS_REGISTLIST regist)
     {
-        nnDeleteBufferObjectGL(((AMS_PARAM_DELETE_VERTEX_OBJECT)regist.param).obj);
+        NNS_OBJECT deleteObj = ((AMS_PARAM_DELETE_VERTEX_OBJECT)regist.param).obj;
+        if (deleteObj.nVtxList > 0 && deleteObj.pVtxListPtrList[0].pVtxList is NNS_VTXLIST_DX_DESC)
+            nnDeleteVertexObjectDXG20(deleteObj);
+        else
+            nnDeleteBufferObjectGL(deleteObj);
         regist.command_id = 0;
     }
 
@@ -1965,9 +1971,7 @@ internal partial class AppMain
         return target;
     }
 
-    // main.cpp:476-495 creates only _gm_mapFar_render_work and leaves _am_draw_target zeroed, so
-    // the ping-pong in gmWaterSurface.cpp:1198-1211 always lands on a width==0 target and bails.
-    // Both halves have to be real for the effects to have anywhere to copy to.
+    // both targets need to be real, the water ping-pong bails on a width==0 target
     private static void amRenderCreateWork(int width, int height)
     {
         amRenderCreate(_gm_mapFar_render_work, width, height,
@@ -2027,7 +2031,7 @@ internal partial class AppMain
         OpenGL.mppglTexImage2D(target.target);
     }
 
-    private static void amRenderCopyTarget(
+    internal static void amRenderCopyTarget(
       AMS_RENDER_TARGET target,
       NNS_RGBA_U8 color)
     {

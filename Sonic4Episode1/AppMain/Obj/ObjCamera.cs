@@ -2,7 +2,7 @@
 
 internal partial class AppMain
 {
-    private static int ObjCameraInit(
+    internal static int ObjCameraInit(
      int cam_id,
      NNS_VECTOR pos,
      int group,
@@ -62,7 +62,7 @@ internal partial class AppMain
         return index;
     }
 
-    private static void ObjCamera3dInit(int cam_id)
+    internal static void ObjCamera3dInit(int cam_id)
     {
         if (obj_camera_sys == null)
             return;

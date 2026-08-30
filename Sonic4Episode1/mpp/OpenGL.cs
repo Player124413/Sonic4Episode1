@@ -1994,10 +1994,8 @@ namespace mpp
             return m_graphicsDevice;
         }
 
-        // What setupEffect hands the stock effects; an override effect needs the same,
-        // PROJECTION_CORRECTION included, or it will not line up with the rest of the scene.
-        // What nnPutMaterialCore just bound. An override effect has its own samplers, so it has
-        // to be handed the textures the material set up rather than inheriting the units.
+        // an override effect has its own samplers, so it needs the textures the material set up
+        // rather than inheriting the units
         public static Texture2D mppglGetBoundTexture(int unit)
         {
             if (unit < 0 || unit >= m_textureUnits.Length)
@@ -2009,11 +2007,19 @@ namespace mpp
             return m_textures.TryGetValue(m_textureUnits[unit].BoundTexture, out texture) ? texture : null;
         }
 
+        // the standard shader binds samplers by NNS_TEXINFO.TexName, not by texture unit
+        public static Texture2D mppglGetTexture(uint name)
+        {
+            Texture2D texture;
+            return m_textures.TryGetValue(name, out texture) ? texture : null;
+        }
+
         public static Matrix mppglGetView()
         {
             return m_modelViewMatrixStack.Peek();
         }
 
+        // an override effect needs PROJECTION_CORRECTION too, or it won't line up with the rest of the scene
         public static Matrix mppglGetProjection()
         {
             return m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
@@ -2035,13 +2041,30 @@ namespace mpp
             end = m_fogEnd;
         }
 
-        // Substitutes a custom Effect for the stock ones. Cleared at two boundaries, and it
-        // needs both: nnPutMaterial clears per material, and amDrawExecCommand clears per
-        // command. Per material alone leaks, because nnPutMaterial is called from exactly one
-        // place and primitives never reach it. Per draw call alone drops the effect partway
-        // through any material that issues more than one draw.
-        // Flushes first because the batcher merges draws across calls and its snapshotted
-        // context does not carry the override.
+        // direction points the way the light travels, same convention as XNA's DirectionalLight
+        public static bool mppglGetLight(int unit, out Vector3 diffuse, out Vector3 specular, out Vector3 direction)
+        {
+            diffuse = Vector3.Zero;
+            specular = Vector3.Zero;
+            direction = Vector3.Down;
+
+            if (unit < 0 || unit >= m_lightUnit.Length || !m_lightUnit[unit].Enabled)
+                return false;
+
+            diffuse = m_lightUnit[unit].DiffuseColor;
+            specular = m_lightUnit[unit].SpecularColor;
+            direction = m_lightUnit[unit].Direction;
+            return true;
+        }
+
+        public static Vector3 mppglGetAmbient()
+        {
+            return m_ambientColor;
+        }
+
+        // cleared at two boundaries, per material and per command, because either alone is wrong:
+        // per-material leaks past primitives, per-command drops it mid-material. Flushes first
+        // since the batcher's snapshotted context doesn't carry the override across merged draws.
         public static void mppglSetEffectOverride(Effect effect)
         {
             if (m_overrideEffect == effect)

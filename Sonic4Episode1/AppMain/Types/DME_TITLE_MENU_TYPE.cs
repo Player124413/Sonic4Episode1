@@ -1,6 +1,6 @@
 internal partial class AppMain
 {
-    private enum DME_TITLE_MENU_TYPE
+    internal enum DME_TITLE_MENU_TYPE
     {
         DME_TITLE_MENU_TYPE_START,
         DME_TITLE_MENU_TYPE_TUDUKI,

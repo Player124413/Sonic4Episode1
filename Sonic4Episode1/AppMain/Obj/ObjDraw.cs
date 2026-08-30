@@ -945,26 +945,13 @@
 
     public static uint ObjDraw3DNNGetMaterialUserData(NNS_DRAWCALLBACK_VAL val)
     {
-        uint num = 0;
-        switch (val.pMaterial.fType)
+        switch (val.pMaterial.pMaterial)
         {
-            case 1:
-                mppAssertNotImpl();
-                break;
-            case 2:
-                mppAssertNotImpl();
-                break;
-            case 4:
-                mppAssertNotImpl();
-                break;
-            case 8:
-                num = ((NNS_MATERIAL_GLES11_DESC)val.pMaterial.pMaterial).User;
-                break;
-            default:
-                num = 0U;
-                break;
+            case NNS_MATERIAL_GLES11_DESC gles11: return gles11.User;
+            case NNS_MATERIAL_STDSHADER_DESC stdshader: return stdshader.User;
+            case NNS_MATERIAL_DESC desc: return desc.User;
+            default: return 0U;
         }
-        return num;
     }
 
     public static void ObjDrawSetToon(OBS_ACTION3D_NN_WORK obj_3d)

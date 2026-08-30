@@ -51,7 +51,17 @@
       <ForceLoad>True</ForceLoad>
     </NativeReference>
     
-    <Content Include="..\Content\bin\DesktopGLHD\**\*.*">
+  </ItemGroup>
+
+  <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
+  <PropertyGroup>
+    <ContentProfile>mobile-hd</ContentProfile>
+    <ContentItemType>None</ContentItemType>
+  </PropertyGroup>
+  <Import Project="..\Content.targets" />
+
+  <ItemGroup Condition="'$(SkipContentCopy)' != 'true'">
+    <Content Include="$(ContentDir)**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>

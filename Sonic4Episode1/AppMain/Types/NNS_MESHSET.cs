@@ -11,6 +11,7 @@ internal partial class AppMain
         public int iMaterial;
         public int iVtxList;
         public int iPrimList;
+        public int iShader;
         public uint Reserved2;
         public uint Reserved1;
         public uint Reserved0;
@@ -28,6 +29,7 @@ internal partial class AppMain
             this.iMaterial = meshSet.iMaterial;
             this.iVtxList = meshSet.iVtxList;
             this.iPrimList = meshSet.iPrimList;
+            this.iShader = meshSet.iShader;
             this.Reserved2 = meshSet.Reserved2;
             this.Reserved1 = meshSet.Reserved1;
             this.Reserved0 = meshSet.Reserved0;
@@ -44,6 +46,7 @@ internal partial class AppMain
                 this.iMaterial = meshSet.iMaterial;
                 this.iVtxList = meshSet.iVtxList;
                 this.iPrimList = meshSet.iPrimList;
+                this.iShader = meshSet.iShader;
                 this.Reserved2 = meshSet.Reserved2;
                 this.Reserved1 = meshSet.Reserved1;
                 this.Reserved0 = meshSet.Reserved0;
@@ -51,25 +54,29 @@ internal partial class AppMain
             return this;
         }
 
-        public static NNS_MESHSET Read(BinaryReader reader)
+        public static NNS_MESHSET Read(BinaryReader reader, NNE_PLATFORM platform)
         {
-            return new NNS_MESHSET()
+            NNS_MESHSET meshSet = new NNS_MESHSET();
+            meshSet.Center.x = reader.ReadSingle();
+            meshSet.Center.y = reader.ReadSingle();
+            meshSet.Center.z = reader.ReadSingle();
+            meshSet.Radius = reader.ReadSingle();
+            meshSet.iNode = reader.ReadInt32();
+            meshSet.iMatrix = reader.ReadInt32();
+            meshSet.iMaterial = reader.ReadInt32();
+            meshSet.iVtxList = reader.ReadInt32();
+            meshSet.iPrimList = reader.ReadInt32();
+
+            if (platform == NNE_PLATFORM.DXG20)
             {
-                Center = {
-          x = reader.ReadSingle(),
-          y = reader.ReadSingle(),
-          z = reader.ReadSingle()
-        },
-                Radius = reader.ReadSingle(),
-                iNode = reader.ReadInt32(),
-                iMatrix = reader.ReadInt32(),
-                iMaterial = reader.ReadInt32(),
-                iVtxList = reader.ReadInt32(),
-                iPrimList = reader.ReadInt32(),
-                Reserved2 = reader.ReadUInt32(),
-                Reserved1 = reader.ReadUInt32(),
-                Reserved0 = reader.ReadUInt32()
-            };
+                meshSet.iShader = reader.ReadInt32();
+                return meshSet;
+            }
+
+            meshSet.Reserved2 = reader.ReadUInt32();
+            meshSet.Reserved1 = reader.ReadUInt32();
+            meshSet.Reserved0 = reader.ReadUInt32();
+            return meshSet;
         }
     }
 }

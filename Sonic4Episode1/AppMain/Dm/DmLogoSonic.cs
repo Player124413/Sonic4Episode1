@@ -1,5 +1,9 @@
 ﻿internal partial class AppMain
 {
+    public const string DMD_LOGO_SONIC_FILENAME = "DEMO/LOGO/D_LOGO_SONIC.AMB";
+
+    private static bool dm_logo_sonic_is_console;
+
     public void DmLogoSonicInit(object arg)
     {
         if (this.DmLogoSonicBuildCheck())
@@ -27,6 +31,7 @@
 
     public void DmLogoSonicBuild()
     {
+        dm_logo_sonic_is_console = amFsAllVariant(AMD_FS_VARIANT_CONSOLE, DMD_LOGO_SONIC_FILENAME);
         AMS_AMB_HEADER[] amsAmbHeaderArray = new AMS_AMB_HEADER[1];
         dm_logo_sonic_build_tcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(this.dmLogoSonicDataBuildMain), new GSF_TASK_PROCEDURE(this.dmLogoSonicDataBuildDest), 0U, ushort.MaxValue, 4096U, 0, null, "DM_LSONT_BUILD");
         dm_logo_sonic_aos_tex = New<AOS_TEXTURE>(1);
@@ -112,6 +117,19 @@
         this.dmLogoSonicActionCreate(work);
         IzFadeInitEasy(0U, 2U, 60f, true);
         work.func = new DMS_LOGO_SONIC_WORK._func_(this.dmLogoSonicFadeInWaitFunc);
+        work.skip_check = dm_logo_sonic_is_console
+            ? new DMS_LOGO_SONIC_WORK._skip_check_(dmLogoSonicIsSkipPressedPad)
+            : new DMS_LOGO_SONIC_WORK._skip_check_(dmLogoSonicIsSkipPressedTouch);
+    }
+
+    private static bool dmLogoSonicIsSkipPressedPad()
+    {
+        return AoPad.AoPadSomeoneStand(ControllerConsts.CONFIRM) >= 0;
+    }
+
+    private static bool dmLogoSonicIsSkipPressedTouch()
+    {
+        return amTpIsTouchPush(0) || isBackKeyPressed();
     }
 
     public void dmLogoSonicMainFunc(MTS_TASK_TCB tcb)
@@ -126,12 +144,12 @@
         {
             if (work.func != null)
                 work.func(work);
-            if (((int)work.flag & 1) != 0 && ((int)work.flag & 2) == 0 && (amTpIsTouchPush(0) || isBackKeyPressed()))
+            if (((int)work.flag & 1) != 0 && ((int)work.flag & 2) == 0 && work.skip_check())
             {
                 setBackKeyRequest(false);
                 work.flag |= 2U;
                 if (IzFadeIsEnd())
-                    IzFadeInitEasy(0U, 3U, 10f, true);
+                    IzFadeInitEasy(0U, 3U, dm_logo_sonic_is_console ? DMD_LOGO_SONIC_FADEOUT_TIME : DMD_LOGO_SONIC_FADEOUT_TIME_SKIP, true);
                 work.func = new DMS_LOGO_SONIC_WORK._func_(this.dmLogoSonicFadeOutWaitFunc);
             }
             if (((int)work.flag & 4) != 0)

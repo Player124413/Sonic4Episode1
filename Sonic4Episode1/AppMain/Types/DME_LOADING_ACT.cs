@@ -1,6 +1,6 @@
 internal partial class AppMain
 {
-    private enum DME_LOADING_ACT
+    internal enum DME_LOADING_ACT
     {
         ACT_BG_WHITE,
         ACT_BG_BOTTOM,

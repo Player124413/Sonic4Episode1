@@ -13,7 +13,7 @@
         aoWinSysDrawPrimitveA(texlist, tex_id, x, y, w, h);
     }
 
-    private static void AoWinSysDrawState(
+    internal static void AoWinSysDrawState(
       int type,
       NNS_TEXLIST texlist,
       uint tex_id,
@@ -26,7 +26,7 @@
         AoWinSysDrawState(type, texlist, tex_id, x, y, w, h, state, 0.0f);
     }
 
-    private static void AoWinSysDrawState(
+    internal static void AoWinSysDrawState(
       int type,
       NNS_TEXLIST texlist,
       uint tex_id,

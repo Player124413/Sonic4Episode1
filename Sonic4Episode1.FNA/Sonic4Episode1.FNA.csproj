@@ -11,8 +11,14 @@
     <ApplicationIcon>s4.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- desktop gets the console model and texture sets alongside the mobile ones -->
+    <ContentProfile>desktop-hd</ContentProfile>
+  </PropertyGroup>
+
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
   <Import Project="..\Shaders\Shaders.targets" />
+  <Import Project="..\Content.targets" />
 
   <ItemGroup>
     <Content Include="s4.ico" />

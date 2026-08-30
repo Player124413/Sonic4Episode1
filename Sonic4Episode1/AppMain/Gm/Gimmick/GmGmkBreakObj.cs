@@ -166,7 +166,7 @@
             GMS_GMK_BOBJ_PARTS work = (GMS_GMK_BOBJ_PARTS)GMM_EFFECT_CREATE_WORK(() => new GMS_GMK_BOBJ_PARTS(), null, 0, "BreakObj_Parts");
             OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
             ObjObjectCopyAction3dNNModel(obj_work, gm_gmk_breakobj_obj_3d_list[numArray[0]], work.eff_work.obj_3d);
-            ((NNS_MATERIAL_GLES11_DESC)obj_work.obj_3d._object.pMatPtrList[0].pMaterial).fFlag = 2U;
+            mppSetMaterialFlag(obj_work.obj_3d._object.pMatPtrList[0], 2U);
             obj_work.pos.x = parent_obj.pos.x + (short)numArray[1] * 4096;
             obj_work.pos.y = parent_obj.pos.y - (short)numArray[2] * 4096;
             obj_work.pos.z = parent_obj.pos.z + 1;

@@ -1,5 +1,6 @@
 internal partial class AppMain
 {
+    // NN key family SISplineA16_1: A16_1 plus an SI spline handle
     internal class NNS_MOTION_KEY_Class15
     {
         public readonly NNS_MOTION_SI_SPLINE_HANDLE Shandle = new NNS_MOTION_SI_SPLINE_HANDLE();

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -11,7 +13,9 @@ internal partial class AppMain
         public string dir;
         public int count;
         public string[] files;
-        public sbyte[] types;
+        public int[] types;
+        public short[] user0;
+        public short[] user1;
         public sbyte[] flag;
         public sbyte type;
         public byte[] data;
@@ -24,6 +28,10 @@ internal partial class AppMain
         public FsBackgroundReadComplete callback;
         public AMS_AMB_HEADER amb_header;
         public bool is_real_amb = false;
+        public bool big_endian = false;
+
+        // null follows am_fs_variant; anything else pins this request to that variant
+        public string variant;
 
         public static explicit operator AMS_AMB_HEADER(AMS_FS fs)
         {
@@ -36,18 +44,25 @@ internal partial class AppMain
             this.amb_header.dir = this.dir;
             this.amb_header.file_num = this.count;
             this.amb_header.files = new string[this.files.Length];
-            this.amb_header.types = new sbyte[this.types.Length];
+            this.amb_header.types = new int[this.types.Length];
+            this.amb_header.user0 = new short[this.files.Length];
+            this.amb_header.user1 = new short[this.files.Length];
             this.amb_header.flag = new sbyte[this.flag.Length];
             this.amb_header.offsets = new int[this.files.Length];
             this.amb_header.lengths = new int[this.files.Length];
             this.amb_header.data = this.data;
             this.amb_header.buf = new object[this.count];
             Array.Copy(files, 0, amb_header.files, 0, this.files.Length);
-            Buffer.BlockCopy(types, 0, amb_header.types, 0, this.types.Length);
+            Array.Copy(types, 0, amb_header.types, 0, this.types.Length);
+            if (user0 != null)
+                Array.Copy(user0, 0, amb_header.user0, 0, this.user0.Length);
+            if (user1 != null)
+                Array.Copy(user1, 0, amb_header.user1, 0, this.user1.Length);
             Buffer.BlockCopy(flag, 0, amb_header.flag, 0, this.flag.Length);
             Buffer.BlockCopy(offsets, 0, amb_header.offsets, 0, this.offsets.Length * 4);
             Buffer.BlockCopy(lengths, 0, amb_header.lengths, 0, this.lengths.Length * 4);
             this.amb_header.is_real_amb = is_real_amb;
+            this.amb_header.big_endian = big_endian;
             amPreLoadAmbItems(this.amb_header);
         }
     }
@@ -60,7 +75,13 @@ internal partial class AppMain
     public static AMS_FS amFsReadBackground(string file_name)
     {
         FsReadSpeedBytesPerFrame = 32768;
-        return amFsReadBackground(file_name, null);
+        return amFsReadBackground(file_name, (FsBackgroundReadComplete)null);
+    }
+
+    public static AMS_FS amFsReadBackgroundAs(string file_name, string variant)
+    {
+        FsReadSpeedBytesPerFrame = 32768;
+        return amFsReadBackground(file_name, null, variant);
     }
 
     public static AMS_FS amFsReadBackground(string file_name, int BytesPerFrame)
@@ -73,10 +94,19 @@ internal partial class AppMain
         string file_name,
         FsBackgroundReadComplete callback)
     {
+        return amFsReadBackground(file_name, callback, null);
+    }
+
+    private static AMS_FS amFsReadBackground(
+        string file_name,
+        FsBackgroundReadComplete callback,
+        string variant)
+    {
         //Console.WriteLine(file_name);
 
         AMS_FS amsFs;
-        if (ams_fsList.Count > 0 && lastReadAMS_FS != null && lastReadAMS_FS.file_name == file_name)
+        if (ams_fsList.Count > 0 && lastReadAMS_FS != null && lastReadAMS_FS.file_name == file_name
+            && lastReadAMS_FS.variant == variant)
         {
             amsFs = ams_fsList.First.Value;
             amFsExecuteBackgroundRead();
@@ -86,6 +116,7 @@ internal partial class AppMain
             amsFs = new AMS_FS();
             amsFs.callback = callback;
             amsFs.file_name = file_name;
+            amsFs.variant = variant;
             amsFs.stat = 2;
             ams_fsList.AddLast(amsFs);
             lastReadAMS_FS = amsFs;
@@ -114,7 +145,7 @@ internal partial class AppMain
         }
     }
 
-    private static AMS_AMB_HEADER readAMBFile(AmbChunk buf)
+    internal static AMS_AMB_HEADER readAMBFile(AmbChunk buf)
     {
         byte[] array = buf.array;
         int offset = buf.offset;
@@ -150,73 +181,107 @@ internal partial class AppMain
         return amb;
     }
 
+    public const int AMB_FILE_ID = 0x424D4123;
+    public const int AMB_HEADER_SIZE = 0x20;
+
     public static void readAmbHeader(Stream stream, ref AMS_AMB_HEADER amb)
     {
         using (BinaryReader binaryReader = new BinaryReader(stream))
         {
-            var tmp = binaryReader.ReadInt32();
-            if (tmp == 0x424d4123)
+            var fileId = binaryReader.ReadInt32();
+            if (fileId != AMB_FILE_ID)
             {
-                binaryReader.BaseStream.Seek(12, SeekOrigin.Current);
-                amb.file_num = binaryReader.ReadInt32();
-                var entryTableOffset = binaryReader.ReadInt32();
-                binaryReader.BaseStream.Position = 0x1C;
-                var stringTableOffset = binaryReader.ReadInt32();
+                readLegacyAmbHeader(binaryReader, ref amb, fileId);
+                return;
+            }
 
-                amb.is_real_amb = true;
-                amb.files = new string[amb.file_num];
-                amb.types = new sbyte[amb.file_num];
-                amb.offsets = new int[amb.file_num];
-                amb.lengths = new int[amb.file_num];
-                amb.buf = new object[amb.file_num];
-                amb.flag = new sbyte[4] {127, 127, 127, 127};
-                for (int i = 0; i < amb.file_num; i++)
-                {
-                    binaryReader.BaseStream.Seek(entryTableOffset + (i * 0x10), SeekOrigin.Begin);
-                    amb.offsets[i] = binaryReader.ReadInt32();
-                    amb.lengths[i] = binaryReader.ReadInt32();
-                    if (stringTableOffset != 0)
-                    {
-                        binaryReader.BaseStream.Seek(stringTableOffset + (i * 0x20), SeekOrigin.Begin);
-                        amb.files[i] = readChars(binaryReader);
-                    }
-                    else
-                    {
-                        amb.files[i] = i.ToString();
-                    }
-                }
+            var headerSize = binaryReader.ReadInt32();
+            if (headerSize == AMB_HEADER_SIZE)
+            {
+                readRealAmbHeader(binaryReader, ref amb);
+                return;
+            }
+
+            if (BinaryPrimitives.ReverseEndianness(headerSize) == AMB_HEADER_SIZE)
+            {
+                amb.big_endian = true;
+                readRealAmbHeader(new EndianBinaryReader(stream, bigEndian: true), ref amb);
+                return;
+            }
+
+            throw new InvalidDataException($"#AMB header size 0x{headerSize:X8} is not 0x20 in either byte order");
+        }
+    }
+
+    private static void readRealAmbHeader(BinaryReader reader, ref AMS_AMB_HEADER amb)
+    {
+        reader.BaseStream.Position = 0x10;
+        amb.file_num = reader.ReadInt32();
+        var entryTableOffset = reader.ReadInt32();
+        reader.BaseStream.Position = 0x1C;
+        var stringTableOffset = reader.ReadInt32();
+
+        amb.is_real_amb = true;
+        amb.files = new string[amb.file_num];
+        amb.types = new int[amb.file_num];
+        amb.user0 = new short[amb.file_num];
+        amb.user1 = new short[amb.file_num];
+        amb.offsets = new int[amb.file_num];
+        amb.lengths = new int[amb.file_num];
+        amb.buf = new object[amb.file_num];
+        amb.flag = new sbyte[4] {127, 127, 127, 127};
+        for (int i = 0; i < amb.file_num; i++)
+        {
+            reader.BaseStream.Seek(entryTableOffset + (i * 0x10), SeekOrigin.Begin);
+            amb.offsets[i] = reader.ReadInt32();
+            amb.lengths[i] = reader.ReadInt32();
+            amb.types[i] = reader.ReadInt32();
+            amb.user0[i] = reader.ReadInt16();
+            amb.user1[i] = reader.ReadInt16();
+            if (stringTableOffset != 0)
+            {
+                reader.BaseStream.Seek(stringTableOffset + (i * 0x20), SeekOrigin.Begin);
+                amb.files[i] = readChars(reader);
             }
             else
             {
-                amb.file_num = tmp;
-                amb.files = new string[amb.file_num];
-                amb.types = new sbyte[amb.file_num];
-                amb.offsets = new int[amb.file_num];
-                amb.lengths = new int[amb.file_num];
-                amb.buf = new object[amb.file_num];
-                int num = binaryReader.ReadInt32();
-                amb.flag = new sbyte[num];
-                for (int i = 0; i < num; i++)
-                {
-                    amb.flag[i] = binaryReader.ReadSByte();
-                }
-
-                for (int j = 0; j < amb.file_num; j++)
-                {
-                    amb.files[j] = binaryReader.ReadString();
-                    amb.types[j] = binaryReader.ReadSByte();
-                }
-
-                for (int k = 0; k < amb.file_num; k++)
-                {
-                    amb.offsets[k] = binaryReader.ReadInt32();
-                }
-
-                for (int l = 0; l < amb.file_num; l++)
-                {
-                    amb.lengths[l] = binaryReader.ReadInt32();
-                }
+                amb.files[i] = i.ToString();
             }
+        }
+    }
+
+    private static void readLegacyAmbHeader(BinaryReader reader, ref AMS_AMB_HEADER amb, int fileNum)
+    {
+        amb.file_num = fileNum;
+        amb.files = new string[amb.file_num];
+        amb.types = new int[amb.file_num];
+        // legacy layout has no per-file user data, these just stay zero
+        amb.user0 = new short[amb.file_num];
+        amb.user1 = new short[amb.file_num];
+        amb.offsets = new int[amb.file_num];
+        amb.lengths = new int[amb.file_num];
+        amb.buf = new object[amb.file_num];
+        int num = reader.ReadInt32();
+        amb.flag = new sbyte[num];
+        for (int i = 0; i < num; i++)
+        {
+            amb.flag[i] = reader.ReadSByte();
+        }
+
+        for (int j = 0; j < amb.file_num; j++)
+        {
+            amb.files[j] = reader.ReadString();
+            amb.types[j] = reader.ReadSByte();
+        }
+
+        for (int k = 0; k < amb.file_num; k++)
+        {
+            amb.offsets[k] = reader.ReadInt32();
+        }
+
+        for (int l = 0; l < amb.file_num; l++)
+        {
+            amb.lengths[l] = reader.ReadInt32();
         }
     }
 
@@ -244,6 +309,22 @@ internal partial class AppMain
         return null;
     }
 
+    private static bool mppIsNnMotionMember(string extension)
+    {
+        switch (extension.ToUpperInvariant())
+        {
+            case ".INM":
+            case ".INV":
+            case ".ZNM":
+            case ".ZNV":
+            case ".ENM":
+            case ".ENV":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static void amPreLoadAmbItems(AMS_AMB_HEADER amb)
     {
         AmbChunk ambChunk = new AmbChunk(amb.data, 0, 0, amb);
@@ -252,8 +333,7 @@ internal partial class AppMain
             ambChunk.offset = amb.offsets[index];
             ambChunk.length = amb.lengths[index];
             string extension = Path.GetExtension(amb.files[index]);
-            if (extension.Equals(".INM", StringComparison.OrdinalIgnoreCase) ||
-                extension.Equals(".INV", StringComparison.OrdinalIgnoreCase))
+            if (mppIsNnMotionMember(extension))
             {
                 NNS_MOTION motion;
                 amMotionSetup(out motion, ambChunk);
@@ -269,6 +349,91 @@ internal partial class AppMain
         }
     }
 
+    // "<path> <variant>" lines, one per archive the content build emitted an alt version of
+    private static Dictionary<string, string> am_fs_variants;
+
+    // names the asset mode, not the dump it came from: console is assembled from more than one
+    public const string AMD_FS_VARIANT_CONSOLE = "console";
+
+    // what a screen asks for when its act tables only describe the base archives. a screen that
+    // has not been ported to console yet has to pin this, or a globally flipped shared archive
+    // reaches it with ids it cannot index
+    public const string AMD_FS_VARIANT_BASE = "";
+
+    public static string am_fs_variant = AMD_FS_VARIANT_CONSOLE;
+
+    private static Dictionary<string, string> amFsGetVariants()
+    {
+        if (am_fs_variants != null)
+            return am_fs_variants;
+
+        am_fs_variants = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            using var stream = TitleContainer.OpenStream("Content\\variants.txt");
+            using var reader = new StreamReader(stream);
+            for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
+            {
+                var space = line.LastIndexOf(' ');
+                if (space > 0)
+                    am_fs_variants[line.Substring(0, space)] = line.Substring(space + 1);
+            }
+        }
+        catch (Exception)
+        {
+        }
+
+        return am_fs_variants;
+    }
+
+    // null when this path comes back as the base asset, which is the only way to tell:
+    // the request is identical either way, only the payload differs
+    public static string amFsResolvedVariant(string path)
+    {
+        return amFsVariantFor(path, am_fs_variant);
+    }
+
+    private static string amFsVariantFor(string path, string variant)
+    {
+        if (string.IsNullOrEmpty(variant))
+            return null;
+
+        if (!amFsGetVariants().TryGetValue(path.Replace('\\', '/'), out var declared)
+            || !string.Equals(declared, variant, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return declared;
+    }
+
+    // a screen's act tables index one build's archives, so a partial variant set has to fall back
+    // wholesale rather than mix the two
+    public static bool amFsAllVariant(string variant, params string[] paths)
+    {
+        foreach (var path in paths)
+        {
+            if (!string.Equals(amFsResolvedVariant(path), variant, StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        return true;
+    }
+
+    public static string amFsResolve(string path)
+    {
+        return amFsResolveAs(path, am_fs_variant);
+    }
+
+    public static string amFsResolveAs(string path, string variant)
+    {
+        var key = path.Replace('\\', '/');
+        var declared = amFsVariantFor(key, variant);
+        if (declared == null)
+            return key;
+
+        var dot = key.LastIndexOf('.');
+        return key.Substring(0, dot) + "." + declared + key.Substring(dot);
+    }
+
     public static void amFsExecuteBackgroundRead()
     {
         if (ams_fsList.Count > 0)
@@ -277,7 +442,10 @@ internal partial class AppMain
 
             if (value.stream == null)
             {
-                var stream = TitleContainer.OpenStream("Content\\" + value.file_name);
+                var resolved = value.variant == null
+                    ? amFsResolve(value.file_name)
+                    : amFsResolveAs(value.file_name, value.variant);
+                var stream = TitleContainer.OpenStream("Content\\" + resolved);
 
                 value.stream = new MemoryStream();
 #if ASYNC_IO
@@ -301,73 +469,18 @@ internal partial class AppMain
 
             //Console.WriteLine("{0}", value.data.Length);
 
-            using (BinaryReader binaryReader = new BinaryReader(value.stream))
-            {
-                // 23 41 4D 42
-                var tmp = binaryReader.ReadInt32();
-                if (tmp == 0x424d4123)
-                {
-                    binaryReader.BaseStream.Position += 12;
-                    value.count = binaryReader.ReadInt32();
-                    var entryTableOffset = binaryReader.ReadInt32();
-                    binaryReader.BaseStream.Position = 0x1C;
-                    var stringTableOffset = binaryReader.ReadInt32();
-
-                    value.is_real_amb = true;
-                    value.files = new string[value.count];
-                    value.types = new sbyte[value.count];
-                    value.offsets = new int[value.count];
-                    value.lengths = new int[value.count];
-                    value.flag = new sbyte[0];
-                    for (int i = 0; i < value.count; i++)
-                    {
-                        binaryReader.BaseStream.Seek(entryTableOffset + (i * 0x10), SeekOrigin.Begin);
-                        value.offsets[i] = binaryReader.ReadInt32();
-                        value.lengths[i] = binaryReader.ReadInt32();
-
-                        if (stringTableOffset != 0)
-                        {
-                            binaryReader.BaseStream.Seek(stringTableOffset + (i * 0x20), SeekOrigin.Begin);
-                            //var bytes = binaryReader.ReadBytes(0x20);
-                            value.files[i] = readChars(binaryReader);
-                        }
-                        else
-                        {
-                            value.files[i] = i.ToString();
-                        }
-                    }
-                }
-                else
-                {
-                    value.count = tmp;
-                    value.files = new string[value.count];
-                    value.types = new sbyte[value.count];
-                    value.offsets = new int[value.count];
-                    value.lengths = new int[value.count];
-                    int num2 = binaryReader.ReadInt32();
-                    value.flag = new sbyte[num2];
-                    for (int i = 0; i < num2; i++)
-                    {
-                        value.flag[i] = binaryReader.ReadSByte();
-                    }
-
-                    for (int j = 0; j < value.count; j++)
-                    {
-                        value.files[j] = binaryReader.ReadString();
-                        value.types[j] = binaryReader.ReadSByte();
-                    }
-
-                    for (int k = 0; k < value.count; k++)
-                    {
-                        value.offsets[k] = binaryReader.ReadInt32();
-                    }
-
-                    for (int l = 0; l < value.count; l++)
-                    {
-                        value.lengths[l] = binaryReader.ReadInt32();
-                    }
-                }
-            }
+            AMS_AMB_HEADER parsed = new AMS_AMB_HEADER();
+            readAmbHeader(value.stream, ref parsed);
+            value.count = parsed.file_num;
+            value.files = parsed.files;
+            value.types = parsed.types;
+            value.user0 = parsed.user0;
+            value.user1 = parsed.user1;
+            value.offsets = parsed.offsets;
+            value.lengths = parsed.lengths;
+            value.flag = parsed.flag;
+            value.is_real_amb = parsed.is_real_amb;
+            value.big_endian = parsed.big_endian;
 
             value.makeAmbHeader();
             value.stat = 3;

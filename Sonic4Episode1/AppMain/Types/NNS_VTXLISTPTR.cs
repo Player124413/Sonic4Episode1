@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 internal partial class AppMain
@@ -24,7 +25,7 @@ internal partial class AppMain
             return this;
         }
 
-        public static NNS_VTXLISTPTR Read(BinaryReader reader, long data0Pos)
+        public static NNS_VTXLISTPTR Read(BinaryReader reader, long data0Pos, NNE_PLATFORM platform)
         {
             NNS_VTXLISTPTR nnsVtxlistptr = new NNS_VTXLISTPTR();
             nnsVtxlistptr.fType = reader.ReadUInt32();
@@ -33,10 +34,23 @@ internal partial class AppMain
             {
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num, SeekOrigin.Begin);
-                nnsVtxlistptr.pVtxList = NNS_VTXLIST_GL_DESC.Read(reader, data0Pos);
+                nnsVtxlistptr.pVtxList = ReadVtxList(reader, data0Pos, platform);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             return nnsVtxlistptr;
+        }
+
+        private static object ReadVtxList(BinaryReader reader, long data0Pos, NNE_PLATFORM platform)
+        {
+            switch (platform)
+            {
+                case NNE_PLATFORM.GLES11:
+                    return NNS_VTXLIST_GL_DESC.Read(reader, data0Pos);
+                case NNE_PLATFORM.DXG20:
+                    return NNS_VTXLIST_DX_DESC.Read(reader, data0Pos);
+                default:
+                    throw new NotSupportedException($"no vertex list reader for {platform}");
+            }
         }
     }
 }

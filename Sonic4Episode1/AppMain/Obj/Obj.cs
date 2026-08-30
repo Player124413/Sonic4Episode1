@@ -494,7 +494,7 @@ internal partial class AppMain
         set => _g_obj = value;
     }
 
-    private static void ObjInit(
+    internal static void ObjInit(
       byte group,
       ushort prio,
       byte pause_level,
@@ -551,7 +551,7 @@ internal partial class AppMain
         obj_ptcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(objMain), new GSF_TASK_PROCEDURE(objDestructor), 0U, pause_level, prio, group, null, "object");
     }
 
-    private static void ObjExit()
+    internal static void ObjExit()
     {
         if (obj_ptcb == null)
             return;
@@ -561,7 +561,7 @@ internal partial class AppMain
         g_obj.flag |= 2147483648U;
     }
 
-    private static void ObjPreExit()
+    internal static void ObjPreExit()
     {
         ObjCameraExit();
         g_obj.glb_camera_id = -1;
@@ -572,7 +572,7 @@ internal partial class AppMain
         return null != obj_ptcb;
     }
 
-    private static bool ObjIsExitWait()
+    internal static bool ObjIsExitWait()
     {
         return obj_ptcb != null && ((int)g_obj.flag & int.MinValue) != 0;
     }
@@ -594,7 +594,7 @@ internal partial class AppMain
         return ((int)_g_obj.flag & 1) == 0 || ((int)ulFlag & 32) != 0 ? 0U : 1U;
     }
 
-    private static void ObjDataAlloc(int num)
+    internal static void ObjDataAlloc(int num)
     {
         if (obj_data_work_save != null)
         {
@@ -774,7 +774,7 @@ internal partial class AppMain
             g_obj.obj_list_tail = pWork.prev;
     }
 
-    private static void ObjObjectClearAllObject()
+    internal static void ObjObjectClearAllObject()
     {
         OBS_OBJECT_WORK next;
         for (OBS_OBJECT_WORK obsObjectWork = g_obj.obj_list_head; obsObjectWork != null; obsObjectWork = next)
@@ -784,12 +784,12 @@ internal partial class AppMain
         }
     }
 
-    private static bool ObjObjectCheckClearAllObject()
+    internal static bool ObjObjectCheckClearAllObject()
     {
         return g_obj.obj_list_head == null;
     }
 
-    private static OBS_OBJECT_WORK ObjObjectSearchRegistObject(
+    internal static OBS_OBJECT_WORK ObjObjectSearchRegistObject(
       OBS_OBJECT_WORK obj_work,
       ushort obj_type)
     {

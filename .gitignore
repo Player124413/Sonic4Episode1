@@ -5,6 +5,9 @@
 
 [Cc]ontent/
 
+# built by `s4content build <profile>`, one tree per head, all derivable from content-sources.toml
+[Cc]ontent.[Bb]uild/
+
 [Dd]ependencies/
 
 # User-specific files
@@ -355,3 +358,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+*.7z
+*.gz
+/Shaders/FNA

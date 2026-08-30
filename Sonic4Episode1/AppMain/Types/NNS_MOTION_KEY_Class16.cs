@@ -2,6 +2,7 @@ using System.IO;
 
 internal partial class AppMain
 {
+    // NN key family A16_3: Sint16 frame, three Angle16. Three axis rotation, pairs with Class13 (Angle32).
     internal class NNS_MOTION_KEY_Class16
     {
         public short Frame;

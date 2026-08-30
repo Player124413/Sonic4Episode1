@@ -937,7 +937,7 @@ internal partial class AppMain
         return n * ((float)Math.PI / 180f);
     }
 
-    private static int NNM_DEGtoA32(float n)
+    internal static int NNM_DEGtoA32(float n)
     {
         return (int)(n * 182.04443359375);
     }
@@ -962,7 +962,7 @@ internal partial class AppMain
         return n * 9.58738E-05f;
     }
 
-    private static int NNM_DEGtoA32(int n)
+    internal static int NNM_DEGtoA32(int n)
     {
         return (int)(n * 182.04443359375);
     }
@@ -987,7 +987,7 @@ internal partial class AppMain
         return n * 9.58738E-05f;
     }
 
-    private static int NNM_DEGtoA16(float n)
+    internal static int NNM_DEGtoA16(float n)
     {
         return (short)(int)(n * 182.04443359375);
     }
@@ -2712,7 +2712,7 @@ internal partial class AppMain
         return val;
     }
 
-    private static void nnCalcNodeHideMotion(
+    public static void nnCalcNodeHideMotion(
       ArrayPointer<uint> nodestatlist,
       NNS_MOTION mot,
       float frame)
@@ -4275,22 +4275,21 @@ internal partial class AppMain
     {
         for (int index1 = 0; index1 < nMaterial; ++index1)
         {
-            if (((int)srcmatptr[index1].fType & 2) != 0)
+            if (srcmatptr[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC pMaterial)
             {
                 NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc = null;
-                NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)srcmatptr[index1].pMaterial;
-                if (((int)srcmatptr[index1].fType & 4) != 0)
+                if (pMaterial is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE userProfile)
                 {
                     if (dstmatptr != null)
                     {
-                        dstmatptr[index1].fType = 6U;
-                        dstmatptr[index1].pMaterial = (NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)(materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE());
-                        ((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)materialStdshaderDesc).Assign((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)pMaterial);
+                        dstmatptr[index1].fType = srcmatptr[index1].fType;
+                        dstmatptr[index1].pMaterial = materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE();
+                        ((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)materialStdshaderDesc).Assign(userProfile);
                     }
                 }
                 else if (dstmatptr != null)
                 {
-                    dstmatptr[index1].fType = 2U;
+                    dstmatptr[index1].fType = srcmatptr[index1].fType;
                     dstmatptr[index1].pMaterial = materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC();
                     materialStdshaderDesc.Assign(pMaterial);
                 }
@@ -4298,36 +4297,32 @@ internal partial class AppMain
                 int num1 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_STDSHADER_COLOR pColor2 = ((NNS_MATERIAL_STDSHADER_DESC)srcmatptr[index2].pMaterial).pColor;
-                    if (pColor1 == pColor2)
-                    {
-                        if (dstmatptr != null)
-                            materialStdshaderDesc.pColor = ((NNS_MATERIAL_STDSHADER_DESC)dstmatptr[index2].pMaterial).pColor;
-                        num1 = 0;
-                        break;
-                    }
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_STDSHADER_DESC prev) || pColor1 != prev.pColor)
+                        continue;
+                    if (dstmatptr != null && dstmatptr[index2].pMaterial is NNS_MATERIAL_STDSHADER_DESC prevDst)
+                        materialStdshaderDesc.pColor = prevDst.pColor;
+                    num1 = 0;
+                    break;
                 }
                 if (num1 != 0 && dstmatptr != null)
                 {
                     materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR();
                     materialStdshaderDesc.pColor.Assign(pColor1);
                 }
-                NNS_MATERIAL_LOGIC pLogic1 = pMaterial.pLogic;
+                NNS_MATERIAL_STDSHADER_LOGIC pLogic1 = pMaterial.pLogic;
                 int num2 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_LOGIC pLogic2 = ((NNS_MATERIAL_STDSHADER_DESC)srcmatptr[index2].pMaterial).pLogic;
-                    if (pLogic1 == pLogic2)
-                    {
-                        if (dstmatptr != null)
-                            materialStdshaderDesc.pLogic = ((NNS_MATERIAL_STDSHADER_DESC)dstmatptr[index2].pMaterial).pLogic;
-                        num2 = 0;
-                        break;
-                    }
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_STDSHADER_DESC prev) || pLogic1 != prev.pLogic)
+                        continue;
+                    if (dstmatptr != null && dstmatptr[index2].pMaterial is NNS_MATERIAL_STDSHADER_DESC prevDst)
+                        materialStdshaderDesc.pLogic = prevDst.pLogic;
+                    num2 = 0;
+                    break;
                 }
-                if (num2 != 0 && dstmatptr != null)
+                if (num2 != 0 && dstmatptr != null && pLogic1 != null)
                 {
-                    materialStdshaderDesc.pLogic = new NNS_MATERIAL_LOGIC();
+                    materialStdshaderDesc.pLogic = new NNS_MATERIAL_STDSHADER_LOGIC();
                     materialStdshaderDesc.pLogic.Assign(pLogic1);
                 }
                 if (pMaterial.nTex > 0)
@@ -4363,63 +4358,58 @@ internal partial class AppMain
                     }
                 }
             }
-            else if (((int)srcmatptr[index1].fType & 8) != 0)
+            else if (srcmatptr[index1].pMaterial is NNS_MATERIAL_GLES11_DESC pMaterialGles11)
             {
                 NNS_MATERIAL_GLES11_DESC materialGleS11Desc = null;
-                NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)srcmatptr[index1].pMaterial;
                 if (dstmatptr != null)
                 {
-                    dstmatptr[index1].fType = 8U;
+                    dstmatptr[index1].fType = srcmatptr[index1].fType;
                     dstmatptr[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC();
-                    materialGleS11Desc.Assign(pMaterial);
+                    materialGleS11Desc.Assign(pMaterialGles11);
                 }
-                NNS_MATERIAL_STDSHADER_COLOR pColor1 = pMaterial.pColor;
+                NNS_MATERIAL_STDSHADER_COLOR pColor1 = pMaterialGles11.pColor;
                 int num1 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_STDSHADER_COLOR pColor2 = ((NNS_MATERIAL_GLES11_DESC)srcmatptr[index2].pMaterial).pColor;
-                    if (pColor1 == pColor2)
-                    {
-                        if (dstmatptr != null)
-                            materialGleS11Desc.pColor = ((NNS_MATERIAL_GLES11_DESC)dstmatptr[index2].pMaterial).pColor;
-                        num1 = 0;
-                        break;
-                    }
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_GLES11_DESC prev) || pColor1 != prev.pColor)
+                        continue;
+                    if (dstmatptr != null && dstmatptr[index2].pMaterial is NNS_MATERIAL_GLES11_DESC prevDst)
+                        materialGleS11Desc.pColor = prevDst.pColor;
+                    num1 = 0;
+                    break;
                 }
                 if (num1 != 0 && dstmatptr != null)
                 {
                     materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR();
                     materialGleS11Desc.pColor.Assign(pColor1);
                 }
-                NNS_MATERIAL_GLES11_LOGIC pLogic1 = pMaterial.pLogic;
+                NNS_MATERIAL_GLES11_LOGIC pLogic1 = pMaterialGles11.pLogic;
                 int num2 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_GLES11_LOGIC pLogic2 = ((NNS_MATERIAL_GLES11_DESC)srcmatptr[index2].pMaterial).pLogic;
-                    if (pLogic1 == pLogic2)
-                    {
-                        if (dstmatptr != null)
-                            materialGleS11Desc.pLogic = ((NNS_MATERIAL_GLES11_DESC)dstmatptr[index2].pMaterial).pLogic;
-                        num2 = 0;
-                        break;
-                    }
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_GLES11_DESC prev) || pLogic1 != prev.pLogic)
+                        continue;
+                    if (dstmatptr != null && dstmatptr[index2].pMaterial is NNS_MATERIAL_GLES11_DESC prevDst)
+                        materialGleS11Desc.pLogic = prevDst.pLogic;
+                    num2 = 0;
+                    break;
                 }
                 if (num2 != 0 && dstmatptr != null)
                 {
                     materialGleS11Desc.pLogic = new NNS_MATERIAL_GLES11_LOGIC();
                     materialGleS11Desc.pLogic.Assign(pLogic1);
                 }
-                if (pMaterial.nTex > 0)
+                if (pMaterialGles11.nTex > 0)
                 {
                     if (dstmatptr != null)
                     {
-                        materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pMaterial.nTex];
-                        for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
-                            materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterial.pTexDesc[index2]);
+                        materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pMaterialGles11.nTex];
+                        for (int index2 = 0; index2 < pMaterialGles11.nTex; ++index2)
+                            materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterialGles11.pTexDesc[index2]);
                     }
-                    for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
+                    for (int index2 = 0; index2 < pMaterialGles11.nTex; ++index2)
                     {
-                        NNS_MATERIAL_GLES11_TEXMAP_DESC gleS11TexmapDesc1 = pMaterial.pTexDesc[index2];
+                        NNS_MATERIAL_GLES11_TEXMAP_DESC gleS11TexmapDesc1 = pMaterialGles11.pTexDesc[index2];
                         NNS_MATERIAL_GLES11_TEXMAP_DESC gleS11TexmapDesc2;
                         if (dstmatptr != null)
                             gleS11TexmapDesc2 = materialGleS11Desc.pTexDesc[index2];
@@ -4436,13 +4426,12 @@ internal partial class AppMain
                     }
                 }
             }
-            else if (((int)srcmatptr[index1].fType & 1) != 0)
+            else if (srcmatptr[index1].pMaterial is NNS_MATERIAL_DESC pMaterial1)
             {
                 NNS_MATERIAL_DESC nnsMaterialDesc = null;
-                NNS_MATERIAL_DESC pMaterial1 = (NNS_MATERIAL_DESC)srcmatptr[index1].pMaterial;
                 if (dstmatptr != null)
                 {
-                    dstmatptr[index1].fType = 1U;
+                    dstmatptr[index1].fType = srcmatptr[index1].fType;
                     dstmatptr[index1].pMaterial = nnsMaterialDesc = new NNS_MATERIAL_DESC();
                     nnsMaterialDesc.Assign(pMaterial1);
                 }
@@ -4450,20 +4439,22 @@ internal partial class AppMain
                 int num1 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_DESC pMaterial2 = (NNS_MATERIAL_DESC)srcmatptr[index2].pMaterial;
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_DESC pMaterial2))
+                        continue;
                     NNS_MATERIAL_COLOR pColor2 = pMaterial2.pColor;
                     NNS_MATERIAL_COLOR pBackColor = pMaterial2.pBackColor;
+                    NNS_MATERIAL_DESC prevDst = dstmatptr?[index2].pMaterial as NNS_MATERIAL_DESC;
                     if (pColor1 == pColor2)
                     {
-                        if (dstmatptr != null)
-                            nnsMaterialDesc.pColor = ((NNS_MATERIAL_DESC)dstmatptr[index2].pMaterial).pColor;
+                        if (prevDst != null)
+                            nnsMaterialDesc.pColor = prevDst.pColor;
                         num1 = 0;
                         break;
                     }
                     if (pColor1 == pBackColor)
                     {
-                        if (dstmatptr != null)
-                            nnsMaterialDesc.pColor = ((NNS_MATERIAL_DESC)dstmatptr[index2].pMaterial).pBackColor;
+                        if (prevDst != null)
+                            nnsMaterialDesc.pColor = prevDst.pBackColor;
                         num1 = 0;
                         break;
                     }
@@ -4479,20 +4470,22 @@ internal partial class AppMain
                     int num2 = 1;
                     for (int index2 = 0; index2 < index1; ++index2)
                     {
-                        NNS_MATERIAL_DESC pMaterial2 = (NNS_MATERIAL_DESC)srcmatptr[index2].pMaterial;
+                        if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_DESC pMaterial2))
+                            continue;
                         NNS_MATERIAL_COLOR pColor2 = pMaterial2.pColor;
                         NNS_MATERIAL_COLOR pBackColor2 = pMaterial2.pBackColor;
+                        NNS_MATERIAL_DESC prevDst = dstmatptr?[index2].pMaterial as NNS_MATERIAL_DESC;
                         if (pBackColor1 == pColor2)
                         {
-                            if (dstmatptr != null)
-                                nnsMaterialDesc.pBackColor = ((NNS_MATERIAL_DESC)dstmatptr[index2].pMaterial).pColor;
+                            if (prevDst != null)
+                                nnsMaterialDesc.pBackColor = prevDst.pColor;
                             num2 = 0;
                             break;
                         }
                         if (pBackColor1 == pBackColor2)
                         {
-                            if (dstmatptr != null)
-                                nnsMaterialDesc.pBackColor = ((NNS_MATERIAL_DESC)dstmatptr[index2].pMaterial).pBackColor;
+                            if (prevDst != null)
+                                nnsMaterialDesc.pBackColor = prevDst.pBackColor;
                             num2 = 0;
                             break;
                         }
@@ -4507,14 +4500,12 @@ internal partial class AppMain
                 int num3 = 1;
                 for (int index2 = 0; index2 < index1; ++index2)
                 {
-                    NNS_MATERIAL_LOGIC pLogic2 = ((NNS_MATERIAL_DESC)srcmatptr[index2].pMaterial).pLogic;
-                    if (pLogic1 == pLogic2)
-                    {
-                        if (dstmatptr != null)
-                            nnsMaterialDesc.pLogic = ((NNS_MATERIAL_DESC)dstmatptr[index2].pMaterial).pLogic;
-                        num3 = 0;
-                        break;
-                    }
+                    if (!(srcmatptr[index2].pMaterial is NNS_MATERIAL_DESC prev) || pLogic1 != prev.pLogic)
+                        continue;
+                    if (dstmatptr != null && dstmatptr[index2].pMaterial is NNS_MATERIAL_DESC prevDst)
+                        nnsMaterialDesc.pLogic = prevDst.pLogic;
+                    num3 = 0;
+                    break;
                 }
                 if (num3 != 0 && dstmatptr != null)
                 {
@@ -4573,7 +4564,13 @@ internal partial class AppMain
         {
             if (dstvlist != null)
                 dstvlist[index1].fType = srcvlist[index1].fType;
-            if (((int)srcvlist[index1].fType & 1) != 0)
+            // DXG20 descriptors carry their own GPU buffers, so these are shared rather than copied
+            if (srcvlist[index1].pVtxList is NNS_VTXLIST_DX_DESC)
+            {
+                if (dstvlist != null)
+                    dstvlist[index1].pVtxList = srcvlist[index1].pVtxList;
+            }
+            else if (srcvlist[index1].pVtxList is NNS_VTXLIST_GL_DESC)
             {
                 NNS_VTXLIST_GL_DESC pVtxList = (NNS_VTXLIST_GL_DESC)srcvlist[index1].pVtxList;
                 NNS_VTXLIST_GL_DESC nnsVtxlistGlDesc = null;
@@ -4625,7 +4622,7 @@ internal partial class AppMain
                     Array.Copy(pVtxList.pMatrixIndices, nnsVtxlistGlDesc.pMatrixIndices, pVtxList.nMatrix);
                 }
             }
-            else if (((int)srcvlist[index1].fType & 16711680) != 0)
+            else if (srcvlist[index1].pVtxList is NNS_VTXLIST_COMMON_DESC)
             {
                 NNS_VTXLIST_COMMON_DESC pVtxList = (NNS_VTXLIST_COMMON_DESC)srcvlist[index1].pVtxList;
                 NNS_VTXLIST_COMMON_DESC vtxlistCommonDesc = null;
@@ -4689,9 +4686,13 @@ internal partial class AppMain
         {
             if (dstplist != null)
                 dstplist[index1].fType = srcplist[index1].fType;
-            if (((int)srcplist[index1].fType & 1) != 0)
+            if (srcplist[index1].pPrimList is NNS_PRIMTYPE_DX_STRIPLIST)
             {
-                NNS_PRIMLIST_GL_DESC pPrimList = (NNS_PRIMLIST_GL_DESC)srcplist[index1].pPrimList;
+                if (dstplist != null)
+                    dstplist[index1].pPrimList = srcplist[index1].pPrimList;
+            }
+            else if (srcplist[index1].pPrimList is NNS_PRIMLIST_GL_DESC pPrimList)
+            {
                 NNS_PRIMLIST_GL_DESC nnsPrimlistGlDesc = null;
                 if (dstplist != null)
                 {
@@ -4920,7 +4921,7 @@ internal partial class AppMain
         mppAssertNotImpl();
     }
 
-    private static void nnMakeUnitMatrix(ref SNNS_MATRIX dst)
+    internal static void nnMakeUnitMatrix(ref SNNS_MATRIX dst)
     {
         dst.M00 = 1f;
         dst.M01 = 0.0f;
@@ -4940,7 +4941,7 @@ internal partial class AppMain
         dst.M33 = 1f;
     }
 
-    private static void nnMakeUnitMatrix(NNS_MATRIX dst)
+    internal static void nnMakeUnitMatrix(NNS_MATRIX dst)
     {
         dst.M00 = 1f;
         dst.M01 = 0.0f;
@@ -5335,7 +5336,7 @@ internal partial class AppMain
         mtx.M32 = 0.0f;
         mtx.M33 = 1f;
     }
-    private static void nnCalcMatrixPaletteMotion(
+    public static void nnCalcMatrixPaletteMotion(
      NNS_MATRIX[] mtxpal,
      uint[] nodestatlist,
      NNS_OBJECT obj,
@@ -5543,7 +5544,7 @@ internal partial class AppMain
                 if (nnCalcMotionFrame(out dstframe, fType2, submot.StartKeyFrame, submot.EndKeyFrame, frame) != 0)
                 {
                     if (((int)submot.fType & 30720) != 0)
-                        num2 |= nnCalcMotionRotate(submot, dstframe, ref rv, quat, rtype);
+                        num2 |= nnCalcMotionRotate(submot, dstframe, ref rv, ref quat, rtype);
                     else if (((int)submot.fType & 1792) != 0)
                         num1 |= nnCalcMotionTranslate(submot, dstframe, tv);
                     else if (((int)submot.fType & 229376) != 0)
@@ -5605,11 +5606,12 @@ internal partial class AppMain
         return SubMotIdx;
     }
 
+    // NNS_QUATERNION is a struct, needs ref or the interpolated result gets thrown away
     private static int nnCalcMotionRotate(
       NNS_SUBMOTION submot,
       float frame,
       ref NNS_ROTATE_A32 rv,
-      NNS_QUATERNION rq,
+      ref NNS_QUATERNION rq,
       uint rtype)
     {
         int num1 = 0;
@@ -5630,39 +5632,22 @@ internal partial class AppMain
         switch (num2)
         {
             case 14336:
-                if (num3 == 16U || pKeyList is NNS_MOTION_KEY_Class16[])
+                if (num3 == 16U)
                 {
                     switch (submot.fIPType & 3703U)
                     {
-                        // HACKS TO SUPPORT NNS_MOTION_KEY_Class14 (incorrectly)
                         case 2:
-                            if (pKeyList is NNS_MOTION_KEY_Class16[])
-                            {
-                                nnInterpolateLinearA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
-                                rv.x = val.x;
-                                rv.y = val.y;
-                                rv.z = val.z;
-                            }
-                            if (pKeyList is NNS_MOTION_KEY_Class14[])
-                            {
-                                nnInterpolateLinearA16_1((NNS_MOTION_KEY_Class14[])pKeyList, nKeyFrame, frame, out var x);
-                                rv.x = x;
-                            };
+                            nnInterpolateLinearA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
+                            rv.x = val.x;
+                            rv.y = val.y;
+                            rv.z = val.z;
                             num1 = 1;
                             break;
                         case 4:
-                            if (pKeyList is NNS_MOTION_KEY_Class16[])
-                            {
-                                nnInterpolateConstantA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
-                                rv.x = val.x;
-                                rv.y = val.y;
-                                rv.z = val.z;
-                            }
-                            if (pKeyList is NNS_MOTION_KEY_Class14[])
-                            {
-                                nnInterpolateConstantA16_1((NNS_MOTION_KEY_Class14[])pKeyList, nKeyFrame, frame, out var x);
-                                rv.x = x;
-                            };
+                            nnInterpolateConstantA16_3((NNS_MOTION_KEY_Class16[])pKeyList, nKeyFrame, frame, ref val);
+                            rv.x = val.x;
+                            rv.y = val.y;
+                            rv.z = val.z;
                             num1 = 1;
                             break;
                         case 512:
@@ -6724,7 +6709,7 @@ internal partial class AppMain
         while (nnsNode.iSibling != -1);
     }
 
-    private static void nnCalcMatrixPalette(
+    public static void nnCalcMatrixPalette(
       NNS_MATRIX[] mtxpal,
       uint[] nodestatlist,
       NNS_OBJECT obj,
@@ -6884,48 +6869,47 @@ internal partial class AppMain
                 }
                 if (flag1)
                 {
-                    uint fType = obj.pMatPtrList[index1].fType;
-                    if (((int)fType & 2) != 0)
+                    if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC pStd)
                     {
-                        NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)obj.pMatPtrList[index1].pMaterial;
-                        NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc;
-                        mmobj.pMatPtrList[index1].pMaterial = ((int)fType & 4) == 0 ? (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC(pMaterial)) : (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)pMaterial));
+                        NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc =
+                            pStd is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE stdUserProfile
+                                ? new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE(stdUserProfile)
+                                : new NNS_MATERIAL_STDSHADER_DESC(pStd);
+                        mmobj.pMatPtrList[index1].pMaterial = materialStdshaderDesc;
                         if (flag2)
-                            materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
+                            materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pStd.pColor);
                         if (flag3)
                         {
-                            int nTex = pMaterial.nTex;
+                            int nTex = pStd.nTex;
                             materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[nTex];
                             for (int index2 = 0; index2 < nTex; ++index2)
                             {
-                                materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pMaterial.pTexDesc[index2]);
+                                materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pStd.pTexDesc[index2]);
                                 if (objectBTexOffsetMot[index2])
                                     materialStdshaderDesc.pTexDesc[index2].fType &= 3221225471U;
                             }
                         }
                     }
-                    else if (((int)fType & 8) != 0)
+                    else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC pGles11)
                     {
-                        NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)obj.pMatPtrList[index1].pMaterial;
                         NNS_MATERIAL_GLES11_DESC materialGleS11Desc;
-                        mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pMaterial);
+                        mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pGles11);
                         if (flag2)
-                            materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
+                            materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pGles11.pColor);
                         if (flag3)
                         {
-                            int nTex = pMaterial.nTex;
+                            int nTex = pGles11.nTex;
                             materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[nTex];
                             for (int index2 = 0; index2 < nTex; ++index2)
                             {
-                                materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterial.pTexDesc[index2]);
+                                materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pGles11.pTexDesc[index2]);
                                 if (objectBTexOffsetMot[index2])
                                     materialGleS11Desc.pTexDesc[index2].fType &= 3221225471U;
                             }
                         }
                     }
-                    else if (((int)fType & 1) != 0)
+                    else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC pMaterial)
                     {
-                        NNS_MATERIAL_DESC pMaterial = (NNS_MATERIAL_DESC)obj.pMatPtrList[index1].pMaterial;
                         NNS_MATERIAL_DESC nnsMaterialDesc;
                         mmobj.pMatPtrList[index1].pMaterial = nnsMaterialDesc = new NNS_MATERIAL_DESC(pMaterial);
                         if (flag2)
@@ -6949,30 +6933,29 @@ internal partial class AppMain
         {
             for (int index1 = 0; index1 < nMaterial; ++index1)
             {
-                uint fType = obj.pMatPtrList[index1].fType;
-                if (((int)fType & 2) != 0)
+                if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC pStd)
                 {
-                    NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)obj.pMatPtrList[index1].pMaterial;
-                    NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc;
-                    mmobj.pMatPtrList[index1].pMaterial = ((int)fType & 4) == 0 ? (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC(pMaterial)) : (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)pMaterial));
-                    materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
-                    materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[pMaterial.nTex];
-                    for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
-                        materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pMaterial.pTexDesc[index2]);
+                    NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc =
+                        pStd is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE stdUserProfile
+                            ? new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE(stdUserProfile)
+                            : new NNS_MATERIAL_STDSHADER_DESC(pStd);
+                    mmobj.pMatPtrList[index1].pMaterial = materialStdshaderDesc;
+                    materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pStd.pColor);
+                    materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[pStd.nTex];
+                    for (int index2 = 0; index2 < pStd.nTex; ++index2)
+                        materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pStd.pTexDesc[index2]);
                 }
-                else if (((int)fType & 8) != 0)
+                else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC pGles11)
                 {
-                    NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)obj.pMatPtrList[index1].pMaterial;
                     NNS_MATERIAL_GLES11_DESC materialGleS11Desc;
-                    mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pMaterial);
-                    materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
-                    materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pMaterial.nTex];
-                    for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
-                        materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterial.pTexDesc[index2]);
+                    mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pGles11);
+                    materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pGles11.pColor);
+                    materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pGles11.nTex];
+                    for (int index2 = 0; index2 < pGles11.nTex; ++index2)
+                        materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pGles11.pTexDesc[index2]);
                 }
-                else if (((int)fType & 1) != 0)
+                else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC pMaterial)
                 {
-                    NNS_MATERIAL_DESC pMaterial = (NNS_MATERIAL_DESC)obj.pMatPtrList[index1].pMaterial;
                     NNS_MATERIAL_DESC nnsMaterialDesc;
                     mmobj.pMatPtrList[index1].pMaterial = nnsMaterialDesc = new NNS_MATERIAL_DESC(pMaterial);
                     nnsMaterialDesc.pColor = new NNS_MATERIAL_COLOR(pMaterial.pColor);
@@ -7054,52 +7037,51 @@ internal partial class AppMain
                 }
                 if (flag1)
                 {
-                    uint fType = obj.pMatPtrList[index1].fType;
-                    if (((int)fType & 2) != 0)
+                    if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC pStd)
                     {
-                        NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)obj.pMatPtrList[index1].pMaterial;
-                        NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc;
-                        mmobj.pMatPtrList[index1].pMaterial = ((int)fType & 4) == 0 ? (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC(pMaterial)) : (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)pMaterial));
+                        NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc =
+                            pStd is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE stdUserProfile
+                                ? new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE(stdUserProfile)
+                                : new NNS_MATERIAL_STDSHADER_DESC(pStd);
+                        mmobj.pMatPtrList[index1].pMaterial = materialStdshaderDesc;
                         if (flag2)
-                            materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
+                            materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pStd.pColor);
                         if (flag3)
                         {
-                            int nTex = pMaterial.nTex;
+                            int nTex = pStd.nTex;
                             materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[nTex];
                             for (int index2 = 0; index2 < nTex; ++index2)
                             {
-                                materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pMaterial.pTexDesc[index2]);
+                                materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pStd.pTexDesc[index2]);
                                 if (objectBTexOffsetMot[index2])
                                     materialStdshaderDesc.pTexDesc[index2].fType &= 3221225471U;
                             }
                         }
                     }
-                    else if (((int)fType & 8) != 0)
+                    else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC pGles11)
                     {
-                        NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)obj.pMatPtrList[index1].pMaterial;
                         NNS_MATERIAL_GLES11_DESC materialGleS11Desc;
                         mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = amDrawAlloc_NNS_MATERIAL_GLES11_DESC();
-                        materialGleS11Desc.Assign(pMaterial);
+                        materialGleS11Desc.Assign(pGles11);
                         if (flag2)
                         {
                             materialGleS11Desc.pColor = amDrawAlloc_NNS_MATERIAL_STDSHADER_COLOR();
-                            materialGleS11Desc.pColor.Assign(pMaterial.pColor);
+                            materialGleS11Desc.pColor.Assign(pGles11.pColor);
                         }
                         if (flag3)
                         {
-                            int nTex = pMaterial.nTex;
+                            int nTex = pGles11.nTex;
                             materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[nTex];
                             for (int index2 = 0; index2 < nTex; ++index2)
                             {
-                                materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterial.pTexDesc[index2]);
+                                materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pGles11.pTexDesc[index2]);
                                 if (objectBTexOffsetMot[index2])
                                     materialGleS11Desc.pTexDesc[index2].fType &= 3221225471U;
                             }
                         }
                     }
-                    else if (((int)fType & 1) != 0)
+                    else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC pMaterial)
                     {
-                        NNS_MATERIAL_DESC pMaterial = (NNS_MATERIAL_DESC)obj.pMatPtrList[index1].pMaterial;
                         NNS_MATERIAL_DESC nnsMaterialDesc;
                         mmobj.pMatPtrList[index1].pMaterial = nnsMaterialDesc = new NNS_MATERIAL_DESC(pMaterial);
                         if (flag2)
@@ -7123,30 +7105,29 @@ internal partial class AppMain
         {
             for (int index1 = 0; index1 < nMaterial; ++index1)
             {
-                uint fType = obj.pMatPtrList[index1].fType;
-                if (((int)fType & 2) != 0)
+                if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC pStd)
                 {
-                    NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)obj.pMatPtrList[index1].pMaterial;
-                    NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc;
-                    mmobj.pMatPtrList[index1].pMaterial = ((int)fType & 4) == 0 ? (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC(pMaterial)) : (materialStdshaderDesc = new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE((NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE)pMaterial));
-                    materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
-                    materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[pMaterial.nTex];
-                    for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
-                        materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pMaterial.pTexDesc[index2]);
+                    NNS_MATERIAL_STDSHADER_DESC materialStdshaderDesc =
+                        pStd is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE stdUserProfile
+                            ? new NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE(stdUserProfile)
+                            : new NNS_MATERIAL_STDSHADER_DESC(pStd);
+                    mmobj.pMatPtrList[index1].pMaterial = materialStdshaderDesc;
+                    materialStdshaderDesc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pStd.pColor);
+                    materialStdshaderDesc.pTexDesc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC[pStd.nTex];
+                    for (int index2 = 0; index2 < pStd.nTex; ++index2)
+                        materialStdshaderDesc.pTexDesc[index2] = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC(pStd.pTexDesc[index2]);
                 }
-                else if (((int)fType & 8) != 0)
+                else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC pGles11)
                 {
-                    NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)obj.pMatPtrList[index1].pMaterial;
                     NNS_MATERIAL_GLES11_DESC materialGleS11Desc;
-                    mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pMaterial);
-                    materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pMaterial.pColor);
-                    materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pMaterial.nTex];
-                    for (int index2 = 0; index2 < pMaterial.nTex; ++index2)
-                        materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pMaterial.pTexDesc[index2]);
+                    mmobj.pMatPtrList[index1].pMaterial = materialGleS11Desc = new NNS_MATERIAL_GLES11_DESC(pGles11);
+                    materialGleS11Desc.pColor = new NNS_MATERIAL_STDSHADER_COLOR(pGles11.pColor);
+                    materialGleS11Desc.pTexDesc = new NNS_MATERIAL_GLES11_TEXMAP_DESC[pGles11.nTex];
+                    for (int index2 = 0; index2 < pGles11.nTex; ++index2)
+                        materialGleS11Desc.pTexDesc[index2] = new NNS_MATERIAL_GLES11_TEXMAP_DESC(ref pGles11.pTexDesc[index2]);
                 }
-                else if (((int)fType & 1) != 0)
+                else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC pMaterial)
                 {
-                    NNS_MATERIAL_DESC pMaterial = (NNS_MATERIAL_DESC)obj.pMatPtrList[index1].pMaterial;
                     NNS_MATERIAL_DESC nnsMaterialDesc;
                     mmobj.pMatPtrList[index1].pMaterial = nnsMaterialDesc = new NNS_MATERIAL_DESC(pMaterial);
                     nnsMaterialDesc.pColor = new NNS_MATERIAL_COLOR(pMaterial.pColor);
@@ -7295,8 +7276,8 @@ internal partial class AppMain
             return;
         for (int index1 = 0; index1 < nMaterial; ++index1)
         {
-            uint fType = obj.pMatPtrList[index1].fType;
-            if (((int)fType & 2) != 0)
+            if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC
+                && mmobj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_STDSHADER_DESC)
             {
                 NNS_MATERIAL_STDSHADER_DESC pMaterial1 = (NNS_MATERIAL_STDSHADER_DESC)obj.pMatPtrList[index1].pMaterial;
                 NNS_MATERIAL_STDSHADER_DESC pMaterial2 = (NNS_MATERIAL_STDSHADER_DESC)mmobj.pMatPtrList[index1].pMaterial;
@@ -7327,7 +7308,8 @@ internal partial class AppMain
                     }
                 }
             }
-            else if (((int)fType & 8) != 0)
+            else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC
+                && mmobj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_GLES11_DESC)
             {
                 NNS_MATERIAL_GLES11_DESC pMaterial1 = (NNS_MATERIAL_GLES11_DESC)obj.pMatPtrList[index1].pMaterial;
                 NNS_MATERIAL_GLES11_DESC pMaterial2 = (NNS_MATERIAL_GLES11_DESC)mmobj.pMatPtrList[index1].pMaterial;
@@ -7357,7 +7339,8 @@ internal partial class AppMain
                     }
                 }
             }
-            else if (((int)fType & 1) != 0)
+            else if (obj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC
+                && mmobj.pMatPtrList[index1].pMaterial is NNS_MATERIAL_DESC)
             {
                 NNS_MATERIAL_DESC pMaterial1 = (NNS_MATERIAL_DESC)obj.pMatPtrList[index1].pMaterial;
                 NNS_MATERIAL_DESC pMaterial2 = (NNS_MATERIAL_DESC)mmobj.pMatPtrList[index1].pMaterial;
@@ -7394,8 +7377,8 @@ internal partial class AppMain
         int nSubmotion = mmot.nSubmotion;
         for (int index = 0; index < nMaterial; ++index)
         {
-            uint fType = obj.pMatPtrList[index].fType;
-            if (((int)fType & 2) != 0)
+            // interpolators write into the clone, so dispatch on its type, not the source material's
+            if (mmobj.pMatPtrList[index].pMaterial is NNS_MATERIAL_STDSHADER_DESC)
             {
                 NNS_MATERIAL_STDSHADER_DESC pMaterial = (NNS_MATERIAL_STDSHADER_DESC)mmobj.pMatPtrList[index].pMaterial;
                 NNS_MATERIAL_STDSHADER_COLOR pColor = pMaterial.pColor;
@@ -7478,7 +7461,7 @@ internal partial class AppMain
                     ++pSubmotion;
                 }
             }
-            else if (((int)fType & 8) != 0)
+            else if (mmobj.pMatPtrList[index].pMaterial is NNS_MATERIAL_GLES11_DESC)
             {
                 NNS_MATERIAL_GLES11_DESC pMaterial = (NNS_MATERIAL_GLES11_DESC)mmobj.pMatPtrList[index].pMaterial;
                 NNS_MATERIAL_STDSHADER_COLOR pColor = pMaterial.pColor;
@@ -7558,7 +7541,7 @@ internal partial class AppMain
                     ++pSubmotion;
                 }
             }
-            else if (((int)fType & 1) != 0)
+            else if (mmobj.pMatPtrList[index].pMaterial is NNS_MATERIAL_DESC)
             {
                 NNS_MATERIAL_DESC pMaterial = (NNS_MATERIAL_DESC)mmobj.pMatPtrList[index].pMaterial;
                 NNS_MATERIAL_COLOR pColor = pMaterial.pColor;

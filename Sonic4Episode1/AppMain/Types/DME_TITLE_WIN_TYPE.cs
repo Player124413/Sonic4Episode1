@@ -1,6 +1,6 @@
 internal partial class AppMain
 {
-    private enum DME_TITLE_WIN_TYPE
+    internal enum DME_TITLE_WIN_TYPE
     {
         DME_TITLE_WIN_TYPE_DEL_DATA1,
         DME_TITLE_WIN_TYPE_DEL_DATA2,

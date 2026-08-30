@@ -1,0 +1,44 @@
+<Project>
+
+  <!-- points a head project at one profile's built content tree. Does NOT run the build, that's
+       the explicit `s4content build <profile>` step; this just consumes the result and fails
+       readably when it's missing. Set ContentProfile before importing; SkipContentCopy=true
+       iterates against whatever is already in the output directory -->
+
+  <PropertyGroup>
+    <ContentProfile Condition="'$(ContentProfile)' == ''">mobile-hd</ContentProfile>
+    <ContentBuildRoot Condition="'$(ContentBuildRoot)' == ''">$(MSBuildThisFileDirectory)Content.Build\</ContentBuildRoot>
+    <ContentDir>$(ContentBuildRoot)$(ContentProfile)\</ContentDir>
+    <ContentItemType Condition="'$(ContentItemType)' == ''">Content</ContentItemType>
+  </PropertyGroup>
+
+  <Target Name="VerifyContentProfile" BeforeTargets="BeforeBuild" Condition="'$(SkipContentCopy)' != 'true'">
+    <Error Condition="!Exists('$(ContentDir)')"
+           Text="Content profile '$(ContentProfile)' has not been built. Run: dotnet run --project Sonic4Episode1.Content -- build $(ContentProfile)&#xA;Expected at $(ContentDir)" />
+  </Target>
+
+  <!-- copying never removes, so a hand-assembled output directory ends up a union of the profile
+       and whatever was already there, a correctness hazard, not just untidiness. Opt in with
+       CleanContentBeforeCopy=true; off by default since the pipeline shouldn't delete a directory
+       it didn't create -->
+  <Target Name="CleanStaleContent"
+          BeforeTargets="CollectContent"
+          Condition="'$(CleanContentBeforeCopy)' == 'true' AND '$(SkipContentCopy)' != 'true'">
+    <RemoveDir Directories="$(OutputPath)Content" />
+  </Target>
+
+  <!-- globbed inside a target, same reason as Shaders.targets: a plain ItemGroup would silently
+       bind to nothing on a clean checkout and stay bound -->
+  <Target Name="CollectContent"
+          DependsOnTargets="VerifyContentProfile"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(SkipContentCopy)' != 'true' AND '$(ContentItemType)' == 'Content'">
+    <ItemGroup>
+      <ContentFile Include="$(ContentDir)**\*.*" />
+      <Content Include="@(ContentFile)"
+               Link="Content\%(ContentFile.RecursiveDir)%(ContentFile.Filename)%(ContentFile.Extension)"
+               CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
+</Project>

@@ -1,6 +1,6 @@
 internal partial class AppMain
 {
-    private enum DME_TITLE_DATA_TYPE
+    internal enum DME_TITLE_DATA_TYPE
     {
         DME_TITLE_DATA_TYPE_CMN_DATA,
         DME_TITLE_DATA_TYPE_LANG_DATA,

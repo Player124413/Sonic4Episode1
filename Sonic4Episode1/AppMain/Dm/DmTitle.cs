@@ -6,7 +6,9 @@ using gs.backup;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.GamerServices;
 
-internal partial class AppMain
+using static AppMain;
+
+internal static class DmTitle
 {
     public const int DMD_TITLE_TASK_PAUSELEVEL = 0;
     public const int DMD_TITLE_TASK_PRIO_MAIN = 8192;
@@ -142,22 +144,7 @@ internal partial class AppMain
     const int IDA_D_TITLE_JP_ACT_TEX_START_PC = 16; // tex_start
     const int IDA_D_TITLE_JP_ACT_TEX_WIN_MSG3_PC = 17; // tex_win_msg3
 
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_PC = 0; // tex_back
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC = 1; // tex_ok
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_YES_PC = 2; // tex_yes
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_NO_PC = 3; // tex_no
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_WINTITLE_PC = 4; // tex_wintitle
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_STGSLCT_PC = 5; // tex_back_stgslct
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_OPT_PC = 6; // tex_back_opt
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_RANK_PC = 7; // tex_back_rank
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG01_PC = 8; // tex_msg01
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG02_PC = 9; // tex_msg02
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG03_PC = 10; // tex_msg03
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG04_PC = 11; // tex_msg04
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG05_PC = 12; // tex_msg05
-    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_FILESLCT_PC = 13; // tex_back_fileslct
-
-    const int IDA_D_CMN_WIN_ACT_WIN_LINE = 0;
+    const int IDA_D_CMN_WIN_ACT_WIN_LINE = IDA_D_CMN_WIN_ACT_WIN_LINE_PC;
 
     const int IDA_D_TITLE_ACT_CURSOR_PC = 0;
 
@@ -176,12 +163,15 @@ internal partial class AppMain
         "DEMO/TITLE/D_TITLE_CN.AMB",
         "DEMO/TITLE/D_TITLE_HK.AMB"
     };
+    public const string DMD_TITLE_DATA_FILENAME = "DEMO/TITLE/D_TITLE.AMB";
+
     private static readonly string[] dm_title_menu_cmn_amb_name_tbl = new string[]
     {
         g_dm_buy_screen_btn_amb_path,
         "DEMO/CMN/D_CMN_OBI.AMB",
         DMD_MANUAL_CMN_DATA_FILENAME
     };
+
     private static readonly string[] dm_title_menu_cmn_lng_amb_name_tbl = new string[]
     {
         "DEMO/CMN/D_CMN_MSG_JP.AMB",
@@ -195,36 +185,6 @@ internal partial class AppMain
         "DEMO/CMN/D_CMN_MSG_RU.AMB",
         "DEMO/CMN/D_CMN_MSG_CN.AMB",
         "DEMO/CMN/D_CMN_MSG_CN.AMB"
-    };
-
-    private static readonly string[] dm_title_file_lng_amb_name_tbl_pc = new string[]
-    {
-        "DEMO/TITLE/PC/D_TITLE_JP.AMB",
-        "DEMO/TITLE/PC/D_TITLE_US.AMB",
-        "DEMO/TITLE/PC/D_TITLE_FR.AMB",
-        "DEMO/TITLE/PC/D_TITLE_IT.AMB",
-        "DEMO/TITLE/PC/D_TITLE_GE.AMB",
-        "DEMO/TITLE/PC/D_TITLE_SP.AMB",
-        "DEMO/TITLE/PC/D_TITLE_FI.AMB",
-        "DEMO/TITLE/PC/D_TITLE_PT.AMB",
-        "DEMO/TITLE/PC/D_TITLE_RU.AMB",
-        "DEMO/TITLE/PC/D_TITLE_CN.AMB",
-        "DEMO/TITLE/PC/D_TITLE_HK.AMB"
-    };
-
-    private static readonly string[] dm_title_menu_cmn_lng_amb_name_tbl_pc = new string[]
-    {
-        "DEMO/CMN/PC/D_CMN_MSG_JP.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_US.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_FR.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_IT.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_GE.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_SP.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_FI.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_PT.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_RU.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_CN.AMB",
-        "DEMO/CMN/PC/D_CMN_MSG_CN.AMB"
     };
 
     private static readonly float[] dm_title_crsr_pos_y_tbl = new float[]
@@ -261,6 +221,55 @@ internal partial class AppMain
 	    {DMD_TITLE_SIZE_HALF_WIDTH - 88.0f, 420.0f},	// YES
 	    {DMD_TITLE_SIZE_HALF_WIDTH + 88.0f, 420.0f},	// NO
     };
+
+    // slot < 0 is main_work.ama[-slot - 1], the title archives; slot >= 0 is main_work.cmn_ama[slot]
+    private const int AMA_TITLE_CMN = -1 - (int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_CMN_DATA;
+    private const int AMA_TITLE_LNG = -1 - (int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_LANG_DATA;
+    private const int AMA_CMN_BTN = 0;   // DEMO/CMN/D_CMN_BTN.AMB
+    private const int AMA_CMN_WIN = 2;   // DEMO/CMN/D_CMN_WIN.AMB
+    private const int AMA_CMN_MSG = 3;   // DEMO/CMN/D_CMN_MSG_XX.AMB
+
+    private static readonly int[] dm_title_act_slot_tbl_iphone = BuildSlots(
+        (AMA_TITLE_CMN, (int)DME_TITLE_ACT.ACT_LANG),
+        (AMA_TITLE_LNG, (int)DME_TITLE_ACT.ACT_BTN_CANCEL),
+        (AMA_CMN_BTN, (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_L),
+        (AMA_CMN_WIN, (int)DME_TITLE_ACT.ACT_TEX_YES),
+        (AMA_CMN_MSG, (int)DME_TITLE_ACT.ACT_NUM));
+
+    private static readonly int[] dm_title_act_slot_tbl_pc = BuildSlots(
+        (AMA_TITLE_CMN, (int)DME_TITLE_ACT_REG.ACT_TEX_START),
+        (AMA_TITLE_LNG, (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL),
+        (AMA_CMN_BTN, (int)DME_TITLE_ACT_REG.ACT_WIN_LINE),
+        (AMA_CMN_WIN, (int)DME_TITLE_ACT_REG.ACT_TEX_WINTITLE),
+        (AMA_CMN_MSG, (int)DME_TITLE_ACT_REG.ACT_NUM));
+
+    // the archive path is the same either way, amFsResolve decides which build's data lands there.
+    // these tables describe that data, so they stay paired. picked once and not asked about again.
+    internal sealed class DMS_TITLE_VARIANT
+    {
+        public uint[] act_id_tbl;
+        public int[] act_slot_tbl;
+        public float[,] win_act_pos_tbl;
+        public DMS_TITLE_MAIN_WORK._proc_ proc_win_input;
+    }
+
+    private static DMS_TITLE_VARIANT dm_title_variant;
+
+    // (slot, end) runs, each covering up to but not including `end`
+    private static int[] BuildSlots(params (int Slot, int End)[] runs)
+    {
+        var slots = new int[runs[runs.Length - 1].End];
+        var start = 0;
+        foreach (var run in runs)
+        {
+            for (int i = start; i < run.End; i++)
+                slots[i] = run.Slot;
+
+            start = run.End;
+        }
+
+        return slots;
+    }
 
     public static readonly uint[] dm_title_g_dm_act_id_tbl_iphone = new uint[]
     {
@@ -334,42 +343,76 @@ internal partial class AppMain
         IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC
     };
 
+    // must stay below every table it references, static field initialisers run in textual order
+    private static readonly DMS_TITLE_VARIANT dm_title_variant_iphone = new DMS_TITLE_VARIANT
+    {
+        act_id_tbl = dm_title_g_dm_act_id_tbl_iphone,
+        act_slot_tbl = dm_title_act_slot_tbl_iphone,
+        win_act_pos_tbl = dm_title_win_act_pos_tbl_iphone,
+        proc_win_input = dmTitleInputProcWindowIphone,
+    };
+
+    private static readonly DMS_TITLE_VARIANT dm_title_variant_pc = new DMS_TITLE_VARIANT
+    {
+        act_id_tbl = dm_title_g_dm_act_id_tbl_pc,
+        act_slot_tbl = dm_title_act_slot_tbl_pc,
+        win_act_pos_tbl = dm_title_win_act_pos_tbl_pc,
+        proc_win_input = dmTitleInputProcWindowPc,
+    };
+
+    internal static DMS_TITLE_VARIANT TitleVariantForTest(bool iphone)
+    {
+        return iphone ? dm_title_variant_iphone : dm_title_variant_pc;
+    }
+
     private static bool dm_title_is_title_start = false;
 
-    private void DmTitleStart(object arg)
+    public static void DmTitleStart(object arg)
     {
         dm_title_is_title_start = true;
         int oldEvtId = SyGetEvtInfo().old_evt_id;
         if (dm_title_is_title_start)
             SSave.CreateInstance().Init();
-        this.dmTitleInit();
+        dmTitleInit();
     }
 
-    private void DmMainMenuStart(object arg)
+    public static void DmMainMenuStart(object arg)
     {
         dm_title_is_title_start = false;
-        this.dmTitleInit();
+        dmTitleInit();
     }
 
-    private void dmTitleInit()
+    private static void dmTitleInit()
     {
         // GC.Collect();
         AoActSysSetDrawStateEnable(true);
         AoActSysSetDrawState(10U);
-        var work = (DMS_TITLE_MAIN_WORK)MTM_TASK_MAKE_TCB(this.dmTitleProcMain, this.dmTitleDest, 0U, 0, 8192U, 10, () => new DMS_TITLE_MAIN_WORK(), "TITLE_MAIN").work;
-        this.dmTitleSetInitDispData(work);
+        var work = (DMS_TITLE_MAIN_WORK)MTM_TASK_MAKE_TCB(dmTitleProcMain, dmTitleDest, 0U, 0, 8192U, 10, () => new DMS_TITLE_MAIN_WORK(), "TITLE_MAIN").work;
+        dmTitleSetInitDispData(work);
         if (dm_title_is_title_start)
             AoAccountClearCurrentId();
         work.is_jp_region = GeEnvGetDecideKey() == GSE_DECIDE_KEY.GSD_DECIDE_KEY_O;
-        work.proc_update = this.dmTitleLoadFontData;
-#if IOS || ANDROID
-        work.iphone_menus = true;
-#else
-        work.iphone_menus = false;
-#endif
+        work.proc_update = dmTitleLoadFontData;
+        work.iphone_menus = !dmTitleIsConsoleDataComplete();
+        dm_title_variant = work.iphone_menus ? dm_title_variant_iphone : dm_title_variant_pc;
     }
 
-    private void dmTitleSetInitDispData(DMS_TITLE_MAIN_WORK main_work)
+    // five of the eleven languages have no console archive, so this is not always true on desktop
+    private static bool dmTitleIsConsoleDataComplete()
+    {
+        var lng = GsEnvGetLanguage();
+
+        return amFsAllVariant(
+            AMD_FS_VARIANT_CONSOLE,
+            DMD_TITLE_DATA_FILENAME,
+            dm_title_file_lng_amb_name_tbl[lng],
+            dm_title_menu_cmn_lng_amb_name_tbl[lng],
+            dm_title_menu_cmn_amb_name_tbl[0],
+            dm_title_menu_cmn_amb_name_tbl[1],
+            dm_title_menu_cmn_amb_name_tbl[2]);
+    }
+
+    private static void dmTitleSetInitDispData(DMS_TITLE_MAIN_WORK main_work)
     {
         var tmp_prev_evt = (GSE_EVT_ID)SyGetEvtInfo().old_evt_id;
 
@@ -423,14 +466,14 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleProcMain(MTS_TASK_TCB tcb)
+    private static void dmTitleProcMain(MTS_TASK_TCB tcb)
     {
         DMS_TITLE_MAIN_WORK work = (DMS_TITLE_MAIN_WORK)tcb.work;
         work.flag_prev = work.flag;
         if (((int)work.flag & 1) != 0)
         {
             mtTaskClearTcb(tcb);
-            this.dmTitleSetNextEvent(work);
+            dmTitleSetNextEvent(work);
         }
 
         if (((int)work.flag & int.MinValue) != 0 && event_after_buy)
@@ -438,7 +481,7 @@ internal partial class AppMain
             work.is_init_play = true;
             work.is_no_save_data = true;
             event_after_buy = false;
-            work.proc_update = (this.dmTitleProcFadeOut);
+            work.proc_update = (dmTitleProcFadeOut);
             work.flag &= int.MaxValue;
             work.flag |= 1073741824U;
             IzFadeInitEasy(1U, 1U, 32f);
@@ -462,12 +505,12 @@ internal partial class AppMain
         work.proc_draw(work);
     }
 
-    private void dmTitleDest(MTS_TASK_TCB tcb)
+    private static void dmTitleDest(MTS_TASK_TCB tcb)
     {
         UNREFERENCED_PARAMETER(tcb);
     }
 
-    private void dmTitleSetNextEvent(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetNextEvent(DMS_TITLE_MAIN_WORK main_work)
     {
         short evt_case1 = 0;
         if (((int)main_work.flag & 1073741824) != 0)
@@ -490,7 +533,7 @@ internal partial class AppMain
             {
                 case 0:
                     evt_case1 = 0;
-                    this.dmTitleSetFirstPlayData(main_work);
+                    dmTitleSetFirstPlayData(main_work);
                     nextDemoLevel = 0;
                     g_gs_main_sys_info.stage_id = 0;
                     g_gs_main_sys_info.char_id[0] = 0;
@@ -535,40 +578,33 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleLoadFontData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleLoadFontData(DMS_TITLE_MAIN_WORK main_work)
     {
         GsFontBuild();
-        main_work.proc_update = (this.dmTitleIsLoadFontData);
+        main_work.proc_update = (dmTitleIsLoadFontData);
     }
 
-    private void dmTitleIsLoadFontData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleIsLoadFontData(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!GsFontIsBuilded())
             return;
-        main_work.proc_update = (this.dmTitleLoadRequest);
+        main_work.proc_update = (dmTitleLoadRequest);
     }
 
-    private void dmTitleLoadRequest(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleLoadRequest(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (main_work.iphone_menus)
-        {
-            main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/TITLE/D_TITLE.AMB");
-        }
-        else
-        {
-            main_work.arc_amb_fs[0] = amFsReadBackground("DEMO/TITLE/PC/D_TITLE.AMB");
-        }
-        main_work.arc_amb_fs[1] = amFsReadBackground((main_work.iphone_menus ? dm_title_file_lng_amb_name_tbl : dm_title_file_lng_amb_name_tbl_pc)[GsEnvGetLanguage()]);
+        main_work.arc_amb_fs[0] = amFsReadBackground(DMD_TITLE_DATA_FILENAME);
+        main_work.arc_amb_fs[1] = amFsReadBackground(dm_title_file_lng_amb_name_tbl[GsEnvGetLanguage()]);
         for (int index = 0; index < 3; ++index)
             main_work.arc_cmn_amb_fs[index] = amFsReadBackground(dm_title_menu_cmn_amb_name_tbl[index]);
-        main_work.arc_cmn_amb_fs[3] = amFsReadBackground((main_work.iphone_menus ? dm_title_menu_cmn_lng_amb_name_tbl : dm_title_menu_cmn_lng_amb_name_tbl_pc)[GsEnvGetLanguage()]);
-        this.DmTitleOpLoad();
-        main_work.proc_update = (this.dmTitleProcLoadWait);
+        main_work.arc_cmn_amb_fs[3] = amFsReadBackground(dm_title_menu_cmn_lng_amb_name_tbl[GsEnvGetLanguage()]);
+        DmTitleOp.DmTitleOpLoad();
+        main_work.proc_update = (dmTitleProcLoadWait);
     }
 
-    private void dmTitleProcLoadWait(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcLoadWait(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (!this.dmTitleIsDataLoad(main_work))
+        if (!dmTitleIsDataLoad(main_work))
             return;
 
         for (int index1 = 0; index1 < 2; ++index1)
@@ -599,55 +635,35 @@ internal partial class AppMain
             AoTexLoad(main_work.cmn_tex[index]);
         }
 
-        this.DmTitleOpBuild();
+        DmTitleOp.DmTitleOpBuild();
         DmSndBgmPlayerInit();
-        main_work.proc_update = (this.dmTitleProcTexBuildWait);
+        main_work.proc_update = (dmTitleProcTexBuildWait);
     }
 
-    void dmTitleProcTexBuildWait(DMS_TITLE_MAIN_WORK main_work)
+    static void dmTitleProcTexBuildWait(DMS_TITLE_MAIN_WORK main_work)
     {
-        var dm_title_g_dm_act_id_tbl = main_work.iphone_menus ? dm_title_g_dm_act_id_tbl_iphone : dm_title_g_dm_act_id_tbl_pc;
+        var dm_title_g_dm_act_id_tbl = dm_title_variant.act_id_tbl;
         // テクスチャ構築完了判定
         if (dmTitleIsTexLoad(main_work)
             && DmSndBgmPlayerIsSndSysBuild())
         {
-            int ACT_NUM = main_work.iphone_menus ? (int)dm_title_g_dm_act_id_tbl_iphone.Length : (int)DME_TITLE_ACT_REG.ACT_NUM;
+            var slots = dm_title_variant.act_slot_tbl;
 
-            for (int i = 0; i < ACT_NUM; i++)
+            for (int i = 0; i < slots.Length; i++)
             {
-                A2S_AMA_HEADER ama = null;
-                AOS_TEXTURE tex = null;
+                A2S_AMA_HEADER ama;
+                AOS_TEXTURE tex;
 
-                int ACT_TEX_WINTITLE = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_YES : (int)DME_TITLE_ACT_REG.ACT_TEX_WINTITLE;
-                int ACT_WIN_LINE = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_L : (int)DME_TITLE_ACT_REG.ACT_WIN_LINE;
-                int ACT_BTN_CANCEL = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_BTN_CANCEL : (int)DME_TITLE_ACT_REG.ACT_BTN_CANCEL;
-                int ACT_LANG = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_LANG : (int)DME_TITLE_ACT_REG.ACT_LANG;
-
-                if (i >= ACT_TEX_WINTITLE)
+                if (slots[i] < 0)
                 {
-                    ama = main_work.cmn_ama[3];
-                    tex = main_work.cmn_tex[3];
-                }
-                else if (i >= ACT_WIN_LINE)
-                {
-                    ama = main_work.cmn_ama[2];
-                    tex = main_work.cmn_tex[2];
-                }
-                else if (i >= ACT_BTN_CANCEL)
-                {
-                    ama = main_work.cmn_ama[0];
-                    tex = main_work.cmn_tex[0];
-                }
-
-                else if (i < ACT_LANG)
-                {
-                    ama = main_work.ama[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_CMN_DATA];
-                    tex = main_work.tex[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_CMN_DATA];
+                    var index = -slots[i] - 1;
+                    ama = main_work.ama[index];
+                    tex = main_work.tex[index];
                 }
                 else
                 {
-                    ama = main_work.ama[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_LANG_DATA];
-                    tex = main_work.tex[(int)DME_TITLE_DATA_TYPE.DME_TITLE_DATA_TYPE_LANG_DATA];
+                    ama = main_work.cmn_ama[slots[i]];
+                    tex = main_work.cmn_tex[slots[i]];
                 }
 
                 // 構築
@@ -686,7 +702,7 @@ internal partial class AppMain
 
             main_work.proc_update = dmTitleProcCheckLoadingEnd;
 
-            DmTitleOpInit();
+            DmTitleOp.DmTitleOpInit();
 
             // オープニング側の初期化内にObjInitがあり、そこでSTATE上書きされるので、再度設定
             AoActSysSetDrawState(DMD_TITLE_DRAW_STATE_ID);
@@ -695,16 +711,16 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleProcCheckLoadingEnd(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcCheckLoadingEnd(DMS_TITLE_MAIN_WORK main_work)
     {
         if (dm_title_is_title_start)
         {
             main_work.disp_change_time = 40;
             main_work.flag |= 8U;
-            main_work.proc_update = (this.dmTitleProcFadeIn);
-            main_work.proc_draw = (this.dmTitleDrawSetProcDispData);
+            main_work.proc_update = (dmTitleProcFadeIn);
+            main_work.proc_draw = (dmTitleDrawSetProcDispData);
             main_work.flag |= 512U;
-            this.DmTitleOpDispRightEnable(true);
+            DmTitleOp.DmTitleOpDispRightEnable(true);
             for (int index = 0; index < 2; ++index)
                 main_work.mmenu_win_size_rate[index] = 0.0f;
             IzFadeInitEasy(1U, 0U, 32f);
@@ -712,19 +728,19 @@ internal partial class AppMain
         }
         else
         {
-            main_work.proc_update = (this.dmTitleProcFadeIn);
-            this.dmTitleSetMenuInfo(main_work);
-            this.DmTitleOpSetRetOptionState();
-            main_work.proc_draw = (this.dmTitleDrawSetProcDispData);
+            main_work.proc_update = (dmTitleProcFadeIn);
+            dmTitleSetMenuInfo(main_work);
+            DmTitleOp.DmTitleOpSetRetOptionState();
+            main_work.proc_draw = (dmTitleDrawSetProcDispData);
             main_work.flag |= 1024U;
             main_work.flag |= 2097152U;
-            this.DmTitleOpDispRightEnable(false);
+            DmTitleOp.DmTitleOpDispRightEnable(false);
             for (int index = 0; index < 2; ++index)
                 main_work.mmenu_win_size_rate[index] = 1f;
         }
     }
 
-    private void dmTitleProcFadeIn(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFadeIn(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!IzFadeIsEnd())
             return;
@@ -732,27 +748,27 @@ internal partial class AppMain
         AoPresenceSet(AO_PRESENCE_STAGE_ID_TITLE, false);
         if (dm_title_is_title_start)
         {
-            main_work.proc_update = (this.dmTitleProcWaitInput);
-            main_work.proc_input = (this.dmTitleInputProcTitle);
+            main_work.proc_update = (dmTitleProcWaitInput);
+            main_work.proc_input = (dmTitleInputProcTitle);
             DmSndBgmPlayerPlayBgm(1);
         }
         else
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-            main_work.proc_input = (this.dmTitleInputProcMainMenu);
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
             main_work.flag |= 2147483648U;
             DmSndBgmPlayerPlayBgm(0);
         }
 
-        main_work.proc_win_update = (this.dmTitleProcWindowNodispIdle);
+        main_work.proc_win_update = (dmTitleProcWindowNodispIdle);
     }
 
-    private void dmTitleProcWaitInput(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWaitInput(DMS_TITLE_MAIN_WORK main_work)
     {
         ++main_work.timer;
         if (main_work.timer > 3600.0)
         {
-            main_work.proc_update = (this.dmTitleProcFadeOut);
+            main_work.proc_update = (dmTitleProcFadeOut);
             main_work.proc_input = null;
             main_work.timer = 0.0f;
             main_work.flag |= 1048576U;
@@ -766,7 +782,7 @@ internal partial class AppMain
                 main_work.proc_input(main_work);
             if (((int)main_work.flag & 32) == 0)
                 return;
-            main_work.proc_update = (this.dmTitleProcDecideEfct);
+            main_work.proc_update = (dmTitleProcDecideEfct);
             main_work.proc_input = null;
             main_work.timer = 0.0f;
             main_work.flag &= 4294967263U;
@@ -775,20 +791,20 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleProcDecideEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcDecideEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.timer >= 60.0 && AoAccountSetCurrentIdIsFinished())
         {
             if (AoAccountGetCurrentId() >= 0)
             {
                 main_work.flag &= 4294966783U;
-                main_work.proc_update = (this.dmTitleProcCheckTrialIdle);
+                main_work.proc_update = (dmTitleProcCheckTrialIdle);
                 GsRebootSetTitle();
             }
             else
             {
-                main_work.proc_update = (this.dmTitleProcWaitInput);
-                main_work.proc_input = (this.dmTitleInputProcTitle);
+                main_work.proc_update = (dmTitleProcWaitInput);
+                main_work.proc_input = (dmTitleInputProcTitle);
                 DmSndBgmPlayerPlayBgm(1);
             }
 
@@ -798,13 +814,13 @@ internal partial class AppMain
             ++main_work.timer;
     }
 
-    private void dmTitleProcCheckTrialIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcCheckTrialIdle(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!GsTrialCheckIsFinished())
             return;
         if (GsTrialIsTrial())
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuOpenWin);
+            main_work.proc_update = (dmTitleProcMainMenuOpenWin);
             main_work.proc_input = null;
             main_work.flag |= 2147483648U;
             main_work.flag |= 4096U;
@@ -818,18 +834,18 @@ internal partial class AppMain
         else
         {
             DmSaveStart(1U, false, false);
-            main_work.proc_update = (this.dmTitleProcFileSlctWaitDataLoad);
+            main_work.proc_update = (dmTitleProcFileSlctWaitDataLoad);
             DmSndBgmPlayerPlayBgm(0);
         }
     }
 
-    private void dmTitleProcFileSlctWaitDataLoad(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFileSlctWaitDataLoad(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!DmSaveIsExit())
             return;
         if (DmCmnBackupIsLoadSuccessed())
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuOpenWin);
+            main_work.proc_update = (dmTitleProcMainMenuOpenWin);
             main_work.proc_input = null;
             main_work.flag |= 2147483648U;
             main_work.flag |= 4096U;
@@ -851,7 +867,7 @@ internal partial class AppMain
             main_work.cur_crsr_pos_y = !GsTrialIsTrial()
                 ? main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1] + dm_title_crsr_pos_y_tbl[0]
                 : dm_title_crsr_trial_pos_y_tbl[main_work.cur_slct_menu];
-            this.dmTitleSetLoadSysData(main_work);
+            dmTitleSetLoadSysData(main_work);
         }
         else
         {
@@ -860,37 +876,37 @@ internal partial class AppMain
             main_work.slct_menu_num = 3;
             if (error == 1)
             {
-                main_work.proc_update = (this.dmTitleProcFileSlctSaveStartWait);
+                main_work.proc_update = (dmTitleProcFileSlctSaveStartWait);
             }
             else
             {
-                main_work.proc_update = (this.dmTitleProcMainMenuOpenWin);
+                main_work.proc_update = (dmTitleProcMainMenuOpenWin);
                 main_work.proc_input = null;
                 main_work.flag |= 2147483648U;
                 main_work.flag |= 4096U;
                 main_work.flag |= 2097152U;
-                this.dmTitleSetInitSaveData(main_work);
-                this.dmTitleSetInitSysData(main_work);
+                dmTitleSetInitSaveData(main_work);
+                dmTitleSetInitSysData(main_work);
             }
         }
     }
 
-    private void dmTitleProcFileSlctSaveStartWait(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFileSlctSaveStartWait(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!DmSaveIsExit())
             return;
         DmSaveStart(4U, true, false);
-        main_work.proc_update = (this.dmTitleProcFileSlctWaitDataSave);
+        main_work.proc_update = (dmTitleProcFileSlctWaitDataSave);
     }
 
-    private void dmTitleProcFileSlctWaitDataSave(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFileSlctWaitDataSave(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!DmSaveIsExit())
             return;
         if (!DmCmnBackupIsSaveSuccessed())
         {
-            main_work.proc_update = (this.dmTitleProcWaitInput);
-            main_work.proc_input = (this.dmTitleInputProcTitle);
+            main_work.proc_update = (dmTitleProcWaitInput);
+            main_work.proc_input = (dmTitleInputProcTitle);
             main_work.flag |= 512U;
             main_work.flag &= 4294966271U;
             main_work.flag &= int.MaxValue;
@@ -901,25 +917,25 @@ internal partial class AppMain
         {
             SSave.CreateInstance().Init();
             main_work.is_init_play = true;
-            this.dmTitleSetInitSysData(main_work);
-            main_work.proc_update = (this.dmTitleProcMainMenuOpenWin);
+            dmTitleSetInitSysData(main_work);
+            main_work.proc_update = (dmTitleProcMainMenuOpenWin);
             main_work.proc_input = null;
             main_work.flag |= 2147483648U;
             main_work.flag |= 2097152U;
         }
     }
 
-    private void dmTitleProcMainMenuOpenWin(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuOpenWin(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 4194304) != 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-            main_work.proc_input = (this.dmTitleInputProcMainMenu);
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
             main_work.mmenu_win_timer = 0.0f;
             main_work.flag |= 1024U;
             main_work.flag &= 4294966783U;
             main_work.flag &= 4290772991U;
-            this.DmTitleOpDispRightEnable(false);
+            DmTitleOp.DmTitleOpDispRightEnable(false);
             main_work.cur_slct_menu = GsTrialIsTrial() || main_work.is_init_play ? 0 : 1;
             main_work.cur_crsr_pos_y = !GsTrialIsTrial()
                 ? main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1] + dm_title_crsr_pos_y_tbl[0]
@@ -927,32 +943,32 @@ internal partial class AppMain
             SaveState.showResumeWarning();
         }
         else
-            this.dmTitleSetMMenuWinOpenEfct(main_work);
+            dmTitleSetMMenuWinOpenEfct(main_work);
     }
 
-    private void dmTitleProcMainMenuCloseWin(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuCloseWin(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 4194304) != 0)
         {
             AoAccountClearCurrentId();
             SSave.CreateInstance().Init();
             main_work.flag &= int.MaxValue;
-            main_work.proc_update = (this.dmTitleProcWaitInput);
-            main_work.proc_input = (this.dmTitleInputProcTitle);
+            main_work.proc_update = (dmTitleProcWaitInput);
+            main_work.proc_input = (dmTitleInputProcTitle);
             main_work.flag |= 512U;
             main_work.flag &= 4294966271U;
             main_work.flag &= 4292870143U;
-            this.DmTitleOpDispRightEnable(true);
+            DmTitleOp.DmTitleOpDispRightEnable(true);
             DmSndBgmPlayerPlayBgm(1);
             main_work.mmenu_win_timer = 0.0f;
             main_work.flag &= 4292870143U;
             main_work.flag &= 4290772991U;
         }
         else
-            this.dmTitleSetMMenuWinCloseEfct(main_work);
+            dmTitleSetMMenuWinCloseEfct(main_work);
     }
 
-    private void dmTitleProcMainMenuIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuIdle(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.proc_input != null)
             main_work.proc_input(main_work);
@@ -964,7 +980,7 @@ internal partial class AppMain
 
         if (((int)main_work.flag & 2) != 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuCloseWin);
+            main_work.proc_update = (dmTitleProcMainMenuCloseWin);
             main_work.proc_input = null;
             main_work.mmenu_win_timer = 8f;
             main_work.flag &= 4294966271U;
@@ -974,7 +990,7 @@ internal partial class AppMain
         }
         else if (((int)main_work.flag & 4) != 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuDecideEfct);
+            main_work.proc_update = (dmTitleProcMainMenuDecideEfct);
             main_work.proc_input = null;
             main_work.timer = 0.0f;
             main_work.flag &= 4294967293U;
@@ -983,7 +999,7 @@ internal partial class AppMain
         }
         else if (((int)main_work.flag & 2048) != 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuCompBuyIdle);
+            main_work.proc_update = (dmTitleProcMainMenuCompBuyIdle);
             main_work.proc_input = null;
             main_work.timer = 0.0f;
             main_work.flag |= 262144U;
@@ -994,7 +1010,7 @@ internal partial class AppMain
         {
             if (((int)main_work.flag & 64) != 0 || ((int)main_work.flag & 128) != 0)
             {
-                this.dmTitleSetChngFocusCrsrData(main_work);
+                dmTitleSetChngFocusCrsrData(main_work);
                 DmSoundPlaySE("Cursol");
                 main_work.flag &= 4294967231U;
                 main_work.flag &= 4294967167U;
@@ -1002,18 +1018,18 @@ internal partial class AppMain
 
             if (((int)main_work.flag & 256) == 0)
                 return;
-            this.dmTitleSetCtrlFocusChangeEfct(main_work);
-            if (!this.dmTitleIsCtrlFocusChangeEfctEnd(main_work))
+            dmTitleSetCtrlFocusChangeEfct(main_work);
+            if (!dmTitleIsCtrlFocusChangeEfctEnd(main_work))
                 return;
             main_work.flag &= 4294967039U;
         }
     }
 
-    private void dmTitleProcMainMenuCompBuyFadeOut(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuCompBuyFadeOut(DMS_TITLE_MAIN_WORK main_work)
     {
         if (IzFadeIsEnd())
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuCompBuyIdle);
+            main_work.proc_update = (dmTitleProcMainMenuCompBuyIdle);
             //Upsell.launchUpsellScreen(main_work.buy_scr_work);
             main_work.flag &= int.MaxValue;
             main_work.disp_flag &= 4294967293U;
@@ -1021,13 +1037,13 @@ internal partial class AppMain
 
         if (((int)main_work.flag & 256) == 0)
             return;
-        this.dmTitleSetCtrlFocusChangeEfct(main_work);
-        if (!this.dmTitleIsCtrlFocusChangeEfctEnd(main_work))
+        dmTitleSetCtrlFocusChangeEfct(main_work);
+        if (!dmTitleIsCtrlFocusChangeEfctEnd(main_work))
             return;
         main_work.flag &= 4294967039U;
     }
 
-    private void dmTitleProcMainMenuCompBuyIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuCompBuyIdle(DMS_TITLE_MAIN_WORK main_work)
     {
         //if (Upsell.showUpsell)
         //    return;
@@ -1045,7 +1061,7 @@ internal partial class AppMain
             else
                 IzFadeInitEasy(1U, 0U, 32f);
             DmSndBgmPlayerPlayBgm(0);
-            main_work.proc_update = (this.dmTitleProcMainMenuCompBuyFadeIn);
+            main_work.proc_update = (dmTitleProcMainMenuCompBuyFadeIn);
             main_work.disp_flag |= 2U;
         }
         else
@@ -1055,7 +1071,7 @@ internal partial class AppMain
             else
                 IzFadeInitEasy(1U, 0U, 32f);
             DmSndBgmPlayerPlayBgm(0);
-            main_work.proc_update = (this.dmTitleProcMainMenuCompBuyFadeIn);
+            main_work.proc_update = (dmTitleProcMainMenuCompBuyFadeIn);
             main_work.disp_flag |= 2U;
         }
     }
@@ -1066,14 +1082,14 @@ internal partial class AppMain
         DmSndBgmPlayerPlayBgm(0);
     }
 
-    private void dmTitleProcMainMenuCompBuyFadeIn(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuCompBuyFadeIn(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!IzFadeIsEnd())
             return;
         if (DmBuyScreenGetResult(main_work.buy_scr_work) == 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-            main_work.proc_input = (this.dmTitleInputProcMainMenu);
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
             main_work.flag |= 2147483648U;
             if (!GsTrialIsTrial())
             {
@@ -1084,8 +1100,8 @@ internal partial class AppMain
         }
         else
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-            main_work.proc_input = (this.dmTitleInputProcMainMenu);
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
             main_work.flag |= 2147483648U;
         }
 
@@ -1093,16 +1109,16 @@ internal partial class AppMain
             main_work.decide_menu_frm[index] = 0.0f;
     }
 
-    private void dmTitleProcMainMenuTrophyIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuTrophyIdle(DMS_TITLE_MAIN_WORK main_work)
     {
     }
 
-    private void dmTitleProcMainMenuDecideEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuDecideEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 256) != 0)
         {
-            this.dmTitleSetCtrlFocusChangeEfct(main_work);
-            if (this.dmTitleIsCtrlFocusChangeEfctEnd(main_work))
+            dmTitleSetCtrlFocusChangeEfct(main_work);
+            if (dmTitleIsCtrlFocusChangeEfctEnd(main_work))
                 main_work.flag &= 4294967039U;
         }
 
@@ -1129,8 +1145,8 @@ internal partial class AppMain
                 for (int index = 0; index < 5; ++index)
                     main_work.decide_menu_frm[index] = 0.0f;
                 main_work.flag &= 4294967291U;
-                main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-                main_work.proc_input = (this.dmTitleInputProcMainMenu);
+                main_work.proc_update = (dmTitleProcMainMenuIdle);
+                main_work.proc_input = (dmTitleInputProcMainMenu);
                 if (XBOXLive.signinStatus == XBOXLive.SigninStatus.UpdateNeeded)
                 {
                     XBOXLive.displayTitleUpdateMessage = true;
@@ -1153,34 +1169,43 @@ internal partial class AppMain
                     }
 
                     AppMain.g_ao_sys_global.is_show_ui = true;
-                    Guide.BeginShowMessageBox(" ", text, (IEnumerable<string>)stringList, 0, MessageBoxIcon.Alert, new AsyncCallback(AppMain.TitleMBResult), (object)null);
+                    Guide.BeginShowMessageBox(" ", text, (IEnumerable<string>)stringList, 0, MessageBoxIcon.Alert, new AsyncCallback(TitleMBResult), (object)null);
                 }
             }
             else
             {
                 if (curSlctMenu == 0 && SaveState.shouldResume())
                 {
-                    main_work.proc_update = (this.dmTitleProcFadeOut);
+                    main_work.proc_update = (dmTitleProcFadeOut);
                 }
                 else
                 {
                     if (curSlctMenu == 0 && !main_work.is_init_play && !GsTrialIsTrial())
                     {
-                        if (this.dmTitleIsSaveRunning())
+                        if (dmTitleIsSaveRunning())
                         {
-                            main_work.proc_update = (this.dmTitleProcMainMenuDelSaveWin);
-                            main_work.announce_flag |= 1U;
-                            main_work.flag &= 4292869119U;
+                            main_work.proc_update = (dmTitleProcMainMenuDelSaveWin);
+                            main_work.announce_flag |= 1U << (int)DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA1;
+                            if (main_work.iphone_menus)
+                                main_work.flag &= 4292869119U;
                             return;
                         }
 
-                        main_work.proc_update = (this.dmTitleProcFadeOut);
+                        if (main_work.iphone_menus)
+                        {
+                            main_work.proc_update = (dmTitleProcFadeOut);
+                        }
+                        else
+                        {
+                            main_work.proc_update = (dmTitleProcNoSaveCheckInitStart);
+                            main_work.announce_flag |= 1U << (int)DME_TITLE_WIN_TYPE.DME_TITLE_WIN_TYPE_DEL_DATA4;
+                        }
                         return;
                     }
 
                     if (GsTrialIsTrial() && curSlctMenu == 1)
                     {
-                        main_work.proc_update = (this.dmTitleProcMainMenuCompBuyFadeOut);
+                        main_work.proc_update = (dmTitleProcMainMenuCompBuyFadeOut);
                         main_work.proc_input = null;
                         main_work.timer = 0.0f;
                         IzFadeInitEasy(0U, 1U, 32f);
@@ -1188,7 +1213,7 @@ internal partial class AppMain
                         return;
                     }
 
-                    main_work.proc_update = (this.dmTitleProcFadeOut);
+                    main_work.proc_update = (dmTitleProcFadeOut);
                 }
 
                 main_work.timer = 0.0f;
@@ -1208,17 +1233,17 @@ internal partial class AppMain
         }
     }
 
-    protected static void TitleMBResult(IAsyncResult userResult)
+    private static void TitleMBResult(IAsyncResult userResult)
     {
         g_ao_sys_global.is_show_ui = false;
     }
 
-    private void dmTitleProcMainMenuDelSaveWin(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcMainMenuDelSaveWin(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 8192) != 0)
         {
-            main_work.proc_update = (this.dmTitleProcMainMenuIdle);
-            main_work.proc_input = (this.dmTitleInputProcMainMenu);
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
             main_work.timer = 0.0f;
             main_work.flag &= 4294959103U;
             for (int index = 0; index < 5; ++index)
@@ -1229,29 +1254,55 @@ internal partial class AppMain
         {
             SOption instance = SOption.CreateInstance();
             SOption.EControl.Type control = instance.GetControl();
-            this.dmTitleSetInitSaveData(main_work);
+            dmTitleSetInitSaveData(main_work);
             instance.SetControl(control);
-            main_work.proc_update = (this.dmTitleProcSaveInitData);
+            main_work.proc_update = (dmTitleProcSaveInitData);
             DmSaveMenuStart(false, false);
             main_work.flag &= 4294950911U;
         }
 
         if (((int)main_work.flag & 256) == 0)
             return;
-        this.dmTitleSetCtrlFocusChangeEfct(main_work);
-        if (!this.dmTitleIsCtrlFocusChangeEfctEnd(main_work))
+        dmTitleSetCtrlFocusChangeEfct(main_work);
+        if (!dmTitleIsCtrlFocusChangeEfctEnd(main_work))
             return;
         main_work.flag &= 4294967039U;
     }
 
-    private void dmTitleProcSaveInitData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcNoSaveCheckInitStart(DMS_TITLE_MAIN_WORK main_work)
+    {
+        if ((main_work.flag & DMD_TITLE_FLAG_DEL_DATA_BACK_MMENU) != 0)
+        {
+            main_work.proc_update = (dmTitleProcMainMenuIdle);
+            main_work.proc_input = (dmTitleInputProcMainMenu);
+            main_work.timer = 0.0f;
+            main_work.flag &= ~DMD_TITLE_FLAG_DEL_DATA_BACK_MMENU;
+            for (int index = 0; index < (int)DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_NUM; ++index)
+                main_work.decide_menu_frm[index] = 0.0f;
+        }
+        else if ((main_work.flag & DMD_TITLE_FLAG_DEL_DATA_INIT_START) != 0)
+        {
+            dmTitleSetInitSaveData(main_work);
+            main_work.proc_update = (dmTitleProcSaveInitData);
+            main_work.flag &= ~DMD_TITLE_FLAG_DEL_SAVE_DATA;
+        }
+
+        if ((main_work.flag & DMD_TITLE_FLAG_MENU_CRSR_EFCT) == 0)
+            return;
+        dmTitleSetCtrlFocusChangeEfct(main_work);
+        if (!dmTitleIsCtrlFocusChangeEfctEnd(main_work))
+            return;
+        main_work.flag &= ~DMD_TITLE_FLAG_MENU_CRSR_EFCT;
+    }
+
+    private static void dmTitleProcSaveInitData(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!DmSaveIsExit())
             return;
         if (!GsTrialIsTrial() && !DmCmnBackupIsSaveSuccessed())
         {
-            main_work.proc_update = (this.dmTitleProcWaitInput);
-            main_work.proc_input = (this.dmTitleInputProcTitle);
+            main_work.proc_update = (dmTitleProcWaitInput);
+            main_work.proc_input = (dmTitleInputProcTitle);
             main_work.flag |= 512U;
             main_work.flag &= 4294966271U;
             main_work.flag &= int.MaxValue;
@@ -1259,7 +1310,7 @@ internal partial class AppMain
         }
         else
         {
-            main_work.proc_update = (this.dmTitleProcFadeOut);
+            main_work.proc_update = (dmTitleProcFadeOut);
             main_work.timer = 0.0f;
             IzFadeInitEasy(0U, 1U, 32f);
             DmSndBgmPlayerExit();
@@ -1267,22 +1318,22 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleProcFadeOut(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFadeOut(DMS_TITLE_MAIN_WORK main_work)
     {
         if (!IzFadeIsEnd())
             return;
-        this.DmTitleOpExit();
-        main_work.proc_update = (this.dmTitleProcDataRelease);
+        DmTitleOp.DmTitleOpExit();
+        main_work.proc_update = (dmTitleProcDataRelease);
         main_work.proc_draw = null;
     }
 
-    private void dmTitleProcWindowNodispIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWindowNodispIdle(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.proc_win_input != null)
             main_work.proc_win_input(main_work);
         if (main_work.announce_flag == 0U)
             return;
-        main_work.proc_win_update = (this.dmTitleProcWindowOpenEfct);
+        main_work.proc_win_update = (dmTitleProcWindowOpenEfct);
         main_work.proc_input = null;
         main_work.proc_win_input = null;
         main_work.win_timer = 0.0f;
@@ -1300,20 +1351,20 @@ internal partial class AppMain
         main_work.flag |= 131072U;
     }
 
-    private void dmTitleProcWindowOpenEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWindowOpenEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 65536) != 0)
         {
-            main_work.proc_win_update = (this.dmTitleProcWindowAnnounceIdle);
-            main_work.proc_win_input = (this.dmTitleInputProcWindow);
+            main_work.proc_win_update = (dmTitleProcWindowAnnounceIdle);
+            main_work.proc_win_input = dm_title_variant.proc_win_input;
             main_work.disp_flag |= 1U;
             main_work.flag &= 4294901759U;
         }
         else
-            this.dmTitleSetWinOpenEfct(main_work);
+            dmTitleSetWinOpenEfct(main_work);
     }
 
-    private void dmTitleProcWindowAnnounceIdle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWindowAnnounceIdle(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.proc_win_input != null)
             main_work.proc_win_input(main_work);
@@ -1325,7 +1376,7 @@ internal partial class AppMain
                 main_work.proc_win_input = null;
                 main_work.win_timer = 8f;
                 main_work.disp_flag &= 4294967294U;
-                main_work.proc_win_update = (this.dmTitleProcWindowCloseEfct);
+                main_work.proc_win_update = (dmTitleProcWindowCloseEfct);
                 DmSoundPlaySE("Ok");
                 main_work.flag &= 4294967291U;
                 main_work.flag &= 4294967293U;
@@ -1338,7 +1389,7 @@ internal partial class AppMain
                 main_work.proc_win_input = null;
                 main_work.win_timer = 8f;
                 main_work.disp_flag &= 4294967294U;
-                main_work.proc_win_update = (this.dmTitleProcWindowCloseEfct);
+                main_work.proc_win_update = (dmTitleProcWindowCloseEfct);
                 DmSoundPlaySE("Cancel");
                 main_work.flag |= 2U;
                 main_work.flag &= 4294967291U;
@@ -1354,7 +1405,7 @@ internal partial class AppMain
                 main_work.proc_win_input = null;
                 main_work.win_timer = 8f;
                 main_work.disp_flag &= 4294967294U;
-                main_work.proc_win_update = (this.dmTitleProcWindowCloseEfct);
+                main_work.proc_win_update = (dmTitleProcWindowCloseEfct);
                 DmSoundPlaySE("Ok");
                 main_work.flag &= 4294967291U;
                 main_work.flag &= 4294967293U;
@@ -1367,7 +1418,7 @@ internal partial class AppMain
                 main_work.proc_win_input = null;
                 main_work.win_timer = 8f;
                 main_work.disp_flag &= 4294967294U;
-                main_work.proc_win_update = (this.dmTitleProcWindowCloseEfct);
+                main_work.proc_win_update = (dmTitleProcWindowCloseEfct);
                 DmSoundPlaySE("Cancel");
                 main_work.flag |= 2U;
                 main_work.flag &= 4294967291U;
@@ -1375,11 +1426,11 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleProcWindowCloseEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWindowCloseEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 65536) != 0)
         {
-            main_work.proc_win_update = (this.dmTitleProcWindowNodispIdle);
+            main_work.proc_win_update = (dmTitleProcWindowNodispIdle);
             main_work.announce_flag &= (uint)~(1 << main_work.win_mode);
             if (main_work.win_mode == 0 || main_work.win_mode == 1)
             {
@@ -1409,24 +1460,24 @@ internal partial class AppMain
             main_work.flag &= 4294901759U;
         }
 
-        this.dmTitleSetWinCloseEfct(main_work);
+        dmTitleSetWinCloseEfct(main_work);
     }
 
-    private void dmTitleProcDataRelease(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcDataRelease(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (!this.DmTitleOpExitEndCheck())
+        if (!DmTitleOp.DmTitleOpExitEndCheck())
             return;
         for (int index = 0; index < 2; ++index)
             AoTexRelease(main_work.tex[index]);
         for (int index = 0; index < 4; ++index)
             AoTexRelease(main_work.cmn_tex[index]);
-        this.DmTitleOpFlush();
-        main_work.proc_update = (this.dmTitleProcFinish);
+        DmTitleOp.DmTitleOpFlush();
+        main_work.proc_update = (dmTitleProcFinish);
     }
 
-    private void dmTitleProcFinish(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcFinish(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (!this.dmTitleIsTexRelease(main_work))
+        if (!dmTitleIsTexRelease(main_work))
             return;
         int length1 = main_work.trg_slct.Length;
         for (int index = 0; index < length1; ++index)
@@ -1457,13 +1508,13 @@ internal partial class AppMain
                 main_work.arc_cmn_amb[index] = null;
         }
 
-        this.DmTitleOpRelease();
-        main_work.proc_update = (this.dmTitleProcWaitFinished);
+        DmTitleOp.DmTitleOpRelease();
+        main_work.proc_update = (dmTitleProcWaitFinished);
     }
 
-    private void dmTitleProcWaitFinished(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleProcWaitFinished(DMS_TITLE_MAIN_WORK main_work)
     {
-        if (!this.DmTitleOpReleaseCheck())
+        if (!DmTitleOp.DmTitleOpReleaseCheck())
             return;
         if (((int)main_work.flag & 524288) != 0)
         {
@@ -1476,7 +1527,7 @@ internal partial class AppMain
         main_work.proc_update = null;
     }
 
-    private void dmTitleInputProcTitle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleInputProcTitle(DMS_TITLE_MAIN_WORK main_work)
     {
         var stand = AoPad.AoPadSomeoneMStand(ControllerConsts.START | ControllerConsts.CONFIRM);
         if (amTpIsTouchPush(0) || stand != -1)
@@ -1491,7 +1542,7 @@ internal partial class AppMain
         setBackKeyRequest(false);
     }
 
-    private void dmTitleInputProcMainMenu(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleInputProcMainMenu(DMS_TITLE_MAIN_WORK main_work)
     {
         int length = main_work.trg_slct.Length;
         if (!LiveFeature.isInterrupted())
@@ -1597,32 +1648,21 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleInputProcWindow(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleInputProcWindowPc(DMS_TITLE_MAIN_WORK main_work)
     {
-        CTrgAoAction[] trgAnswer = main_work.trg_answer;
-
         var pad = AoPad.AoPadMStand();
 
         if (pad.HasFlag(ControllerConsts.CANCEL))
-        {
-            main_work.win_cur_slct = 1;
-            main_work.flag |= 4U;
-        }
+            main_work.flag |= DMD_TITLE_FLAG_CANCEL;
 
         if (pad.HasFlag(ControllerConsts.CONFIRM))
-        {
-            main_work.win_cur_slct = main_work.win_cur_slct == 0 ? 1 : 0;
-            main_work.flag |= 4U;
-        }
+            main_work.flag |= DMD_TITLE_FLAG_DECIDE;
 
         if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.LEFT))
         {
             if (main_work.win_cur_slct != 0)
             {
-                // Select ZONE Switch
                 main_work.win_cur_slct = 0;
-
-                // Cursor SE Play
                 DmSoundPlaySE("Cursol");
             }
         }
@@ -1630,23 +1670,29 @@ internal partial class AppMain
         {
             if (main_work.win_cur_slct != 1)
             {
-                // Select ZONE Switch
                 main_work.win_cur_slct = 1;
-
-                // Cursor SE Play
                 DmSoundPlaySE("Cursol");
             }
         }
+    }
+
+    private static void dmTitleInputProcWindowIphone(DMS_TITLE_MAIN_WORK main_work)
+    {
+        CTrgAoAction[] trgAnswer = main_work.trg_answer;
 
         for (int i = 0; i < 2; i++)
+            trgAnswer[i].IsSelected = i == main_work.win_cur_slct;
+
+        if (trgAnswer[0].GetState(0U)[10] && trgAnswer[0].GetState(0U)[1])
         {
-            var trig = trgAnswer[i];
-            trig.IsSelected = i == main_work.win_cur_slct;
-            if (trgAnswer[0].GetState(0U)[10] && trgAnswer[0].GetState(0U)[1])
-            {
-                main_work.win_cur_slct = i;
-                main_work.flag |= 4U;
-            }
+            main_work.win_cur_slct = 1;
+            main_work.flag |= DMD_TITLE_FLAG_DECIDE;
+        }
+
+        if (trgAnswer[1].GetState(0U)[10] && trgAnswer[1].GetState(0U)[1])
+        {
+            main_work.win_cur_slct = 0;
+            main_work.flag |= DMD_TITLE_FLAG_DECIDE;
         }
     }
 
@@ -1656,7 +1702,7 @@ internal partial class AppMain
         表示設定処理
      */
     // ==========================================================================
-    private void dmTitleDrawSetProcDispData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleDrawSetProcDispData(DMS_TITLE_MAIN_WORK main_work)
     {
         float tmp_win_size = 0;
 
@@ -1665,7 +1711,7 @@ internal partial class AppMain
         {
             // 共通描画設定部
             AoActSysSetDrawTaskPrio(0x8000);
-            DmTitleOpDraw2D();
+            DmTitleOp.DmTitleOpDraw2D();
 
             AoActSortExecute();
             AoActSortDraw();
@@ -1673,7 +1719,7 @@ internal partial class AppMain
 
             // 場面別描画設定部
             if ((main_work.flag & DMD_TITLE_FLAG_DISP_TITLE) == DMD_TITLE_FLAG_DISP_TITLE
-                && DmTitleOpIsLogoActFinish())
+                && DmTitleOp.DmTitleOpIsLogoActFinish())
             {
                 dmTitleDrawProcTitle(main_work);
             }
@@ -1777,7 +1823,7 @@ internal partial class AppMain
         amDrawMakeTask(dmTitleTaskDraw, 0x8000, 0);
     }
 
-    private void dmTitleDrawProcTitle(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleDrawProcTitle(DMS_TITLE_MAIN_WORK main_work)
     {
         var ACT_TEX_START = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_START : (int)DME_TITLE_ACT_REG.ACT_TEX_START;
 
@@ -1819,13 +1865,13 @@ internal partial class AppMain
         AoActSortUnregAll();
     }
 
-    private void dmTitleDrawProcMainMenu(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleDrawProcMainMenu(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.iphone_menus)
         {
             bool is_trial = GsTrialIsTrial();
             bool has_save_data = !main_work.is_init_play;
-            this.dmTitleDrawProcMainMenuIphone(main_work, has_save_data, is_trial);
+            dmTitleDrawProcMainMenuIphone(main_work, has_save_data, is_trial);
         }
         else
         {
@@ -1998,7 +2044,7 @@ internal partial class AppMain
         メインメニュー時表示設定処理
      */
     // ==========================================================================
-    void dmTitleDrawProcMainMenuTrial(DMS_TITLE_MAIN_WORK main_work)
+    static void dmTitleDrawProcMainMenuTrial(DMS_TITLE_MAIN_WORK main_work)
     {
         AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
 
@@ -2040,7 +2086,7 @@ internal partial class AppMain
         メインメニュー時表示設定処理
      */
     // ==========================================================================
-    void dmTitleDrawProcMainMenuFirst(DMS_TITLE_MAIN_WORK main_work)
+    static void dmTitleDrawProcMainMenuFirst(DMS_TITLE_MAIN_WORK main_work)
     {
         AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
 
@@ -2076,7 +2122,7 @@ internal partial class AppMain
         メインメニュー時表示設定処理
      */
     // ==========================================================================
-    void dmTitleDrawProcMainMenuPlayed(DMS_TITLE_MAIN_WORK main_work)
+    static void dmTitleDrawProcMainMenuPlayed(DMS_TITLE_MAIN_WORK main_work)
     {
         AoActSetTexture(AoTexGetTexList(main_work.tex[1]));
 
@@ -2117,15 +2163,15 @@ internal partial class AppMain
     }
 
 
-    private void CLocalBtnBase_Update(
+    private static void CLocalBtnBase_Update(
         AOS_ACTION src,
         ArrayPointer<AOS_ACTION> btn,
         CTrgAoAction trg)
     {
-        this.CLocalBtnBase_Update(src, btn, trg, 0.0f);
+        CLocalBtnBase_Update(src, btn, trg, 0.0f);
     }
 
-    private void CLocalBtnBase_Update(
+    private static void CLocalBtnBase_Update(
         AOS_ACTION src,
         ArrayPointer<AOS_ACTION> btn,
         CTrgAoAction trg,
@@ -2146,21 +2192,21 @@ internal partial class AppMain
         AoActAcmPop();
     }
 
-    private void CLocalBtnBase_Draw(ArrayPointer<AOS_ACTION> btn)
+    private static void CLocalBtnBase_Draw(ArrayPointer<AOS_ACTION> btn)
     {
         AoActSortRegAction(btn[0]);
         AoActSortRegAction(btn[1]);
         AoActSortRegAction(btn[2]);
     }
 
-    private void CLocalBtnBase_SetFrame(ArrayPointer<AOS_ACTION> btn, float frame)
+    private static void CLocalBtnBase_SetFrame(ArrayPointer<AOS_ACTION> btn, float frame)
     {
         AoActSetFrame(btn[0], frame);
         AoActSetFrame(btn[1], frame);
         AoActSetFrame(btn[2], frame);
     }
 
-    private void dmTitleDrawProcMainMenuIphone(
+    private static void dmTitleDrawProcMainMenuIphone(
         DMS_TITLE_MAIN_WORK main_work,
         bool has_save_data,
         bool is_trial)
@@ -2176,10 +2222,10 @@ internal partial class AppMain
             flag = true;
         }
 
-        if ((this.dmTitleProcMainMenuDecideEfct) == main_work.proc_update)
+        if ((dmTitleProcMainMenuDecideEfct) == main_work.proc_update)
             numArray3[main_work.cur_slct_menu] = 1f;
         else if ((!IzFadeIsExe() || IzFadeIsEnd()) &&
-                 (!((this.dmTitleProcSaveInitData) == main_work.proc_update) &&
+                 (!((dmTitleProcSaveInitData) == main_work.proc_update) &&
                   (131072 & (int)main_work.flag) == 0))
         {
             for (int index = 0; index < 3; ++index)
@@ -2190,7 +2236,7 @@ internal partial class AppMain
                 else
                     frame = 2f;
                 AoActSetFrame(main_work.act[numArray1[index]], frame);
-                this.CLocalBtnBase_SetFrame(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[index]), frame);
+                CLocalBtnBase_SetFrame(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[index]), frame);
             }
 
             float frame1;
@@ -2224,7 +2270,7 @@ internal partial class AppMain
 
         if (!LiveFeature.isInterrupted())
         {
-            var dm_title_g_dm_act_id_tbl = main_work.iphone_menus ? dm_title_g_dm_act_id_tbl_iphone : dm_title_g_dm_act_id_tbl_pc;
+            var dm_title_g_dm_act_id_tbl = dm_title_variant.act_id_tbl;
 
             if (!flag)
             {
@@ -2248,15 +2294,15 @@ internal partial class AppMain
             //AoActUpdate(main_work.act[numArray1[3]], numArray3[3]);
             //AoActUpdate(main_work.act[numArray1[4]], numArray3[4]);
             AoActSetTexture(AoTexGetTexList(main_work.tex[0]));
-            this.CLocalBtnBase_Update(main_work.act[numArray1[0]],
+            CLocalBtnBase_Update(main_work.act[numArray1[0]],
                 new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[0]), main_work.trg_slct[0], numArray3[0]);
             if (flag)
-                this.CLocalBtnBase_Update(main_work.act[numArray1[1]],
+                CLocalBtnBase_Update(main_work.act[numArray1[1]],
                     new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[1]), main_work.trg_slct[1], numArray3[1]);
-            this.CLocalBtnBase_Update(main_work.act[numArray1[2]],
+            CLocalBtnBase_Update(main_work.act[numArray1[2]],
                 new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[2]), main_work.trg_slct[2], numArray3[2]);
-            // this.CLocalBtnBase_Update(main_work.act[numArray1[3]], new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[3]), main_work.trg_slct[3], numArray3[3]);
-            // this.CLocalBtnBase_Update(main_work.act[numArray1[4]], new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[4]), main_work.trg_slct[4], numArray3[4]);
+            // CLocalBtnBase_Update(main_work.act[numArray1[3]], new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[3]), main_work.trg_slct[3], numArray3[3]);
+            // CLocalBtnBase_Update(main_work.act[numArray1[4]], new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[4]), main_work.trg_slct[4], numArray3[4]);
         }
 
         float frame3 = 2.0 <= main_work.act[15].frame ? 1f : 0.0f;
@@ -2277,23 +2323,23 @@ internal partial class AppMain
         main_work.trg_game.Update();
         if (!LiveFeature.isInterrupted())
         {
-            this.CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[0]));
+            CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[0]));
             AoActSortRegAction(main_work.act[numArray1[0]]);
             main_work.act[numArray1[0]].sprite.center_y -= 3f;
             if (flag)
             {
-                this.CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[1]));
+                CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[1]));
                 AoActSortRegAction(main_work.act[numArray1[1]]);
                 main_work.act[numArray1[1]].sprite.center_y -= 3f;
             }
 
-            this.CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[2]));
+            CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[2]));
             AoActSortRegAction(main_work.act[numArray1[2]]);
             main_work.act[numArray1[2]].sprite.center_y -= 3f;
-            // this.CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[3]));
+            // CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[3]));
             // AoActSortRegAction(main_work.act[numArray1[3]]);
             // main_work.act[numArray1[3]].sprite.center_y -= 3f;
-            // this.CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[4]));
+            // CLocalBtnBase_Draw(new ArrayPointer<AOS_ACTION>(main_work.act, numArray2[4]));
             // AoActSortRegAction(main_work.act[numArray1[4]]);
             // main_work.act[numArray1[4]].sprite.center_y -= 3f;
         }
@@ -2315,9 +2361,9 @@ internal partial class AppMain
         AoActSortUnregAll();
     }
 
-    private void dmTitleWinSelectDraw(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleWinSelectDraw(DMS_TITLE_MAIN_WORK main_work)
     {
-        var dm_title_win_act_pos_tbl = main_work.iphone_menus ? dm_title_win_act_pos_tbl_iphone : dm_title_win_act_pos_tbl_pc;
+        var dm_title_win_act_pos_tbl = dm_title_variant.win_act_pos_tbl;
         var ACT_WIN_NO_BTN_L = (int)DME_TITLE_ACT.ACT_WIN_NO_BTN_L;
         var ACT_WIN_YES_BTN_R = (int)DME_TITLE_ACT.ACT_WIN_YES_BTN_R;
         var ACT_TEX_YES = main_work.iphone_menus ? (int)DME_TITLE_ACT.ACT_TEX_YES : (int)DME_TITLE_ACT_REG.ACT_TEX_YES;
@@ -2573,14 +2619,14 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleTaskDraw(AMS_TCB tcb)
+    private static void dmTitleTaskDraw(AMS_TCB tcb)
     {
         AoActDrawPre();
         amDrawExecCommand(10U);
         amDrawEndScene();
     }
 
-    private bool dmTitleIsDataLoad(DMS_TITLE_MAIN_WORK main_work)
+    private static bool dmTitleIsDataLoad(DMS_TITLE_MAIN_WORK main_work)
     {
         for (int index = 0; index < 2; ++index)
         {
@@ -2594,10 +2640,10 @@ internal partial class AppMain
                 return false;
         }
 
-        return this.DmTitleOpLoadCheck();
+        return DmTitleOp.DmTitleOpLoadCheck();
     }
 
-    private bool dmTitleIsTexLoad(DMS_TITLE_MAIN_WORK main_work)
+    private static bool dmTitleIsTexLoad(DMS_TITLE_MAIN_WORK main_work)
     {
         for (int index = 0; index < 2; ++index)
         {
@@ -2611,10 +2657,10 @@ internal partial class AppMain
                 return false;
         }
 
-        return GsFontIsBuilded() && this.DmTitleOpBuildCheck();
+        return GsFontIsBuilded() && DmTitleOp.DmTitleOpBuildCheck();
     }
 
-    private bool dmTitleIsTexRelease(DMS_TITLE_MAIN_WORK main_work)
+    private static bool dmTitleIsTexRelease(DMS_TITLE_MAIN_WORK main_work)
     {
         for (int index = 0; index < 2; ++index)
         {
@@ -2628,16 +2674,16 @@ internal partial class AppMain
                 return false;
         }
 
-        return this.DmTitleOpFlushCheck();
+        return DmTitleOp.DmTitleOpFlushCheck();
     }
 
-    private void dmTitleSetChngFocusCrsrData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetChngFocusCrsrData(DMS_TITLE_MAIN_WORK main_work)
     {
         if (((int)main_work.flag & 64) != 0)
         {
             main_work.prev_slct_menu = main_work.cur_slct_menu;
             main_work.cur_slct_menu =
-                this.dmTitleGetRevisedMenuFocus(main_work.cur_slct_menu, -1, main_work.slct_menu_num);
+                dmTitleGetRevisedMenuFocus(main_work.cur_slct_menu, -1, main_work.slct_menu_num);
             main_work.src_crsr_pos_y = main_work.cur_crsr_pos_y;
             main_work.dst_crsr_pos_y = !GsTrialIsTrial()
                 ? dm_title_crsr_pos_y_tbl[0] + main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1]
@@ -2648,7 +2694,7 @@ internal partial class AppMain
         if (((int)main_work.flag & 128) == 0)
             return;
         main_work.prev_slct_menu = main_work.cur_slct_menu;
-        main_work.cur_slct_menu = this.dmTitleGetRevisedMenuFocus(main_work.cur_slct_menu, 1, main_work.slct_menu_num);
+        main_work.cur_slct_menu = dmTitleGetRevisedMenuFocus(main_work.cur_slct_menu, 1, main_work.slct_menu_num);
         main_work.src_crsr_pos_y = main_work.cur_crsr_pos_y;
         main_work.dst_crsr_pos_y = !GsTrialIsTrial()
             ? dm_title_crsr_pos_y_tbl[0] + main_work.cur_slct_menu * dm_title_crsr_pos_y_tbl[1]
@@ -2656,7 +2702,7 @@ internal partial class AppMain
         main_work.flag |= 256U;
     }
 
-    private int dmTitleGetRevisedMenuFocus(int idx, int diff, int menu_num)
+    private static int dmTitleGetRevisedMenuFocus(int idx, int diff, int menu_num)
     {
         int num = idx + diff;
         if (num < 0)
@@ -2666,7 +2712,7 @@ internal partial class AppMain
         return num;
     }
 
-    private void dmTitleSetCtrlFocusChangeEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetCtrlFocusChangeEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         float[] numArray1 = new float[2];
         float[] numArray2 = new float[2]
@@ -2678,7 +2724,7 @@ internal partial class AppMain
         main_work.cur_crsr_pos_y += numArray1[1];
     }
 
-    private void dmTitleSetWinOpenEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetWinOpenEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (main_work.win_timer > 8.0)
         {
@@ -2698,7 +2744,7 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleSetWinCloseEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetWinCloseEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         for (uint index = 0; index < 2U; ++index)
             main_work.win_size_rate[(int)index] = main_work.win_timer == 0.0 ? 0.0f : main_work.win_timer / 8f;
@@ -2713,7 +2759,7 @@ internal partial class AppMain
             --main_work.win_timer;
     }
 
-    private void dmTitleSetMMenuWinOpenEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetMMenuWinOpenEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         if (0.0 == main_work.mmenu_win_timer)
             DmSoundPlaySE("Window");
@@ -2736,7 +2782,7 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleSetMMenuWinCloseEfct(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetMMenuWinCloseEfct(DMS_TITLE_MAIN_WORK main_work)
     {
         for (uint index = 0; index < 2U; ++index)
             main_work.mmenu_win_size_rate[(int)index] =
@@ -2752,7 +2798,7 @@ internal partial class AppMain
             --main_work.mmenu_win_timer;
     }
 
-    private bool dmTitleIsCtrlFocusChangeEfctEnd(DMS_TITLE_MAIN_WORK main_work)
+    private static bool dmTitleIsCtrlFocusChangeEfctEnd(DMS_TITLE_MAIN_WORK main_work)
     {
         float num = main_work.dst_crsr_pos_y - main_work.src_crsr_pos_y;
         if (main_work.cur_crsr_pos_y >= (double)main_work.dst_crsr_pos_y && num >= 0.0)
@@ -2773,7 +2819,7 @@ internal partial class AppMain
         return false;
     }
 
-    private void dmTitleSetLoadSysData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetLoadSysData(DMS_TITLE_MAIN_WORK main_work)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         uint num = 0;
@@ -2823,7 +2869,7 @@ internal partial class AppMain
         mainSysInfo.is_first_play = false;
     }
 
-    private void dmTitleSetInitSysData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetInitSysData(DMS_TITLE_MAIN_WORK main_work)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         SOption instance = SOption.CreateInstance();
@@ -2843,7 +2889,7 @@ internal partial class AppMain
         mainSysInfo.is_first_play = false;
     }
 
-    private void dmTitleSetMenuInfo(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetMenuInfo(DMS_TITLE_MAIN_WORK main_work)
     {
         if (GsTrialIsTrial())
         {
@@ -2862,26 +2908,26 @@ internal partial class AppMain
         }
     }
 
-    private void dmTitleSetFirstPlayData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetFirstPlayData(DMS_TITLE_MAIN_WORK main_work)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         SSystem instance = SSystem.CreateInstance();
         mainSysInfo.rest_player_num = GSD_MAINSYS_PLAYER_REST_DEF;
         instance.PlayerStock = mainSysInfo.rest_player_num;
-        this.dmTitleSetLoadSysData(main_work);
+        dmTitleSetLoadSysData(main_work);
     }
 
-    private void dmTitleSetInitSaveData(DMS_TITLE_MAIN_WORK main_work)
+    private static void dmTitleSetInitSaveData(DMS_TITLE_MAIN_WORK main_work)
     {
         GsGetMainSysInfo().Save.Init();
     }
 
-    private bool dmTitleIsSaveRunning()
+    private static bool dmTitleIsSaveRunning()
     {
         return GsGetMainSysInfo().is_save_run != 0U;
     }
 
-    private bool dmTitleIsChangeOptVol()
+    private static bool dmTitleIsChangeOptVol()
     {
         SOption instance = SOption.CreateInstance();
         return instance.GetVolumeBgm() != 100U || instance.GetVolumeSe() != 100U;

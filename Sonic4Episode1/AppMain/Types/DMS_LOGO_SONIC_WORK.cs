@@ -6,7 +6,10 @@ internal partial class AppMain
         public uint flag;
         public int timer;
         public _func_ func;
+        public _skip_check_ skip_check;
 
         public delegate void _func_(DMS_LOGO_SONIC_WORK work);
+
+        public delegate bool _skip_check_();
     }
 }

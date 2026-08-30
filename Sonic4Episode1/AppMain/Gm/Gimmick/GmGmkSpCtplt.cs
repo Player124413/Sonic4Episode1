@@ -9,8 +9,11 @@
         obj_work.obj_3d.mat_speed = 1f;
         ObjDrawObjectActionSet3DNNMaterial(obj_work, 1);
         obj_work.disp_flag &= 4294967291U;
-        ((NNS_MATERIAL_GLES11_DESC)obj_work.obj_3d._object.pMatPtrList[0].pMaterial).fFlag |= 1U;
-        ((NNS_MATERIAL_GLES11_DESC)obj_work.obj_3d._object.pMatPtrList[1].pMaterial).fFlag |= 1U;
+        for (int index = 0; index < 2; ++index)
+        {
+            NNS_MATERIALPTR matptr = obj_work.obj_3d._object.pMatPtrList[index];
+            mppSetMaterialFlag(matptr, mppMaterialFlag(matptr) | 1U);
+        }
         gmsGmkSpctpltWork.gmk_work.ene_com.rect_work[2].flag &= 4294967291U;
         OBS_RECT_WORK pRec = gmsGmkSpctpltWork.gmk_work.ene_com.rect_work[2];
         pRec.ppDef = null;

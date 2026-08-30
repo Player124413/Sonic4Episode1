@@ -47,189 +47,10 @@ internal partial class AppMain
         new NNS_RGBA()
     };
     private int test_dist = 786432;
-    public readonly float[] dm_stgslct_act_tab_disp_y_pos_tbl = new float[5]
+    internal static DMS_LOGO_COM_LOAD_FILE_INFO[] dm_titleop_com_fileinfo_list = new DMS_LOGO_COM_LOAD_FILE_INFO[2]
     {
-        dm_stgslct_act_disp_y_pos_tbl[0] - 0.0f,
-        dm_stgslct_act_disp_y_pos_tbl[0] - 120f,
-        dm_stgslct_act_disp_y_pos_tbl[0] - 240f,
-        dm_stgslct_act_disp_y_pos_tbl[0] - 360f,
-        dm_stgslct_act_disp_y_pos_tbl[0] - 480f
-    };
-    public readonly float[] dm_stgslct_act_crsr_disp_y_pos_tbl = new float[4]
-    {
-        160f,
-        248f,
-        336f,
-        424f
-    };
-    public readonly float[][] dm_stgslct_win_act_frm_tbl = new float[10][]
-    {
-        new float[3]{ 2f, 0.0f, 1f },
-        new float[3]{ 3f, 0.0f, 0.0f },
-        new float[3]{ 1f, 1f, 0.0f },
-        new float[3]{ 1f, 2f, 0.0f },
-        new float[3]{ 1f, 3f, 0.0f },
-        new float[3]{ 1f, 4f, 0.0f },
-        new float[3]{ 1f, 5f, 0.0f },
-        new float[3]{ 1f, 6f, 0.0f },
-        new float[3]{ 1f, 7f, 0.0f },
-        new float[3]{ 1f, 7f, 0.0f }
-    };
-    public readonly float[][] dm_stgslct_win_disp_slct_frm_tbl = new float[2][]
-    {
-        new float[2]{ 0.0f, 1f },
-        new float[2]{ 1f, 0.0f }
-    };
-    public readonly float[] dm_stgslct_vrtcl_disp_pos_y_tbl = new float[4]
-    {
-        0.0f,
-        128f,
-        256f,
-        384f
-    };
-    public readonly float[] dm_stgslct_back_text_length_tbl = new float[11]
-    {
-        -39f,
-        -53f,
-        -69f,
-        -77f,
-        -70f,
-        -55f,
-        -53f,
-        -53f,
-        -53f,
-        -53f,
-        -53f
-    };
-    public readonly float[][] dm_stgslct_win_act_pos_tbl = new float[14][]
-    {
-        new float[2]{ 522f, 280f },
-        new float[2]{ 758f, 224f },
-        new float[2]{ 344f, 400f },
-        new float[2]{ 390f, 400f },
-        new float[2]{ 480f, 360f },
-        new float[2]{ 480f, 248f },
-        new float[2]{ 480f, 360f },
-        new float[2]{ 480f, 344f },
-        new float[2]{ 480f, 404f },
-        new float[2]{ 400f, 274f },
-        new float[2]{ 778f, 224f },
-        new float[2]{ 480f, 420f },
-        new float[2]{ 304f, 420f },
-        new float[2]{ 656f, 420f }
-    };
-    public readonly float[] dm_stgslct_act_table_disp_id_tbl = new float[24]
-    {
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        4f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f
-    };
-    public readonly float[] dm_stgslct_disp_msg_id_table_tbl = new float[24]
-    {
-        0.0f,
-        1f,
-        2f,
-        3f,
-        4f,
-        5f,
-        6f,
-        7f,
-        8f,
-        9f,
-        10f,
-        11f,
-        12f,
-        13f,
-        14f,
-        15f,
-        16f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f,
-        5f
-    };
-    public readonly float[] dm_stgslct_act_disp_pos_y_tbl = new float[24]
-    {
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        0.0f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        4f,
-        5f,
-        6f
-    };
-    public readonly float[] dm_stgslct_act_num_disp_id_tbl = new float[24]
-    {
-        0.0f,
-        1f,
-        2f,
-        0.0f,
-        0.0f,
-        1f,
-        2f,
-        0.0f,
-        0.0f,
-        1f,
-        2f,
-        0.0f,
-        0.0f,
-        1f,
-        2f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1f,
-        2f,
-        3f,
-        4f,
-        5f,
-        6f
-    };
-    private DMS_LOGO_COM_LOAD_FILE_INFO[] dm_titleop_com_fileinfo_list = new DMS_LOGO_COM_LOAD_FILE_INFO[2]
-    {
-        new DMS_LOGO_COM_LOAD_FILE_INFO("G_ZONE1/MAPFAR/ZONE1_MAPFAR.AMB", new post_func_Delegate(dmTitleOpLoadPostFuncMapFar)),
-        new DMS_LOGO_COM_LOAD_FILE_INFO("DEMO/TITLE/D_TITLEOP.AMB", new post_func_Delegate(dmTitleOpLoadPostFuncTitleLogo))
+        new DMS_LOGO_COM_LOAD_FILE_INFO("G_ZONE1/MAPFAR/ZONE1_MAPFAR.AMB", new post_func_Delegate(DmTitleOp.dmTitleOpLoadPostFuncMapFar)),
+        new DMS_LOGO_COM_LOAD_FILE_INFO("DEMO/TITLE/D_TITLEOP.AMB", new post_func_Delegate(DmTitleOp.dmTitleOpLoadPostFuncTitleLogo))
     };
     public const int GSD_TROPHY_ITEM_NUM = 16;
     public const int TROPHY_NONE = 0;
@@ -6124,6 +5945,24 @@ internal partial class AppMain
     public const int IDA_D_CMN_BTN_ACT_BTN_LEFT_RB_STGSLCT = 12;
     public const int IDA_D_CMN_BTN_ACT_BUT_DEL = 13;
     public const int IDA_D_CMN_BTN_ACT_BTN_BACK_FILESLCT = 14;
+    // console D_CMN_WIN is one action where mobile is eight, and console D_CMN_MSG is fourteen
+    // where mobile is eight, so these are a separate set rather than a renumbering
+    public const int IDA_D_CMN_WIN_ACT_WIN_LINE_PC = 0; // win_line
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_PC = 0; // tex_back
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_OK_PC = 1; // tex_ok
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_YES_PC = 2; // tex_yes
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_NO_PC = 3; // tex_no
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_WINTITLE_PC = 4; // tex_wintitle
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_STGSLCT_PC = 5; // tex_back_stgslct
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_OPT_PC = 6; // tex_back_opt
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_RANK_PC = 7; // tex_back_rank
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG01_PC = 8; // tex_msg01
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG02_PC = 9; // tex_msg02
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG03_PC = 10; // tex_msg03
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG04_PC = 11; // tex_msg04
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_MSG05_PC = 12; // tex_msg05
+    public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK_FILESLCT_PC = 13; // tex_back_fileslct
+
     public const int IDA_D_CMN_MSG_JP_ACT_TEX_BACK = 0;
     public const int IDA_D_CMN_MSG_JP_ACT_TEX_YES = 1;
     public const int IDA_D_CMN_MSG_JP_ACT_TEX_NO = 2;
@@ -15383,7 +15222,7 @@ internal partial class AppMain
     public static uint AMD_RENDER_CLEAR_DEPTH;
     public static uint AMD_RENDER_CLEAR_STENCIL;
     public static uint AMD_RENDER_CLEAR_ALL;
-    private static AMS_RENDER_MANAGER _am_render_manager;
+    internal static AMS_RENDER_MANAGER _am_render_manager;
     private static AMS_RENDER_TARGET _am_render_default;
     private static readonly AMS_PAD_DATA[] _am_pad;
     private static readonly HGS_TROPHY_CHECK_INFO[] hg_trophy_check_info_tbl_clear_demo;
@@ -15458,7 +15297,7 @@ internal partial class AppMain
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceTcbProcDrawDT;
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceUserFuncMatrixPush;
     private static OBF_DRAW_USER_DT_FUNC _gmWaterSurfaceUserFuncPop;
-    private static readonly AMS_RENDER_TARGET _gm_mapFar_render_work;
+    internal static readonly AMS_RENDER_TARGET _gm_mapFar_render_work;
     private static readonly GMS_MAP_FAR_DATA g_map_far_data_real;
     private static GMS_MAP_FAR_DATA g_map_far_data;
     private static readonly GMS_MAP_FAR_MGR g_map_far_mgr_real;
@@ -15547,35 +15386,8 @@ internal partial class AppMain
     private static MPP_VOID_GMS_BOSS2_BODY_WORK[] gm_boss2_body_state_func_tbl_enter;
     private static MPP_VOID_GMS_BOSS2_BODY_WORK[] gm_boss2_body_state_func_tbl_leave;
     private static int[] g_boss2_node_index_list;
-    private static readonly uint[] g_dm_act_id_tbl_stg_slct;
-    public static readonly string[] dm_stgslct_main_lng_amb_name_tbl;
-    public static readonly string[] dm_stgslct_menu_cmn_amb_name_tbl;
-    public static readonly string[] dm_stgslct_menu_cmn_lng_amb_name_tbl;
-    public static readonly uint[][] dm_stgslct_zone_act_num_tbl;
-    public static readonly uint[] dm_stgslct_act_chng_vrtcl_num_tbl;
-    public static readonly uint[] dm_stgslct_act_zone_no_tbl;
-    public static readonly uint[] dm_stgslct_eme_get_act_no_tbl;
-    public static readonly ushort[][] dm_stgslct_conv_stage_no_tbl;
-    public static readonly uint[] dm_stgslct_zone_array_act_tbl;
-    public static readonly int[][] dm_stgslct_n_zone_input_dir_tbl;
-    public static readonly int[][] dm_stgslct_s_zone_input_dir_tbl;
-    public static readonly int[][] dm_stgslct_f_zone_input_dir_tbl;
-    public static readonly int[][] dm_stgslct_a_zone_input_dir_tbl;
     public static float fTest;
     public static float fTest2;
-    public static readonly float[][] dm_stgslct_n_zone_disp_pos_tbl;
-    public static readonly float[][] dm_stgslct_n_zone_nodisp_pos_tbl;
-    public static readonly float[][] dm_stgslct_f_zone_disp_pos_tbl;
-    public static readonly float[][] dm_stgslct_f_zone_nodisp_pos_tbl;
-    public static readonly float[][] dm_stgslct_s_zone_disp_pos_tbl;
-    public static readonly float[][] dm_stgslct_s_zone_nodisp_pos_tbl;
-    public static readonly float[][] dm_stgslct_a_zone_disp_pos_tbl;
-    public static readonly float[][] dm_stgslct_a_zone_nodisp_pos_tbl;
-    public static readonly float[] dm_stgslct_act_disp_y_pos_tbl;
-    private static bool dm_stgslct_is_stage_start;
-    private static CActionDraw stgSelect_act_draw_sys;
-    private static int[] dmStgSlctSetScoreDispFrame_tmp_digit;
-    private static int[] dmStgSlctSetScoreDispFrame_time_digit;
     private static MTS_TASK_TCB sy_evt_tcb;
     private static SYS_EVT_INFO sy_evt_info;
     private static Random random;
@@ -15866,7 +15678,6 @@ internal partial class AppMain
     private static Dictionary<int, A2S_SUB_USR[]> readAMAFile_subusrHash;
     private static Dictionary<int, A2S_SUB_HIT[]> readAMAFile_subhitHash;
     private static Dictionary<int, A2S_SUB_KEY[]> readAMAFile_subkeyHash;
-    private static char[] readChars_name;
     public static int GMD_MAP_DRAW_BGM_TIMER;
     private static readonly int[] gm_map_prim_draw_tvx_alpha_set_z2;
     private static OBS_ACTION3D_NN_WORK gm_map_obj3d;
@@ -15906,22 +15717,22 @@ internal partial class AppMain
     private static readonly uint[][] g_gm_gmk_animal_type_id;
     private static readonly uint[][] g_gm_gmk_animal_obj_id;
     private static readonly GMS_GMK_ANIMAL_PARAM[] g_gm_gmk_animal_speed_param;
-    private static Reference<MTS_TASK_TCB> dm_titleop_load_tcb;
-    private static MTS_TASK_TCB dm_titleop_build_tcb;
-    private static MTS_TASK_TCB dm_titleop_flush_tcb;
-    private static MTS_TASK_TCB dm_titleop_mgr_tcb;
-    private static bool dm_titleop_build_state;
-    private static NNS_RGBA_U8 dm_titleop_clear_color;
-    private static DMS_TITLEOP_ROCK_SETTING[][] dm_titleop_rock_setting;
-    private static int[] dm_titleop_rock_setting_num;
-    private static AMS_FS[] dm_titleop_data;
-    private static object[] dm_titleop_mapfar_data;
-    private static AOS_TEXTURE[] dm_titleop_aos_tex;
-    private OBS_ACTION3D_NN_WORK[] dm_titleop_obj_3d_list;
-    private OBS_ACTION3D_NN_WORK[] dm_titleop_water_obj_3d_list;
-    private static int dm_titleop_scrl_x_ofst;
-    private static OBF_DRAW_USER_DT_FUNC _dmTitleOpPreDrawDT;
-    private static OBF_DRAW_USER_DT_FUNC _dmTitleOpFallShaderPreRenderUserFunc;
+    internal static Reference<MTS_TASK_TCB> dm_titleop_load_tcb;
+    internal static MTS_TASK_TCB dm_titleop_build_tcb;
+    internal static MTS_TASK_TCB dm_titleop_flush_tcb;
+    internal static MTS_TASK_TCB dm_titleop_mgr_tcb;
+    internal static bool dm_titleop_build_state;
+    internal static NNS_RGBA_U8 dm_titleop_clear_color;
+    internal static DMS_TITLEOP_ROCK_SETTING[][] dm_titleop_rock_setting;
+    internal static int[] dm_titleop_rock_setting_num;
+    internal static AMS_FS[] dm_titleop_data;
+    internal static object[] dm_titleop_mapfar_data;
+    internal static AOS_TEXTURE[] dm_titleop_aos_tex;
+    internal static OBS_ACTION3D_NN_WORK[] dm_titleop_obj_3d_list;
+    internal static OBS_ACTION3D_NN_WORK[] dm_titleop_water_obj_3d_list;
+    internal static int dm_titleop_scrl_x_ofst;
+    internal static OBF_DRAW_USER_DT_FUNC _dmTitleOpPreDrawDT;
+    internal static OBF_DRAW_USER_DT_FUNC _dmTitleOpFallShaderPreRenderUserFunc;
     public static int AKD_UTIL_FRAME60_TO_TIME_MAX_FRAME;
     public static string sFile;
     private static readonly OBS_LOAD_INITIAL_WORK obj_load_initial_work;
@@ -16086,9 +15897,9 @@ internal partial class AppMain
         short[] ar1 = numArray1;
         SYS_EVT_DATA sysEvtData1 = new SYS_EVT_DATA(f1_1, null, null, null, null, ar1, 0U);
         sysEvtDataArray2[2] = sysEvtData1;
-        sysEvtDataArray1[3] = new SYS_EVT_DATA((this.DmTitleStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
-        sysEvtDataArray1[4] = new SYS_EVT_DATA((this.DmMainMenuStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
-        sysEvtDataArray1[5] = new SYS_EVT_DATA((DmStgSlct.DmStgSlctStart), null, null, null, null, new short[8] { 6, 11, 7, 4, 3, 0, 0, 0 }, 0U);
+        sysEvtDataArray1[3] = new SYS_EVT_DATA((DmTitle.DmTitleStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
+        sysEvtDataArray1[4] = new SYS_EVT_DATA((DmTitle.DmMainMenuStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
+        sysEvtDataArray1[5] = new SYS_EVT_DATA((StgSlct.DmStgSlctStart), null, null, null, null, new short[8] { 6, 11, 7, 4, 3, 0, 0, 0 }, 0U);
         sysEvtDataArray1[6] = new SYS_EVT_DATA((this.GmMainInit), null, null, null, null, new short[9] { 5, 6, 9, 11, 4, 3, 14, 0, 0 }, 0U);
         SYS_EVT_DATA[] sysEvtDataArray3 = sysEvtDataArray1;
         short[] numArray2 = new short[8];

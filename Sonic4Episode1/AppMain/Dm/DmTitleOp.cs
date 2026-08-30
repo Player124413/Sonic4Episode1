@@ -1,7 +1,9 @@
-﻿internal partial class AppMain
+﻿using static AppMain;
+
+internal static class DmTitleOp
 {
 
-    public DMS_TITLEOP_OBJ_3DNN_WORK DMM_TITLEOP_CREATE_3D_OBJ(
+    public static DMS_TITLEOP_OBJ_3DNN_WORK DMM_TITLEOP_CREATE_3D_OBJ(
       ushort prio,
       byte group,
       TaskWorkFactoryDelegate work_size,
@@ -10,19 +12,19 @@
         return dmTitleOpCreate3DObj(prio, group, work_size);
     }
 
-    private void DmTitleOpLoad()
+    internal static void DmTitleOpLoad()
     {
-        DmLogoComLoadFileCreate(dm_titleop_load_tcb);
-        DmLogoComLoadFileReg(dm_titleop_load_tcb, dm_titleop_com_fileinfo_list, 2);
-        DmLogoComLoadFileStart(dm_titleop_load_tcb);
+        AppMain._instance.DmLogoComLoadFileCreate(dm_titleop_load_tcb);
+        AppMain._instance.DmLogoComLoadFileReg(dm_titleop_load_tcb, dm_titleop_com_fileinfo_list, 2);
+        AppMain._instance.DmLogoComLoadFileStart(dm_titleop_load_tcb);
     }
 
-    private bool DmTitleOpLoadCheck()
+    internal static bool DmTitleOpLoadCheck()
     {
         return dm_titleop_load_tcb.Target == null && dm_titleop_data[0] != null;
     }
 
-    private void DmTitleOpBuild()
+    internal static void DmTitleOpBuild()
     {
         AMS_AMB_HEADER[] amsAmbHeaderArray = new AMS_AMB_HEADER[1];
         dm_titleop_build_tcb = MTM_TASK_MAKE_TCB(dmTitleOpDataBuildMain, dmTitleOpDataBuildDest, 0U, ushort.MaxValue, 4096U, 0, null, "DM_TOP_BUILD");
@@ -55,12 +57,12 @@
 #endif
     }
 
-    private bool DmTitleOpBuildCheck()
+    internal static bool DmTitleOpBuildCheck()
     {
         return dm_titleop_build_state;
     }
 
-    private void DmTitleOpFlush()
+    internal static void DmTitleOpFlush()
     {
         dm_titleop_flush_tcb = MTM_TASK_MAKE_TCB(dmTitleOpDataFlushMain, dmTitleOpDataFlushDest, 0U, ushort.MaxValue, 4096U, 0, null, "DM_TOP_FLUSH");
         AOS_TEXTURE[] dmTitleopAosTex = dm_titleop_aos_tex;
@@ -71,12 +73,12 @@
         GmGameDBuildRegFlushModel(dm_titleop_water_obj_3d_list, ((AMS_AMB_HEADER)dm_titleop_mapfar_data[3]).file_num);
     }
 
-    private bool DmTitleOpFlushCheck()
+    internal static bool DmTitleOpFlushCheck()
     {
         return !dm_titleop_build_state;
     }
 
-    private void DmTitleOpRelease()
+    internal static void DmTitleOpRelease()
     {
         for (int index = 0; index < 2; ++index)
             dm_titleop_data[index] = null;
@@ -84,12 +86,12 @@
             dm_titleop_mapfar_data[index] = null;
     }
 
-    private bool DmTitleOpReleaseCheck()
+    internal static bool DmTitleOpReleaseCheck()
     {
         return dm_titleop_load_tcb.Target == null && dm_titleop_data[0] == null;
     }
 
-    private void DmTitleOpInit()
+    internal static void DmTitleOpInit()
     {
         NNS_RGBA col = new NNS_RGBA(1f, 1f, 1f, 1f);
         NNS_VECTOR nnsVector = GlobalPool<NNS_VECTOR>.Alloc();
@@ -127,19 +129,19 @@
         GlobalPool<NNS_VECTOR>.Release(nnsVector);
     }
 
-    private void DmTitleOpExit()
+    internal static void DmTitleOpExit()
     {
         if (dm_titleop_mgr_tcb == null)
             return;
         ((DMS_TITLEOP_MGR_WORK)dm_titleop_mgr_tcb.work).flag |= 536870912U;
     }
 
-    private bool DmTitleOpExitEndCheck()
+    internal static bool DmTitleOpExitEndCheck()
     {
         return dm_titleop_mgr_tcb == null;
     }
 
-    private void DmTitleOpDraw2D()
+    internal static void DmTitleOpDraw2D()
     {
         if (dm_titleop_mgr_tcb == null)
             return;
@@ -184,12 +186,12 @@
         }
     }
 
-    private bool DmTitleOpIsLogoActFinish()
+    internal static bool DmTitleOpIsLogoActFinish()
     {
         return dm_titleop_mgr_tcb != null && ((int)((DMS_TITLEOP_MGR_WORK)dm_titleop_mgr_tcb.work).flag & 1073741824) != 0;
     }
 
-    private void DmTitleOpDispRightEnable(bool disp)
+    internal static void DmTitleOpDispRightEnable(bool disp)
     {
         if (dm_titleop_mgr_tcb == null)
             return;
@@ -200,7 +202,7 @@
             work.flag |= 4096U;
     }
 
-    private void DmTitleOpSetRetOptionState()
+    internal static void DmTitleOpSetRetOptionState()
     {
         if (dm_titleop_mgr_tcb == null)
             return;
@@ -220,7 +222,7 @@
         }
     }
 
-    private static void dmTitleOpLoadPostFuncMapFar(DMS_LOGO_COM_LOAD_CONTEXT context)
+    internal static void dmTitleOpLoadPostFuncMapFar(DMS_LOGO_COM_LOAD_CONTEXT context)
     {
         dm_titleop_data[context.no] = context.fs_req;
         AMS_AMB_HEADER header = readAMBFile(dm_titleop_data[context.no]);
@@ -233,13 +235,13 @@
         }
     }
 
-    private static void dmTitleOpLoadPostFuncTitleLogo(DMS_LOGO_COM_LOAD_CONTEXT context)
+    internal static void dmTitleOpLoadPostFuncTitleLogo(DMS_LOGO_COM_LOAD_CONTEXT context)
     {
         dm_titleop_data[context.no] = context.fs_req;
         context.fs_req = null;
     }
 
-    private void dmTitleOpDataBuildMain(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpDataBuildMain(MTS_TASK_TCB tcb)
     {
         bool flag = true;
         AOS_TEXTURE[] dmTitleopAosTex = dm_titleop_aos_tex;
@@ -256,12 +258,12 @@
         dm_titleop_build_state = true;
     }
 
-    private void dmTitleOpDataBuildDest(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpDataBuildDest(MTS_TASK_TCB tcb)
     {
         dm_titleop_build_tcb = null;
     }
 
-    private void dmTitleOpDataFlushMain(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpDataFlushMain(MTS_TASK_TCB tcb)
     {
         bool flag = true;
         AOS_TEXTURE[] dmTitleopAosTex = dm_titleop_aos_tex;
@@ -283,12 +285,12 @@
         dm_titleop_build_state = false;
     }
 
-    private void dmTitleOpDataFlushDest(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpDataFlushDest(MTS_TASK_TCB tcb)
     {
         dm_titleop_flush_tcb = null;
     }
 
-    private void dmTitleOpMgrInit()
+    internal static void dmTitleOpMgrInit()
     {
         dm_titleop_mgr_tcb = MTM_TASK_MAKE_TCB(dmTitleOpMgrMain, dmTitleOpMgrDest, 0U, ushort.MaxValue, 12288U, 0, () => new DMS_TITLEOP_MGR_WORK(), "DM_TOP_MGR");
         DMS_TITLEOP_MGR_WORK work = (DMS_TITLEOP_MGR_WORK)dm_titleop_mgr_tcb.work;
@@ -303,12 +305,12 @@
         dm_titleop_scrl_x_ofst = 0;
     }
 
-    private void dmTitleOpMgrDest(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpMgrDest(MTS_TASK_TCB tcb)
     {
         dm_titleop_mgr_tcb = null;
     }
 
-    private void dmTitleOpMgrMain(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpMgrMain(MTS_TASK_TCB tcb)
     {
         DMS_TITLEOP_MGR_WORK work = (DMS_TITLEOP_MGR_WORK)tcb.work;
         if (((int)work.flag & 536870912) != 0)
@@ -339,7 +341,7 @@
         }
     }
 
-    private void dmTitleOpCreateObjFarSky()
+    internal static void dmTitleOpCreateObjFarSky()
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork1 = DMM_TITLEOP_CREATE_3D_OBJ(24576, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_SKYT");
         OBS_OBJECT_WORK obj_work1 = (OBS_OBJECT_WORK)titleopObj3DnnWork1;
@@ -361,7 +363,7 @@
         obj_work2.ppFunc = dmTitleOpFarSkyFunc;
     }
 
-    private void dmTitleOpFarSkyFunc(OBS_OBJECT_WORK obj_work)
+    internal static void dmTitleOpFarSkyFunc(OBS_OBJECT_WORK obj_work)
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = (DMS_TITLEOP_OBJ_3DNN_WORK)obj_work;
         titleopObj3DnnWork.sky_rot += 0.01f;
@@ -371,7 +373,7 @@
         nnRotateYMatrix(obj_work.obj_3d.user_obj_mtx, obj_work.obj_3d.user_obj_mtx, (ushort)NNM_DEGtoA16(titleopObj3DnnWork.sky_rot));
     }
 
-    private void dmTitleOpCreateObjFarRock(uint type)
+    internal static void dmTitleOpCreateObjFarRock(uint type)
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = DMM_TITLEOP_CREATE_3D_OBJ(24832, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_ROCKT");
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)titleopObj3DnnWork;
@@ -403,7 +405,7 @@
         top3d_work.rock_setting_num = dm_titleop_rock_setting_num[type];
     }
 
-    private void dmTitleOpCreateObjFarSea()
+    internal static void dmTitleOpCreateObjFarSea()
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = DMM_TITLEOP_CREATE_3D_OBJ(20480, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_SEA");
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)titleopObj3DnnWork;
@@ -421,7 +423,7 @@
         obj_work.disp_flag |= 5308420U;
     }
 
-    private DMS_TITLEOP_OBJ_3DNN_WORK dmTitleOpCreate3DObj(
+    private static DMS_TITLEOP_OBJ_3DNN_WORK dmTitleOpCreate3DObj(
       ushort prio,
       byte group,
       TaskWorkFactoryDelegate work_size)
@@ -439,7 +441,7 @@
         return titleopObj3DnnWork;
     }
 
-    private void dmTitleOpCreateAction(DMS_TITLEOP_MGR_WORK top_mgr_work)
+    internal static void dmTitleOpCreateAction(DMS_TITLEOP_MGR_WORK top_mgr_work)
     {
         string sPath = null;
         A2S_AMA_HEADER ama = readAMAFile(amBindGet(dm_titleop_data[1], 0, out sPath));
@@ -451,13 +453,13 @@
         top_mgr_work.flag |= 2147483648U;
     }
 
-    private void dmTitleOpDeleteAction(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
+    internal static void dmTitleOpDeleteAction(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
     {
         for (int index = 0; index < 7; ++index)
             AoActDelete(top_mgr_work.act[index]);
     }
 
-    private void dmTitleOpEndStart(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpEndStart(MTS_TASK_TCB tcb)
     {
         DMS_TITLEOP_MGR_WORK work = (DMS_TITLEOP_MGR_WORK)tcb.work;
         dmTitleOpPreEnd(ref work);
@@ -465,13 +467,13 @@
         mtTaskChangeTcbProcedure(tcb, dmTitleOpPreEndWait);
     }
 
-    private void dmTitleOpPreEnd(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
+    internal static void dmTitleOpPreEnd(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
     {
         for (OBS_OBJECT_WORK obj_work = ObjObjectSearchRegistObject(null, ushort.MaxValue); obj_work != null; obj_work = ObjObjectSearchRegistObject(obj_work, ushort.MaxValue))
             obj_work.ppOut = null;
     }
 
-    private void dmTitleOpPreEndWait(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpPreEndWait(MTS_TASK_TCB tcb)
     {
         DMS_TITLEOP_MGR_WORK work = (DMS_TITLEOP_MGR_WORK)tcb.work;
         ++work.frame;
@@ -481,7 +483,7 @@
         mtTaskChangeTcbProcedure(tcb, dmTitleOpEndWait);
     }
 
-    private void dmTitleOpEnd(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
+    internal static void dmTitleOpEnd(ref DMS_TITLEOP_MGR_WORK top_mgr_work)
     {
         dmTitleOpDeleteAction(ref top_mgr_work);
         g_obj.ppPre = null;
@@ -490,24 +492,24 @@
         ObjExit();
     }
 
-    private void dmTitleOpEndWait(MTS_TASK_TCB tcb)
+    internal static void dmTitleOpEndWait(MTS_TASK_TCB tcb)
     {
         if (!ObjObjectCheckClearAllObject() || ObjIsExitWait())
             return;
         mtTaskClearTcb(tcb);
     }
 
-    private static void dmTitleOpPreDrawDT(object data)
+    internal static void dmTitleOpPreDrawDT(object data)
     {
         amDrawSetBGColor(dm_titleop_clear_color);
     }
 
-    private void dmTitleOpObjDraw(OBS_OBJECT_WORK obj_work)
+    internal static void dmTitleOpObjDraw(OBS_OBJECT_WORK obj_work)
     {
         ObjDrawActionSummary(obj_work);
     }
 
-    private void dmTitleOpObjRockDraw(OBS_OBJECT_WORK obj_work)
+    internal static void dmTitleOpObjRockDraw(OBS_OBJECT_WORK obj_work)
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = (DMS_TITLEOP_OBJ_3DNN_WORK)obj_work;
         for (int index = 0; index < titleopObj3DnnWork.rock_setting_num; ++index)
@@ -529,7 +531,7 @@
     // Unlike the in-game far map, the title screen draws the sky in PRE_MAPFAR and the sea in
     // MAPFAR_SEA (dmTitleOp.cpp:1360-1364), so by the time this runs the frame has something
     // in it and the copy is worth sampling.
-    private static void dmTitleOpFallShaderPreRenderUserFunc(object data)
+    internal static void dmTitleOpFallShaderPreRenderUserFunc(object data)
     {
         NNS_RGBA_U8 color = new NNS_RGBA_U8(0, 0, 0, byte.MaxValue);
         AMS_RENDER_TARGET target = _am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target;
@@ -541,14 +543,14 @@
 #endif
     }
 
-    private void dmTitleOpDrawFallShaderPreSettingUserFunc(ref object data)
+    internal static void dmTitleOpDrawFallShaderPreSettingUserFunc(ref object data)
     {
         if ((_am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target).width == 0)
             return;
         amDrawGetProjectionMatrix();
     }
 
-    private void dmTitleOpCamera(OBS_CAMERA camera)
+    internal static void dmTitleOpCamera(OBS_CAMERA camera)
     {
         camera.disp_pos.x = 0.0f;
         camera.disp_pos.y = 5f;

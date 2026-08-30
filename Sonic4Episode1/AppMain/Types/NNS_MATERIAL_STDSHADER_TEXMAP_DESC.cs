@@ -1,3 +1,5 @@
+using System.IO;
+
 internal partial class AppMain
 {
     internal class NNS_MATERIAL_STDSHADER_TEXMAP_DESC
@@ -16,6 +18,38 @@ internal partial class AppMain
         public object pTexInfo;
         public uint Reserved1;
         public uint Reserved0;
+
+        // 64 bytes on disk, mapped field by field since the on-disk layout doesn't match the fields above
+        public static NNS_MATERIAL_STDSHADER_TEXMAP_DESC Read(BinaryReader reader, long data0Pos)
+        {
+            NNS_MATERIAL_STDSHADER_TEXMAP_DESC desc = new NNS_MATERIAL_STDSHADER_TEXMAP_DESC();
+            desc.fType = reader.ReadUInt32();
+            desc.iTexIdx = reader.ReadInt32();
+            desc.TexCoord = reader.ReadInt32();
+            desc.Blend = reader.ReadSingle();
+            desc.Offset = new NNS_TEXCOORD(reader.ReadSingle(), reader.ReadSingle());
+            desc.Scale = new NNS_TEXCOORD(reader.ReadSingle(), reader.ReadSingle());
+            desc.WrapS = reader.ReadUInt16();
+            desc.WrapT = reader.ReadUInt16();
+
+            uint borderColor = reader.ReadUInt32();
+            desc.pBorderColor = new NNS_RGBA(
+                ((borderColor >> 16) & 0xFF) / 255f,
+                ((borderColor >> 8) & 0xFF) / 255f,
+                (borderColor & 0xFF) / 255f,
+                ((borderColor >> 24) & 0xFF) / 255f);
+
+            // pFilterMode and pLODParam, not followed yet; nothing reads them on this path
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+            reader.ReadUInt32();
+
+            desc.Reserved0 = reader.ReadUInt32();
+            desc.Reserved1 = reader.ReadUInt32();
+            reader.ReadUInt32();
+
+            return desc;
+        }
 
         public void Assign(NNS_MATERIAL_STDSHADER_TEXMAP_DESC pPtr)
         {

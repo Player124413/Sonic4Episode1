@@ -11,6 +11,9 @@ internal partial class AppMain
         public GSS_SND_SE_HANDLE[] h_snd_ring = new GSS_SND_SE_HANDLE[8];
         public uint flag;
         public _ring_work_func_delegate_ ring_draw_func;
+        public _ring_sys_func_delegate_ ring_update_func;
+        public _ring_sys_func_delegate_ ring_draw_begin_func;
+        public _ring_sys_func_delegate_ ring_draw_end_func;
         public _rec_func_ rec_func;
         public _ring_work_func_delegate_ col_func;
         public ushort dir;
@@ -39,6 +42,9 @@ internal partial class AppMain
         {
             this.flag = 0U;
             this.ring_draw_func = null;
+            this.ring_update_func = null;
+            this.ring_draw_begin_func = null;
+            this.ring_draw_end_func = null;
             this.rec_func = null;
             this.col_func = null;
             this.dir = 0;

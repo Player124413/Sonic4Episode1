@@ -1,0 +1,7 @@
+endian = "little"
+origin = "D_STGSLCT.AMB"
+
+files = [
+  "D_STGSLCT.AMA",
+  "D_STGSLCT.AMB",
+]

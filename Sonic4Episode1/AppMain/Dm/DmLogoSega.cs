@@ -1,5 +1,17 @@
 ﻿internal partial class AppMain
 {
+    private const int DMD_LOGO_SEGA_START_WAIT_TIME_CONSOLE = 30;
+    private const int DMD_LOGO_SEGA_PLAYER_POS_Y_ADJUST_CONSOLE = -48;
+    private const float DMD_LOGO_SEGA_CAMERA_SCALE_CONSOLE = 0.75f;
+    private const int DMD_LOGO_SEGA_START_TIMER_CONSOLE = 0;
+    private const int DMD_LOGO_SEGA_START_TIMER_IPHONE = 4;
+
+    private static bool dm_logo_sega_is_console;
+    private static int dm_logo_sega_start_wait_time = DMD_LOGO_SEGA_START_WAIT_TIME;
+    private static int dm_logo_sega_start_timer = DMD_LOGO_SEGA_START_TIMER_IPHONE;
+    private static int dm_logo_sega_player_pos_y_adjust = DMD_LOGO_SEGA_PLAYER_POS_Y_ADJUST;
+    private static float dm_logo_sega_camera_scale = DMD_LOGO_SEGA_CAMERA_SCALE;
+
     public static int dm_logo_sega_com_file_num => dm_logo_sega_com_fileinfo_list.Length;
 
     private static int dm_logo_sega_localize_file_num => dm_logo_sega_localize_fileinfo_list_region_jp.Length;
@@ -34,6 +46,7 @@
 
     private void DmLogoSegaBuild()
     {
+        this.dmLogoSegaSelectVariant();
         AMS_AMB_HEADER[] amsAmbHeaderArray = new AMS_AMB_HEADER[2];
         dm_logo_sega_build_tcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(this.dmLogoSegaDataBuildMain), new GSF_TASK_PROCEDURE(this.dmLogoSegaDataBuildDest), 0U, ushort.MaxValue, 4096U, 0, null, "DM_LSEGA_BUILD");
         g_obj.def_user_light_flag = 1U;
@@ -61,6 +74,23 @@
     private bool DmLogoSegaBuildCheck()
     {
         return dm_logo_sega_build_state;
+    }
+
+    private void dmLogoSegaSelectVariant()
+    {
+        var region = GsEnvGetRegion();
+        dm_logo_sega_is_console = amFsAllVariant(
+            AMD_FS_VARIANT_CONSOLE,
+            dm_logo_sega_localize_fileinfo_list_tbl[(int)region][0].file_path);
+
+        dm_logo_sega_start_wait_time = dm_logo_sega_is_console
+            ? DMD_LOGO_SEGA_START_WAIT_TIME_CONSOLE : DMD_LOGO_SEGA_START_WAIT_TIME;
+        dm_logo_sega_start_timer = dm_logo_sega_is_console
+            ? DMD_LOGO_SEGA_START_TIMER_CONSOLE : DMD_LOGO_SEGA_START_TIMER_IPHONE;
+        dm_logo_sega_player_pos_y_adjust = dm_logo_sega_is_console
+            ? DMD_LOGO_SEGA_PLAYER_POS_Y_ADJUST_CONSOLE : DMD_LOGO_SEGA_PLAYER_POS_Y_ADJUST;
+        dm_logo_sega_camera_scale = dm_logo_sega_is_console
+            ? DMD_LOGO_SEGA_CAMERA_SCALE_CONSOLE : DMD_LOGO_SEGA_CAMERA_SCALE;
     }
 
     private void DmLogoSegaFlush()
@@ -135,7 +165,7 @@
         g_obj.ppObjPost = null;
         g_obj.ppRegRecAuto = null;
         g_obj.draw_scale.x = g_obj.draw_scale.y = g_obj.draw_scale.z =
-                    (int)(((3.2f/* *3.2で64dot扱い */) * (1.0f / DMD_LOGO_SEGA_CAMERA_SCALE * 2)) * FX32_ONE);
+                    (int)(((3.2f/* *3.2で64dot扱い */) * (1.0f / dm_logo_sega_camera_scale * 2)) * FX32_ONE);
         // 逆数保存
         g_obj.inv_draw_scale.x = g_obj.inv_draw_scale.y = g_obj.inv_draw_scale.z = FX_Div(FX32_ONE, g_obj.draw_scale.x);
         g_obj.depth = 128;
@@ -158,7 +188,7 @@
         var obsCamera = ObjCameraGet(DMD_LOGO_SEGA_CAMERA_ID);
         obsCamera.user_func = new OBJF_CAMERA_USER_FUNC(this.dmLogoSegaCamera);
         obsCamera.command_state = 0U;
-        obsCamera.scale = 0.9f;
+        obsCamera.scale = dm_logo_sega_camera_scale;
         obsCamera.ofst.z = 1000f;
         this.amTrailEFInitialize();
     }
@@ -281,10 +311,10 @@
         ++logo_work.timer;
         if (!mppSountInitializationDelayExpired())
             flag = false;
-        if (logo_work.timer < 0 || !flag)
+        if (logo_work.timer < dm_logo_sega_start_wait_time || !flag)
             return;
         IzFadeExit();
-        logo_work.timer = 4;
+        logo_work.timer = dm_logo_sega_start_timer;
         logo_work.func = new DMS_LOGO_SEGA_WORK_Delegate(this.dmLogoSegaRunLeftFunc);
         this.dmLogoSegaPlayerInitSeqRunLeft(logo_work.ply_obj);
         logo_work.flag |= 2U;
@@ -365,7 +395,7 @@
         obj_work.disp_flag |= 16777728U;
         obj_work.scale.x = obj_work.scale.y = obj_work.scale.z = 8192;
         nnMakeUnitMatrix(obj3d.user_obj_mtx_r);
-        nnTranslateMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, 0.0f, -36f / FXM_FX32_TO_FLOAT(g_obj.draw_scale.y), 0.0f);
+        nnTranslateMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, 0.0f, dm_logo_sega_player_pos_y_adjust / FXM_FX32_TO_FLOAT(g_obj.draw_scale.y), 0.0f);
         obj_work.pos.x = 2490368;
         obj_work.pos.y = 0;
         obj_work.pos.z = 0;
