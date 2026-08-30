@@ -10,9 +10,16 @@ internal partial class AppMain
     public const int AMA_FILE_ID = 0x414D4123;
     public const int AMA_HEADER_SIZE = 0x20;
 
+    // the pause menu is the only screen that reads an action file straight off the content root
+    // rather than out of an archive, so this is the one loader that has to resolve variants itself
     public static A2S_AMA_HEADER readAMAFile(string name)
     {
-        using (Stream input = TitleContainer.OpenStream("Content\\" + name))
+        return readAMAFileAs(name, am_fs_variant);
+    }
+
+    public static A2S_AMA_HEADER readAMAFileAs(string name, string variant)
+    {
+        using (Stream input = TitleContainer.OpenStream("Content\\" + amFsResolveAs(name, variant)))
         {
             using (MemoryStream buffered = new MemoryStream())
             {

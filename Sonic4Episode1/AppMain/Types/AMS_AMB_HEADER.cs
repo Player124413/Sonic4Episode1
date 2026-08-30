@@ -23,9 +23,6 @@ internal partial class AppMain
         public byte[] data;
         public AMS_AMB_HEADER parent;
         public bool is_real_amb = false;
-
-        // xbla archives are big-endian throughout, members included. nothing inside an .AMA says
-        // which way round it is, so the container has to carry it
         public bool big_endian = false;
 
         // the sibling archive supplying some of this one's members, and where in it each of our

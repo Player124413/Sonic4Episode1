@@ -294,8 +294,8 @@
                 gm_boss4_n_offset_x = -(gm_boss4_n_scroll_end - gm_boss4_n_scroll_start) + (int)gm_boss4_f_scroll_spd;
                 gm_boss4_n_scroll_pt_x -= gm_boss4_n_scroll_end - gm_boss4_n_scroll_start;
             }
-            g_gm_main_system.map_fcol.left = gm_boss4_n_scroll_pt_x - (int)((float)(AMD_SCREEN_2D_WIDTH / 2) * GMD_CAMERA_SCALE) - GMD_BOSS4_SCROLL_LIMIT_OFFSET_X;//180;
-            g_gm_main_system.map_fcol.right = gm_boss4_n_scroll_pt_x + (int)((float)(AMD_SCREEN_2D_WIDTH / 2) * GMD_CAMERA_SCALE);//180;
+            g_gm_main_system.map_fcol.left = gm_boss4_n_scroll_pt_x - OBD_LCD_X / 2 - GMD_BOSS4_SCROLL_LIMIT_OFFSET_X;//180;
+            g_gm_main_system.map_fcol.right = gm_boss4_n_scroll_pt_x + OBD_LCD_X / 2;//180;
             GlobalPool<NNS_VECTOR>.Release(nnsVector);
         }
     }

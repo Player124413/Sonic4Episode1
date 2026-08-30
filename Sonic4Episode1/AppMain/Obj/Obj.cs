@@ -623,13 +623,6 @@ internal partial class AppMain
         g_obj.pData = null;
     }
 
-    private static void ObjObjectClipLCDSet(short size_x, short size_y)
-    {
-        return;
-        g_obj.clip_lcd_size[0] = size_x;
-        g_obj.clip_lcd_size[1] = size_y;
-    }
-
     private static void ObjObjectOffsetSet(short sX, short sY)
     {
         g_obj.offset[0] = sX;

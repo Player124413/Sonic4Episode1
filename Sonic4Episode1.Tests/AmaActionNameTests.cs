@@ -136,4 +136,65 @@ public class AmaActionNameTests
     {
         Assert.Equal(9, ReadDetecting(BigEndian, claimedBigEndian: false).act_tbl.Length);
     }
+
+    // G_PAUSE.AMA and G_PAUSE_L.AMA are the only loose .AMA files in the game, and the console ones
+    // are big-endian with nothing around them to say so: readAMAFile(string) has no container and
+    // passes bigEndian false. Detection is the only thing standing between the console pause menu
+    // and a gigabyte-sized act_tbl. see docs/pause-action-ids.md
+    [Fact]
+    public void TheConsolePauseFilesReadWithoutAContainerToAskAboutByteOrder()
+    {
+        var pause = ReadDetecting("G_PAUSE_XBLA.AMA", claimedBigEndian: false);
+
+        Assert.Equal(6u, pause.act_num);
+        Assert.Equal(
+            new[] { "title_base", "btn_base", "btn_base_s", "btn_base_d", "btn_base_d_s", "back" },
+            pause.act_names);
+    }
+
+    // PauseMenuTableTests bounds gm_pm_act_id_tbl against these four counts, so this is where they
+    // are held against the shipped files
+    [Theory]
+    [InlineData("G_PAUSE_XBLA.AMA", 6)]
+    [InlineData("G_PAUSE_L_XBLA.AMA", 12)]
+    [InlineData("G_PAUSE_P_XBLA.AMA", 1)]
+    [InlineData("G_PAUSE_P_L_XBLA.AMA", 16)]
+    public void TheConsolePauseArchivesHaveTheActionCountsTheTablesAssume(string fixture, int acts)
+    {
+        Assert.Equal((uint)acts, ReadDetecting(fixture, claimedBigEndian: false).act_num);
+    }
+
+    // the entries gmPmDrawSelect indexes, and the two the port drops for want of a screen to reach
+    [Fact]
+    public void TheConsoleButtonLabelsAreWhereTheXboxArmExpectsThem()
+    {
+        var labels = ReadDetecting("G_PAUSE_P_L_XBLA.AMA", claimedBigEndian: false);
+
+        Assert.Equal(16u, labels.act_num);
+        Assert.Equal(0, labels.FindAct("btn_retry"));
+        Assert.Equal(2, labels.FindAct("btn_option"));
+        Assert.Equal(4, labels.FindAct("btn_rank"));
+        Assert.Equal(6, labels.FindAct("btn_trophy"));
+        Assert.Equal(8, labels.FindAct("btn_world"));
+        Assert.Equal(14, labels.FindAct("btn_resume"));
+
+        // every label is a plain/selected pair, which is what act_id_tbl[i] and act_id_tbl[i] + 1 rely on
+        foreach (var name in new[] { "retry", "option", "rank", "trophy", "world", "resume" })
+            Assert.Equal(labels.FindAct("btn_" + name) + 1, labels.FindAct("btn_" + name + "_s"));
+    }
+
+    // the two builds share exactly one action name, which is why this is a screen swap and not an
+    // art swap: the mobile tables index 0-9 and would find six actions on the console file
+    [Fact]
+    public void TheTwoPauseBuildsAreDifferentScreensNotDifferentArt()
+    {
+        var mobile = ReadDetecting("G_PAUSE_MOBILE.AMA", claimedBigEndian: false);
+        var console = ReadDetecting("G_PAUSE_XBLA.AMA", claimedBigEndian: false);
+
+        Assert.Equal(10u, mobile.act_num);
+        Assert.Equal(6u, console.act_num);
+
+        var shared = mobile.act_names.Where(name => console.FindAct(name) >= 0).ToArray();
+        Assert.Equal(new[] { "back" }, shared);
+    }
 }

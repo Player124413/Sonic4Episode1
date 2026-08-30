@@ -15,6 +15,7 @@ internal sealed class BuildReport
     public int OverlaysEmitted;
     public int VariantsEmitted;
     public int VariantsSkippedIncomplete;
+    public int VariantsWithoutBase;
     public List<string> Variants = new List<string>();
     public int TexturesConverted;
     public int TexturesFailed;
@@ -53,6 +54,7 @@ internal sealed class BuildReport
         OverlaysEmitted += other.OverlaysEmitted;
         VariantsEmitted += other.VariantsEmitted;
         VariantsSkippedIncomplete += other.VariantsSkippedIncomplete;
+        VariantsWithoutBase += other.VariantsWithoutBase;
         TexturesConverted += other.TexturesConverted;
         TexturesFailed += other.TexturesFailed;
         Patched += other.Patched;
@@ -125,13 +127,24 @@ internal static class ContentBuild
         return found;
     }
 
+    // loose .AMA is in here because the pause menu is the one screen that reads an action file off
+    // the content root instead of out of an archive. Only G_PAUSE.AMA and G_PAUSE_L.AMA exist.
     private static Dictionary<string, string> Archives(string root)
     {
         var found = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var path in Directory.EnumerateFiles(root, "*.AMB", SearchOption.AllDirectories))
-            found[Path.GetRelativePath(root, path).Replace('\\', '/')] = path;
+        foreach (var pattern in new[] { "*.AMB", "*.AMA" })
+        {
+            foreach (var path in Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories))
+                found[Path.GetRelativePath(root, path).Replace('\\', '/')] = path;
+        }
 
         return found;
+    }
+
+    // an .AMA is an action file, not a container: nothing inside it to transcode, repack or check
+    private static bool IsLooseAma(string relative)
+    {
+        return string.Equals(Path.GetExtension(relative), ".AMA", StringComparison.OrdinalIgnoreCase);
     }
 
     // authored replacements, keyed like `unpack` lays a tree out but with the extension dropped so
@@ -184,6 +197,9 @@ internal static class ContentBuild
             EmitVariant(variant, source, baseArchives, profile, report);
             EmitMemberVariant(variant, source, baseArchives, profile, report);
         }
+
+        if (report.VariantsWithoutBase > 0)
+            report.Notes.Add($"{report.VariantsWithoutBase} variant archives the base has no counterpart for");
 
         // parallel emission makes arrival order arbitrary; sorting keeps two runs comparable
         report.Problems.Sort(StringComparer.OrdinalIgnoreCase);
@@ -247,6 +263,9 @@ internal static class ContentBuild
     private static byte[] Emit(byte[] bytes, string relative, BuildReport report,
         ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
     {
+        if (IsLooseAma(relative))
+            return bytes;
+
         try
         {
             var normalised = AmbTree.Normalise(bytes);
@@ -428,11 +447,11 @@ internal static class ContentBuild
 
         Each(spec.Archives, report, (key, local) =>
         {
+            // a variant may bring an archive the base has no counterpart for, which is how the
+            // console pause menu gets G_PAUSE_P* and G_PAUSE_WIN. It still ships as a sibling, so
+            // amFsResolvedVariant gates it with the rest of the screen and it is absent otherwise
             if (!baseArchives.ContainsKey(key))
-            {
-                local.Problems.Add($"{key}: variant '{spec.Source}' names an archive the base does not have");
-                return;
-            }
+                local.VariantsWithoutBase++;
 
             if (!variantArchives.TryGetValue(key, out var path))
             {
@@ -597,7 +616,9 @@ internal static class ContentBuild
         var report = new CheckReport();
         var problems = report.Problems;
         var baseArchives = Archives(sources.Source(profile.Base));
-        var variantSuffixes = profile.Variants.Select(v => "." + v.Name + ".AMB").ToArray();
+        var variantSuffixes = profile.Variants
+            .SelectMany(v => new[] { "." + v.Name + ".AMB", "." + v.Name + ".AMA" })
+            .ToArray();
         var appended = 0;
 
         if (!Directory.Exists(profile.Output))
@@ -614,6 +635,10 @@ internal static class ContentBuild
                 problems.Add($"{pair.Key}: missing from the output");
                 continue;
             }
+
+            // a loose .AMA has no members to hold in place; being present is the whole check
+            if (IsLooseAma(pair.Key))
+                continue;
 
             if (!AmbTree.TryReadNested(File.ReadAllBytes(pair.Value), out var expected))
             {
@@ -658,8 +683,9 @@ internal static class ContentBuild
             .SelectMany(name => Archives(sources.Source(name)).Keys)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        // an output archive that is none of base, declared variant sibling, or declared overlay
-        foreach (var path in Directory.EnumerateFiles(profile.Output, "*.AMB", SearchOption.AllDirectories))
+        // an output file that is none of base, declared variant sibling, or declared overlay
+        foreach (var pattern in new[] { "*.AMB", "*.AMA" })
+        foreach (var path in Directory.EnumerateFiles(profile.Output, pattern, SearchOption.AllDirectories))
         {
             var relative = Path.GetRelativePath(profile.Output, path).Replace('\\', '/');
             if (baseArchives.ContainsKey(relative) || overlayArchives.Contains(relative))

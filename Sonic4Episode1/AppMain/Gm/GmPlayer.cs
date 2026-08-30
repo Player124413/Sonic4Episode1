@@ -1267,7 +1267,7 @@ internal partial class AppMain
         return false;
     }
 
-    private static bool GmPlayerKeyCheckJumpKeyOn(GMS_PLAYER_WORK ply_work)
+    public static bool GmPlayerKeyCheckJumpKeyOn(GMS_PLAYER_WORK ply_work)
     {
         return (ply_work.key_on & 160) != 0;
     }
@@ -1309,7 +1309,7 @@ internal partial class AppMain
                ((GMS_ENEMY_COM_WORK)ply_work.gmk_obj).target_obj == (OBS_OBJECT_WORK)ply_work;
     }
 
-    private static bool GmPlayerIsTransformSuperSonic(GMS_PLAYER_WORK ply_work)
+    public static bool GmPlayerIsTransformSuperSonic(GMS_PLAYER_WORK ply_work)
     {
         return ((int)g_gm_main_system.game_flag & 1048576) == 0 && (ply_work.player_flag & 1049600) == 0 &&
                (!GSM_MAIN_STAGE_IS_SPSTAGE() && ((int)g_gs_main_sys_info.game_flag & 32) != 0) &&

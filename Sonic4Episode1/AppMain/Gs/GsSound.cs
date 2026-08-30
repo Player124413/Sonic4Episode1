@@ -299,6 +299,8 @@ internal partial class AppMain
             else
             {
                 this.m_stGMState = MediaState.Playing;
+                this.status = STATUS_PLAYING;
+                this.m_fBGVolume = -1f;
                 Microsoft.Xna.Framework.Media.MediaPlayer.Resume();
             }
         }
@@ -886,7 +888,7 @@ internal partial class AppMain
             //Console.WriteLine(CriAuPlayer.m_ActiveSong);
             if (auply.type == CriAuPlayer.TYPE_BGM && auply.se_name == CriAuPlayer.m_ActiveSong) // TYPE_BGM
             {
-                if (Microsoft.Xna.Framework.Media.MediaPlayer.State != MediaState.Playing && auply.status == CriAuPlayer.STATUS_PLAYING) // STATUS_PLAYING 
+                if (state == MediaState.Stopped && auply.status == CriAuPlayer.STATUS_PLAYING) // STATUS_PLAYING
                 {
                     auply.m_stGMState = state;
                     auply.status = CriAuPlayer.STATUS_PLAYEND; // STATUS_PLAYEND
@@ -1374,7 +1376,7 @@ internal partial class AppMain
     {
     }
 
-    private static GSS_SND_SE_HANDLE GsSoundAllocSeHandle()
+    public static GSS_SND_SE_HANDLE GsSoundAllocSeHandle()
     {
         for (int index = 0; index < 16; ++index)
         {
@@ -1392,7 +1394,7 @@ internal partial class AppMain
         return gs_sound_se_handle_error;
     }
 
-    private static void GsSoundFreeSeHandle(GSS_SND_SE_HANDLE se_handle)
+    public static void GsSoundFreeSeHandle(GSS_SND_SE_HANDLE se_handle)
     {
         if (gs_sound_se_handle_error == se_handle)
         {

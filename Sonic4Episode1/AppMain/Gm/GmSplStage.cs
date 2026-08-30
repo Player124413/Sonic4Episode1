@@ -135,7 +135,7 @@ internal partial class AppMain
         IzFadeRestoreDrawSetting();
         GmObjSetAllObjectNoDisp();
         GmRingGetWork().flag |= 1U;
-        GmFixSetDisp(false);
+        GmFix.GmFixSetDisp(false);
         work.flag |= 4U;
         work.counter = 1U;
         mtTaskChangeTcbProcedure(tcb, new GSF_TASK_PROCEDURE(gmSplStageGotoEnd));

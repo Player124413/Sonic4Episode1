@@ -78,18 +78,18 @@
     {
         if (!GmPauseMenuIsFinished())
             return;
-        int result = GmPauseMenuGetResult();
+        GmPauseMenu.GME_PMENU_RESULT result = GmPauseMenuGetResult();
         bool flag = false;
         switch (result)
         {
-            case 0:
-            case 2:
-            case 3:
+            case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_RETRY:
+            case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_BACK:
+            case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_MAINMENU:
                 SaveState.deleteSave();
                 flag = true;
                 pause_work.proc_update = new GMS_PAUSE_WORK._proc_update_(gmPauseProcUpdateFadeOutToExitGame);
                 break;
-            case 1:
+            case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_OPTION:
                 flag = true;
                 pause_work.proc_update = new GMS_PAUSE_WORK._proc_update_(gmPauseProcUpdateFadeOutToOption);
                 break;

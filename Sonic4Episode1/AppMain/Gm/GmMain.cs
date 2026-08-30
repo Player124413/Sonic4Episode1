@@ -7,18 +7,13 @@ internal partial class AppMain
 {
     public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f;
     public const float GMD_CAMERA_UP_SCALE_MAX = 0.3371917f;
-#if false
-    public const float GMD_CAMERA_SCALE = (0.078125f * 2.19089f * GMD_OBJ_DRAW_SCALE);
-#else
     public const float GMD_CAMERA_SCALE = 0.5469176375f;
-#endif
 
-    public const short GMD_OBJ_CLIP_LCD_X = 383;
-    public const short GMD_OBJ_CLIP_LCD_Y = 215;
+    // the scene is drawn rolled 90deg and unrolled in clip space, so screen width comes off
+    // disp_height and screen height off disp_height*aspect. see docs/camera-view-extent.md
+    public static short GMD_OBJ_LCD_X => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT);
 
-    public static short GMD_OBJ_LCD_X => (short)(GMD_CAMERA_SCALE * GSD_DISP_WIDTH);
-
-    public static short GMD_OBJ_LCD_Y => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT);
+    public static short GMD_OBJ_LCD_Y => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT * AMD_SCREEN_ASPECT);
 
     public static bool GMM_MAIN_STAGE_IS_BOSS()
     {
@@ -93,15 +88,9 @@ internal partial class AppMain
         if (((int)g_gs_main_sys_info.game_flag & 4) == 0)
             gmMainSysInit();
         if (g_gs_main_sys_info.stage_id == 9)
-        {
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, (short)(GMD_OBJ_LCD_X * 1.42), (short)(GMD_OBJ_LCD_X * 1.42), GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
-            ObjObjectClipLCDSet((short)(GMD_OBJ_CLIP_LCD_X * 1.42), (short)(GMD_OBJ_CLIP_LCD_X * 1.42));
-        }
         else
-        {
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
-            ObjObjectClipLCDSet(GMD_OBJ_CLIP_LCD_X, GMD_OBJ_CLIP_LCD_Y);
-        }
         ObjDataAlloc(994);
         ObjDrawESEffectSystemInit(0, 20480U, 5U);
         amTrailEFInitialize();
@@ -152,7 +141,7 @@ internal partial class AppMain
         ObjObjectClearAllObject();
         ObjPreExit();
         GmMapExit();
-        GmFixExit();
+        GmFix.GmFixExit();
         GmPauseExit();
         GmRingExit();
         GmCameraExit();
@@ -163,7 +152,7 @@ internal partial class AppMain
         GmEventMgrExit();
         ObjDrawESEffectSystemExit();
         GmClearDemoExit();
-        GmOverExit();
+        GmOver.GmOverExit();
         GmSplStageExit();
         GmEndingExit();
         GmStartDemo.GmStartDemoExit();
@@ -399,7 +388,7 @@ internal partial class AppMain
     }
 
 
-    private static int GmMainKeyCheckPauseKeyOn()
+    public static int GmMainKeyCheckPauseKeyOn()
     {
         int num1 = -1;
         uint num2 = 215;
@@ -801,7 +790,7 @@ internal partial class AppMain
         GmDecoInit();
         GmWaterSurfaceInit();
         GmPlyEfctTrailSysInit();
-        GmFixInit();
+        GmFix.GmFixInit();
         GmCameraInit();
         GmSoundInit();
         GmRingInit();
@@ -978,7 +967,7 @@ internal partial class AppMain
                     if (g_gm_main_system.player_rest_num[0] == 0U)
                     {
                         g_gm_main_system.game_flag |= 32U;
-                        GmOverStart(0);
+                        GmOver.GmOverStart((int)GmOver.GME_OVER_TYPE.GME_OVER_TYPE_GAMEOVER);
                         GmSoundPlayGameOver();
                     }
                     else
@@ -988,7 +977,7 @@ internal partial class AppMain
                         if (((int)g_gm_main_system.game_flag & 512) != 0)
                         {
                             g_gm_main_system.game_flag |= 32U;
-                            GmOverStart(1);
+                            GmOver.GmOverStart((int)GmOver.GME_OVER_TYPE.GME_OVER_TYPE_TIMEOVER);
                         }
                         else
                             IzFadeInitEasy(0U, 1U, 15f);
@@ -1032,7 +1021,10 @@ internal partial class AppMain
             }
             if (gmMainCheckExeSyncTimerCount())
                 ++g_gm_main_system.sync_time;
-            if ((GmMainKeyCheckPauseKeyPush() != -1 || gmMainIsSuspendedPause() || (isBackKeyPressed() || !isForeground) || g_ao_sys_global.is_show_ui) && GmPauseCheckExecutable())
+            // start is the console pause button (gmMain.cpp:3253); the touch check and the back key
+            // are the mobile and WP7 arms. Select reaching this at all is the WP7 hardware back key
+            // being wired to the pad's Back button in Sonic4Ep1.cs.
+            if ((GmMainKeyCheckPauseKeyPush() != -1 || gmMainIsSuspendedPause() || (isBackKeyPressed() || !isForeground) || g_ao_sys_global.is_show_ui || (AoPad.AoPadStand() & ControllerConsts.START) != 0) && GmPauseCheckExecutable())
             {
                 setBackKeyRequest(false);
                 GmMainClearSuspendedPause();
@@ -1044,7 +1036,7 @@ internal partial class AppMain
                     return;
                 gmMainDecideNextEvt();
                 g_gm_main_system.game_flag &= 4294967167U;
-                if (GmPauseMenuGetResult() == 0)
+                if (GmPauseMenuGetResult() == GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_RETRY)
                 {
                     GmMainRestartExit();
                     GmMainGSRetryInit();
@@ -1062,13 +1054,13 @@ internal partial class AppMain
         {
             switch (GmPauseMenuGetResult())
             {
-                case 0:
+                case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_RETRY:
                     evt_case = 1;
                     break;
-                case 2:
+                case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_BACK:
                     evt_case = 0;
                     break;
-                case 3:
+                case GmPauseMenu.GME_PMENU_RESULT.GME_PMENU_RESULT_MAINMENU:
                     evt_case = 4;
                     break;
                 default:

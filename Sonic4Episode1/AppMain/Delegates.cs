@@ -58,11 +58,7 @@ internal partial class AppMain
         NNS_OBJECT nnso,
         object o);
 
-    public delegate void MPP_VOID_GMS_FIX_PART_WORK(GMS_FIX_PART_WORK pPart);
-
     public delegate void MPP_VOID_OBS_OBJECT_WORK(OBS_OBJECT_WORK pPart);
-
-    public delegate void GMF_FIX_PART_INIT_FUNC(GMS_FIX_MGR_WORK pArg);
 
     public delegate void MPP_VOID_GMSGAMEDATLOADCONTEXT(GMS_GAMEDAT_LOAD_CONTEXT p);
 
@@ -134,8 +130,6 @@ internal partial class AppMain
     public delegate void pfnGMS_SMSG_MGR_WORK(GMS_SMSG_MGR_WORK p);
 
     public delegate void seq_func_delegate(GMS_PLAYER_WORK ply_work);
-
-    public delegate void _GMS_OVER_MGR_WORK_UD_(GMS_OVER_MGR_WORK _gms_over_mgr_work);
 
     public delegate void _ring_work_func_delegate_(GMS_RING_WORK gms_ring_work);
 

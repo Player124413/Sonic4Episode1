@@ -27,7 +27,7 @@ internal partial class AppMain
         aoSysExit();
     }
 
-    private static bool AoSysIsShowPlatformUI()
+    public static bool AoSysIsShowPlatformUI()
     {
         return g_ao_sys_global.is_show_ui;
     }

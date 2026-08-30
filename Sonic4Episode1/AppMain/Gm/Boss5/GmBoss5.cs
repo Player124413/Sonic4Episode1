@@ -3323,7 +3323,7 @@ internal partial class AppMain
         if (GmFadeIsEnd(fade_obj) == 0)
             return;
         gmBoss5RequestClearAlarmFade(parentObj);
-        GmFixSetDisp(false);
+        GmFix.GmFixSetDisp(false);
         obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmBoss5LastFadeOutEnd);
     }
 

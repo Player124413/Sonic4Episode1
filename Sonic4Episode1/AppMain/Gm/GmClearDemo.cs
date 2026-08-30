@@ -842,7 +842,7 @@ internal partial class AppMain
         GmSoundStopBGMJingle(64);
         GsSoundStopSe();
         GmMapSetDisp(false);
-        GmFixSetDisp(false);
+        GmFix.GmFixSetDisp(false);
         GmObjSetAllObjectNoDisp();
         GmRingGetWork().flag |= 1U;
         g_gm_main_system.game_flag |= 8192U;

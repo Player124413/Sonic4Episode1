@@ -21,7 +21,7 @@
     public static void GmEndingStart()
     {
         g_gm_main_system.game_flag |= 8388608U;
-        GmFixSetDispEx(false, false, false, true, false);
+        GmFix.GmFixSetDispEx(false, false, false, true, false);
         gm_ending_tcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(gmEndingCtrl), null, 0U, 0, 18448U, 5, () => new GMS_ENDING_WORK(), "ENDING_CTRL");
         GMS_ENDING_WORK work = (GMS_ENDING_WORK)gm_ending_tcb.work;
         work.step = 0;

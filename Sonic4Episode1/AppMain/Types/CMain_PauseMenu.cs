@@ -307,13 +307,15 @@ internal partial class AppMain
                 this.m_act[index].Draw();
         }
 
+        // pinned to the base: the console pause archives are a different screen, 6 actions against
+        // these tables' 10, so they must never resolve here. see docs/pause-action-ids.md
         private void fileLoadingStart()
         {
-            this.m_file[0] = readAMAFile("G_COM/MENU/G_PAUSE.AMA");
-            this.pause_amb = amFsReadBackground("G_COM/MENU/G_PAUSE.AMB");
-            this.m_file[1] = readAMAFile("G_COM/MENU/G_PAUSE_L.AMA");
+            this.m_file[0] = readAMAFileAs("G_COM/MENU/G_PAUSE.AMA", AMD_FS_VARIANT_BASE);
+            this.pause_amb = amFsReadBackgroundAs("G_COM/MENU/G_PAUSE.AMB", AMD_FS_VARIANT_BASE);
+            this.m_file[1] = readAMAFileAs("G_COM/MENU/G_PAUSE_L.AMA", AMD_FS_VARIANT_BASE);
             int language = GsEnvGetLanguage();
-            this.lang_amb = amFsReadBackground(file1.c_lang_amb[language]);
+            this.lang_amb = amFsReadBackgroundAs(file1.c_lang_amb[language], AMD_FS_VARIANT_BASE);
             this.m_flag[0] = true;
             this.m_flag[3] = true;
             this.AttachTask("gmPauseMenu.Load", 28928U, 0U, 0U);

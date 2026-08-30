@@ -547,13 +547,8 @@ internal partial class AppMain
             main_camera_pos[0].x = map_sys_work.main_cam_user_disp[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
             main_camera_pos[1].x = map_sys_work.main_cam_user_target[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
         }
-#if !_IPHONE
-        cam_disp_width_half = (float)(GSD_DISP_WIDTH / 2) * GMD_CAMERA_SCALE;
-        cam_disp_height_half = (float)(GSD_DISP_HEIGHT / 2) * GMD_CAMERA_SCALE;
-#else //!_IPHONE
-	    cam_disp_width_half	= (float)(AMD_SCREEN_2D_WIDTH/2) * GMD_CAMERA_SCALE;
-	    cam_disp_height_half= (float)(AMD_SCREEN_2D_HEIGHT/2) * GMD_CAMERA_SCALE;
-#endif //!_IPHONE
+        cam_disp_width_half = (float)(OBD_LCD_X / 2);
+        cam_disp_height_half = (float)(OBD_LCD_Y / 2);
         // 限界位置
         limit_left = 0 + cam_disp_width_half;
         limit_right = g_gm_main_system.map_size[MTD_X] - cam_disp_width_half;

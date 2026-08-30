@@ -66,8 +66,8 @@ internal partial class AppMain
         OBS_CAMERA obsCamera = ObjCameraGet(0);
         int num1 = FXM_FLOAT_TO_FX32(obsCamera.pos.x) >> 12;
         int num2 = -FXM_FLOAT_TO_FX32(obsCamera.pos.y) >> 12;
-        int num3 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * obsCamera.scale) >> 12;
-        int num4 = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * obsCamera.scale) >> 12;
+        int num3 = OBD_LCD_X / 2;
+        int num4 = OBD_LCD_Y / 2;
         int userWork1 = (int)obj_work.user_work;
         int userWork2 = (int)obj_work.user_work;
         byte num5 = 1;
@@ -182,8 +182,8 @@ internal partial class AppMain
         //int lcd_width = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_WIDTH / 2f * obsCamera.scale) >> 12;
         //int lcd_height = FXM_FLOAT_TO_FX32(AMD_SCREEN_2D_HEIGHT / 2f * obsCamera.scale) >> 12;
 
-        int lcd_width = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_WIDTH / 2) * obsCamera.scale) >> FX32_SHIFT;
-        int lcd_height = FXM_FLOAT_TO_FX32((float)(AMD_SCREEN_2D_HEIGHT / 2) * obsCamera.scale) >> FX32_SHIFT;
+        int lcd_width = OBD_LCD_X / 2;
+        int lcd_height = OBD_LCD_Y / 2;
         byte num7 = 1;
         if (((obj_work.user_flag) & 1) != 0 && g_gm_main_system.map_fcol.left != gmkCamScrLimitWork.limit_setting.limit_rect[0])
         {

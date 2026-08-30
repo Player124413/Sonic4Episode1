@@ -64,7 +64,7 @@
         gmsEffect3DesWork2.obj_3des.command_state = 10U;
         parentObj1.enemy_flag |= 65536U;
         GmSoundPlaySE("Special6");
-        GmFixRequestTimerFlash();
+        GmFix.GmFixRequestTimerFlash();
         g_gm_main_system.game_time += gm_gmk_ss_time_add_subtract[(int)parentObj1.obj_work.user_work];
         parentObj1.obj_work.flag |= 4U;
     }

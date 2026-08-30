@@ -66,7 +66,7 @@
         GmSoundPlaySE(cue_name, null);
     }
 
-    private static void GmSoundPlaySE(string cue_name, GSS_SND_SE_HANDLE se_handle)
+    public static void GmSoundPlaySE(string cue_name, GSS_SND_SE_HANDLE se_handle)
     {
         GsSoundPlaySe(cue_name, se_handle);
     }
@@ -402,9 +402,9 @@
     {
         if (((int)gm_sound_flag & 67108864) != 0)
             GsSoundResumeBgm(gm_sound_jingle_scb, 0);
-        else if (((int)gm_sound_flag & 33554432) != 0)
+        if (((int)gm_sound_flag & 33554432) != 0)
             GsSoundResumeBgm(gm_sound_jingle_bgm_scb, 0);
-        else if (((int)gm_sound_flag & 16777216) != 0)
+        if (((int)gm_sound_flag & 16777216) != 0)
             GsSoundResumeBgm(gm_sound_bgm_scb, 0);
         GsSoundResumeSe(128U);
         gm_sound_flag &= 4043309055U;

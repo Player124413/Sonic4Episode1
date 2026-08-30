@@ -76,9 +76,9 @@ internal partial class AppMain
     public static void GmCameraPosSet(int pos_x, int pos_y, int pos_z)
     {
         OBS_CAMERA obsCamera = ObjCameraGet(0);
-        float lcd_width = (float)(GSD_DISP_WIDTH / 2) * obsCamera.scale;
-        float lcd_height = (float)(GSD_DISP_HEIGHT / 2) * obsCamera.scale;
-        float bottom = g_gm_main_system.map_fcol.bottom - (float)(GSD_DISP_HEIGHT / 2) * obsCamera.scale;
+        float lcd_width = (float)(OBD_LCD_X / 2);
+        float lcd_height = (float)(OBD_LCD_Y / 2);
+        float bottom = g_gm_main_system.map_fcol.bottom - (float)(OBD_LCD_Y / 2);
         obsCamera.pos.x = FXM_FX32_TO_FLOAT(pos_x);
         if (obsCamera.pos.x < (double)lcd_width)
             obsCamera.pos.x = lcd_width;
@@ -144,49 +144,40 @@ internal partial class AppMain
 
     public static void GmCameraSetClipCamera(OBS_CAMERA obj_camera)
     {
-        if (false)
-        {
+        float left = (float)(g_gm_main_system.map_fcol.left + OBD_OBJ_CLIP_LCD_X / 2);
+        float right = (float)(g_gm_main_system.map_fcol.right - OBD_OBJ_CLIP_LCD_X / 2);
+        float top = (float)(g_gm_main_system.map_fcol.top + OBD_OBJ_CLIP_LCD_Y / 2);
+        float bottom = (float)(g_gm_main_system.map_fcol.bottom - OBD_OBJ_CLIP_LCD_Y / 2);
 
-            ObjObjectClipCameraSet(g_obj.camera[0][0], g_obj.camera[0][1]);
+        float camera_x, camera_y;
+
+        if (obj_camera.disp_pos.x <= left)
+        {
+            camera_x = left;
+        }
+        else if (obj_camera.disp_pos.x >= right)
+        {
+            camera_x = right;
         }
         else
         {
-            float left = (float)(g_gm_main_system.map_fcol.left + GMD_OBJ_CLIP_LCD_X / 2);
-            float right = (float)(g_gm_main_system.map_fcol.right - GMD_OBJ_CLIP_LCD_X / 2);
-            float top = (float)(g_gm_main_system.map_fcol.top + GMD_OBJ_CLIP_LCD_Y / 2);
-            float bottom = (float)(g_gm_main_system.map_fcol.bottom - GMD_OBJ_CLIP_LCD_Y / 2);
-
-            float camera_x, camera_y;
-
-            if (obj_camera.disp_pos.x <= left)
-            {
-                camera_x = left;
-            }
-            else if (obj_camera.disp_pos.x >= right)
-            {
-                camera_x = right;
-            }
-            else
-            {
-                camera_x = obj_camera.disp_pos.x;
-            }
-            if (-obj_camera.disp_pos.y <= top)
-            {
-                camera_y = top;
-            }
-            else if (-obj_camera.disp_pos.y >= bottom)
-            {
-                camera_y = bottom;
-            }
-            else
-            {
-                camera_y = -obj_camera.disp_pos.y;
-            }
-
-
-            ObjObjectClipCameraSet(FXM_FLOAT_TO_FX32(camera_x - (float)(OBD_OBJ_CLIP_LCD_X / 2)),
-                                FXM_FLOAT_TO_FX32(camera_y - (float)(OBD_OBJ_CLIP_LCD_Y / 2)));
+            camera_x = obj_camera.disp_pos.x;
         }
+        if (-obj_camera.disp_pos.y <= top)
+        {
+            camera_y = top;
+        }
+        else if (-obj_camera.disp_pos.y >= bottom)
+        {
+            camera_y = bottom;
+        }
+        else
+        {
+            camera_y = -obj_camera.disp_pos.y;
+        }
+
+        ObjObjectClipCameraSet(FXM_FLOAT_TO_FX32(camera_x - (float)(OBD_OBJ_CLIP_LCD_X / 2)),
+                            FXM_FLOAT_TO_FX32(camera_y - (float)(OBD_OBJ_CLIP_LCD_Y / 2)));
     }
 
     private static void GmCameraFunc(OBS_CAMERA obj_camera)
@@ -429,17 +420,10 @@ internal partial class AppMain
 
         // 表示限界リミットチェック
         {
-#if true
-            float left = g_gm_main_system.map_fcol.left + (float)(OBD_LCD_X / 2) * obj_camera.scale;
-            float right = g_gm_main_system.map_fcol.right - (float)(OBD_LCD_X / 2) * obj_camera.scale;
-            float top = g_gm_main_system.map_fcol.top + (float)(OBD_LCD_Y / 2) * obj_camera.scale;
-            float bottom = g_gm_main_system.map_fcol.bottom - (float)(OBD_LCD_Y / 2) * obj_camera.scale;
-#else
-            float left = g_gm_main_system.map_fcol.left + (float)(AMD_SCREEN_2D_WIDTH / 2) * obj_camera.scale;
-            float right = g_gm_main_system.map_fcol.right - (float)(AMD_SCREEN_2D_WIDTH / 2) * obj_camera.scale;
-            float top = g_gm_main_system.map_fcol.top + (float)(AMD_SCREEN_2D_HEIGHT / 2) * obj_camera.scale;
-            float bottom = g_gm_main_system.map_fcol.bottom - (float)(AMD_SCREEN_2D_HEIGHT / 2) * obj_camera.scale;
-#endif
+            float left = g_gm_main_system.map_fcol.left + (float)(OBD_LCD_X / 2);
+            float right = g_gm_main_system.map_fcol.right - (float)(OBD_LCD_X / 2);
+            float top = g_gm_main_system.map_fcol.top + (float)(OBD_LCD_Y / 2);
+            float bottom = g_gm_main_system.map_fcol.bottom - (float)(OBD_LCD_Y / 2);
             // scale変更時の左右端チェック
 #if true
             // 左端チェック

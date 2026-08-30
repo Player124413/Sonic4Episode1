@@ -13,12 +13,25 @@ public class CockpitLanguageTests
 
     private const int JP = 0, US = 1, GE = 4, SP = 5, FI = 6, PT = 7, RU = 8, CN = 9, HK = 10;
 
+    // the ported modules own their tables; the rest are still on AppMain
+    private static readonly System.Type[] Owners =
+    {
+        typeof(AppMain), typeof(GmFix), typeof(GmOver), typeof(GmStartDemo),
+    };
+
     private static int[] Table(string name)
     {
-        var field = typeof(AppMain).GetField(name, BindingFlags.NonPublic | BindingFlags.Static)
-            ?? typeof(AppMain).GetField(name, BindingFlags.Public | BindingFlags.Static);
+        FieldInfo field = null;
+        foreach (var owner in Owners)
+        {
+            field = owner.GetField(name, BindingFlags.NonPublic | BindingFlags.Static)
+                ?? owner.GetField(name, BindingFlags.Public | BindingFlags.Static);
 
-        Assert.True(field != null, $"AppMain.{name} not found");
+            if (field != null)
+                break;
+        }
+
+        Assert.True(field != null, $"{name} not found on any of {string.Join(", ", Owners.Select(t => t.Name))}");
 
         return field.GetValue(null) switch
         {
@@ -37,6 +50,7 @@ public class CockpitLanguageTests
         "gm_over_ama_amb_idx_tbl",
         "g_gm_clear_demo_data_ama_id",
         "g_gm_clear_demo_data_amb_id",
+        "gm_start_demo_data_amb_id",
     };
 
     [Theory]

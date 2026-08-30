@@ -37,7 +37,7 @@
         return amTaskMake(_am_default_taskp, proc, dest, prio, user, attr, name, stall, group, run);
     }
 
-    private static void amTaskSetProcedure(AMS_TCB tcb, TaskProc proc)
+    public static void amTaskSetProcedure(AMS_TCB tcb, TaskProc proc)
     {
         tcb.procedure = proc;
         tcb.proc_addr = int.MaxValue;
