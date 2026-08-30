@@ -1,6 +1,6 @@
 ﻿internal partial class AppMain
 {
-    private static OBS_OBJECT_WORK GMM_COCKPIT_CREATE_WORK(
+    public static OBS_OBJECT_WORK GMM_COCKPIT_CREATE_WORK(
       TaskWorkFactoryDelegate work_size,
       OBS_OBJECT_WORK parent_obj,
       ushort sort_prio,

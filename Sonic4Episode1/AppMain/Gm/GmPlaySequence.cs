@@ -80,7 +80,7 @@ internal partial class AppMain
         ply_work.player_flag &= int.MaxValue;
     }
 
-    private static bool GmPlySeqChangeSequence(GMS_PLAYER_WORK ply_work, int seq_state)
+    public static bool GmPlySeqChangeSequence(GMS_PLAYER_WORK ply_work, int seq_state)
     {
         GmPlySeqChangeSequenceState(ply_work, seq_state);
         if (ply_work.seq_init_tbl[seq_state] == null)
@@ -3632,7 +3632,7 @@ internal partial class AppMain
         ply_work.timer = 16;
     }
 
-    private static void GmPlySeqInitDemoFw(GMS_PLAYER_WORK ply_work)
+    public static void GmPlySeqInitDemoFw(GMS_PLAYER_WORK ply_work)
     {
         GmPlySeqChangeSequenceState(ply_work, 39);
         GmPlayerStateGimmickInit(ply_work);

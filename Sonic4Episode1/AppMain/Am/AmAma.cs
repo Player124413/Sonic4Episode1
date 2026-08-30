@@ -7,12 +7,19 @@ internal partial class AppMain
     public static void amMemFree(object obj) { }
 
 
+    public const int AMA_FILE_ID = 0x414D4123;
+    public const int AMA_HEADER_SIZE = 0x20;
+
     public static A2S_AMA_HEADER readAMAFile(string name)
     {
         using (Stream input = TitleContainer.OpenStream("Content\\" + name))
         {
-            using (BinaryReader br = new BinaryReader(input))
-                return readAMAFile(br);
+            using (MemoryStream buffered = new MemoryStream())
+            {
+                input.CopyTo(buffered);
+                var bytes = buffered.ToArray();
+                return readAMAFile(bytes, 0, bytes.Length, false);
+            }
         }
     }
 
@@ -20,8 +27,13 @@ internal partial class AppMain
     {
         if (data is A2S_AMA_HEADER)
             return (A2S_AMA_HEADER)data;
+
         AmbChunk ambChunk = (AmbChunk)data;
-        return readAMAFile(ambChunk.array, ambChunk.offset, ambChunk.amb != null && ambChunk.amb.big_endian);
+        return readAMAFile(
+            ambChunk.array,
+            ambChunk.offset,
+            ambChunk.length,
+            ambChunk.amb != null && ambChunk.amb.big_endian);
     }
 
     public static A2S_AMA_HEADER readAMAFile(byte[] data, int offset)
@@ -31,6 +43,16 @@ internal partial class AppMain
 
     public static A2S_AMA_HEADER readAMAFile(byte[] data, int offset, bool bigEndian)
     {
+        return readAMAFile(data, offset, data.Length - offset, bigEndian);
+    }
+
+    // bigEndian is what the containing archive claims. It is only believed when the header itself
+    // cannot settle the question, because a member can outlive its container's byte order: a
+    // per-member console variant splices an xbla .AMA into a little-endian archive.
+    public static A2S_AMA_HEADER readAMAFile(byte[] data, int offset, int length, bool bigEndian)
+    {
+        bigEndian = amAmaIsBigEndian(data, offset, length, bigEndian);
+
         using (MemoryStream memoryStream = new MemoryStream(data, offset, data.Length - offset))
         {
             using (BinaryReader br = bigEndian
@@ -38,6 +60,56 @@ internal partial class AppMain
                 : new BinaryReader(memoryStream))
                 return readAMAFile(br);
         }
+    }
+
+    // "#AMA" then version, node_num, act_num and four table offsets. The magic is a byte string so
+    // it says nothing about byte order, and unlike #AMB there is no field with a known value to
+    // compare against. What does settle it is that every count and offset has to land inside the
+    // file: read the wrong way round, act_tbl_offset 0x20 becomes 0x20000000.
+    private static bool amAmaIsBigEndian(byte[] data, int offset, int length, bool fallback)
+    {
+        if (length < AMA_HEADER_SIZE || offset < 0 || offset + length > data.Length)
+            return fallback;
+
+        if (amAmaReadInt(data, offset, bigEndian: false) != AMA_FILE_ID)
+            return fallback;
+
+        var little = amAmaHeaderScore(data, offset, length, bigEndian: false);
+        var big = amAmaHeaderScore(data, offset, length, bigEndian: true);
+
+        // an .AMA with no nodes, no acts and no tables reads the same either way, and then the
+        // container is the only thing that knows
+        return little == big ? fallback : big > little;
+    }
+
+    private static int amAmaHeaderScore(byte[] data, int offset, int length, bool bigEndian)
+    {
+        var score = 0;
+
+        // node_num and act_num, bounded by a dword each since no table entry is smaller
+        for (int field = 2; field <= 3; field++)
+        {
+            var value = amAmaReadInt(data, offset + field * 4, bigEndian);
+            if (value >= 0 && value <= length / 4)
+                score++;
+        }
+
+        // node_tbl, act_tbl, node_name_tbl, act_name_tbl
+        for (int field = 4; field <= 7; field++)
+        {
+            var value = amAmaReadInt(data, offset + field * 4, bigEndian);
+            if (value >= 0 && value <= length)
+                score++;
+        }
+
+        return score;
+    }
+
+    private static int amAmaReadInt(byte[] data, int offset, bool bigEndian)
+    {
+        return bigEndian
+            ? data[offset] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3]
+            : data[offset + 3] << 24 | data[offset + 2] << 16 | data[offset + 1] << 8 | data[offset];
     }
 
     public static A2S_AMA_HEADER readAMAFile(BinaryReader br)

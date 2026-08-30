@@ -3,7 +3,7 @@
 internal partial class AppMain
 {
 
-    private static object ObjDataLoadAmbIndex(
+    public static object ObjDataLoadAmbIndex(
       OBS_DATA_WORK data_work,
       int index,
       AMS_AMB_HEADER amb)

@@ -62,7 +62,7 @@ internal partial class AppMain
             work.fs = amFsReadBackground(g_gs_init_loading_file_path);
         if (!amFsIsComplete(work.fs))
             return;
-        DmLoadingBuild(work.fs);
+        DmLoading.DmLoadingBuild(work.fs);
         amFsClearRequest(work.fs);
         work.fs = null;
         work.proc = new GSS_INIT_WORK.ProcDelegate(gsInitProcBuildLoadingFile);
@@ -70,7 +70,7 @@ internal partial class AppMain
 
     private static void gsInitProcBuildLoadingFile(GSS_INIT_WORK work)
     {
-        if (!DmLoadingBuildCheck())
+        if (!DmLoading.DmLoadingBuildCheck())
             return;
         work.proc = new GSS_INIT_WORK.ProcDelegate(gsInitProcLoadSysMsgFile);
     }

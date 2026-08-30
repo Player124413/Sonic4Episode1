@@ -262,8 +262,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_FILESLCT_NEXT_EVT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_FILESLCT_SAVE_FILE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_FILESLCT_WIN.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_LOADING_ACT.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_LOADING_DATA_TYPE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_LOGO_COM_LOAD_STATE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_MANUAL_DATA_TYPE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_SAVE_ACT.cs" />
@@ -274,8 +272,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_TITLE_NEXT_EVT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DME_TITLE_WIN_TYPE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_BUY_SCR_WORK.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_LOADING_MAIN_WORK.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_LOADING_MGR.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_LOGO_COM_LOAD_CONTEXT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_LOGO_COM_LOAD_FILE_INFO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\DMS_LOGO_COM_LOAD_WORK.cs" />
@@ -581,9 +577,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_SOUND_BGM_FADE_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_SOUND_BGM_WIN_BOSS_MGR_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_SPL_STG_WORK.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_START_DEMO_DATA.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_START_DEMO_MGR.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_START_DEMO_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_TVX_DRAW_STACK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_TVX_DRAW_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_TVX_EX_WORK.cs" />
@@ -869,6 +862,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnCalcMotionRotate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadPolarHandle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CPadVirtualPad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\Loading\Loading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)gm\StartDemo\StartDemo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)gm\StartDemo\StartDemoConsts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)gm\StartDemo\StartDemoTables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)gm\StartDemo\StartDemoTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\Loading\LoadingConsts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\Loading\LoadingTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlct.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctConsts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctDraw.cs" />
@@ -907,7 +907,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmSound.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmTitle.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmCmnBackup.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmLoading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmLogoSega.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmLogoSonic.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Dm\DmSave.cs" />
@@ -1060,7 +1059,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmScore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmSound.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmSplStage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmStartDemo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmStartMsg.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmTvx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmWaterSurface.cs" />

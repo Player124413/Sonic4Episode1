@@ -475,7 +475,9 @@ Output is always #AMB. The legacy magic-less layout is read only.";
         {
             var variants = profile.Variants.Count == 0
                 ? "none"
-                : string.Join(", ", profile.Variants.Select(v => $"{v.Source}({v.Archives.Count})"));
+                : string.Join(", ", profile.Variants.Select(v => v.Members.Count == 0
+                    ? $"{v.Source}({v.Archives.Count})"
+                    : $"{v.Source}({v.Members.Count} members)"));
             var heads = profile.Heads.Count == 0 ? "any" : string.Join(",", profile.Heads);
             var overlays = profile.Overlays.Count == 0 ? "none" : string.Join(",", profile.Overlays);
             var patches = profile.Patches.Count == 0 ? "none" : string.Join(",", profile.Patches);

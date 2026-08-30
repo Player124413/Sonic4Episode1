@@ -1,4 +1,6 @@
-﻿internal partial class AppMain
+﻿using gs.backup;
+
+internal partial class AppMain
 {
     public static void GmStartMsgExit()
     {
@@ -139,6 +141,81 @@
             ObjDraw3DNNUserFunc(new OBF_DRAW_USER_DT_FUNC(gmStartMsgDrawWindowPre_DT), null, 0, 13U);
             AoWinSysDrawState(0, AoTexGetTexList(gm_start_msg_aos_tex[1]), 0U, gm_start_msg_win_size_tbl[work.msg_type][language][0], gm_start_msg_win_size_tbl[work.msg_type][language][1], (gm_start_msg_win_size_tbl[work.msg_type][language][2] - 32f) * work.win_per, (float)((gm_start_msg_win_size_tbl[work.msg_type][language][3] - 32.0) * work.win_per * 0.899999976158142 - 16.0), 13U);
         }
+    }
+
+    public static bool GmStartMsgIsExe()
+    {
+        bool flag = false;
+        GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
+        if (((int)g_gs_main_sys_info.game_flag & 4) == 0)
+        {
+            SSystem instance = SSystem.CreateInstance();
+            switch (mainSysInfo.stage_id)
+            {
+                case 5:
+                    flag = !GsMainSysIsStageClear(5);
+                    break;
+                case 9:
+                    if (!GsMainSysIsStageClear(9))
+                        flag = true;
+                    else if ((512 & (int)mainSysInfo.game_flag) != 0)
+                    {
+                        if (!instance.IsAnnounce(SSystem.EAnnounce.TruckFlick))
+                            flag = true;
+                    }
+                    else if (!instance.IsAnnounce(SSystem.EAnnounce.TruckTilt))
+                        flag = true;
+                    if (flag)
+                    {
+                        if ((512 & (int)mainSysInfo.game_flag) != 0)
+                        {
+                            instance.SetAnnounce(SSystem.EAnnounce.TruckFlick, true);
+                            break;
+                        }
+                        instance.SetAnnounce(SSystem.EAnnounce.TruckTilt, true);
+                        break;
+                    }
+                    break;
+                case 21:
+                    if (!GsMainSysIsStageClear(21))
+                    {
+                        flag = true;
+                        goto case 22;
+                    }
+                    else
+                        goto case 22;
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
+                    if (!flag)
+                    {
+                        if ((512 & (int)mainSysInfo.game_flag) != 0)
+                        {
+                            if (!instance.IsAnnounce(SSystem.EAnnounce.SpecialStageFlick))
+                                flag = true;
+                        }
+                        else if (!instance.IsAnnounce(SSystem.EAnnounce.SpecialStageTilt))
+                            flag = true;
+                    }
+                    if (flag)
+                    {
+                        if ((512 & (int)mainSysInfo.game_flag) != 0)
+                        {
+                            instance.SetAnnounce(SSystem.EAnnounce.SpecialStageFlick, true);
+                            break;
+                        }
+                        instance.SetAnnounce(SSystem.EAnnounce.SpecialStageTilt, true);
+                        break;
+                    }
+                    break;
+            }
+        }
+        if (flag)
+            GmMainClearSuspendedPause();
+        return flag;
     }
 
     public static void GmStartMsgInit()

@@ -77,8 +77,8 @@ internal partial class AppMain
                     }
                     else
                     {
-                        texbuf = amTextureDecode(amb.data, amb.offsets[index],
-                            amb.lengths[index], ext);
+                        var chunk = amBindChunk(amb, index);
+                        texbuf = amTextureDecode(chunk.array, chunk.offset, chunk.length, ext);
                         amb.buf[index] = texbuf;
                     }
                 }

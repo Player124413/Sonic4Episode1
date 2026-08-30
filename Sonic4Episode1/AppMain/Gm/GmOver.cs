@@ -1,11 +1,17 @@
 ﻿internal partial class AppMain
 {
+    // slot 1 is the G_OVER_<lang> member, the only one that can sit past the end of the archive
+    private static int gmOverLanguage()
+    {
+        return GmGameDatCockpitLanguage(gm_over_tex_amb_idx_tbl, 1);
+    }
+
     private static void GmOverBuildDataInit()
     {
         for (int index = 0; index < 2; ++index)
         {
             gm_over_textures[index].Clear();
-            gm_over_texamb_list[index] = (AMS_AMB_HEADER)ObjDataLoadAmbIndex(null, gm_over_tex_amb_idx_tbl[GsEnvGetLanguage()][index], GmGameDatGetCockpitData());
+            gm_over_texamb_list[index] = (AMS_AMB_HEADER)ObjDataLoadAmbIndex(null, gm_over_tex_amb_idx_tbl[gmOverLanguage()][index], GmGameDatGetCockpitData());
             AoTexBuild(gm_over_textures[index], gm_over_texamb_list[index]);
             AoTexLoad(gm_over_textures[index]);
         }
@@ -59,7 +65,7 @@
         {
             OBS_OBJECT_WORK work2 = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "GAME_OVER");
             GMS_COCKPIT_2D_WORK cpit_2d = (GMS_COCKPIT_2D_WORK)work2;
-            ObjObjectAction2dAMALoadSetTexlist(work2, cpit_2d.obj_2d, null, null, gm_over_ama_amb_idx_tbl[GsEnvGetLanguage()][1], GmGameDatGetCockpitData(), AoTexGetTexList(gm_over_textures[1]), gm_over_string_act_id_tbl[GsEnvGetLanguage()][index], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work2, cpit_2d.obj_2d, null, null, gm_over_ama_amb_idx_tbl[gmOverLanguage()][1], GmGameDatGetCockpitData(), AoTexGetTexList(gm_over_textures[1]), gm_over_string_act_id_tbl[gmOverLanguage()][index], 0);
             work1.string_sub_parts[index] = cpit_2d;
             gmOverSetActionHide(cpit_2d);
         }
@@ -67,7 +73,7 @@
         {
             OBS_OBJECT_WORK work2 = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "GAME_OVER");
             GMS_COCKPIT_2D_WORK cpit_2d = (GMS_COCKPIT_2D_WORK)work2;
-            ObjObjectAction2dAMALoadSetTexlist(work2, cpit_2d.obj_2d, null, null, gm_over_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_over_textures[0]), gm_over_fadeout_act_id_tbl[index], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work2, cpit_2d.obj_2d, null, null, gm_over_ama_amb_idx_tbl[gmOverLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_over_textures[0]), gm_over_fadeout_act_id_tbl[index], 0);
             work1.fadeout_sub_parts[index] = cpit_2d;
             work2.pos.z = -65536;
             work2.disp_flag &= 4294967291U;

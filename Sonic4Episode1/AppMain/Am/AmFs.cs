@@ -33,6 +33,14 @@ internal partial class AppMain
         // null follows am_fs_variant; anything else pins this request to that variant
         public string variant;
 
+        // 0 not started, 1 parent read, 2 sibling read, 3 done
+        public int phase;
+
+        public int[] member_variant;
+        public string member_variant_name;
+        public AMS_AMB_HEADER member_variant_amb;
+        public int[] member_variant_index;
+
         public static explicit operator AMS_AMB_HEADER(AMS_FS fs)
         {
             return readAMBFile(fs);
@@ -63,6 +71,8 @@ internal partial class AppMain
             Buffer.BlockCopy(lengths, 0, amb_header.lengths, 0, this.lengths.Length * 4);
             this.amb_header.is_real_amb = is_real_amb;
             this.amb_header.big_endian = big_endian;
+            this.amb_header.member_variant_amb = this.member_variant_amb;
+            this.amb_header.member_variant_index = this.member_variant_index;
             amPreLoadAmbItems(this.amb_header);
         }
     }
@@ -327,11 +337,9 @@ internal partial class AppMain
 
     public static void amPreLoadAmbItems(AMS_AMB_HEADER amb)
     {
-        AmbChunk ambChunk = new AmbChunk(amb.data, 0, 0, amb);
         for (int index = 0; index < amb.files.Length; ++index)
         {
-            ambChunk.offset = amb.offsets[index];
-            ambChunk.length = amb.lengths[index];
+            AmbChunk ambChunk = amBindChunk(amb, index);
             string extension = Path.GetExtension(amb.files[index]);
             if (mppIsNnMotionMember(extension))
             {
@@ -349,8 +357,11 @@ internal partial class AppMain
         }
     }
 
-    // "<path> <variant>" lines, one per archive the content build emitted an alt version of
+    // "<path> <variant>" lines, one per archive the content build emitted an alt version of.
+    // "<path>#<index> <variant>" for a shared archive only some of whose members moved
     private static Dictionary<string, string> am_fs_variants;
+
+    private static Dictionary<string, int[]> am_fs_member_variants;
 
     // names the asset mode, not the dump it came from: console is assembled from more than one
     public const string AMD_FS_VARIANT_CONSOLE = "console";
@@ -367,23 +378,90 @@ internal partial class AppMain
         if (am_fs_variants != null)
             return am_fs_variants;
 
-        am_fs_variants = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
         {
             using var stream = TitleContainer.OpenStream("Content\\variants.txt");
             using var reader = new StreamReader(stream);
-            for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
-            {
-                var space = line.LastIndexOf(' ');
-                if (space > 0)
-                    am_fs_variants[line.Substring(0, space)] = line.Substring(space + 1);
-            }
+            amFsLoadVariants(reader);
         }
         catch (Exception)
         {
+            amFsLoadVariants(TextReader.Null);
         }
 
         return am_fs_variants;
+    }
+
+    internal static void amFsLoadVariants(TextReader reader)
+    {
+        am_fs_variants = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var members = new Dictionary<string, List<int>>(StringComparer.OrdinalIgnoreCase);
+
+        for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
+        {
+            var space = line.LastIndexOf(' ');
+            if (space <= 0)
+                continue;
+
+            var key = line.Substring(0, space);
+            var declared = line.Substring(space + 1);
+
+            var hash = key.LastIndexOf('#');
+            if (hash <= 0 || !int.TryParse(key.Substring(hash + 1), out var index))
+            {
+                am_fs_variants[key] = declared;
+                continue;
+            }
+
+            var path = amFsMemberKey(key.Substring(0, hash), declared);
+            if (!members.TryGetValue(path, out var indices))
+                members[path] = indices = new List<int>();
+
+            indices.Add(index);
+        }
+
+        am_fs_member_variants = new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in members)
+        {
+            // ascending, because the sparse sibling's members are paired with these positionally
+            pair.Value.Sort();
+            am_fs_member_variants[pair.Key] = pair.Value.ToArray();
+        }
+    }
+
+    private static string amFsMemberKey(string path, string variant)
+    {
+        return path.Replace('\\', '/') + "\n" + variant;
+    }
+
+    // the base indices this archive supplies from `variant`, or null for none. the archive itself
+    // still resolves to the base path: only these members come from the sibling
+    public static int[] amFsMemberVariantIndices(string path, string variant)
+    {
+        if (string.IsNullOrEmpty(variant))
+            return null;
+
+        amFsGetVariants();
+        return am_fs_member_variants.TryGetValue(amFsMemberKey(path, variant), out var indices)
+            ? indices
+            : null;
+    }
+
+    // the member-level counterpart of amFsAllVariant: a screen that names its own members of a
+    // shared archive, and falls back wholesale if any of them is missing
+    public static bool amFsAllMemberVariant(string variant, string path, params int[] indices)
+    {
+        var declared = amFsMemberVariantIndices(path, variant);
+        if (declared == null)
+            return false;
+
+        foreach (var index in indices)
+        {
+            if (Array.IndexOf(declared, index) < 0)
+                return false;
+        }
+
+        return true;
     }
 
     // null when this path comes back as the base asset, which is the only way to tell:
@@ -427,47 +505,70 @@ internal partial class AppMain
     {
         var key = path.Replace('\\', '/');
         var declared = amFsVariantFor(key, variant);
-        if (declared == null)
-            return key;
 
+        return declared == null ? key : amFsVariantPath(key, declared);
+    }
+
+    // G_COM/CPIT/CPIT_MAIN.AMB plus "console" -> G_COM/CPIT/CPIT_MAIN.console.AMB
+    public static string amFsVariantPath(string path, string variant)
+    {
+        var key = path.Replace('\\', '/');
         var dot = key.LastIndexOf('.');
-        return key.Substring(0, dot) + "." + declared + key.Substring(dot);
+
+        return key.Substring(0, dot) + "." + variant + key.Substring(dot);
+    }
+
+    // true once the whole file is in value.stream; false means the async copy is still running and
+    // the caller should come back next frame
+    private static bool amFsCopyInto(AMS_FS value, string resolved)
+    {
+        if (value.stream == null)
+        {
+            var stream = TitleContainer.OpenStream("Content\\" + resolved);
+
+            value.stream = new MemoryStream();
+#if ASYNC_IO
+#if ASYNC_TARGETING_PACK
+            value.readTask = Task.Factory.StartNew(() => stream.CopyTo(value.stream));
+#else
+            value.readTask = stream.CopyToAsync(value.stream);
+#endif
+#else
+            stream.CopyTo(value.stream);
+#endif
+        }
+
+        if (value.readTask != null && !value.readTask.IsCompleted)
+            return false;
+
+        value.stream.Seek(0, SeekOrigin.Begin);
+        value.readTask = null;
+        return true;
+    }
+
+    private static void amFsFinishCopy(AMS_FS value)
+    {
+        value.stream?.Dispose();
+        value.stream = null;
     }
 
     public static void amFsExecuteBackgroundRead()
     {
-        if (ams_fsList.Count > 0)
+        if (ams_fsList.Count == 0)
+            return;
+
+        AMS_FS value = ams_fsList.First.Value;
+
+        if (value.phase == 0)
         {
-            AMS_FS value = ams_fsList.First.Value;
+            var resolved = value.variant == null
+                ? amFsResolve(value.file_name)
+                : amFsResolveAs(value.file_name, value.variant);
 
-            if (value.stream == null)
-            {
-                var resolved = value.variant == null
-                    ? amFsResolve(value.file_name)
-                    : amFsResolveAs(value.file_name, value.variant);
-                var stream = TitleContainer.OpenStream("Content\\" + resolved);
-
-                value.stream = new MemoryStream();
-#if ASYNC_IO
-#if ASYNC_TARGETING_PACK
-                value.readTask = Task.Factory.StartNew(() => stream.CopyTo(value.stream));
-#else
-                value.readTask = stream.CopyToAsync(value.stream);
-#endif
-#else
-                stream.CopyTo(value.stream);
-#endif
-            }
-
-            if (value.readTask != null && !value.readTask.IsCompleted)
-            {
+            if (!amFsCopyInto(value, resolved))
                 return;
-            }
 
             value.data = (value.stream as MemoryStream).ToArray();
-            value.stream.Seek(0, SeekOrigin.Begin);
-
-            //Console.WriteLine("{0}", value.data.Length);
 
             AMS_AMB_HEADER parsed = new AMS_AMB_HEADER();
             readAmbHeader(value.stream, ref parsed);
@@ -482,14 +583,52 @@ internal partial class AppMain
             value.is_real_amb = parsed.is_real_amb;
             value.big_endian = parsed.big_endian;
 
-            value.makeAmbHeader();
-            value.stat = 3;
-            value.stream?.Dispose();
-            value.stream = null;
-            ams_fsList.RemoveFirst();
-            if (value.callback != null)            
-                value.callback(value);            
+            amFsFinishCopy(value);
+
+            value.member_variant_name = value.variant ?? am_fs_variant;
+            value.member_variant = amFsMemberVariantIndices(
+                value.file_name, value.member_variant_name);
+            value.phase = value.member_variant == null ? 2 : 1;
         }
+
+        // the sibling holds only the declared members, in the same ascending order the manifest
+        // gave them, so pairing is positional
+        if (value.phase == 1)
+        {
+            var sibling_path = amFsVariantPath(value.file_name, value.member_variant_name);
+            if (!amFsCopyInto(value, sibling_path))
+                return;
+
+            var sibling = new AMS_AMB_HEADER();
+            var bytes = (value.stream as MemoryStream).ToArray();
+            readAmbHeader(value.stream, ref sibling);
+            sibling.data = bytes;
+            sibling.dir = sibling_path;
+            sibling.buf = new object[sibling.file_num];
+            amPreLoadAmbItems(sibling);
+
+            value.member_variant_amb = sibling;
+            value.member_variant_index = new int[value.count];
+            for (int i = 0; i < value.count; i++)
+                value.member_variant_index[i] = -1;
+
+            for (int i = 0; i < value.member_variant.Length && i < sibling.file_num; i++)
+            {
+                var index = value.member_variant[i];
+                if (index >= 0 && index < value.count)
+                    value.member_variant_index[index] = i;
+            }
+
+            amFsFinishCopy(value);
+            value.phase = 2;
+        }
+
+        value.makeAmbHeader();
+        value.stat = 3;
+        value.phase = 3;
+        ams_fsList.RemoveFirst();
+        if (value.callback != null)
+            value.callback(value);
     }
 
 

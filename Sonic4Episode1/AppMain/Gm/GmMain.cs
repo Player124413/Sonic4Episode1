@@ -166,7 +166,7 @@ internal partial class AppMain
         GmOverExit();
         GmSplStageExit();
         GmEndingExit();
-        GmStartDemoExit();
+        GmStartDemo.GmStartDemoExit();
         GmStartMsgExit();
         CPadVirtualPad.CreateInstance().Release();
         CPadPolarHandle.CreateInstance().Release();
@@ -482,7 +482,7 @@ internal partial class AppMain
     {
         short[] char_id_list = new short[1];
         GmMainClearSuspendedPause();
-        DmLoadingStart();
+        DmLoading.DmLoadingStart();
         GmPauseMenuLoadStart();
         for (int index = 0; index < 1; ++index)
             char_id_list[index] = (short)g_gs_main_sys_info.char_id[index];
@@ -518,14 +518,14 @@ internal partial class AppMain
             return;
         GmGameDatLoadExit();
         g_gs_main_sys_info.game_flag |= 16U;
-        DmLoadingSetLoadComplete();
+        DmLoading.DmLoadingSetLoadComplete();
         mtTaskChangeTcbProcedure(tcb, new GSF_TASK_PROCEDURE(gmMainDataLoadingEndWait));
     }
 
     private static void gmMainDataLoadingEndWait(MTS_TASK_TCB tcb)
     {
         gmMainUpdateSuspendedPause();
-        if (!DmLoadingIsExit())
+        if (!DmLoading.DmLoadingIsExit())
             return;
         gmMainGameStart();
         mtTaskClearTcb(tcb);
@@ -827,7 +827,7 @@ internal partial class AppMain
         else if (g_gs_main_sys_info.game_mode == 2)
             GmEndingStart();
         else
-            GmStartDemoStart();
+            GmStartDemo.GmStartDemoStart();
     }
 
     private static void gmMainInitLight()

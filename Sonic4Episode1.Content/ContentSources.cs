@@ -35,6 +35,37 @@ internal sealed class VariantSpec
     public bool Flip;
 
     public List<string> Archives = new List<string>();
+
+    // `<archive>#<member>` for a shared archive where only some members may move, written to a
+    // sparse sibling instead of a whole one. CPIT_MAIN is the case: G_START can go console while
+    // G_FIX and G_RSLT, whose ids differ between builds, stay on the base
+    public List<MemberRef> Members = new List<MemberRef>();
+}
+
+internal readonly struct MemberRef
+{
+    public readonly string Archive;
+    public readonly string Member;
+
+    public MemberRef(string archive, string member)
+    {
+        Archive = archive;
+        Member = member;
+    }
+
+    public static MemberRef Parse(string profile, string source, string declared)
+    {
+        var hash = declared.IndexOf('#');
+        if (hash <= 0 || hash == declared.Length - 1)
+        {
+            throw new InvalidDataException(
+                $"profile '{profile}' variant '{source}': '{declared}' is not <archive>#<member>");
+        }
+
+        return new MemberRef(
+            declared.Substring(0, hash).Replace('\\', '/'),
+            declared.Substring(hash + 1));
+    }
 }
 
 internal sealed class ContentProfile
@@ -152,9 +183,26 @@ internal sealed class ContentSources
                 spec.Archives.Add(((string)archive).Replace('\\', '/'));
         }
 
-        if (spec.Archives.Count == 0)
+        if (body.TryGetValue("members", out var members))
+        {
+            foreach (var member in (TomlArray)members)
+                spec.Members.Add(MemberRef.Parse(profile, spec.Source, (string)member));
+        }
+
+        if (spec.Archives.Count == 0 && spec.Members.Count == 0)
             throw new InvalidDataException(
-                $"profile '{profile}' variant '{spec.Source}' names no archives; list them explicitly");
+                $"profile '{profile}' variant '{spec.Source}' names no archives or members; list them " +
+                "explicitly");
+
+        // a whole-archive swap and a member swap of the same archive would both want the same
+        // sibling filename, and the member one would lose
+        foreach (var member in spec.Members)
+        {
+            if (spec.Archives.Contains(member.Archive, StringComparer.OrdinalIgnoreCase))
+                throw new InvalidDataException(
+                    $"profile '{profile}' variant '{spec.Source}': {member.Archive} is named as both a " +
+                    "whole archive and a member swap");
+        }
 
         return spec;
     }

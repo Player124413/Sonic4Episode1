@@ -44,6 +44,35 @@ internal partial class AppMain
         return g_gm_gamedat_cockpit_main_arc;
     }
 
+    // FI/PT/RU/CN/HK are WP7 additions. Their CPIT_MAIN members sit past index 57 and only exist in
+    // the 98-member WP7 archive; every other build stops at 57 and indexing one throws.
+    // see docs/startdemo-port-notes.md
+    public static int GmGameDatCockpitLanguage(int[] member_by_language)
+    {
+        var lang = GsEnvGetLanguage();
+        return GmGameDatCockpitLanguageFor(lang, member_by_language[lang], gmGameDatCockpitMemberNum());
+    }
+
+    // for the modules whose table is [language][slot]; only the language-specific slot can be past
+    // the end, the shared one is always low
+    public static int GmGameDatCockpitLanguage(int[][] member_by_language, int slot)
+    {
+        var lang = GsEnvGetLanguage();
+        return GmGameDatCockpitLanguageFor(
+            lang, member_by_language[lang][slot], gmGameDatCockpitMemberNum());
+    }
+
+    internal static int GmGameDatCockpitLanguageFor(int lang, int member, int file_num)
+    {
+        return file_num > 0 && member >= file_num ? GSD_LANGUAGE_US : lang;
+    }
+
+    private static int gmGameDatCockpitMemberNum()
+    {
+        var cockpit = GmGameDatGetCockpitData();
+        return cockpit == null ? 0 : cockpit.file_num;
+    }
+
     public static void GmGameDatLoadInit(int proc_type, ushort stage_id, short[] char_id_list)
     {
         MTS_TASK_TCB mtsTaskTcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(gmDataLoadMain), new GSF_TASK_PROCEDURE(gmDataLoadDest), 0U, ushort.MaxValue, 2048U, 5, () => new GMS_GAMEDAT_LOAD_WORK(), "GM_LOAD");
@@ -572,7 +601,7 @@ internal partial class AppMain
         GmSoundBuild();
         GmFixBuildDataInit();
         GmClearDemoBuild();
-        GmStartDemoBuild();
+        GmStartDemo.GmStartDemoBuild();
         GmOverBuildDataInit();
         GmPauseMenuBuildStart();
         GmEfctCmnBuildDataInit();
@@ -606,7 +635,7 @@ internal partial class AppMain
 
     private static bool GmGameDatBuildStandardCheck()
     {
-        return GmPlayerBuildCheck() && GmSoundBuildCheck() && (GmRingBuildCheck() != 0 && GmFixBuildDataLoop()) && (GmClearDemoBuildCheck() && GmStartDemoBuildCheck() && (GmOverBuildDataLoop() && GmPauseMenuBuildIsFinished())) && GmEfctCmnBuildDataLoop();
+        return GmPlayerBuildCheck() && GmSoundBuildCheck() && (GmRingBuildCheck() != 0 && GmFixBuildDataLoop()) && (GmClearDemoBuildCheck() && GmStartDemo.GmStartDemoBuildCheck() && (GmOverBuildDataLoop() && GmPauseMenuBuildIsFinished())) && GmEfctCmnBuildDataLoop();
     }
 
     private static bool GmGameDatBuildAreaCheck()
@@ -647,7 +676,7 @@ internal partial class AppMain
         GmEfctCmnFlushDataInit();
         GmPauseMenuFlushStart();
         GmOverFlushDataInit();
-        GmStartDemoFlush();
+        GmStartDemo.GmStartDemoFlush();
         GmClearDemoFlush();
         GmFixFlushDataInit();
         GmSoundFlush();
@@ -679,7 +708,7 @@ internal partial class AppMain
 
     private static bool GmGameDatFlushStandardCheck()
     {
-        return GmRingFlushCheck() != 0 && GmEfctCmnFlushDataLoop() && (GmFixFlushDataLoop() && GmStartDemoFlushCheck()) && (GmClearDemoFlushCheck() && GmOverFlushDataLoop() && (GmPauseMenuFlushIsFinished() && GmGameDBuildCheckFlushModel())) && (GmWaterSurfaceCheckFlush() && GmPlayerFlushCheck());
+        return GmRingFlushCheck() != 0 && GmEfctCmnFlushDataLoop() && (GmFixFlushDataLoop() && GmStartDemo.GmStartDemoFlushCheck()) && (GmClearDemoFlushCheck() && GmOverFlushDataLoop() && (GmPauseMenuFlushIsFinished() && GmGameDBuildCheckFlushModel())) && (GmWaterSurfaceCheckFlush() && GmPlayerFlushCheck());
     }
 
     private static bool GmGameDatFlushAreaCheck()

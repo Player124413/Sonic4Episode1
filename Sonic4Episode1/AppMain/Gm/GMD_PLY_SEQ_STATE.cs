@@ -1,6 +1,6 @@
 ﻿internal partial class AppMain
 {
-    private const int GME_PLY_SEQ_STATE_FW = 0;
+    public const int GME_PLY_SEQ_STATE_FW = 0;
     private const int GME_PLY_SEQ_STATE_WALK = 1;
     private const int GME_PLY_SEQ_STATE_TURN = 2;
     private const int GME_PLY_SEQ_STATE_LOOKUP_ST = 3;

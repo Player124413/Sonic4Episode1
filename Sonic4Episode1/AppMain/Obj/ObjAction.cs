@@ -1093,7 +1093,7 @@ internal partial class AppMain
         ObjAction2dAMACreate(obj_2d);
     }
 
-    private static void ObjObjectAction2dAMALoadSetTexlist(
+    public static void ObjObjectAction2dAMALoadSetTexlist(
       OBS_OBJECT_WORK obj_work,
       OBS_ACTION2D_AMA_WORK obj_2d,
       OBS_DATA_WORK data_work,

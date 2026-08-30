@@ -77,4 +77,63 @@ public class AmaActionNameTests
             Assert.Equal(-1, ama.FindNode("anything"));
         }
     }
+
+    // D_LOAD.AMA out of DEMO/LOADING/D_LOADING.AMB in the iPad HD bundle and the xbla beta. Same
+    // file, same length, opposite byte order, so they pin the detection against each other.
+    //
+    // These live in this class rather than their own because readAMAFile's node and act caches are
+    // process-wide statics, cleared at the end of each parse. Sequential parses are fine; two test
+    // classes parsing at once are not, and xunit parallelises across classes.
+    private const string LittleEndian = "D_LOAD_MOBILE.AMA";
+    private const string BigEndian = "D_LOAD_XBLA.AMA";
+
+    private static readonly string[] LoadActNames =
+    {
+        "bg_white", "bg_bottom", "obi", "run", "stop", "period1", "period2", "period3", "text_load",
+    };
+
+    private static AppMain.A2S_AMA_HEADER ReadDetecting(string fixture, bool claimedBigEndian)
+    {
+        var path = Path.Combine(
+            Path.GetDirectoryName(typeof(AmaActionNameTests).Assembly.Location), "Fixtures", fixture);
+
+        var bytes = File.ReadAllBytes(path);
+        return AppMain.readAMAFile(bytes, 0, bytes.Length, claimedBigEndian);
+    }
+
+    // the container is asked last, so a member that outlived its archive's byte order still reads.
+    // a per-member console variant splices an xbla .AMA into a little-endian archive
+    [Theory]
+    [InlineData(LittleEndian, false)]
+    [InlineData(LittleEndian, true)]
+    [InlineData(BigEndian, false)]
+    [InlineData(BigEndian, true)]
+    public void ByteOrderComesFromTheFileNotTheContainer(string fixture, bool claimedBigEndian)
+    {
+        var ama = ReadDetecting(fixture, claimedBigEndian);
+
+        Assert.Equal(9u, ama.act_num);
+        Assert.Equal(LoadActNames, ama.act_names);
+    }
+
+    [Fact]
+    public void TheTwoByteOrdersOfOneFileAgree()
+    {
+        var little = ReadDetecting(LittleEndian, claimedBigEndian: false);
+        var big = ReadDetecting(BigEndian, claimedBigEndian: false);
+
+        Assert.Equal(little.act_num, big.act_num);
+        Assert.Equal(little.node_num, big.node_num);
+        Assert.Equal(little.act_tbl_offset, big.act_tbl_offset);
+        Assert.Equal(little.act_name_tbl_offset, big.act_name_tbl_offset);
+        Assert.Equal(little.act_names, big.act_names);
+    }
+
+    // reading a big-endian header the wrong way round gives act_num 0x09000000, which sized act_tbl
+    // straight to roughly a gigabyte. see docs/amb-archives.md
+    [Fact]
+    public void DoesNotSizeTablesFromAMisreadHeader()
+    {
+        Assert.Equal(9, ReadDetecting(BigEndian, claimedBigEndian: false).act_tbl.Length);
+    }
 }

@@ -1,12 +1,18 @@
 ﻿internal partial class AppMain
 {
+    // slot 2 is the SPST_<lang> member, the only one that can sit past the end of the archive
+    private static int gmFixLanguage()
+    {
+        return GmGameDatCockpitLanguage(gm_fix_tex_amb_idx_tbl, 2);
+    }
+
     private static void GmFixBuildDataInit()
     {
         for (int index = 0; index < 3; ++index)
             gm_fix_textures[index].Clear();
         for (int index = 0; index < 3; ++index)
         {
-            gm_fix_texamb_list[index] = ObjDataLoadAmbIndex(null, gm_fix_tex_amb_idx_tbl[GsEnvGetLanguage()][index], GmGameDatGetCockpitData());
+            gm_fix_texamb_list[index] = ObjDataLoadAmbIndex(null, gm_fix_tex_amb_idx_tbl[gmFixLanguage()][index], GmGameDatGetCockpitData());
             AoTexBuild(gm_fix_textures[index], (AMS_AMB_HEADER)gm_fix_texamb_list[index]);
             AoTexLoad(gm_fix_textures[index]);
         }
@@ -309,7 +315,7 @@
             OBS_OBJECT_WORK work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "FIX_RING");
             GMS_COCKPIT_2D_WORK gmsCockpit2DWork = (GMS_COCKPIT_2D_WORK)work;
             work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmFixSubpartOutFunc);
-            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_ringcount_act_id_tbl[index], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_ringcount_act_id_tbl[index], 0);
             gmFixSetFrameStatic(work, 0.0f);
             if (index != 0)
                 work.pos.y += FX_F32_TO_FX32(5f);
@@ -411,7 +417,7 @@
                 OBS_OBJECT_WORK work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "FIX_SCORE");
                 GMS_COCKPIT_2D_WORK gmsCockpit2DWork = (GMS_COCKPIT_2D_WORK)work;
                 work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmFixSubpartOutFunc);
-                ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)act_id_tblgmFixScorePartInit[index], 0);
+                ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)act_id_tblgmFixScorePartInit[index], 0);
                 gmFixSetFrameStatic(work, 0.0f);
                 work.pos.x += num;
                 if (index != 0)
@@ -461,7 +467,7 @@
             OBS_OBJECT_WORK work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "FIX_TIMER");
             GMS_COCKPIT_2D_WORK gmsCockpit2DWork = (GMS_COCKPIT_2D_WORK)work;
             work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmFixSubpartOutFunc);
-            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)act_id_tblgmFixTimerPartInit[index], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)act_id_tblgmFixTimerPartInit[index], 0);
             gmFixSetFrameStatic(work, 0.0f);
             if (gmFixIsTimeAttack())
             {
@@ -500,7 +506,7 @@
                 index3 = 1;
             }
             work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmFixSubpartOutFunc);
-            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][index2], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[index3]), (uint)gm_fix_timer_ss_act_id_tbl[GsEnvGetLanguage()][index1], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][index2], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[index3]), (uint)gm_fix_timer_ss_act_id_tbl[gmFixLanguage()][index1], 0);
             gmFixSetFrameStatic(work, 0.0f);
             ((GMS_FIX_PART_TIMER)partTimer1).sub_parts[index1] = (GMS_COCKPIT_2D_WORK)work;
         }
@@ -734,7 +740,7 @@
             OBS_OBJECT_WORK work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "FIX_CHALLENGE");
             GMS_COCKPIT_2D_WORK gmsCockpit2DWork = (GMS_COCKPIT_2D_WORK)work;
             work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmFixSubpartOutFunc);
-            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_challenge_act_id_tbl[gmFixGetPlan()][index], 0);
+            ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_challenge_act_id_tbl[gmFixGetPlan()][index], 0);
             gmFixSetFrameStatic(work, 0.0f);
             ((GMS_FIX_PART_CHALLENGE)partChallenge).sub_parts[index] = (GMS_COCKPIT_2D_WORK)work;
         }
@@ -797,7 +803,7 @@
                 OBS_OBJECT_WORK work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, "FIX_VIRTUAL_PAD");
                 GMS_COCKPIT_2D_WORK gmsCockpit2DWork = (GMS_COCKPIT_2D_WORK)work;
                 work.ppOut = voidObsObjectWorkArray[index1];
-                ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[GsEnvGetLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_virtual_pad_act_id_tbl[gmFixGetPlan()][index1], 0);
+                ObjObjectAction2dAMALoadSetTexlist(work, gmsCockpit2DWork.obj_2d, null, null, gm_fix_ama_amb_idx_tbl[gmFixLanguage()][0], GmGameDatGetCockpitData(), AoTexGetTexList(gm_fix_textures[0]), (uint)gm_fix_virtual_pad_act_id_tbl[gmFixGetPlan()][index1], 0);
                 amFlagOff(ref work.disp_flag, 32U);
                 gmFixSetFrameStatic(work, 0.0f);
                 if (1 == index1)

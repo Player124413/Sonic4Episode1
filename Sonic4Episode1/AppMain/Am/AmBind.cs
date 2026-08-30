@@ -13,6 +13,22 @@ internal partial class AppMain
         return amsAmbHeader;
     }
 
+    // the one place a member's bytes are located, so a per-member console override lands for every
+    // reader at once. the chunk is parented to the sibling rather than copied out of it, so it
+    // keeps the sibling's byte order and its preload cache. see docs/per-member-variants.md
+    internal static AmbChunk amBindChunk(AMS_AMB_HEADER header, int index)
+    {
+        var sibling = header.member_variant_amb;
+        if (sibling != null)
+        {
+            var k = header.member_variant_index[index];
+            if (k >= 0)
+                return amBindChunk(sibling, k);
+        }
+
+        return new AmbChunk(header.data, header.offsets[index], header.lengths[index], header);
+    }
+
     public static AmbChunk amBindGet(
       AMS_AMB_HEADER header,
       int index,
@@ -21,7 +37,7 @@ internal partial class AppMain
         sPath = null;
         AmbChunk ambChunk = null;
         if (index < header.file_num)
-            ambChunk = new AmbChunk(header.data, header.offsets[index], header.lengths[index], header);
+            ambChunk = amBindChunk(header, index);
         else
             mppAssertNotImpl();
         return ambChunk;
@@ -43,6 +59,10 @@ internal partial class AppMain
         int length = 0;
         if (index < header.count)
         {
+            var sibling = header.member_variant_amb;
+            if (sibling != null && header.member_variant_index[index] >= 0)
+                return amBindChunk(sibling, header.member_variant_index[index]);
+
             array = header.data;
             offset = header.offsets[index];
             length = header.lengths[index];
@@ -55,7 +75,7 @@ internal partial class AppMain
         for (int index = 0; index < header.file_num; ++index)
         {
             if (header.files[index] == filename)
-                return new AmbChunk(header.data, header.offsets[index], header.lengths[index], header);
+                return amBindChunk(header, index);
         }
         return null;
     }
@@ -82,7 +102,7 @@ internal partial class AppMain
         {
             if (header.files[index].IndexOf(exname, 0, StringComparison.OrdinalIgnoreCase) != -1)
             {
-                ambChunk = new AmbChunk(header.data, header.offsets[index], header.lengths[index], header);
+                ambChunk = amBindChunk(header, index);
                 break;
             }
         }

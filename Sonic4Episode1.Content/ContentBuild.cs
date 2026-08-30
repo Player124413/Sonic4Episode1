@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -178,7 +179,11 @@ internal static class ContentBuild
             EmitOverlay(sources.Source(overlay), baseArchives, profile, report, patches);
 
         foreach (var variant in profile.Variants)
-            EmitVariant(variant, sources.Source(variant.Source), baseArchives, profile, report);
+        {
+            var source = sources.Source(variant.Source);
+            EmitVariant(variant, source, baseArchives, profile, report);
+            EmitMemberVariant(variant, source, baseArchives, profile, report);
+        }
 
         // parallel emission makes arrival order arbitrary; sorting keeps two runs comparable
         report.Problems.Sort(StringComparer.OrdinalIgnoreCase);
@@ -236,7 +241,12 @@ internal static class ContentBuild
     private static byte[] Emit(string path, string relative, BuildReport report,
         ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
     {
-        var bytes = File.ReadAllBytes(path);
+        return Emit(File.ReadAllBytes(path), relative, report, profile, patches, flip);
+    }
+
+    private static byte[] Emit(byte[] bytes, string relative, BuildReport report,
+        ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
+    {
         try
         {
             var normalised = AmbTree.Normalise(bytes);
@@ -438,6 +448,132 @@ internal static class ContentBuild
         });
     }
 
+    // a sparse sibling holding only the named members, in ascending base index. the base decides
+    // the index, the sibling only supplies bytes, so nothing the game addresses by IDB_* moves
+    private static void EmitMemberVariant(
+        VariantSpec spec,
+        ContentSource source,
+        Dictionary<string, string> baseArchives,
+        ContentProfile profile,
+        BuildReport report)
+    {
+        var variantArchives = Archives(source);
+        var byArchive = spec.Members
+            .GroupBy(m => m.Archive, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Each(byArchive, report, (group, local) =>
+        {
+            var key = group.Key;
+
+            if (!baseArchives.TryGetValue(key, out var basePath))
+            {
+                local.Problems.Add($"{key}: variant '{spec.Source}' names an archive the base does not have");
+                return;
+            }
+
+            if (!variantArchives.TryGetValue(key, out var variantPath))
+            {
+                local.Problems.Add($"{key}: source '{spec.Source}' does not have it");
+                return;
+            }
+
+            if (!AmbTree.TryReadNested(AmbTree.Normalise(File.ReadAllBytes(basePath)), out var expected))
+            {
+                local.Problems.Add($"{key}: base does not parse");
+                return;
+            }
+
+            var variantBytes = AmbTree.Normalise(File.ReadAllBytes(variantPath));
+            if (!AmbTree.TryReadNested(variantBytes, out var actual))
+            {
+                local.Problems.Add($"{key}: source '{spec.Source}' copy does not parse");
+                return;
+            }
+
+            var picked = new SortedDictionary<int, AppMain.AmbEntry>();
+
+            foreach (var member in group)
+            {
+                var index = IndexOf(expected, member.Member);
+                if (index < 0)
+                {
+                    local.Problems.Add($"{key}: base has no member '{member.Member}'");
+                    continue;
+                }
+
+                // the whole point of the sparse sibling is that the index is the base's, so a
+                // source whose member list has shifted must be refused rather than renumbered
+                if (index >= actual.file_num || !SameMember(expected.files[index], actual.files[index]))
+                {
+                    var found = index < actual.file_num ? actual.files[index] : "nothing";
+                    local.Problems.Add(
+                        $"{key}: '{member.Member}' is index {index} in the base but '{found}' in " +
+                        $"'{spec.Source}'");
+                    continue;
+                }
+
+                picked[index] = new AppMain.AmbEntry
+                {
+                    Name = actual.files[index],
+                    Data = Slice(actual, index),
+                    Type = actual.types[index],
+                    User0 = actual.user0[index],
+                    User1 = actual.user1[index],
+                };
+            }
+
+            if (picked.Count == 0)
+                return;
+
+            var sparse = AppMain.writeAmbArchive(picked.Values.ToList(), AmbTree.IsBigEndian(actual));
+
+            var output = Path.Combine(profile.Output, VariantName(key, spec.Name));
+            Directory.CreateDirectory(Path.GetDirectoryName(output));
+            File.WriteAllBytes(output, Emit(sparse, key, local, profile, NoPatches, spec.Flip));
+
+            local.VariantsEmitted++;
+            foreach (var index in picked.Keys)
+                local.Variants.Add(key + MemberSuffix(index) + " " + spec.Name);
+        });
+    }
+
+    // "<archive>#<index>", the manifest key a member-level lookup uses
+    public static string MemberSuffix(int index)
+    {
+        return "#" + index.ToString(CultureInfo.InvariantCulture);
+    }
+
+    // transcoding renames PNG to DDS, so members compare without the extension, as Check does
+    private static bool SameMember(string was, string now)
+    {
+        return string.Equals(
+            Path.GetFileNameWithoutExtension(was),
+            Path.GetFileNameWithoutExtension(now),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    // exact, because G_START.AMA and G_START.AMB differ only by extension and SameMember would
+    // hand both of them the first one's index
+    private static int IndexOf(AppMain.AMS_AMB_HEADER header, string member)
+    {
+        for (int i = 0; i < header.file_num; i++)
+        {
+            if (string.Equals(header.files[i], member, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static byte[] Slice(AppMain.AMS_AMB_HEADER header, int index)
+    {
+        var data = new byte[header.lengths[index]];
+        Buffer.BlockCopy(header.data, header.offsets[index], data, 0, header.lengths[index]);
+        return data;
+    }
+
     // the game can't enumerate its content directory on every head, so this is read back at load time
     public const string ManifestName = "variants.txt";
 
@@ -515,6 +651,9 @@ internal static class ContentBuild
             }
         }
 
+        foreach (var spec in profile.Variants)
+            CheckMemberVariant(spec, baseArchives, profile, report);
+
         var overlayArchives = profile.Overlays
             .SelectMany(name => Archives(sources.Source(name)).Keys)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -537,6 +676,73 @@ internal static class ContentBuild
         CheckTextureFormats(profile, report, PatchIndex(sources, profile));
 
         return report;
+    }
+
+    // the sparse sibling carries no indices of its own: the runtime pairs its members positionally
+    // with the ascending manifest indices, so that pairing is what has to hold
+    private static void CheckMemberVariant(
+        VariantSpec spec,
+        Dictionary<string, string> baseArchives,
+        ContentProfile profile,
+        CheckReport report)
+    {
+        var byArchive = spec.Members
+            .GroupBy(m => m.Archive, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var group in byArchive)
+        {
+            var key = group.Key;
+            var sibling = Path.Combine(profile.Output, VariantName(key, spec.Name));
+
+            if (!baseArchives.TryGetValue(key, out var basePath))
+            {
+                report.Problems.Add($"{key}: variant '{spec.Name}' names an archive the base does not have");
+                continue;
+            }
+
+            if (!File.Exists(sibling))
+            {
+                report.Problems.Add($"{key}: variant '{spec.Name}' member sibling was not emitted");
+                continue;
+            }
+
+            if (!AmbTree.TryReadNested(File.ReadAllBytes(basePath), out var expected)
+                || !AmbTree.TryReadNested(File.ReadAllBytes(sibling), out var actual))
+            {
+                report.Problems.Add($"{key}: variant '{spec.Name}' member sibling does not parse");
+                continue;
+            }
+
+            var indices = group
+                .Select(m => IndexOf(expected, m.Member))
+                .Where(i => i >= 0)
+                .Distinct()
+                .OrderBy(i => i)
+                .ToList();
+
+            if (indices.Count != actual.file_num)
+            {
+                report.Problems.Add(
+                    $"{key}: variant '{spec.Name}' declares {indices.Count} members, the sibling has " +
+                    $"{actual.file_num}");
+                continue;
+            }
+
+            for (int i = 0; i < indices.Count; i++)
+            {
+                if (SameMember(expected.files[indices[i]], actual.files[i]))
+                    continue;
+
+                report.Problems.Add(
+                    $"{key}: variant '{spec.Name}' sibling member {i} is '{actual.files[i]}', base index " +
+                    $"{indices[i]} is '{expected.files[indices[i]]}'");
+                break;
+            }
+
+            report.Notes.Add(
+                $"{key}: {indices.Count} of {expected.file_num} members from '{spec.Name}'");
+        }
     }
 
     // every texture in the output, base and variants and overlays alike

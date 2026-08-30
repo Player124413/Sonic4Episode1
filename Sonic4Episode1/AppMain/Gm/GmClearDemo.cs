@@ -3,6 +3,13 @@ using gs.backup;
 
 internal partial class AppMain
 {
+    // the G_RSLT_<lang> member, the only one that can sit past the end of the archive. the shared
+    // G_RSLT pair is hardcoded 30/31 at every call site
+    private static int gmClearDemoLanguage()
+    {
+        return GmGameDatCockpitLanguage(g_gm_clear_demo_data_amb_id);
+    }
+
     private static bool GmClearDemoBuildCheck()
     {
         return gmClearDemoIsTexLoad();
@@ -17,7 +24,7 @@ internal partial class AppMain
         for (int index = 0; index < 2; ++index)
             gm_clrdm_tex[index].Clear();
         gm_clrdm_amb[0] = readAMBFile(ObjDataLoadAmbIndex(null, 31, g_gm_gamedat_cockpit_main_arc));
-        gm_clrdm_amb[1] = readAMBFile(ObjDataLoadAmbIndex(null, g_gm_clear_demo_data_amb_id[GsEnvGetLanguage()], g_gm_gamedat_cockpit_main_arc));
+        gm_clrdm_amb[1] = readAMBFile(ObjDataLoadAmbIndex(null, g_gm_clear_demo_data_amb_id[gmClearDemoLanguage()], g_gm_gamedat_cockpit_main_arc));
         for (int index = 0; index < 2; ++index)
         {
             AoTexBuild(gm_clrdm_tex[index], gm_clrdm_amb[index]);
@@ -1431,13 +1438,13 @@ internal partial class AppMain
             ((OBS_OBJECT_WORK) main_work.line_act[index]).scale.y = 4096;
         }
 
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_time_act, main_work.tex_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 7U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_time_act, main_work.tex_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 7U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_time_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_time_act).scale.y = 4096;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_ring_act, main_work.tex_ring_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 8U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_ring_act, main_work.tex_ring_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 8U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_ring_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_ring_act).scale.y = 4096;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_total_act, main_work.tex_total_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 9U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_total_act, main_work.tex_total_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 9U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_total_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_total_act).scale.y = 4096;
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.sonic_icon_act, main_work.sonic_icon_act.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 17U, 0);
@@ -1448,7 +1455,7 @@ internal partial class AppMain
     private static void gmClearDemoCreateObjNormalTimeAtk(GMS_CLRDM_MAIN_WORK main_work)
     {
         gmClearDemoCreateObjActForStage(main_work);
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_big_time_act, main_work.tex_big_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 15U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_big_time_act, main_work.tex_big_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 15U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_big_time_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_big_time_act).scale.y = 4096;
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.time_sonic_icon_act, main_work.time_sonic_icon_act.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 56U, 0);
@@ -1456,24 +1463,24 @@ internal partial class AppMain
         ((OBS_OBJECT_WORK) main_work.time_sonic_icon_act).scale.y = 4096;
         main_work.time_sonic_icon_act.obj_2d.frame = GMM_MAIN_USE_SUPER_SONIC() ? 1f : 0.0f;
         main_work.time_sonic_icon_act.obj_2d.speed = 0.0f;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_new_record_act, main_work.tex_new_record_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 14U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_new_record_act, main_work.tex_new_record_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 14U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_new_record_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_new_record_act).scale.y = 4096;
     }
 
     private static void gmClearDemoCreateObjSpecialScoreAtk(GMS_CLRDM_MAIN_WORK main_work)
     {
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0], main_work.tex_spst_up_act[0].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 11U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0], main_work.tex_spst_up_act[0].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 11U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0]).scale.y = 4096;
         if (main_work.is_get_eme && main_work.is_first_spe_clear)
         {
-            ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[1], main_work.tex_spst_up_act[1].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 12U, 0);
+            ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[1], main_work.tex_spst_up_act[1].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 12U, 0);
             ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[1]).scale.x = 4096;
             ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[1]).scale.y = 4096;
         }
 
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2], main_work.tex_spst_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 13U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2], main_work.tex_spst_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 13U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2]).scale.y = 4096;
         gmClearDemoCreateObjSpeActForStage(main_work);
@@ -1518,16 +1525,16 @@ internal partial class AppMain
             ((OBS_OBJECT_WORK) main_work.line_act[index]).scale.y = 4096;
         }
 
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_time_act, main_work.tex_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 18U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_time_act, main_work.tex_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 18U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_time_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_time_act).scale.y = 4096;
         main_work.tex_time_act.obj_2d.ama.act_tbl[(int) main_work.tex_time_act.obj_2d.act_id].mtn.trs_tbl[0].trs_y -= 15f;
         main_work.tex_time_act.obj_2d.ama.act_tbl[(int) main_work.tex_time_act.obj_2d.act_id].mtn.trs_tbl[1].trs_y -= 15f;
         main_work.tex_time_act.obj_2d.ama.act_tbl[(int) main_work.tex_time_act.obj_2d.act_id].mtn.trs_tbl[2].trs_y -= 15f;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_ring_act, main_work.tex_ring_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 19U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_ring_act, main_work.tex_ring_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 19U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_ring_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_ring_act).scale.y = 4096;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_total_act, main_work.tex_total_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 20U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_total_act, main_work.tex_total_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 20U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_total_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_total_act).scale.y = 4096;
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.sonic_icon_act, main_work.sonic_icon_act.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 70U, 0);
@@ -1536,17 +1543,17 @@ internal partial class AppMain
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.sonic_icon_act2, main_work.sonic_icon_act2.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 71U, 0);
         ((OBS_OBJECT_WORK) main_work.sonic_icon_act2).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.sonic_icon_act2).scale.y = 4096;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_extend_act, main_work.tex_extend_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 10U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_extend_act, main_work.tex_extend_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 10U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_extend_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_extend_act).scale.y = 4096;
     }
 
     private static void gmClearDemoCreateObjSpecialTimeAtk(GMS_CLRDM_MAIN_WORK main_work)
     {
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0], main_work.tex_spst_up_act[0].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 11U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0], main_work.tex_spst_up_act[0].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 11U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[0]).scale.y = 4096;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2], main_work.tex_spst_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 13U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2], main_work.tex_spst_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 13U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_spst_up_act[2]).scale.y = 4096;
         gmClearDemoCreateObjSpeActForStage(main_work);
@@ -1557,7 +1564,7 @@ internal partial class AppMain
             ((OBS_OBJECT_WORK) main_work.icon_emer_up_act[index]).scale.y = 4096;
         }
 
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_big_time_act, main_work.tex_big_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 15U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_big_time_act, main_work.tex_big_time_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 15U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_big_time_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_big_time_act).scale.y = 4096;
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.time_sonic_icon_act, main_work.time_sonic_icon_act.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 56U, 0);
@@ -1565,7 +1572,7 @@ internal partial class AppMain
         ((OBS_OBJECT_WORK) main_work.time_sonic_icon_act).scale.y = 4096;
         main_work.time_sonic_icon_act.obj_2d.frame = GMM_MAIN_USE_SUPER_SONIC() ? 1f : 0.0f;
         main_work.time_sonic_icon_act.obj_2d.speed = 0.0f;
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_new_record_act, main_work.tex_new_record_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 14U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_new_record_act, main_work.tex_new_record_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 14U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_new_record_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_new_record_act).scale.y = 4096;
     }
@@ -1595,7 +1602,7 @@ internal partial class AppMain
         }
 
         ushort num2 = language == 4 ? dm_clrdm_stage_ge_tex_act_id[main_work.stage_id] : dm_clrdm_stage_tex_act_id[main_work.stage_id];
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[1], main_work.tex_up_act[1].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), num2, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[1], main_work.tex_up_act[1].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), num2, 0);
         ((OBS_OBJECT_WORK) main_work.tex_up_act[1]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_up_act[1]).scale.y = 4096;
         ushort num3;
@@ -1608,17 +1615,17 @@ internal partial class AppMain
         else
         {
             num3 = 1;
-            index = g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()];
+            index = g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()];
         }
 
         if (num3 == 0 && (language == 0 || language == 1))
         {
-            ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[2], main_work.tex_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 3U, 0);
+            ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[2], main_work.tex_up_act[2].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 3U, 0);
             ((OBS_OBJECT_WORK) main_work.tex_up_act[2]).scale.x = 4096;
             ((OBS_OBJECT_WORK) main_work.tex_up_act[2]).scale.y = 4096;
         }
 
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[3], main_work.tex_up_act[3].obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), dm_clrdm_stage_text_act_id[main_work.stage_id], 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_up_act[3], main_work.tex_up_act[3].obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), dm_clrdm_stage_text_act_id[main_work.stage_id], 0);
         ((OBS_OBJECT_WORK) main_work.tex_up_act[3]).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_up_act[3]).scale.y = 4096;
         ushort num4 = language != 4 ? (language != 2 ? (language != 5 ? (language != 3 ? dm_clrdm_stage_num_act_id[main_work.stage_id] : dm_clrdm_stage_sp_num_act_id[main_work.stage_id]) : dm_clrdm_stage_sp_num_act_id[main_work.stage_id]) : dm_clrdm_stage_fr_num_act_id[main_work.stage_id]) : dm_clrdm_stage_ge_num_act_id[main_work.stage_id];
@@ -1723,8 +1730,8 @@ internal partial class AppMain
         int index3 = 0;
         for (int index2 = arrayof(main_work.btn_back); index3 < index2; ++index3)
             ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.btn_back[index3], main_work.btn_back[index3].obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), (uint) (103 + index3), 0);
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_retry_act, main_work.tex_retry_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 16U, 0);
-        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_back_slct_act, main_work.tex_back_slct_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[GsEnvGetLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 17U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_retry_act, main_work.tex_retry_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 16U, 0);
+        ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_back_slct_act, main_work.tex_back_slct_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 17U, 0);
         main_work.tex_retry_act.obj_2d.frame = 0.0f;
         main_work.tex_retry_act.obj_2d.speed = 0.0f;
         main_work.tex_back_slct_act.obj_2d.frame = 0.0f;
