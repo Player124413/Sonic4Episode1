@@ -136,7 +136,7 @@ internal partial class AppMain
             ObjCameraPlaySet(0, ofst2);
     }
 
-    private static void GmCameraScaleSet(float scale_target, float scale_spd)
+    public static void GmCameraScaleSet(float scale_target, float scale_spd)
     {
         gm_camera_work.scale_target = scale_target;
         gm_camera_work.scale_spd = scale_spd;
@@ -180,7 +180,7 @@ internal partial class AppMain
                             FXM_FLOAT_TO_FX32(camera_y - (float)(OBD_OBJ_CLIP_LCD_Y / 2)));
     }
 
-    private static void GmCameraFunc(OBS_CAMERA obj_camera)
+    public static void GmCameraFunc(OBS_CAMERA obj_camera)
     {
         SNNS_VECTOR pos;
         GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[GSD_MAIN_PLAYER_1P];

@@ -1385,7 +1385,7 @@ internal partial class AppMain
         GmPlySeqChangeSequence(ply_work, 0);
     }
 
-    private static void GmPlySeqChangeTRetryFw(GMS_PLAYER_WORK ply_work)
+    public static void GmPlySeqChangeTRetryFw(GMS_PLAYER_WORK ply_work)
     {
         GmPlySeqChangeSequence(ply_work, 27);
     }
@@ -1432,7 +1432,7 @@ internal partial class AppMain
         ply_work.rect_work[0].def_power = 3;
     }
 
-    private static void GmPlySeqChangeTRetryAcc(GMS_PLAYER_WORK ply_work)
+    public static void GmPlySeqChangeTRetryAcc(GMS_PLAYER_WORK ply_work)
     {
         GmPlySeqChangeSequence(ply_work, 28);
     }
@@ -3315,7 +3315,7 @@ internal partial class AppMain
                 flag = true;
             if (!flag)
                 return;
-            GMS_SPL_STG_WORK work = GmSplStageGetWork();
+            GMS_SPL_STG_WORK work = GmSplStage.GmSplStageGetWork();
             ply_work.nudge_di_timer = 30;
             ply_work.nudge_timer = 30;
             work.flag &= 4294967293U;

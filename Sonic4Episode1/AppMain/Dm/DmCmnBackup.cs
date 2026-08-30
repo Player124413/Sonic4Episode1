@@ -2,7 +2,7 @@
 
 internal partial class AppMain
 {
-    private static void DmCmnBackupLoad()
+    public static void DmCmnBackupLoad()
     {
         var instance = SSave.CreateInstance();
         var save = XmlStorage.Load();
@@ -35,7 +35,7 @@ internal partial class AppMain
         return flag;
     }
 
-    private static void DmCmnBackupSave(bool is_first, bool is_new, bool is_del)
+    public static void DmCmnBackupSave(bool is_first, bool is_new, bool is_del)
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         var save = SSave.CreateInstance().GetSave();

@@ -600,7 +600,7 @@ internal partial class AppMain
         GmPlayerBuild();
         GmSoundBuild();
         GmFix.GmFixBuildDataInit();
-        GmClearDemoBuild();
+        GmClearDemo.GmClearDemoBuild();
         GmStartDemo.GmStartDemoBuild();
         GmOver.GmOverBuildDataInit();
         GmPauseMenuBuildStart();
@@ -635,7 +635,7 @@ internal partial class AppMain
 
     private static bool GmGameDatBuildStandardCheck()
     {
-        return GmPlayerBuildCheck() && GmSoundBuildCheck() && (GmRingBuildCheck() != 0 && GmFix.GmFixBuildDataLoop()) && (GmClearDemoBuildCheck() && GmStartDemo.GmStartDemoBuildCheck() && (GmOver.GmOverBuildDataLoop() && GmPauseMenuBuildIsFinished())) && GmEfctCmnBuildDataLoop();
+        return GmPlayerBuildCheck() && GmSoundBuildCheck() && (GmRingBuildCheck() != 0 && GmFix.GmFixBuildDataLoop()) && (GmClearDemo.GmClearDemoBuildCheck() && GmStartDemo.GmStartDemoBuildCheck() && (GmOver.GmOverBuildDataLoop() && GmPauseMenuBuildIsFinished())) && GmEfctCmnBuildDataLoop();
     }
 
     private static bool GmGameDatBuildAreaCheck()
@@ -677,7 +677,7 @@ internal partial class AppMain
         GmPauseMenuFlushStart();
         GmOver.GmOverFlushDataInit();
         GmStartDemo.GmStartDemoFlush();
-        GmClearDemoFlush();
+        GmClearDemo.GmClearDemoFlush();
         GmFix.GmFixFlushDataInit();
         GmSoundFlush();
         GmPlayerFlush();
@@ -708,7 +708,7 @@ internal partial class AppMain
 
     private static bool GmGameDatFlushStandardCheck()
     {
-        return GmRingFlushCheck() != 0 && GmEfctCmnFlushDataLoop() && (GmFix.GmFixFlushDataLoop() && GmStartDemo.GmStartDemoFlushCheck()) && (GmClearDemoFlushCheck() && GmOver.GmOverFlushDataLoop() && (GmPauseMenuFlushIsFinished() && GmGameDBuildCheckFlushModel())) && (GmWaterSurfaceCheckFlush() && GmPlayerFlushCheck());
+        return GmRingFlushCheck() != 0 && GmEfctCmnFlushDataLoop() && (GmFix.GmFixFlushDataLoop() && GmStartDemo.GmStartDemoFlushCheck()) && (GmClearDemo.GmClearDemoFlushCheck() && GmOver.GmOverFlushDataLoop() && (GmPauseMenuFlushIsFinished() && GmGameDBuildCheckFlushModel())) && (GmWaterSurfaceCheckFlush() && GmPlayerFlushCheck());
     }
 
     private static bool GmGameDatFlushAreaCheck()

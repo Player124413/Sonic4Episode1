@@ -48,7 +48,7 @@
     {
         OBS_COLLISION_OBJ objCol = obj_work.col_work.obj_col;
         GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[0];
-        GMS_SPL_STG_WORK work = GmSplStageGetWork();
+        GMS_SPL_STG_WORK work = GmSplStage.GmSplStageGetWork();
         if (objCol.toucher_obj == ply_work.obj_work)
         {
             if (ply_work.nudge_timer != 0 && ((int)work.flag & 2) == 0)
@@ -83,7 +83,7 @@
 
     private static void gmGmkSsSquareMain(OBS_OBJECT_WORK obj_work)
     {
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }

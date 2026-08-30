@@ -69,7 +69,7 @@ namespace mpp
         };
         private static RasterizerState m_rasterizerStateCCW = new RasterizerState()
         {
-            CullMode = CullMode.CullClockwiseFace,
+            CullMode = CullMode.CullCounterClockwiseFace,
             ScissorTestEnable = true,
             MultiSampleAntiAlias = false
         };

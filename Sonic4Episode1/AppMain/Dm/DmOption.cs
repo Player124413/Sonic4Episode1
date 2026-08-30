@@ -768,13 +768,13 @@ internal partial class AppMain
             if (main_work.manual_arc_amb[index] != null)
                 main_work.manual_arc_amb[index] = null;
         }
-        DmSaveMenuStart(true, false);
+        DmSave.DmSaveMenuStart(true, false);
         main_work.proc_update = new DMS_OPT_MAIN_WORK._proc_update_(dmOptProcFinishWaitSave);
     }
 
     private static void dmOptProcFinishWaitSave(DMS_OPT_MAIN_WORK main_work)
     {
-        if (!DmSaveIsExit())
+        if (!DmSave.DmSaveIsExit())
             return;
         main_work.proc_update = new DMS_OPT_MAIN_WORK._proc_update_(dmOptProcWaitFinished);
     }

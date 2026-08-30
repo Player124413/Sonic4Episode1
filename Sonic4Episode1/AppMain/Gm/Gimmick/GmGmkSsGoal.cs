@@ -47,7 +47,7 @@
     {
         OBS_COLLISION_OBJ objCol = obj_work.col_work.obj_col;
         GMS_PLAYER_WORK gmsPlayerWork = g_gm_main_system.ply_work[0];
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }

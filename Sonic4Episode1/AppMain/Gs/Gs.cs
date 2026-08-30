@@ -36,8 +36,9 @@ partial class AppMain
         g_gs_main_sys_info.level = level;
     }
 
-    private static void GsReqExit()
+    public static void GsReqExit()
     {
+        System.Environment.Exit(0);
     }
 
     private static void GsInitUser()

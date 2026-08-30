@@ -430,7 +430,7 @@ internal static partial class GmFix
         // act and fall over frames later inside ObjDrawAction2DAMA
         gmFixAssertActionExists(name, ama_id, act_id);
 
-        var obj_work = GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, name);
+        var obj_work = GmCockpit.GMM_COCKPIT_CREATE_WORK(() => new GMS_COCKPIT_2D_WORK(), null, 0, name);
         var subpart = (GMS_COCKPIT_2D_WORK)obj_work;
 
         obj_work.ppOut = out_func;

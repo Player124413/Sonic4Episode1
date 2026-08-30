@@ -16,7 +16,8 @@ public class CockpitLanguageTests
     // the ported modules own their tables; the rest are still on AppMain
     private static readonly System.Type[] Owners =
     {
-        typeof(AppMain), typeof(GmFix), typeof(GmOver), typeof(GmStartDemo),
+        typeof(AppMain), typeof(GmFix), typeof(GmOver), typeof(GmStartDemo), typeof(GmClearDemo),
+        typeof(DmSave),
     };
 
     private static int[] Table(string name)

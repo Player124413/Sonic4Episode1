@@ -702,7 +702,7 @@
             if (dm_stfrl_is_full_staffroll)
             {
                 main_work.proc_update = new DMS_STFRL_MAIN_WORK._proc_update_(dmStaffRollProcSaveEndCheck);
-                DmSaveMenuStart(true, false);
+                DmSave.DmSaveMenuStart(true, false);
             }
             else
             {
@@ -715,7 +715,7 @@
 
     private static void dmStaffRollProcSaveEndCheck(DMS_STFRL_MAIN_WORK main_work)
     {
-        if (!DmSaveIsExit())
+        if (!DmSave.DmSaveIsExit())
             return;
         main_work.flag |= 1U;
         main_work.proc_update = null;

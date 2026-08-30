@@ -1,16 +1,16 @@
 ﻿internal partial class AppMain
 {
 
-    private static void DmSoundBuild()
+    public static void DmSoundBuild()
     {
     }
 
-    private static bool DmSoundBuildCheck()
+    public static bool DmSoundBuildCheck()
     {
         return true;
     }
 
-    private static void DmSoundFlush()
+    public static void DmSoundFlush()
     {
     }
 
@@ -22,7 +22,7 @@
         GsSoundBegin(4096, 1U, 3);
     }
 
-    private static void DmSoundExit()
+    public static void DmSoundExit()
     {
         GsSoundHalt();
         GsSoundEnd();

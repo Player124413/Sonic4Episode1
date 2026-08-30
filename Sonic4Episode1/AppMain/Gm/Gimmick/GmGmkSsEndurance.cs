@@ -50,7 +50,7 @@
     {
         OBS_COLLISION_OBJ objCol = obj_work.col_work.obj_col;
         GMS_PLAYER_WORK gmsPlayerWork = g_gm_main_system.ply_work[0];
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }
@@ -69,7 +69,7 @@
 
     private static void gmGmkSsEnduranceDamage(OBS_OBJECT_WORK obj_work)
     {
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }
@@ -214,12 +214,12 @@
 
     private static void GmGmkSsOnewayThrough(uint sw_no)
     {
-        GmSplStageSwSet(sw_no);
+        GmSplStage.GmSplStageSwSet(sw_no);
     }
 
     private static void gmGmkSsCircleMain(OBS_OBJECT_WORK obj_work)
     {
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }
@@ -234,13 +234,13 @@
     private static void gmGmkSsOnewayMain(OBS_OBJECT_WORK obj_work)
     {
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)obj_work;
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }
         else
         {
-            if (GmSplStageSwCheck(gmsEnemy3DWork.ene_com.eve_rec.flag))
+            if (GmSplStage.GmSplStageSwCheck(gmsEnemy3DWork.ene_com.eve_rec.flag))
             {
                 obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkSsCircleMain);
                 OBS_COLLISION_WORK colWork = gmsEnemy3DWork.ene_com.col_work;

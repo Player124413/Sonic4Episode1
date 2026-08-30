@@ -1,6 +1,6 @@
 ﻿internal partial class AppMain
 {
-    private static void HgTrophyTryAcquisition(int timing)
+    public static void HgTrophyTryAcquisition(int timing)
     {
         HGS_TROPHY_CHECK_TIMING_INFO trophyCheckTimingInfo = hg_trophy_check_timing_info_tbl[timing];
         if (GsTrialIsTrial() || hgTrophyIsPlayDemo())
@@ -40,7 +40,7 @@
             g_gm_main_system.ply_dmg_count = 1U;
     }
 
-    private static void HgTrophyIncFinalClearCount()
+    public static void HgTrophyIncFinalClearCount()
     {
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         if (mainSysInfo.final_clear_count < 2U)

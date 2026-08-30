@@ -119,10 +119,6 @@ internal partial class AppMain
 
     public delegate void gamedat_build_area_func();
 
-    public delegate void _saveproc_input_update(DMS_SAVE_MAIN_WORK work);
-
-    public delegate void _saveproc_draw();
-
     public delegate void GSF_INIT_FUNC();
 
     public delegate void FsBackgroundReadComplete(AMS_FS fs);

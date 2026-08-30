@@ -60,7 +60,7 @@
         obj_work.flag &= 4294967279U;
     }
 
-    private static void GmObjGetRotPosXY(
+    public static void GmObjGetRotPosXY(
       int pos_x,
       int pos_y,
       ref int dest_x,
@@ -75,7 +75,7 @@
         dest_y = num1 + num4;
     }
 
-    private static void GmObjSetAllObjectNoDisp()
+    public static void GmObjSetAllObjectNoDisp()
     {
         for (OBS_OBJECT_WORK obj_work = ObjObjectSearchRegistObject(null, ushort.MaxValue); obj_work != null; obj_work = ObjObjectSearchRegistObject(obj_work, ushort.MaxValue))
         {
@@ -84,7 +84,7 @@
         }
     }
 
-    private static void GmObjSetObjectNoFunc(uint obj_type_flag)
+    public static void GmObjSetObjectNoFunc(uint obj_type_flag)
     {
         uint num = obj_type_flag & int.MaxValue;
         for (ushort obj_type = 0; obj_type < 31 && num != 0U; num >>= 1)

@@ -96,12 +96,12 @@ internal static partial class StgSlct
 
         main_work.proc_menu_update = dmStgSlctProcCheckLoadingEnd;
 
-        DmSaveMenuStart(true, false);
+        DmSave.DmSaveMenuStart(true, false);
     }
 
     private static void dmStgSlctProcCheckLoadingEnd(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (!DmSaveIsExit())
+        if (!DmSave.DmSaveIsExit())
             return;
 
         main_work.proc_menu_update = dmStgSlctProcCreateAct;

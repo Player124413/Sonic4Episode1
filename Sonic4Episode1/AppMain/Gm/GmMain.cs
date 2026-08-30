@@ -151,9 +151,9 @@ internal partial class AppMain
         GmWaterSurfaceExit();
         GmEventMgrExit();
         ObjDrawESEffectSystemExit();
-        GmClearDemoExit();
+        GmClearDemo.GmClearDemoExit();
         GmOver.GmOverExit();
-        GmSplStageExit();
+        GmSplStage.GmSplStageExit();
         GmEndingExit();
         GmStartDemo.GmStartDemoExit();
         GmStartMsgExit();
@@ -812,7 +812,7 @@ internal partial class AppMain
         g_gm_main_system.game_flag &= 4294964223U;
         g_gm_main_system.game_flag |= 2048U;
         if (GSM_MAIN_STAGE_IS_SPSTAGE())
-            GmSplStageStart();
+            GmSplStage.GmSplStageStart();
         else if (g_gs_main_sys_info.game_mode == 2)
             GmEndingStart();
         else
@@ -890,7 +890,7 @@ internal partial class AppMain
             GmGmkNeedleSetLight();
         }
         else if (GSM_MAIN_STAGE_IS_SPSTAGE())
-            GmSplStageSetLight();
+            GmSplStage.GmSplStageSetLight();
         else if (GMM_MAIN_GET_ZONE_TYPE() == 4)
         {
             GmBoss5LandSetLight();
@@ -957,7 +957,7 @@ internal partial class AppMain
             {
                 if (g_gs_main_sys_info.game_mode == 1)
                 {
-                    GmClearDemoRetryStart();
+                    GmClearDemo.GmClearDemoRetryStart();
                 }
                 else
                 {
@@ -1009,7 +1009,7 @@ internal partial class AppMain
             if (((int)g_gm_main_system.game_flag & 4) != 0 && ((int)g_gm_main_system.game_flag & 8) == 0)
             {
                 g_gs_main_sys_info.game_flag |= 2U;
-                GmClearDemoStart();
+                GmClearDemo.GmClearDemoStart();
                 g_gm_main_system.game_flag |= 8U;
             }
             if (GmMainCheckExeTimerCount())

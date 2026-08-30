@@ -86,7 +86,7 @@ internal partial class AppMain
         return 6;
     }
 
-    private static bool AoSysMsgIsShow()
+    public static bool AoSysMsgIsShow()
     {
         return AoSysMsgIsShowReal();
     }

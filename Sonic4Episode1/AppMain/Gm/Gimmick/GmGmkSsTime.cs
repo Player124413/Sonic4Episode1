@@ -41,7 +41,7 @@
 
     private static void gmGmkSsTimeMain(OBS_OBJECT_WORK obj_work)
     {
-        if (((int)GmSplStageGetWork().flag & 4) != 0)
+        if (((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
             obj_work.flag |= 4U;
         else
             obj_work.dir.z = GmMainGetObjectRotation();

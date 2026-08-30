@@ -78,6 +78,9 @@ overlays = ["staged", "wp7-orig"]
 patches  = ["patches"]
 variants = [
   { source = "pc", name = "console", archives = ["G_COM/RING/RING_MDL.AMB", "G_COM/RING/RING_TEX.AMB"] },
+  # the special stage ring, same three ring textures as above. pc has no GMK_SS_RING_MAT: the
+  # material motion is the mobile flipbook and the console arm does not load one.
+  { source = "pc", name = "console", archives = ["G_COM/GMK/GMK_SS_RING_MDL.AMB", "G_COM/GMK/GMK_SS_RING_TEX.AMB"] },
   # menus come from xbla, not pc: Steam's D_CMN_BTN carries a second _key set and runs to 28 actions
   # where XBLA and mobile both have 15, so only xbla's ids line up with the tables in the port.
   # D_CMN_BG/BTN/OBI are id-identical to mobile, only D_CMN_WIN and D_CMN_MSG actually differ.
@@ -118,6 +121,102 @@ variants = [
     "DEMO/LOGO/D_LOGO_SEGA_US_EU.AMB",
     "DEMO/LOGO/D_LOGO_SONIC.AMB",
     "DEMO/LOADING/D_LOADING.AMB",
+    # the pause menu. console and mobile are different screens, not different art: G_PAUSE.AMA is
+    # 6 actions against mobile's 10 and shares only "back". The _P/_WIN set has no mobile
+    # counterpart at all, so those emit as siblings with nothing to fall back to, which is what
+    # keeps them out of the tree unless the console variant is selected. Six languages again, so
+    # amFsAllVariant drops the whole screen back to the touch menu in CN/FI/HK/PT/RU.
+    # ids measured in docs/pause-action-ids.md
+    "G_COM/MENU/G_PAUSE.AMA",
+    "G_COM/MENU/G_PAUSE.AMB",
+    "G_COM/MENU/G_PAUSE_L.AMA",
+    "G_COM/MENU/G_PAUSE_JP.AMB",
+    "G_COM/MENU/G_PAUSE_US.AMB",
+    "G_COM/MENU/G_PAUSE_FR.AMB",
+    "G_COM/MENU/G_PAUSE_IT.AMB",
+    "G_COM/MENU/G_PAUSE_GE.AMB",
+    "G_COM/MENU/G_PAUSE_SP.AMB",
+    "G_COM/MENU/G_PAUSE_P.AMA",
+    "G_COM/MENU/G_PAUSE_P.AMB",
+    "G_COM/MENU/G_PAUSE_P_L.AMA",
+    "G_COM/MENU/G_PAUSE_P_JP.AMB",
+    "G_COM/MENU/G_PAUSE_P_US.AMB",
+    "G_COM/MENU/G_PAUSE_P_FR.AMB",
+    "G_COM/MENU/G_PAUSE_P_IT.AMB",
+    "G_COM/MENU/G_PAUSE_P_GE.AMB",
+    "G_COM/MENU/G_PAUSE_P_SP.AMB",
+    "G_COM/MENU/G_PAUSE_WIN.AMB",
+  ] },
+  # the title card. CPIT_MAIN is shared with the HUD, the results screen, game over and the special
+  # stage, and G_FIX and G_RSLT have their own iPhone id headers where G_START does not, so only
+  # G_START may move. xbla's CPIT_MAIN is member-for-member identical to the base's; PC retail split
+  # G_START into CPIT_STARTDEMO.AMB after the fork and cannot be used. docs/per-member-variants.md
+  { source = "xbla", name = "console", flip = true, members = [
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_US.AMB",
+    # game over. ids are build-independent, G_OVER has no iPhone header
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_US.AMB",
+    # the results screen. ids are a strict prefix, 0-99 identical and iPhone appending 100-105 for
+    # the six touch-button pieces the console retry screen does not have.
+    # docs/cleardemo-port-notes.md
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_US.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_SP.AMB",
+    # the HUD, and the special stage's ring/time overlay it also owns. G_FIX is the one archive here
+    # whose ids differ: 29 and 30 are transposed and mobile appends 45-63, the on-screen controls.
+    # docs/gmfix-port-notes.md. SPST is common-only and identical.
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_FIX.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_FIX.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_US.AMB",
   ] },
 ]
 heads    = ["fna"]
@@ -141,6 +240,9 @@ base     = "ios-hd"
 overlays = ["staged", "wp7-orig"]
 variants = [
   { source = "pc", name = "console", archives = ["G_COM/RING/RING_MDL.AMB", "G_COM/RING/RING_TEX.AMB"] },
+  # the special stage ring, same three ring textures as above. pc has no GMK_SS_RING_MAT: the
+  # material motion is the mobile flipbook and the console arm does not load one.
+  { source = "pc", name = "console", archives = ["G_COM/GMK/GMK_SS_RING_MDL.AMB", "G_COM/GMK/GMK_SS_RING_TEX.AMB"] },
   # menus come from xbla, not pc: Steam's D_CMN_BTN carries a second _key set and runs to 28 actions
   # where XBLA and mobile both have 15, so only xbla's ids line up with the tables in the port.
   # D_CMN_BG/BTN/OBI are id-identical to mobile, only D_CMN_WIN and D_CMN_MSG actually differ.
@@ -179,6 +281,102 @@ variants = [
     "DEMO/LOGO/D_LOGO_SEGA_US_EU.AMB",
     "DEMO/LOGO/D_LOGO_SONIC.AMB",
     "DEMO/LOADING/D_LOADING.AMB",
+    # the pause menu. console and mobile are different screens, not different art: G_PAUSE.AMA is
+    # 6 actions against mobile's 10 and shares only "back". The _P/_WIN set has no mobile
+    # counterpart at all, so those emit as siblings with nothing to fall back to, which is what
+    # keeps them out of the tree unless the console variant is selected. Six languages again, so
+    # amFsAllVariant drops the whole screen back to the touch menu in CN/FI/HK/PT/RU.
+    # ids measured in docs/pause-action-ids.md
+    "G_COM/MENU/G_PAUSE.AMA",
+    "G_COM/MENU/G_PAUSE.AMB",
+    "G_COM/MENU/G_PAUSE_L.AMA",
+    "G_COM/MENU/G_PAUSE_JP.AMB",
+    "G_COM/MENU/G_PAUSE_US.AMB",
+    "G_COM/MENU/G_PAUSE_FR.AMB",
+    "G_COM/MENU/G_PAUSE_IT.AMB",
+    "G_COM/MENU/G_PAUSE_GE.AMB",
+    "G_COM/MENU/G_PAUSE_SP.AMB",
+    "G_COM/MENU/G_PAUSE_P.AMA",
+    "G_COM/MENU/G_PAUSE_P.AMB",
+    "G_COM/MENU/G_PAUSE_P_L.AMA",
+    "G_COM/MENU/G_PAUSE_P_JP.AMB",
+    "G_COM/MENU/G_PAUSE_P_US.AMB",
+    "G_COM/MENU/G_PAUSE_P_FR.AMB",
+    "G_COM/MENU/G_PAUSE_P_IT.AMB",
+    "G_COM/MENU/G_PAUSE_P_GE.AMB",
+    "G_COM/MENU/G_PAUSE_P_SP.AMB",
+    "G_COM/MENU/G_PAUSE_WIN.AMB",
+  ] },
+  # the title card. CPIT_MAIN is shared with the HUD, the results screen, game over and the special
+  # stage, and G_FIX and G_RSLT have their own iPhone id headers where G_START does not, so only
+  # G_START may move. xbla's CPIT_MAIN is member-for-member identical to the base's; PC retail split
+  # G_START into CPIT_STARTDEMO.AMB after the fork and cannot be used. docs/per-member-variants.md
+  { source = "xbla", name = "console", flip = true, members = [
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_START_US.AMB",
+    # game over. ids are build-independent, G_OVER has no iPhone header
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_OVER_US.AMB",
+    # the results screen. ids are a strict prefix, 0-99 identical and iPhone appending 100-105 for
+    # the six touch-button pieces the console retry screen does not have.
+    # docs/cleardemo-port-notes.md
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_US.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_RSLT_SP.AMB",
+    # the HUD, and the special stage's ring/time overlay it also owns. G_FIX is the one archive here
+    # whose ids differ: 29 and 30 are transposed and mobile appends 45-63, the on-screen controls.
+    # docs/gmfix-port-notes.md. SPST is common-only and identical.
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_FIX.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#G_FIX.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_FR.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_FR.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_GE.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_GE.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_IT.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_IT.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_JP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_JP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_SP.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_SP.AMB",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_US.AMA",
+    "G_COM/CPIT/CPIT_MAIN.AMB#SPST_US.AMB",
   ] },
 ]
 textures = { encode = [], accept = ["png", "bc1", "bc2", "bc3", "rgba32", "bgra32", "l8", "pvr"] }

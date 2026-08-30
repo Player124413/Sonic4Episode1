@@ -1191,7 +1191,7 @@ internal partial class AppMain
         gsSoundPlaySe(null, se_id, se_handle, fade_frame);
     }
 
-    private static void GsSoundStopSe()
+    public static void GsSoundStopSe()
     {
         GsSoundStopSe(0, false);
     }

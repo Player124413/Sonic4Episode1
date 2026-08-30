@@ -316,7 +316,7 @@ internal static partial class GmStartDemo
 
         var node = node_flag ? 1 : 0;
 
-        var obj_work = (GMS_COCKPIT_2D_WORK)GMM_COCKPIT_CREATE_WORK(
+        var obj_work = (GMS_COCKPIT_2D_WORK)GmCockpit.GMM_COCKPIT_CREATE_WORK(
             () => new GMS_COCKPIT_2D_WORK(), null, 0, tcb_name);
 
         obj_work.cpit_com.obj_work.disp_flag |= (uint)node;

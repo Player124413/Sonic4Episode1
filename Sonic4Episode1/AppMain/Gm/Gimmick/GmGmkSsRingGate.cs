@@ -8,7 +8,7 @@
     {
         OBS_OBJECT_WORK work1 = GMM_ENEMY_CREATE_WORK(eve_rec, pos_x, pos_y, () => new GMS_ENEMY_3D_WORK(), "GMK_SS_RINGGATE");
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work1;
-        work1.user_work = GmSplStageRingGateNumGet((ushort)eve_rec.left);
+        work1.user_work = GmSplStage.GmSplStageRingGateNumGet((ushort)eve_rec.left);
         work1.user_flag = eve_rec.flag & 1U;
         work1.user_timer = 20;
         if ((ushort)work1.user_work > g_gm_main_system.ply_work[0].ring_num)

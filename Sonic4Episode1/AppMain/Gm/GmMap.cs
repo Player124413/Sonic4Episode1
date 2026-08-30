@@ -640,7 +640,7 @@ internal partial class AppMain
             work.flag |= 268435456U;
     }
 
-    private static void GmMapSetDisp(bool disp)
+    public static void GmMapSetDisp(bool disp)
     {
         if (gm_map_tcb == null)
             return;

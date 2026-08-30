@@ -589,7 +589,7 @@ internal partial class AppMain
         g_obj.pause_level = -1;
     }
 
-    private static uint ObjObjectPauseCheck(uint ulFlag)
+    public static uint ObjObjectPauseCheck(uint ulFlag)
     {
         return ((int)_g_obj.flag & 1) == 0 || ((int)ulFlag & 32) != 0 ? 0U : 1U;
     }
@@ -1031,7 +1031,7 @@ internal partial class AppMain
         ObjObjectRevokeObject(tcbWork);
     }
 
-    private static int ObjObjectViewOutCheck(OBS_OBJECT_WORK pWork)
+    public static int ObjObjectViewOutCheck(OBS_OBJECT_WORK pWork)
     {
         return ObjViewOutCheck(pWork.pos.x, pWork.pos.y, pWork.view_out_ofst, pWork.view_out_ofst_plus[0], pWork.view_out_ofst_plus[1], pWork.view_out_ofst_plus[2], pWork.view_out_ofst_plus[3]);
     }
@@ -1156,7 +1156,7 @@ internal partial class AppMain
         return g_obj.speed != 4096 ? FX_Mul(count, g_obj.speed) : count;
     }
 
-    private static int ObjTimeCountDown(int timer)
+    public static int ObjTimeCountDown(int timer)
     {
         if (g_obj.speed == 4096)
             timer -= 4096;
@@ -1167,7 +1167,7 @@ internal partial class AppMain
         return timer;
     }
 
-    private static int ObjTimeCountUp(int timer)
+    public static int ObjTimeCountUp(int timer)
     {
         if (g_obj.speed == 4096)
             timer += 4096;

@@ -144,7 +144,7 @@ internal partial class AppMain
         g_gm_main_system.game_flag |= 32768U;
     }
 
-    private static void GmCamScrLimitSetDirect(
+    public static void GmCamScrLimitSetDirect(
       GMS_EVE_RECORD_EVENT eve_rec,
       int pos_x,
       int pos_y)

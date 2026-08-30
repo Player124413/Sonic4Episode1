@@ -22,7 +22,7 @@ internal partial class AppMain
         return (float)(1.0 + f2 * (f2 * (0.0416666679084301 + f2 * (-1.0 / 720.0)) - 0.5));
     }
 
-    private static float nnSin(int ang)
+    public static float nnSin(int ang)
     {
         float num = 0.0f;
         int n = ang & ushort.MaxValue;
@@ -60,7 +60,7 @@ internal partial class AppMain
         return num;
     }
 
-    private static float nnCos(int ang)
+    public static float nnCos(int ang)
     {
         return nnSin(ang + 16384);
     }

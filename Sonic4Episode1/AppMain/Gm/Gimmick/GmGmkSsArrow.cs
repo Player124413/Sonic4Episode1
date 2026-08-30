@@ -40,7 +40,7 @@
 
     private static void gmGmkSsArrowMain(OBS_OBJECT_WORK obj_work)
     {
-        if (GSM_MAIN_STAGE_IS_SPSTAGE() && ((int)GmSplStageGetWork().flag & 4) != 0)
+        if (GSM_MAIN_STAGE_IS_SPSTAGE() && ((int)GmSplStage.GmSplStageGetWork().flag & 4) != 0)
         {
             obj_work.flag |= 4U;
         }

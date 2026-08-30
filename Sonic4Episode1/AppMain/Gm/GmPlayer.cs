@@ -868,7 +868,7 @@ internal partial class AppMain
         ply_work.ring_stage_num = (short)MTM_MATH_CLIP(ply_work.ring_stage_num, 0, 9999);
     }
 
-    private static void GmPlayerStockGet(GMS_PLAYER_WORK ply_work, short add_stock)
+    public static void GmPlayerStockGet(GMS_PLAYER_WORK ply_work, short add_stock)
     {
         if (g_gs_main_sys_info.game_mode == 1 && (21 > g_gs_main_sys_info.stage_id || g_gs_main_sys_info.stage_id > 27))
             return;
@@ -885,7 +885,7 @@ internal partial class AppMain
         int pos_y)
     {
         ply_work.score += (uint)score;
-        GmScoreCreateScore(score, pos_x, pos_y, 4096, 0);
+        GmScore.GmScoreCreateScore(score, pos_x, pos_y, FX32_ONE, 0);
     }
 
     private static void GmPlayerAddScoreNoDisp(GMS_PLAYER_WORK ply_work, int score)
@@ -911,7 +911,7 @@ internal partial class AppMain
             : 0U;
         int score = gm_ply_score_combo_tbl[(int)num];
         ply_work.score += (uint)score;
-        GmScoreCreateScore(score, pos_x, pos_y, gm_ply_score_combo_scale_tbl[(int)num],
+        GmScore.GmScoreCreateScore(score, pos_x, pos_y, gm_ply_score_combo_scale_tbl[(int)num],
             gm_ply_score_combo_vib_level_tbl[(int)num]);
     }
 

@@ -133,7 +133,7 @@ internal static partial class GmOver
 
     private static GMS_COCKPIT_2D_WORK gmOverCreatePart(int ama_id, AOS_TEXTURE tex, uint act_id)
     {
-        var obj_work = GMM_COCKPIT_CREATE_WORK(
+        var obj_work = GmCockpit.GMM_COCKPIT_CREATE_WORK(
             () => new GMS_COCKPIT_2D_WORK(), null, 0, "GAME_OVER");
 
         var part = (GMS_COCKPIT_2D_WORK)obj_work;

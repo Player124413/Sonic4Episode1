@@ -102,7 +102,7 @@
         GmSoundStopStageBGM(fade_frame);
     }
 
-    private static void GmSoundStopStageBGM(int fade_frame)
+    public static void GmSoundStopStageBGM(int fade_frame)
     {
         GsSoundStopBgm(gm_sound_bgm_scb, fade_frame);
     }
@@ -228,7 +228,7 @@
         gm_sound_jingle_scb.flag |= 2147483648U;
     }
 
-    private static void GmSoundStopJingle(int fade_frame)
+    public static void GmSoundStopJingle(int fade_frame)
     {
         GsSoundStopBgm(gm_sound_jingle_scb, fade_frame);
     }
@@ -242,7 +242,7 @@
         gm_sound_jingle_bgm_scb.flag |= 2147483648U;
     }
 
-    private static void GmSoundStopBGMJingle(int fade_frame)
+    public static void GmSoundStopBGMJingle(int fade_frame)
     {
         GsSoundStopBgm(gm_sound_jingle_bgm_scb, fade_frame);
     }
@@ -357,7 +357,7 @@
         GmSoundPlayJingle(7U, 0);
     }
 
-    private static void GmSoundPlayClear()
+    public static void GmSoundPlayClear()
     {
         GmSoundStopStageBGM(15);
         GmSoundStopBGMJingle(15);
@@ -366,7 +366,7 @@
         GmSoundPlayJingle(1U, 0);
     }
 
-    private static void GmSoundPlayClearFinal()
+    public static void GmSoundPlayClearFinal()
     {
         GmSoundStopStageBGM(15);
         GmSoundStopBGMJingle(15);

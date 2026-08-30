@@ -159,7 +159,7 @@ internal partial class AppMain
     private const int GME_EFCT_CMN_IDX_ROLLDASH_R = 53;
     private const int GME_EFCT_CMN_IDX_ROLLDASH_S = 54;
     private const int GME_EFCT_CMN_IDX_RUN = 55;
-    private const int GME_EFCT_CMN_IDX_SCORE_0 = 56;
+    public const int GME_EFCT_CMN_IDX_SCORE_0 = 56;
     private const int GME_EFCT_CMN_IDX_SCORE_1 = 57;
     private const int GME_EFCT_CMN_IDX_SCORE_2 = 58;
     private const int GME_EFCT_CMN_IDX_SCORE_3 = 59;
@@ -520,7 +520,7 @@ internal partial class AppMain
         }
     }
 
-    private static GMS_EFFECT_3DES_WORK GmEfctCmnEsCreate(
+    public static GMS_EFFECT_3DES_WORK GmEfctCmnEsCreate(
       OBS_OBJECT_WORK parent_obj,
       int efct_cmn_idx)
     {
@@ -648,7 +648,7 @@ internal partial class AppMain
         efct_work.obj_3des.ecb.drawObjState = 0U;
     }
 
-    private static void GmComEfctSetDispOffset(
+    public static void GmComEfctSetDispOffset(
       GMS_EFFECT_3DES_WORK efct_work,
       int ofst_x,
       int ofst_y,
