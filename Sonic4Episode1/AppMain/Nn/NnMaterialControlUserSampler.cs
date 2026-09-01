@@ -98,11 +98,8 @@ internal partial class AppMain
     }
 
     // the four calls every user-sampler site makes, gmMap.cpp:3248-3259 and four others.
-    //
-    // The oracle pushes amDrawGetProjectionMatrix straight through. We cannot: the shader projects a
-    // view position with this to work out where on screen it is, and everything that actually
-    // reaches the screen here goes through PROJECTION_CORRECTION as well. Pushing the raw matrix
-    // samples the wrong part of the target, which reads as the sea drawing in the clear colour.
+    // the shader projects a view position with this to find where on screen it is, so it has to be
+    // the matrix actually bound at draw time, not the NN copy
     public static void mppSetProjectionUserUniforms()
     {
         Vector4[] rows = NnStdShaderEffect.ProjectionUserUniforms(OpenGL.mppglGetProjection());

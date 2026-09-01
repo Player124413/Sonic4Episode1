@@ -15,6 +15,19 @@
 #define NND_USER_PROFILE_REFRACTS   0
 #endif
 
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+#if ( NND_PROF_MAX_PARALLEL_LIGHT + NND_PROF_MAX_POINT_LIGHT + NND_PROF_MAX_SPOT_LIGHT ) > 1
+#error NND_FLAT_LIGHT_SOURCE only covers one light
+#endif
+
+float4 u_FrontMaterialRegs[5];
+float4 u_FogRegs[5];
+float4 u_FrontLightModelProductRegs;
+float4 u_LightSourceRegs[12];
+
+#include "nnstd-flat-uniforms.fxh"
+#endif
+
 #define main nnStdShaderVS
 #include "nnstdshader/nnstdshader.vsh"
 #undef main
@@ -47,6 +60,11 @@ VS_OUTPUT_USERPROFILE nnStdShaderVSUserProfile(VS_INPUT Input)
 
     return output;
 }
+#endif
+
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+#undef NND_FLAT_LIGHT_SOURCE
+#define NND_FLAT_LIGHT_SOURCE(name) NND_FLAT_LIGHT_SOURCE_PS(name)
 #endif
 
 #define MATERIAL_PARAMETERS         ps_MATERIAL_PARAMETERS

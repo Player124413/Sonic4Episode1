@@ -12,9 +12,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);TRACE;MONOGAME;THIRD_PARTY_DDS;ASYNC_IO;AOT;SPLIT_LOOP;BGM_MEDIAPLAYER;</DefineConstants>
     <NoWarn>1701;1702;CA1416;</NoWarn>
-    <UseMonoRuntime>false</UseMonoRuntime>
-    <PublishAot>true</PublishAot>
-    <PublishAotUsingRuntimePack>true</PublishAotUsingRuntimePack>
+    <UseMonoRuntime>true</UseMonoRuntime>
+    <!--<PublishAot>true</PublishAot>
+    <PublishAotUsingRuntimePack>true</PublishAotUsingRuntimePack>-->
     <AndroidPackageFormat>aab</AndroidPackageFormat>
     <AndroidBundleToolExtraArgs>--local-testing</AndroidBundleToolExtraArgs>
   </PropertyGroup>
@@ -28,7 +28,9 @@
 
   <ItemGroup>
     <PackageReference Include="DdsKtxXna.MonoGame" Version="0.4.4" />
-    <PackageReference Include="MonoGame.Framework.Android" Version="3.8.*" />
+    <!-- source, not the 3.8.x package: nothing published detects ASTC, so every .ast texture
+         throws on load, see docs/monogame-mojoshader-ctab.md -->
+    <ProjectReference Include="..\Submodules\MonoGame\MonoGame.Framework\MonoGame.Framework.Android.csproj" />
     <PackageReference Include="Xamarin.Google.Android.Play.Asset.Delivery" Version="2.3.0.5" />
     <PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.0.1" ExcludeAssets="all" />
     <PackageReference Include="Xamarin.AndroidX.Datastore.Preferences.Core.Jvm" Version="1.2.0.1" ExcludeAssets="all" />

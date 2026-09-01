@@ -606,7 +606,7 @@
 	#endif
 #endif
 
-#if 0 /* 2008.06.23(ïKóvÇ»Ç¢) */
+#if 0 /* 2008.06.23(ÂøÖË¶Å„Å™„ÅÑ) */
 #if ( NND_OPT_TEX_DUALPARABOLOID	!= -1 && NND_OPT_TEXCOORD_DUALPARABOLOID	!= -1 )
 	#if   NND_UV_NUM == 0
 		#define NND_UV_NO_DUALPARABOLOID 0

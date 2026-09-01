@@ -96,8 +96,8 @@ public class Sonic4Ep1 : Game
         this.graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         this.graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 #else
-        this.graphics.PreferredBackBufferWidth = 1920;
-        this.graphics.PreferredBackBufferHeight = 1080;
+        this.graphics.PreferredBackBufferWidth = 1280;
+        this.graphics.PreferredBackBufferHeight = 720;
 #endif
 #if WINDOWS_UAP || IOS || ANDROID || WINDOWSPHONE7_5
         this.graphics.IsFullScreen = true;

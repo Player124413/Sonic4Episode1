@@ -1883,14 +1883,6 @@ internal partial class AppMain
     public const int DMD_LOGO_SONIC_FLAG_SKIP_OK = 1;
     public const int DMD_LOGO_SONIC_FLAG_SKIP = 2;
     public const int DMD_LOGO_SONIC_FLAG_END = 4;
-    public const int TARGET_WIDTH = 480;
-    public const int TARGET_HEIGHT = 320;
-    public const int TARGET_VISIBLE_HEIGHT = 288;
-    public const float TARGET_ORIGINAL_SCALE = 1f;
-    public const int TARGET_2D_OFFSET_Y = 16;
-    public const float TARGET_2D_SCALE_Y = 0.9f;
-    public const int DEVICE_WIDTH = 800;
-    public const int DEVICE_HEIGHT = 480;
     private const int APPD_MAIN_DRAW_FRAME = 0;
     private const int APPD_MAIN_CRIAUDIO_INIT_DELAY = 1;
     private const uint g_gs_bin_win_a_amb_size = 1344;

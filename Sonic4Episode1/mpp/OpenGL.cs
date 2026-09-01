@@ -144,10 +144,6 @@ namespace mpp
         private static int m_matrixIndexArrayStride = 0;
         private static GLVertexData m_matrixIndexArray = null;
         private static bool m_secondaryColorArrayEnabled = false;
-        // no z remap: every projection here comes from nnMake*Matrix, which is D3DX and already
-        // hands back 0..1. halving it as if it were GL cost us half the depth buffer
-        private static readonly Matrix PROJECTION_CORRECTION =
-            Matrix.CreateRotationZ(1.570796f) * Matrix.CreateScale(1f, 1.12f, 1f);
         private static VertexPosTexColNorm[][] m_vertices = new VertexPosTexColNorm[2][]
         {
             new VertexPosTexColNorm[32768],
@@ -777,7 +773,7 @@ namespace mpp
         {
             drawArraysCalls[drawArraysCallsCount].isPending = true;
             drawArraysCalls[drawArraysCallsCount].view = Matrix.Identity;
-            drawArraysCalls[drawArraysCallsCount].projection = m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
+            drawArraysCalls[drawArraysCallsCount].projection = m_projectionMatrixStack.Peek();
             drawArraysCalls[drawArraysCallsCount].alphaTestEnabled = m_alphaTestEnabled;
             drawArraysCalls[drawArraysCallsCount].normalArrayEnabled = m_normalArrayEnabled;
             drawArraysCalls[drawArraysCallsCount].vertexColorEnabled = m_vertexColorEnabled;
@@ -1043,7 +1039,7 @@ namespace mpp
             effect.AlphaFunction = m_alphaFunction;
             effect.ReferenceAlpha = m_alphaRef;
             effect.View = m_modelViewMatrixStack.Peek();
-            effect.Projection = m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
+            effect.Projection = m_projectionMatrixStack.Peek();
             effect.FogEnabled = m_fogEnabled && 9729 == m_fogMode;
             effect.FogColor = m_fogColor;
             effect.FogStart = m_fogStart;
@@ -1089,7 +1085,7 @@ namespace mpp
         private static void setupEffect<TEffect>(TEffect effect) where TEffect : Effect, IEffectMatrices, IEffectLights, IEffectFog
         {
             effect.View = m_modelViewMatrixStack.Peek();
-            effect.Projection = m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
+            effect.Projection = m_projectionMatrixStack.Peek();
             effect.FogEnabled = m_fogEnabled && 9729 == m_fogMode;
             effect.FogColor = m_fogColor;
             effect.FogStart = m_fogStart;
@@ -2021,10 +2017,9 @@ namespace mpp
             return m_modelViewMatrixStack.Peek();
         }
 
-        // an override effect needs PROJECTION_CORRECTION too, or it won't line up with the rest of the scene
         public static Matrix mppglGetProjection()
         {
-            return m_projectionMatrixStack.Peek() * PROJECTION_CORRECTION;
+            return m_projectionMatrixStack.Peek();
         }
 
         // the GL current colour, which nnPutMaterialCore sets from the material diffuse. The

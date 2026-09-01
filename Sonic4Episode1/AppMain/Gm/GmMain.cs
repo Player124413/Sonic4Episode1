@@ -5,15 +5,17 @@ using mpp;
 
 internal partial class AppMain
 {
-    public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f;
-    public const float GMD_CAMERA_UP_SCALE_MAX = 0.3371917f;
-    public const float GMD_CAMERA_SCALE = 0.5469176375f;
+    public const float GMD_CAMERA_SCALE = 0.2997259375f;    // gmMain.h:65, the !_IPHONE arm
 
-    // the scene is drawn rolled 90deg and unrolled in clip space, so screen width comes off
-    // disp_height and screen height off disp_height*aspect. see docs/camera-view-extent.md
-    public static short GMD_OBJ_LCD_X => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT);
+    // gmMain.h:72-78, an iPhone-only feature with no console value. see docs/camera-view-extent.md
+    public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f * (320f / 720f);
+    public const float GMD_CAMERA_UP_SCALE_MAX = GMD_CAMERA_SCALE / 2f;
 
-    public static short GMD_OBJ_LCD_Y => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT * AMD_SCREEN_ASPECT);
+    // gmMain.h:83-84 is scale*GSD_DISP_WIDTH, which assumes the window matches GSD_DISP. It does
+    // not here, so the width extent comes off the aspect instead. same value at 16:9
+    public static short GMD_OBJ_LCD_X => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT * AMD_SCREEN_ASPECT);
+
+    public static short GMD_OBJ_LCD_Y => (short)(GMD_CAMERA_SCALE * GSD_DISP_HEIGHT);
 
     public static bool GMM_MAIN_STAGE_IS_BOSS()
     {

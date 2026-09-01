@@ -13,12 +13,13 @@ public class StageParallaxTests
     private static readonly Vector2 Lcd = StageParallax.GameCamera;
     private static readonly Vector2 Main = new Vector2(280 * 64, 32 * 64);
 
-    // GMD_OBJ_LCD_X is GMD_CAMERA_SCALE * 720 and _Y folds in 720/1280, both truncated to short
+    // GMD_OBJ_LCD_X/Y at 16:9, which is gmMain.h:83-84 exactly: scale * 1280 and scale * 720.
+    // cross-checks against the console's own GMD_OBJ_CLIP_LCD_X/Y of 383/215 (gmMain.h:88-89)
     [Fact]
     public void TheGameCameraIsTheOneGmMainDerives()
     {
-        Assert.Equal(393f, Lcd.X);
-        Assert.Equal(221f, Lcd.Y);
+        Assert.Equal(383f, Lcd.X);
+        Assert.Equal(215f, Lcd.Y);
     }
 
     [Fact]

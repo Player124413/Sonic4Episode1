@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonic4Episode1.Tests", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonic4Episode1.Content", "..\Sonic4Episode1.Content\Sonic4Episode1.Content.csproj", "{07B5FE71-88A1-4C97-B9F4-6F5A3D47F588}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Android", "..\Submodules\MonoGame\MonoGame.Framework\MonoGame.Framework.Android.csproj", "{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,7 @@ Global
 		{E2F579ED-533C-4B0F-B4B0-F7D5EE728C00}.Release|x86.Build.0 = Release|Any CPU
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|x64.Build.0 = Debug|Any CPU
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -169,6 +172,18 @@ Global
 		{07B5FE71-88A1-4C97-B9F4-6F5A3D47F588}.Release|x64.Build.0 = Release|Any CPU
 		{07B5FE71-88A1-4C97-B9F4-6F5A3D47F588}.Release|x86.ActiveCfg = Release|Any CPU
 		{07B5FE71-88A1-4C97-B9F4-6F5A3D47F588}.Release|x86.Build.0 = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|x64.Build.0 = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Debug|x86.Build.0 = Debug|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|x64.ActiveCfg = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|x64.Build.0 = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,6 +196,7 @@ Global
 		{D041552F-D6B1-47B8-8CAB-241F5606BD97} = {E0000646-4BE4-490E-8A77-551CCA135930}
 		{E2F579ED-533C-4B0F-B4B0-F7D5EE728C00} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{896706F4-3DCD-4F7B-B717-EC67CC8D1B1C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{AB45B4DD-647F-278B-94AB-DDFBE2F5CFE2} = {E0000646-4BE4-490E-8A77-551CCA135930}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {54427269-D7E5-4634-B9DC-FD798DC18031}

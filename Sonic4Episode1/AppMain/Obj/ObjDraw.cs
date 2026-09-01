@@ -300,8 +300,8 @@
             if (pos.HasValue && ((int)p_disp_flag1 & 293609472) == 0)
             {
                 OBS_CAMERA obsCamera = ObjCameraGet(_g_obj.glb_camera_id);
-                float num1 = obsCamera.disp_pos.x + obsCamera.bottom;
-                float num2 = obsCamera.disp_pos.x + obsCamera.top;
+                float num1 = obsCamera.disp_pos.x + obsCamera.left;
+                float num2 = obsCamera.disp_pos.x + obsCamera.right;
                 float num3 = (float)-(obsCamera.disp_pos.y + (double)obsCamera.top);
                 float num4 = (float)-(obsCamera.disp_pos.y + (double)obsCamera.bottom);
                 float num5 = 1f;
@@ -1447,8 +1447,7 @@
                     //nnMakeOrthoMatrix(nnsMatrix2, -right, right, -top, top, cam.ZNear, cam.ZFar);
                     float scale = 0.078125f;    // ワイド時に横5ブロック分がこれぐらい
                     float dx, dy;
-                    dx = g_obj.disp_height * scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
-                    dy = dx / cam.Aspect;
+                    ObjCameraGetOrthoExtent(scale, cam.Aspect, out dx, out dy);
                     nnMakeOrthoMatrix(nnsMatrix2, -dx, dx, -dy, dy, cam.ZNear, cam.ZFar);
                     param3DnnSetCamera.prj_mtx.Assign(nnsMatrix2);
                     break;

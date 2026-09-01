@@ -31,7 +31,6 @@ param(
     [string] $KeyFile = "$PSScriptRoot\..\..\Sonic4Episode1.Tests\Fixtures\nnstdshader-keys.txt",
     [string] $OutDir = "$PSScriptRoot\..\$Backend\nnstd",
     [string] $Fxc,
-    [string] $Mgfxc = "$PSScriptRoot\..\mgfx\tool\mgfxc.exe",
     [int] $Jobs = [Environment]::ProcessorCount,
     [switch] $Force
 )
@@ -48,12 +47,9 @@ if ($Backend -eq 'FNA') {
     if (-not $Fxc -or -not (Test-Path $Fxc)) { throw "fxc.exe not found; install the Windows SDK or pass -Fxc" }
 }
 else {
-    # a stock mgfxc cannot compile nnstdshader at all, its MojoShader rejects struct uniforms,
-    # see docs/monogame-mojoshader-ctab.md
-    if (-not (Test-Path $Mgfxc)) {
-        throw "patched mgfxc not found at $Mgfxc; run Shaders\mgfx\Build-Mgfxc.ps1"
+    if (-not (Get-Command mgfxc -ErrorAction SilentlyContinue)) {
+        throw "mgfxc not found; run: dotnet tool install -g dotnet-mgfxc"
     }
-    $Mgfxc = (Resolve-Path $Mgfxc).Path
 }
 
 if (-not $Keys) { $Keys = Get-Content $KeyFile | Where-Object { $_.Trim() } }
@@ -219,7 +215,8 @@ $work = foreach ($key in $Keys) {
     else {
         # mgfxc takes one semicolon separated /Defines and resolves #include against the source
         # file's own directory, so there is no /I to pass
-        $pairs = @()
+        # MonoGame cannot compile a struct uniform, see docs/monogame-mojoshader-ctab.md
+        $pairs = @('NND_FLAT_UNIFORM_STRUCTS=1')
         foreach ($kv in $ProfileDefines.GetEnumerator()) { $pairs += "$($kv.Key)=$($kv.Value)" }
         foreach ($kv in $defines.GetEnumerator()) { $pairs += "$($kv.Key)=$($kv.Value)" }
         $args = @($fx, $out, '/Profile:OpenGL', "/Defines:$($pairs -join ';')")
@@ -234,7 +231,7 @@ Write-Host "compiling $($work.Count) of $($Keys.Count) permutation(s) with $Jobs
 
 $results = $work | ForEach-Object -ThrottleLimit $Jobs -Parallel {
     $item = $_
-    $exe = if ($using:Backend -eq 'MonoGame') { $using:Mgfxc } else { $using:Fxc }
+    $exe = if ($using:Backend -eq 'MonoGame') { 'mgfxc' } else { $using:Fxc }
     # X1519 is the pixel half re-running the TEXCOORD cascade, X3206 is NN's own mul(float3,
     # float4x4) UV transform, X4717 is fxc grumbling that effects are deprecated. All expected.
     $text = & $exe @($item.args) 2>&1 | Where-Object { $_ -notmatch 'X1519|X3206|X4717|^\s*$|compilation object save succeeded' }

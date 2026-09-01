@@ -86,8 +86,7 @@ internal partial class AppMain
 
             obj_camera.scale = 0.078125f;  // This is about 5 blocks when it's wide
 
-            dx = g_obj.disp_height * obj_camera.scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
-            dy = dx / obj_camera.aspect;
+            ObjCameraGetOrthoExtent(obj_camera.scale, obj_camera.aspect, out dx, out dy);
 
             obj_camera.left = -dx;
             obj_camera.right = dx;
@@ -99,7 +98,6 @@ internal partial class AppMain
                 obj_camera.znear, obj_camera.zfar);
         }
 
-        //nnMakeOrthoMatrix(obj_camera.prj_ortho_mtx, obj_camera.left, obj_camera.right, obj_camera.bottom, obj_camera.top, obj_camera.znear, obj_camera.zfar);
         switch (obj_camera.camera_type)
         {
             case OBE_CAMERA_TYPE.OBE_CAMERA_TYPE_TARGET_ROLL:
@@ -151,7 +149,14 @@ internal partial class AppMain
             troll_camera.Target.y = obj_camera.target_pos.y;
             troll_camera.Target.z = obj_camera.target_pos.z;
         }
-        troll_camera.Roll = obj_camera.roll + 16384;
+        troll_camera.Roll = obj_camera.roll;
+    }
+
+    // objCamera.cpp:227-230. dy is fixed, dx grows with aspect, so a wider window sees more
+    public static void ObjCameraGetOrthoExtent(float scale, float aspect, out float dx, out float dy)
+    {
+        dy = g_obj.disp_height * scale * 0.5f;
+        dx = dy * aspect;
     }
 
     private static void ObjCameraGetTargetUpTargetCamera(
@@ -305,8 +310,7 @@ internal partial class AppMain
                     float dx, dy;
                     nnMakePerspectiveMatrix(obsCamera.prj_pers_mtx, obsCamera.fovy, obsCamera.aspect, obsCamera.znear, obsCamera.zfar);
 
-                    dx = g_obj.disp_height * obsCamera.scale * 0.5f * (g_obj.disp_height / g_obj.disp_width);
-                    dy = dx / obsCamera.aspect;
+                    ObjCameraGetOrthoExtent(obsCamera.scale, obsCamera.aspect, out dx, out dy);
 
                     obsCamera.left = -dx;
                     obsCamera.right = dx;

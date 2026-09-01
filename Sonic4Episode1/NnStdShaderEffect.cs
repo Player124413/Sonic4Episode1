@@ -54,9 +54,20 @@ internal sealed class NnStdShaderEffect : Effect
     // FNA's SetValue(Matrix[]) doesn't check length against the parameter, so clamp here
     private static void SetMatrixArray(EffectParameter parameter, Matrix[] values)
     {
-        int capacity = parameter.Elements == null || parameter.Elements.Count == 0
-            ? 1
-            : parameter.Elements.Count;
+        bool isArray = parameter.Elements != null && parameter.Elements.Count > 0;
+
+#if MONOGAME
+        // MonoGame's SetValue(Matrix[]) walks Elements, and a one entry array does not have any,
+        // it comes back as a plain matrix
+        if (!isArray)
+        {
+            if (values.Length > 0)
+                parameter.SetValue(values[0]);
+            return;
+        }
+#endif
+
+        int capacity = isArray ? parameter.Elements.Count : 1;
 
         if (values.Length <= capacity)
         {
@@ -82,12 +93,30 @@ internal sealed class NnStdShaderEffect : Effect
             new Vector4(direction, 0f),
         };
 
-        SetShared("u_LightSource", lights =>
-        {
-            EffectParameter light = LightElement(lights, index);
-            if (light != null)
-                light.SetValue(registers);
-        });
+        SetShared("u_LightSource" + StructSuffix, lights => SetLightRegisters(lights, index, registers));
+    }
+
+#if MONOGAME
+    // elements of the flattened array are registers rather than lights, so a light starts every
+    // NnStdShaderLightRegisters of them
+    private static void SetLightRegisters(EffectParameter lights, int index, Vector4[] registers)
+    {
+        if (lights.Elements == null)
+            return;
+
+        int first = index * NnStdShaderLightRegisters;
+        if (first + registers.Length > lights.Elements.Count)
+            return;
+
+        for (int i = 0; i < registers.Length; ++i)
+            lights.Elements[first + i].SetValue(registers[i]);
+    }
+#else
+    private static void SetLightRegisters(EffectParameter lights, int index, Vector4[] registers)
+    {
+        EffectParameter light = LightElement(lights, index);
+        if (light != null)
+            light.SetValue(registers);
     }
 
     // a permutation reading only element 0 can come back from MojoShader as a plain struct, no Elements
@@ -98,6 +127,7 @@ internal sealed class NnStdShaderEffect : Effect
 
         return index == 0 ? lights : null;
     }
+#endif
 
     public void SetMaterial(AppMain.NNS_MATERIAL_STDSHADER_COLOR color, Vector3 sceneAmbient)
     {
@@ -260,11 +290,32 @@ internal sealed class NnStdShaderEffect : Effect
             set(pixelSide);
     }
 
+#if MONOGAME
+    // MonoGame cannot compile a struct uniform at all, so its permutations declare the four NN
+    // structs as float4 register arrays instead, see docs/monogame-mojoshader-ctab.md. One array
+    // serves both halves, so unlike the struct form there is no ps_ twin to set.
+    private const string StructSuffix = "Regs";
+    private const int NnStdShaderLightRegisters = 12;
+#else
+    private const string StructSuffix = "";
+#endif
+
     // FNA packs struct members tightly by size where D3D9 puts each on its own float4 register, so
     // set one Vector4 per register directly rather than by member name
     private void SetStruct(string name, params Vector4[] registers)
     {
-        SetShared(name, parameter => parameter.SetValue(registers));
+        SetShared(name + StructSuffix, parameter =>
+        {
+#if MONOGAME
+            // a one register struct flattens to a plain float4, which has no Elements to walk
+            if (registers.Length == 1)
+            {
+                parameter.SetValue(registers[0]);
+                return;
+            }
+#endif
+            parameter.SetValue(registers);
+        });
     }
 
     private void SetMatrix(string name, Matrix value)

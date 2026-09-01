@@ -538,6 +538,11 @@ internal partial class AppMain
         g_obj.lcd_size[1] = lcd_size_y;
         g_obj.clip_lcd_size[0] = lcd_size_x;
         g_obj.clip_lcd_size[1] = lcd_size_y;
+
+        // TODO(wam): remove, gmk view-out diagnostics
+        Console.WriteLine($"[s4diag] ObjInit lcd={lcd_size_x}x{lcd_size_y}"
+            + $" disp={disp_width}x{disp_height} aspect={AMD_SCREEN_ASPECT}"
+            + $" scale={GMD_CAMERA_SCALE} 2d={AMD_SCREEN_2D_WIDTH}x{AMD_SCREEN_2D_HEIGHT}");
         g_obj.load_drawflag = 0U;
         g_obj.drawflag = 0U;
         g_obj.glb_camera_id = -1;

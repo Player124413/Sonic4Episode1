@@ -49,26 +49,20 @@
     <Warning Condition="'$(FxcPath)' == ''" Text="fxc.exe not found; shaders will not be rebuilt. Install the Windows SDK if you need to change them." />
   </Target>
 
-  <!-- Shaders/mgfx/Build-Mgfxc.ps1 puts a patched mgfxc here, which is the only one that can
-       compile an effect with a struct uniform, see docs/monogame-mojoshader-ctab.md. water and
-       waterfall have none, so a global mgfxc is still good enough for them and is worth falling
-       back to. Neither is on the restore graph, so absence is a warning and stale blobs rather
-       than a build failure, the same way a missing fxc is treated -->
+  <!-- mgfxc is a global dotnet tool, `dotnet tool install -g dotnet-mgfxc`. It is not on the
+       restore graph, so absence is a warning and stale blobs rather than a build failure, the
+       same way a missing fxc is treated -->
   <Target Name="LocateMgfxc" Condition="'$(ShaderBackend)' == 'MonoGame'">
-    <PropertyGroup>
-      <MgfxcLocalPath>$(ShadersDir)mgfx\tool\mgfxc.exe</MgfxcLocalPath>
-      <MgfxcPath Condition="Exists('$(MgfxcLocalPath)')">$(MgfxcLocalPath)</MgfxcPath>
-    </PropertyGroup>
     <!-- it installs as `mgfxc`, not `dotnet-mgfxc`, so `dotnet mgfxc` does not find it. Called
          with no arguments it prints usage and exits 1, which is enough to say it is there -->
-    <Exec Condition="'$(MgfxcPath)' == ''" Command="mgfxc" IgnoreExitCode="true"
-          StandardOutputImportance="low" StandardErrorImportance="low" EchoOff="true">
+    <Exec Command="mgfxc" IgnoreExitCode="true" StandardOutputImportance="low"
+          StandardErrorImportance="low" EchoOff="true">
       <Output TaskParameter="ExitCode" PropertyName="MgfxcExitCode" />
     </Exec>
     <PropertyGroup>
-      <MgfxcPath Condition="'$(MgfxcPath)' == '' AND '$(MgfxcExitCode)' == '1'">mgfxc</MgfxcPath>
+      <MgfxcPath Condition="'$(MgfxcExitCode)' == '1'">mgfxc</MgfxcPath>
     </PropertyGroup>
-    <Warning Condition="'$(MgfxcPath)' == ''" Text="mgfxc not found; MonoGame shaders will not be rebuilt. Run: Shaders\mgfx\Build-Mgfxc.ps1" />
+    <Warning Condition="'$(MgfxcPath)' == ''" Text="mgfxc not found; MonoGame shaders will not be rebuilt. Run: dotnet tool install -g dotnet-mgfxc" />
   </Target>
 
   <!-- the condition belongs on the Exec, not the target: MSBuild evaluates a target's

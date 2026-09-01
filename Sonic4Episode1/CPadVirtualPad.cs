@@ -22,7 +22,7 @@ internal class CPadVirtualPad
         this.m_area.left = 0.0f;
         this.m_area.top = 0.0f;
         this.m_area.right = AppMain.AMD_SCREEN_2D_WIDTH;
-        this.m_area.bottom = 288f;
+        this.m_area.bottom = 320f;
         return this.create();
     }
 
@@ -155,8 +155,6 @@ internal class CPadVirtualPad
     public ushort getOnFlag(CArray2<float> pos)
     {
         CArray2<float> p1 = CArray2<float>.initializer((float)((m_area.left + (double)this.m_area.right) * 0.5), (float)((m_area.top + (double)this.m_area.bottom) * 0.5));
-        pos.y -= 16f;
-        pos.y /= 1.05f;
         ushort num1 = 0;
         float num2 = (float)((m_area.bottom - (double)this.m_area.top) * 0.400000005960464 * 0.5);
         CArray2<float> xy1_1 = CArray2<float>.initializer(this.m_area.left, p1.y - num2);

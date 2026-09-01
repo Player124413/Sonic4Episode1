@@ -9,425 +9,425 @@
     File    : nnstdshader.psh
     Create  : 2008/05/12 Ver.0.01.00
     Modify  : 2008/09/05 Ver.1.00.01
-                ƒhƒ‰ƒCƒo‚Ì•s‹ï‡‚Æv‚í‚ê‚éŒ´ˆö•s–¾‚ÌŒ»Û‚ª”­¶‚µ‚½ˆ× frac ŠÖ”‚ğƒRƒƒ“ƒg‚µ‚Ä
-                Ÿ‚Ì‚æ‚¤‚É•ÏX‚µ‚Ä‰ñ”ğ‚µ‚½B
+                ãƒ‰ãƒ©ã‚¤ãƒã®ä¸å…·åˆã¨æ€ã‚ã‚Œã‚‹åŸå› ä¸æ˜ã®ç¾è±¡ãŒç™ºç”Ÿã—ãŸç‚º frac é–¢æ•°ã‚’ã‚³ãƒ¡ãƒ³ãƒˆã—ã¦
+                æ¬¡ã®ã‚ˆã†ã«å¤‰æ›´ã—ã¦å›é¿ã—ãŸã€‚
 	              lerps = tp.xy - floor(tp.xy);
-                •s‹ï‡‚ª”­¶‚µ‚½ƒrƒfƒIƒJ[ƒh‚Í
-                EQuadro FX 4500(ƒhƒ‰ƒCƒo169.96)
-    Modify  : 2008/09/24 Ver.1.00.02 NND_OPT_NORMALMAP_AXLY ‚ªéŒ¾‚³‚ê‚Ä‚È‚¢‚Æ‚«ƒfƒtƒHƒ‹ƒgéŒ¾‚ª‚È‚©‚Á‚½‚Ì‚Å’Ç‰ÁB
-    Modify  : 2008/11/07 Ver.1.00.03 ‚Q–Êƒ‰ƒCƒeƒBƒ“ƒO‚Ì•s‹ï‡C³B
-    Modify  : 2009/03/03 Ver.1.00.04 ŒxƒƒbƒZ[ƒW‚ğæ‚èœ‚¢‚½B
-    Modify  : 2009/06/16 Ver.1.00.05 ®—B
+                ä¸å…·åˆãŒç™ºç”Ÿã—ãŸãƒ“ãƒ‡ã‚ªã‚«ãƒ¼ãƒ‰ã¯
+                ãƒ»Quadro FX 4500(ãƒ‰ãƒ©ã‚¤ãƒ169.96)
+    Modify  : 2008/09/24 Ver.1.00.02 NND_OPT_NORMALMAP_AXLY ãŒå®£è¨€ã•ã‚Œã¦ãªã„ã¨ããƒ‡ãƒ•ã‚©ãƒ«ãƒˆå®£è¨€ãŒãªã‹ã£ãŸã®ã§è¿½åŠ ã€‚
+    Modify  : 2008/11/07 Ver.1.00.03 ï¼’é¢ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã®ä¸å…·åˆä¿®æ­£ã€‚
+    Modify  : 2009/03/03 Ver.1.00.04 è­¦å‘Šãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å–ã‚Šé™¤ã„ãŸã€‚
+    Modify  : 2009/06/16 Ver.1.00.05 æ•´ç†ã€‚
     Version : 1.00.05
     Note    : 
 
 ---------------------------------------------------------------------------*/
 #pragma warning(disable:3557)	// warning X3557: Loop only executes for 1 iteration(s), forcing loop to unroll
 
-/*------ Declarations (ƒvƒƒtƒ@ƒCƒ‹’è”) ----------------------------------*/
+/*------ Declarations (ãƒ—ãƒ­ãƒ•ã‚¡ã‚¤ãƒ«å®šæ•°) ----------------------------------*/
 
-/* •ÏŠ·Œã–@ü³‹K‰» */
+/* å¤‰æ›å¾Œæ³•ç·šæ­£è¦åŒ– */
 #ifndef NND_PROF_NORMALIZE_VTX_NORMAL
 	#define NND_PROF_NORMALIZE_VTX_NORMAL		(1)			/* bool */
 #endif
 
-/* •ÏŠ·Œã–@üÄƒXƒP[ƒ‹ */
+/* å¤‰æ›å¾Œæ³•ç·šå†ã‚¹ã‚±ãƒ¼ãƒ« */
 #ifndef NND_PROF_RESCALE_NORMAL
 	#define NND_PROF_RESCALE_NORMAL				(0)			/* bool */
 #endif
 
-/* ’¸“_ƒXƒyƒLƒ…ƒ‰[ƒJƒ‰[ */
+/* é ‚ç‚¹ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ã‚«ãƒ©ãƒ¼ */
 #ifndef NND_PROF_VTX_SPECULAR
 	#define NND_PROF_VTX_SPECULAR				(1)			/* bool */
 #endif
 
-/* Å‘åƒpƒ‰ƒŒƒ‹ƒ‰ƒCƒg” */
+/* æœ€å¤§ãƒ‘ãƒ©ãƒ¬ãƒ«ãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_PROF_MAX_PARALLEL_LIGHT
-	#define NND_PROF_MAX_PARALLEL_LIGHT			(4)			/* int 0`4 */
+	#define NND_PROF_MAX_PARALLEL_LIGHT			(4)			/* int 0ï½4 */
 #endif
 
-/* Å‘åƒ|ƒCƒ“ƒgƒ‰ƒCƒg” */
+/* æœ€å¤§ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_PROF_MAX_POINT_LIGHT
-	#define NND_PROF_MAX_POINT_LIGHT			(2)			/* int 0`4 */
+	#define NND_PROF_MAX_POINT_LIGHT			(2)			/* int 0ï½4 */
 #endif
 
-/* Å‘åƒXƒ|ƒbƒgƒ‰ƒCƒg” */
+/* æœ€å¤§ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_PROF_MAX_SPOT_LIGHT
-	#define NND_PROF_MAX_SPOT_LIGHT				(1)			/* int 0`4 */
+	#define NND_PROF_MAX_SPOT_LIGHT				(1)			/* int 0ï½4 */
 #endif
 
 #define NND_PROF_MAX_LIGHT						( NND_PROF_MAX_PARALLEL_LIGHT + NND_PROF_MAX_POINT_LIGHT + NND_PROF_MAX_SPOT_LIGHT )
 
-/* ƒ‰ƒCƒgƒAƒ“ƒrƒGƒ“ƒgƒpƒ‰ƒ[ƒ^—LŒø */
+/* ãƒ©ã‚¤ãƒˆã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æœ‰åŠ¹ */
 #ifndef NND_PROF_LIGHT_AMBIENT
 	#define NND_PROF_LIGHT_AMBIENT				(0)			/* bool */
 #endif
 
-/* ƒ|ƒCƒ“ƒgƒ‰ƒCƒg‹——£Œ¸Šƒ‚ƒfƒ‹ */
+/* ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆè·é›¢æ¸›è¡°ãƒ¢ãƒ‡ãƒ« */
 #ifndef NND_PROF_POINTLIGHT_DISTATTEN
 	#define NND_PROF_POINTLIGHT_DISTATTEN		(0)
-										/* 0: Œ¸Š‚È‚µ 1: ‹t 2: ‹t‚Qæ */
+										/* 0: æ¸›è¡°ãªã— 1: é€† 2: é€†ï¼’ä¹— */
 #endif
 
-/* ƒXƒ|ƒbƒgƒ‰ƒCƒg‹——£Œ¸Šƒ‚ƒfƒ‹ */
+/* ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆè·é›¢æ¸›è¡°ãƒ¢ãƒ‡ãƒ« */
 #ifndef NND_PROF_SPOTLIGHT_DISTATTEN
 	#define NND_PROF_SPOTLIGHT_DISTATTEN		(0)
-										/* 0: Œ¸Š‚È‚µ 1: ‹t 2: ‹t‚Qæ */
+										/* 0: æ¸›è¡°ãªã— 1: é€† 2: é€†ï¼’ä¹— */
 #endif
 
-/* ]–@ü‚ğ–@üÚü‚©‚çŒvZ */
+/* å¾“æ³•ç·šã‚’æ³•ç·šæ¥ç·šã‹ã‚‰è¨ˆç®— */
 #ifndef NND_PROF_CALC_VTX_BINORMAL
 	#define NND_PROF_CALC_VTX_BINORMAL			(1)			/* bool */
 #endif
 
-/* ƒtƒHƒOƒ‚ƒfƒ‹ */
+/* ãƒ•ã‚©ã‚°ãƒ¢ãƒ‡ãƒ« */
 #ifndef NND_PROF_FOG_MODEL	
-	#define NND_PROF_FOG_MODEL					(0)			/* 0:ƒtƒHƒO‚È‚µ 1:LINEAR 2:EXP 3:EXP2 */
+	#define NND_PROF_FOG_MODEL					(0)			/* 0:ãƒ•ã‚©ã‚°ãªã— 1:LINEAR 2:EXP 3:EXP2 */
 #endif
 
-/* ‹——£ƒtƒHƒO */
+/* è·é›¢ãƒ•ã‚©ã‚° */
 #ifndef NND_PROF_DISTANCE_FOG
 	#define NND_PROF_DISTANCE_FOG				(1)			/* bool */
 #endif
 
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊ‚ÌƒtƒHƒOŒvZ */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ã®ãƒ•ã‚©ã‚°è¨ˆç®— */
 #ifndef NND_PROF_FRAG_FOG
 	#define NND_PROF_FRAG_FOG					(1)			/* bool */
 #endif
 
-/* Å‘åƒ†[ƒU[ƒ†ƒjƒtƒH[ƒ€” */
+/* æœ€å¤§ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ¦ãƒ‹ãƒ•ã‚©ãƒ¼ãƒ æ•° */
 #ifndef NND_PROF_MAX_USER_UNIFORM
 	#define NND_PROF_MAX_USER_UNIFORM			(4)			/* int */
 #endif
 
-/*------ Declarations (ƒVƒF[ƒ_Å“K‰»ƒvƒƒtƒ@ƒCƒ‹’è”) --------------------*/
+/*------ Declarations (ã‚·ã‚§ãƒ¼ãƒ€æœ€é©åŒ–ãƒ—ãƒ­ãƒ•ã‚¡ã‚¤ãƒ«å®šæ•°) --------------------*/
 
-/* ’¸“_ƒJƒ‰[‚ ‚é‚È‚µ */
+/* é ‚ç‚¹ã‚«ãƒ©ãƒ¼ã‚ã‚‹ãªã— */
 #ifndef NND_OPT_VTX_COLOR
-	#define NND_OPT_VTX_COLOR					(0)			/* bool 0:’¸“_ƒJƒ‰[‚È‚µ 1:’¸“_ƒJƒ‰[‚ ‚è */
+	#define NND_OPT_VTX_COLOR					(0)			/* bool 0:é ‚ç‚¹ã‚«ãƒ©ãƒ¼ãªã— 1:é ‚ç‚¹ã‚«ãƒ©ãƒ¼ã‚ã‚Š */
 #endif
 
-/* ’¸“_•ÏŠ·•û® */
+/* é ‚ç‚¹å¤‰æ›æ–¹å¼ */
 #ifndef NND_OPT_VTX_TFM_MODE
 	#define NND_OPT_VTX_TFM_MODE				(0)
 #endif
-#define NND_OPT_VTX_TFM_MODE_RIGID				(0)		// ƒŠƒWƒbƒg
-#define NND_OPT_VTX_TFM_MODE_PLIABLE_B4			(1)		// ƒvƒ‰ƒCƒAƒuƒ‹
-#define NND_OPT_VTX_TFM_MODE_PLIABLE_B32		(2)		// ƒvƒ‰ƒCƒAƒuƒ‹
+#define NND_OPT_VTX_TFM_MODE_RIGID				(0)		// ãƒªã‚¸ãƒƒãƒˆ
+#define NND_OPT_VTX_TFM_MODE_PLIABLE_B4			(1)		// ãƒ—ãƒ©ã‚¤ã‚¢ãƒ–ãƒ«
+#define NND_OPT_VTX_TFM_MODE_PLIABLE_B32		(2)		// ãƒ—ãƒ©ã‚¤ã‚¢ãƒ–ãƒ«
 #define NND_OPT_VTX_TFM_MODE_TFM				(3)		// -
 
-/* ƒ‰ƒCƒeƒBƒ“ƒO‚ğ‚·‚é */
+/* ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚’ã™ã‚‹ */
 #ifndef NND_OPT_LIGHTING
 	#define NND_OPT_LIGHTING					(1)			/* bool */
 #endif
 
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒO‚ğ‚·‚é */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚’ã™ã‚‹ */
 #ifndef NND_OPT_FRAG_LIGHTING
 	#define NND_OPT_FRAG_LIGHTING				(1)			/* bool */
 #endif
 
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒOƒpƒ‰ƒŒƒ‹ƒ‰ƒCƒg” */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ãƒ‘ãƒ©ãƒ¬ãƒ«ãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_OPT_NUM_FRAG_PARALLEL_LIGHT
 	#define NND_OPT_NUM_FRAG_PARALLEL_LIGHT		(1)
 #endif
 
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒOƒ|ƒCƒ“ƒgƒ‰ƒCƒg” */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_OPT_NUM_FRAG_POINT_LIGHT
 	#define NND_OPT_NUM_FRAG_POINT_LIGHT		(0)
 #endif
 
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒOƒXƒ|ƒbƒgƒ‰ƒCƒg” */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆæ•° */
 #ifndef NND_OPT_NUM_FRAG_SPOT_LIGHT
 	#define NND_OPT_NUM_FRAG_SPOT_LIGHT			(0)
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰—LŒø */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©æœ‰åŠ¹ */
 #ifndef NND_OPT_SPECULAR
 	#define NND_OPT_SPECULAR					(1)			/* bool */
 #endif
 
-/* “ñ–Êƒ‰ƒCƒeƒBƒ“ƒO‚ğs‚È‚¤ */
+/* äºŒé¢ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã‚’è¡Œãªã† */
 #ifndef NND_OPT_TWOSIDED_LIGHTING
 	#define NND_OPT_TWOSIDED_LIGHTING			(0)			/* bool */
 #endif
 
-/* ÚüA]–@ü‚ğŒvZ‚·‚é */
+/* æ¥ç·šã€å¾“æ³•ç·šã‚’è¨ˆç®—ã™ã‚‹ */
 #ifndef NND_OPT_TANGENT_SPACE
 	#define NND_OPT_TANGENT_SPACE				(0)			/* bool */
 #endif
 
-/* ˆ³kƒ^ƒ“ƒWƒFƒ“ƒgƒXƒy[ƒX–@üƒ}ƒbƒv‚ğg—p‚·‚é */
+/* åœ§ç¸®ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆã‚¹ãƒšãƒ¼ã‚¹æ³•ç·šãƒãƒƒãƒ—ã‚’ä½¿ç”¨ã™ã‚‹ */
 #ifndef NND_OPT_NORMALMAP_AXLY
 	#define NND_OPT_NORMALMAP_AXLY				(0)			/* bool */
 #endif
 
-/* ƒeƒNƒXƒ`ƒƒÀ•W‚ÌÅ‘å” */
+/* ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã®æœ€å¤§æ•° */
 #ifndef NND_OPT_MAX_TEXCOORD
-	#define NND_OPT_MAX_TEXCOORD				(0)			/* int 0`4 */
+	#define NND_OPT_MAX_TEXCOORD				(0)			/* int 0ï½4 */
 #endif
 
-/* ƒeƒNƒXƒ`ƒƒƒ}ƒbƒv‚ÌÅ‘å” */
+/* ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒãƒƒãƒ—ã®æœ€å¤§æ•° */
 #ifndef NND_OPT_MAX_TEXMAP
 	#define NND_OPT_MAX_TEXMAP					(0)
 #endif
 
-/* –@üƒ}ƒbƒvƒCƒ“ƒfƒbƒNƒX */
+/* æ³•ç·šãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_NORMAL
 	#define NND_OPT_TEX_NORMAL					(-1)
 #endif
 
-/* –@üƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* æ³•ç·šãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_NORMAL
 	#define NND_OPT_TEXCOORD_NORMAL				(-1)
 #endif
 
-/* ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒvƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_BASE
 	#define NND_OPT_TEX_BASE					(-1)
 #endif
 
-/* ƒx[ƒXƒfƒBƒtƒ…[ƒYƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_BASE
 	#define NND_OPT_TEXCOORD_BASE				(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒvƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_DECAL
 	#define NND_OPT_TEX_DECAL					(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_DECAL
 	#define NND_OPT_TEXCOORD_DECAL				(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_DECAL2
 	#define NND_OPT_TEX_DECAL2					(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚QƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_DECAL2
 	#define NND_OPT_TEXCOORD_DECAL2				(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚RƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_DECAL3
 	#define NND_OPT_TEX_DECAL3					(-1)
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚RƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_DECAL3
 	#define NND_OPT_TEXCOORD_DECAL3				(-1)
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒvƒCƒ“ƒfƒNƒX */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SPECULAR
 	#define NND_OPT_TEX_SPECULAR				(-1)
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_SPECULAR
 	#define NND_OPT_TEXCOORD_SPECULAR			(-1)
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒ}ƒbƒvƒCƒ“ƒfƒNƒX */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SHININESS
 	#define NND_OPT_TEX_SHININESS				(-1)
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_SHININESS
 	#define NND_OPT_TEXCOORD_SHININESS			(-1)
 #endif
 
-/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒvƒCƒ“ƒfƒNƒX */
+/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_DUALPARABOLOID
 	#define NND_OPT_TEX_DUALPARABOLOID			(-1)
 #endif
 
-#if 0 /* 2008.06.23(•K—v‚È‚¢) */
-/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+#if 0 /* 2008.06.23(å¿…è¦ãªã„) */
+/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_DUALPARABOLOID
 	#define NND_OPT_TEXCOORD_DUALPARABOLOID		(-1)
 #endif
 #endif
 
-/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒvƒCƒ“ƒfƒNƒX */
+/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_ENVMASK
 	#define NND_OPT_TEX_ENVMASK					(-1)
 #endif
 
-/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒvƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_ENVMASK
 	#define NND_OPT_TEXCOORD_ENVMASK			(-1)
 #endif
 
-/* æZƒeƒNƒXƒ`ƒƒƒCƒ“ƒfƒbƒNƒX */
+/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_MODULATE
 	#define NND_OPT_TEX_MODULATE				(-1)
 #endif
 
-/* æZƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_MODULATE
 	#define NND_OPT_TEXCOORD_MODULATE			(-1)
 #endif
 
-/* ‰ÁZƒeƒNƒXƒ`ƒƒƒCƒ“ƒfƒbƒNƒX */
+/* åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_ADD
 	#define NND_OPT_TEX_ADD						(-1)
 #endif
 
-/* ‰ÁZƒeƒNƒXƒ`ƒƒÀ•Wí•Ê */
+/* åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ç¨®åˆ¥ */
 #ifndef NND_OPT_TEXCOORD_ADD
 	#define NND_OPT_TEXCOORD_ADD				(-1)
 #endif
 
-/* •s“§–¾“xƒeƒNƒXƒ`ƒƒƒCƒ“ƒfƒbƒNƒX */
+/* ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_OPACITY
 	#define NND_OPT_TEX_OPACITY					(-1)
 #endif
 
-/* •s“§–¾“xƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_OPACITY
 	#define NND_OPT_TEXCOORD_OPACITY			(-1)
 #endif
 
-/* ƒVƒƒƒhƒEƒ}ƒbƒvƒCƒ“ƒfƒbƒNƒX */
+/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SHADOW
 	#define NND_OPT_TEX_SHADOW					(-1)
 #endif
 
-/* ƒVƒƒƒhƒEƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SHADOW2
 	#define NND_OPT_TEX_SHADOW2					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚PƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼‘ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER1
 	#define NND_OPT_TEX_USER1					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚PƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼‘ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER1
 	#define NND_OPT_TEXCOORD_USER1				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER2
 	#define NND_OPT_TEX_USER2					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚QƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼’ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER2
 	#define NND_OPT_TEXCOORD_USER2				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚RƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼“ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER3
 	#define NND_OPT_TEX_USER3					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚RƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼“ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER3
 	#define NND_OPT_TEXCOORD_USER3				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚SƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼”ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER4
 	#define NND_OPT_TEX_USER4					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚SƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼”ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER4
 	#define NND_OPT_TEXCOORD_USER4				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚TƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼•ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER5
 	#define NND_OPT_TEX_USER5					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚TƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼•ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER5
 	#define NND_OPT_TEXCOORD_USER5				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚UƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼–ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER6
 	#define NND_OPT_TEX_USER6					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚UƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼–ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER6
 	#define NND_OPT_TEXCOORD_USER6				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚VƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼—ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER7
 	#define NND_OPT_TEX_USER7					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚VƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼—ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER7
 	#define NND_OPT_TEXCOORD_USER7				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼˜ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_USER8
 	#define NND_OPT_TEX_USER8					(-1)
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚WƒeƒNƒXƒ`ƒƒÀ•WƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼˜ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEXCOORD_USER8
 	#define NND_OPT_TEXCOORD_USER8				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚Q‚cƒ}ƒbƒv‚PƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼’ï¼¤ãƒãƒƒãƒ—ï¼‘ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLER2D1
 	#define NND_OPT_TEX_SAMPLER2D1				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚Q‚cƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼’ï¼¤ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLER2D2
 	#define NND_OPT_TEX_SAMPLER2D2				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚R‚cƒ}ƒbƒv‚PƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼“ï¼¤ãƒãƒƒãƒ—ï¼‘ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLER3D1
 	#define NND_OPT_TEX_SAMPLER3D1				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚R‚cƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼“ï¼¤ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLER3D2
 	#define NND_OPT_TEX_SAMPLER3D2				(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[ƒLƒ…[ƒuƒ}ƒbƒv‚PƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚­ãƒ¥ãƒ¼ãƒ–ãƒãƒƒãƒ—ï¼‘ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLERCUBE1
 	#define NND_OPT_TEX_SAMPLERCUBE1			(-1)
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[ƒLƒ…[ƒuƒ}ƒbƒv‚QƒCƒ“ƒfƒbƒNƒX */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚­ãƒ¥ãƒ¼ãƒ–ãƒãƒƒãƒ—ï¼’ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 #ifndef NND_OPT_TEX_SAMPLERCUBE2
 	#define NND_OPT_TEX_SAMPLERCUBE2			(-1)
 #endif
 
 /****************************/
-/* ƒ†[ƒU[ƒvƒƒtƒ@ƒCƒ‹’è” */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ—ãƒ­ãƒ•ã‚¡ã‚¤ãƒ«å®šæ•° */
 /****************************/
 #ifndef NND_USER_PROFILE
 	#define NND_USER_PROFILE					(0)			/* 0 .. 15 */
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰ƒJƒ‰[’è” */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ã‚«ãƒ©ãƒ¼å®šæ•° */
 #if NND_OPT_SPECULAR
 #define NND_OUTPUT_COLOR_NUM					(2)
 #else
 #define NND_OUTPUT_COLOR_NUM					(1)
 #endif
 
-/* ƒoƒ“ƒvƒXƒtƒBƒAƒ}ƒbƒv */
+/* ãƒãƒ³ãƒ—ã‚¹ãƒ•ã‚£ã‚¢ãƒãƒƒãƒ— */
 #if ( NND_OPT_FRAG_LIGHTING && \
     ( ( NND_OPT_TEXCOORD_ADD == -1 ) || \
       ( NND_OPT_TEXCOORD_BASE == -1 ) || \
@@ -453,7 +453,7 @@ static float2 g_SphereMapTexCoord;
 #define NND_FRAG_SPHEREMAP (0)
 #endif
 
-/* ‘o•û•¨–Êƒ}ƒbƒv */
+/* åŒæ–¹ç‰©é¢ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_DUALPARABOLOID != -1 || \
     ( ( NND_OPT_TEXCOORD_ADD == -3 ) || \
       ( NND_OPT_TEXCOORD_BASE == -3 ) || \
@@ -479,11 +479,11 @@ static float2 g_DualParaMapTexCoord;
 #define NND_FRAG_DUALPARAMAP (0)
 #endif
 
-/*------ Declarations (“ü—Í‚t‚uÀ•W‚ÌZo) --------------------------------*/
+/*------ Declarations (å…¥åŠ›ï¼µï¼¶åº§æ¨™ã®ç®—å‡º) --------------------------------*/
 
-#include "nnstdshader/nnduv_def.h" /* 2008.06.03(’Ç‰Á) */
+#include "nnstdshader/nnduv_def.h" /* 2008.06.03(è¿½åŠ ) */
 
-/*------ Declarations (ƒZƒ}ƒ“ƒeƒBƒbƒNƒX”Ô†‚ÌZo) ------------------------*/
+/*------ Declarations (ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ç•ªå·ã®ç®—å‡º) ------------------------*/
 
 #define TEXCOORD_TAIL		0
 
@@ -531,8 +531,8 @@ static float2 g_DualParaMapTexCoord;
 	#undef  TEXCOORD_TAIL
 	#define TEXCOORD_TAIL		4
 #else
-	// TEXCOORD ‚ÌÅ‘å’l‚Í‚W
-	#error TEXCOORD_NRMVEC ƒZƒ}ƒ“ƒeƒBƒbƒNƒX‚ª•s³‚Å‚·
+	// TEXCOORD ã®æœ€å¤§å€¤ã¯ï¼˜
+	#error TEXCOORD_NRMVEC ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ãŒä¸æ­£ã§ã™
 #endif
 #endif
 
@@ -563,8 +563,8 @@ static float2 g_DualParaMapTexCoord;
 	#undef  TEXCOORD_TAIL
 	#define TEXCOORD_TAIL		6
 #else
-	// TEXCOORD ‚ÌÅ‘å’l‚Í‚W
-	#error TEXCOORD_TAN TEXCOORD_BNRM ƒZƒ}ƒ“ƒeƒBƒbƒNƒX‚ª•s³‚Å‚·
+	// TEXCOORD ã®æœ€å¤§å€¤ã¯ï¼˜
+	#error TEXCOORD_TAN TEXCOORD_BNRM ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ãŒä¸æ­£ã§ã™
 #endif
 #endif
 
@@ -598,8 +598,8 @@ static float2 g_DualParaMapTexCoord;
 	#undef  TEXCOORD_TAIL
 	#define TEXCOORD_TAIL	( 6 + NND_MAX_UV )
 #else
-	// TEXCOORD ‚ÌÅ‘å’l‚Í‚W
-	#error TEXCOORD_UV ƒZƒ}ƒ“ƒeƒBƒbƒNƒX‚ª•s³‚Å‚·
+	// TEXCOORD ã®æœ€å¤§å€¤ã¯ï¼˜
+	#error TEXCOORD_UV ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ãŒä¸æ­£ã§ã™
 #endif
 #endif
 
@@ -639,8 +639,8 @@ static float2 g_DualParaMapTexCoord;
 	#undef  TEXCOORD_TAIL
 	#define TEXCOORD_TAIL	8
 #else
-	// TEXCOORD ‚ÌÅ‘å’l‚Í‚W
-	#error TEXCOORD_UV ƒZƒ}ƒ“ƒeƒBƒbƒNƒX‚ª•s³‚Å‚·
+	// TEXCOORD ã®æœ€å¤§å€¤ã¯ï¼˜
+	#error TEXCOORD_UV ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ãŒä¸æ­£ã§ã™
 #endif
 #endif
 
@@ -678,21 +678,21 @@ static float2 g_DualParaMapTexCoord;
 	#undef  TEXCOORD_TAIL
 	#define TEXCOORD_TAIL	8
 #else
-	// TEXCOORD ‚ÌÅ‘å’l‚Í‚W
-	#error TEXCOORD_UV ƒZƒ}ƒ“ƒeƒBƒbƒNƒX‚ª•s³‚Å‚·
+	// TEXCOORD ã®æœ€å¤§å€¤ã¯ï¼˜
+	#error TEXCOORD_UV ã‚»ãƒãƒ³ãƒ†ã‚£ãƒƒã‚¯ã‚¹ãŒä¸æ­£ã§ã™
 #endif
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/*------ Declarations (‹¤—Lo—ÍƒŒƒWƒXƒ^[Š„‚è“–‚Ä) -------------------------*/
+/*------ Declarations (å…±æœ‰å‡ºåŠ›ãƒ¬ã‚¸ã‚¹ã‚¿ãƒ¼å‰²ã‚Šå½“ã¦) -------------------------*/
 
 #define NND_SUFFIX_VPOS			xyz
 #define NND_SUFFIX_FOG			w
 
 /*------ Pixel Shader Input Structure -------------------------------------*/
 
-/* ƒsƒNƒZƒ‹ƒVƒF[ƒ_o—Í\‘¢‘Ì */
+/* ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€å‡ºåŠ›æ§‹é€ ä½“ */
 struct PS_INPUT{
 #if NND_OPT_FRAG_LIGHTING || NND_PROF_FOG_MODEL || NND_FRAG_DUALPARAMAP
 	float4 ViewPosFog						: TEXCOORD_VIEWPOSFOG;	// varying vec4 nnglvViewPositionFog;
@@ -730,14 +730,14 @@ struct PS_INPUT{
 
 /*------ Pixel Shader Output Structure ------------------------------------*/
 
-/* ƒsƒNƒZƒ‹ƒVƒF[ƒ_o—Í\‘¢‘Ì */
+/* ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€å‡ºåŠ›æ§‹é€ ä½“ */
 struct PS_OUTPUT{
 	float4 Col	: COLOR0;
 };
 
 /*------ Fixed Structure --------------------------------------------------*/
 
-/* ƒ}ƒeƒŠƒAƒ‹ */
+/* ãƒãƒ†ãƒªã‚¢ãƒ« */
 struct MATERIAL_PARAMETERS{
 	float4	ambient;
 	float4	diffuse;
@@ -746,7 +746,7 @@ struct MATERIAL_PARAMETERS{
 	float	shininess;
 };
 
-/* ƒ‰ƒCƒg */
+/* ãƒ©ã‚¤ãƒˆ */
 struct LIGHT_SOURCE_PARAMETERS{
 	float4	ambient;
 	float4	diffuse;
@@ -767,7 +767,7 @@ struct LIGHT_MODEL_PRODUCTS{
 	float4	sceneColor;
 };
 
-/* ƒtƒHƒbƒO */
+/* ãƒ•ã‚©ãƒƒã‚° */
 struct FOG_PARAMETERS{
 	float4	color;
 	float	density;
@@ -782,354 +782,370 @@ struct FOG_PARAMETERS{
 uniform float4x4				u_TextureMatrix[NND_OPT_MAX_TEXMAP];
 #endif
 
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+NND_FLAT_FRONT_MATERIAL(u_FrontMaterial);
+#else
 uniform MATERIAL_PARAMETERS		u_FrontMaterial;
+#endif
 
 #if NND_PROF_FOG_MODEL
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+NND_FLAT_FOG(u_Fog);
+#else
 uniform	FOG_PARAMETERS			u_Fog;
+#endif
 #endif
 
 #if NND_PROF_MAX_LIGHT
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+NND_FLAT_LIGHT_SOURCE(u_LightSource);
+#else
 uniform LIGHT_SOURCE_PARAMETERS u_LightSource [NND_PROF_MAX_LIGHT];
+#endif
 #endif
 
 #if NND_OPT_FRAG_LIGHTING && NND_OPT_LIGHTING
+#ifdef NND_FLAT_UNIFORM_STRUCTS
+NND_FLAT_LIGHT_MODEL(u_FrontLightModelProduct);
+#else
 uniform LIGHT_MODEL_PRODUCTS	u_FrontLightModelProduct;
+#endif
 #endif
 
 /*------ Fixed Variable ( GL User-define ) --------------------------------*/
 
 #if NND_PROF_MAX_POINT_LIGHT
-uniform float		u_PointLightFallOffEnd[ NND_PROF_MAX_POINT_LIGHT ];		// ƒ|ƒCƒ“ƒgƒ‰ƒCƒgŒ¸ŠI—¹‹——£
-uniform float		u_PointLightFallOffScale[ NND_PROF_MAX_POINT_LIGHT ];	// ƒ|ƒCƒ“ƒgƒ‰ƒCƒgŒ¸ŠƒXƒP[ƒ‹
+uniform float		u_PointLightFallOffEnd[ NND_PROF_MAX_POINT_LIGHT ];		// ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆæ¸›è¡°çµ‚äº†è·é›¢
+uniform float		u_PointLightFallOffScale[ NND_PROF_MAX_POINT_LIGHT ];	// ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆæ¸›è¡°ã‚¹ã‚±ãƒ¼ãƒ«
 #endif
 
 #if NND_OPT_TEX_BASE != -1
-uniform float		u_TexBaseAlpha;				// ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒv•s“§–¾“x
+uniform float		u_TexBaseAlpha;				// ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ—ä¸é€æ˜åº¦
 #endif
 #if NND_OPT_TEX_DECAL != -1
-uniform float		u_TexDecalAlpha;			// ƒfƒJ[ƒ‹ƒeƒNƒXƒ`ƒƒ•s“§–¾“x
+uniform float		u_TexDecalAlpha;			// ãƒ‡ã‚«ãƒ¼ãƒ«ãƒ†ã‚¯ã‚¹ãƒãƒ£ä¸é€æ˜åº¦
 #endif
 #if NND_OPT_TEX_DECAL2 != -1
-uniform float		u_TexDecal2Alpha;			// ƒfƒJ[ƒ‹ƒeƒNƒXƒ`ƒƒ‚Q•s“§–¾“x
+uniform float		u_TexDecal2Alpha;			// ãƒ‡ã‚«ãƒ¼ãƒ«ãƒ†ã‚¯ã‚¹ãƒãƒ£ï¼’ä¸é€æ˜åº¦
 #endif
 #if NND_OPT_TEX_DECAL3 != -1
-uniform float		u_TexDecal3Alpha;			// ƒfƒJ[ƒ‹ƒeƒNƒXƒ`ƒƒ‚R•s“§–¾“x
+uniform float		u_TexDecal3Alpha;			// ãƒ‡ã‚«ãƒ¼ãƒ«ãƒ†ã‚¯ã‚¹ãƒãƒ£ï¼“ä¸é€æ˜åº¦
 #endif
 #if NND_OPT_TEX_SHININESS != -1
-uniform float		u_TexShininessLevel;		// ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒŒƒxƒ‹
+uniform float		u_TexShininessLevel;		// ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒ¬ãƒ™ãƒ«
 #endif
 #if NND_OPT_TEX_DUALPARABOLOID != -1
-uniform float		u_TexDualParaboloidLevel;	// ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒv‹­“x
+uniform float		u_TexDualParaboloidLevel;	// åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—å¼·åº¦
 #endif
 #if NND_OPT_TEX_ADD != -1
-uniform float		u_TexAddLevel;				// ‰ÁZƒ}ƒbƒv‹­“x
+uniform float		u_TexAddLevel;				// åŠ ç®—ãƒãƒƒãƒ—å¼·åº¦
 #endif
 #if NND_OPT_TEX_SHADOW != -1
-uniform float3		u_TexShadowColor;			// ƒVƒƒƒhƒEƒJƒ‰[
+uniform float3		u_TexShadowColor;			// ã‚·ãƒ£ãƒ‰ã‚¦ã‚«ãƒ©ãƒ¼
 #endif
 #if NND_OPT_TEX_SHADOW2 != -1
-uniform float3		u_TexShadow2Color;			// ƒVƒƒƒhƒE‚QƒJƒ‰[ 
+uniform float3		u_TexShadow2Color;			// ã‚·ãƒ£ãƒ‰ã‚¦ï¼’ã‚«ãƒ©ãƒ¼ 
 #endif
 #if NND_OPT_TEX_USER1 != -1
-uniform float		u_TexUser1Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Pƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser1Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼‘ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER2 != -1
-uniform float		u_TexUser2Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Qƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser2Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼’ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER3 != -1
-uniform float		u_TexUser3Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Rƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser3Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼“ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER4 != -1
-uniform float		u_TexUser4Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Sƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser4Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼”ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER5 != -1
-uniform float		u_TexUser5Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Tƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser5Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼•ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER6 != -1
-uniform float		u_TexUser6Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Uƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser6Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼–ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER7 != -1
-uniform float		u_TexUser7Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Vƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser7Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼—ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 #if NND_OPT_TEX_USER8 != -1
-uniform float		u_TexUser8Param;			// ƒ†[ƒU[ƒ}ƒbƒv‚Wƒpƒ‰ƒ[ƒ^
+uniform float		u_TexUser8Param;			// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼˜ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 #endif
 
-uniform float3x3	u_DualParaboloidMatrix;		// ‘o•û•¨–Êƒ}ƒbƒv—pƒ}ƒgƒŠƒNƒX
+uniform float3x3	u_DualParaboloidMatrix;		// åŒæ–¹ç‰©é¢ãƒãƒƒãƒ—ç”¨ãƒãƒˆãƒªã‚¯ã‚¹
 
 #if ( NND_PROF_MAX_USER_UNIFORM > 0 )
-uniform float4		u_UserUniform[NND_PROF_MAX_USER_UNIFORM];	// ƒ†[ƒU[ƒ†ƒjƒtƒH[ƒ€•Ï”
+uniform float4		u_UserUniform[NND_PROF_MAX_USER_UNIFORM];	// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ¦ãƒ‹ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
 #endif
 
 /*------ Sampler Object ---------------------------------------------------*/
 
-#include "nnstdshader/sampler_def.h"	/* 2008.05.29(’Ç‰Á) */
+#include "nnstdshader/sampler_def.h"	/* 2008.05.29(è¿½åŠ ) */
 
-/* –@üƒ}ƒbƒv */
+/* æ³•ç·šãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_NORMAL != -1 )
 sampler2D s_texNormal :register(SAMPLER_NORMAL);
 #endif
 
-/* ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒv */
+/* ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_BASE != -1 )
 sampler2D s_texBase :register(SAMPLER_BASE);
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_DECAL != -1 )
 sampler2D s_texDecal :register(SAMPLER_DECAL);
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚Q */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ */
 #if ( NND_OPT_TEX_DECAL2 != -1 )
 sampler2D s_texDecal2 :register(SAMPLER_DECAL2);
 #endif
 
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚R */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ */
 #if ( NND_OPT_TEX_DECAL3 != -1 )
 sampler2D s_texDecal3 :register(SAMPLER_DECAL3);
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒv */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_SPECULAR != -1 )
 sampler2D s_texSpecular :register(SAMPLER_SPECULAR);
 #endif
 
-/* ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒ}ƒbƒv */
+/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_SHININESS != -1 )
 sampler2D s_texShininess :register(SAMPLER_SHININESS);
 #endif
 
-/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒv */
+/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
 sampler2D s_texDualParaboloid :register(SAMPLER_DUALPARA);
 #endif
 
-/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv */
+/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_ENVMASK != -1 )
 sampler2D s_texEnvMask :register(SAMPLER_ENVMASK);
 #endif
 
-/* æZƒeƒNƒXƒ`ƒƒ */
+/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_MODULATE != -1 )
 sampler2D s_texModulate :register(SAMPLER_MODULATE);
 #endif
 
-/* ‰ÁZƒeƒNƒXƒ`ƒƒ */
+/* åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_ADD != -1 )
 sampler2D s_texAdd :register(SAMPLER_ADD);
 #endif
 
-/* •s“§–¾“xƒeƒNƒXƒ`ƒƒ */
+/* ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_OPACITY != -1 )
 sampler2D s_texOpacity :register(SAMPLER_OPACITY);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚PƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼‘ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER1 != -1 )
 sampler2D s_texUser1 :register(SAMPLER_USER1);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚QƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼’ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER2 != -1 )
 sampler2D s_texUser2 :register(SAMPLER_USER2);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚RƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼“ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER3 != -1 )
 sampler2D s_texUser3 :register(SAMPLER_USER3);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚SƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼”ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER4 != -1 )
 sampler2D s_texUser4 :register(SAMPLER_USER4);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚TƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼•ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER5 != -1 )
 sampler2D s_texUser5 :register(SAMPLER_USER5);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚UƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼–ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER6 != -1 )
 sampler2D s_texUser6 :register(SAMPLER_USER6);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚VƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER7 != -1 )
 sampler2D s_texUser7 :register(SAMPLER_USER7);
 #endif
 
-/* ƒ†[ƒU[ƒ}ƒbƒv‚WƒeƒNƒXƒ`ƒƒ */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼˜ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 #if ( NND_OPT_TEX_USER8 != -1 )
 sampler2D s_texUser8 :register(SAMPLER_USER8);
 #endif
 
-/* ƒVƒƒƒhƒEƒ}ƒbƒv */
+/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_SHADOW != -1 )
 sampler2D s_texShadow :register(SAMPLER_SHADOW);
 #endif
 
-/* ƒVƒƒƒhƒEƒ}ƒbƒv */
+/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ— */
 #if ( NND_OPT_TEX_SHADOW2 != -1 )
 sampler2D s_texShadow2 :register(SAMPLER_SHADOW2);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚Q‚cƒ}ƒbƒv‚P */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼’ï¼¤ãƒãƒƒãƒ—ï¼‘ */
 #if ( NND_OPT_TEX_SAMPLER2D1 != -1 )
 sampler2D s_texUserSampler2D1 :register(SAMPLER_SAMPLER2D1);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚Q‚cƒ}ƒbƒv‚Q */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼’ï¼¤ãƒãƒƒãƒ—ï¼’ */
 #if ( NND_OPT_TEX_SAMPLER2D2 != -1 )
 sampler2D s_texUserSampler2D2 :register(SAMPLER_SAMPLER2D2);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚R‚cƒ}ƒbƒv‚P */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼“ï¼¤ãƒãƒƒãƒ—ï¼‘ */
 #if ( NND_OPT_TEX_SAMPLER3D1 != -1 )
 sampler3D s_texUserSampler3D1 :register(SAMPLER_SAMPLER3D1);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[‚R‚cƒ}ƒbƒv‚Q */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ï¼“ï¼¤ãƒãƒƒãƒ—ï¼’ */
 #if ( NND_OPT_TEX_SAMPLER3D2 != -1 )
 sampler3D s_texUserSampler3D2 :register(SAMPLER_SAMPLER3D2);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[ƒLƒ…[ƒuƒ}ƒbƒv‚P */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚­ãƒ¥ãƒ¼ãƒ–ãƒãƒƒãƒ—ï¼‘ */
 #if ( NND_OPT_TEX_SAMPLERCUBE1 != -1 )
 samplerCUBE s_texUserSamplerCube1 :register(SAMPLER_SAMPLERCUBE1);
 #endif
 
-/* ƒ†[ƒU[ƒTƒ“ƒvƒ‰[ƒLƒ…[ƒuƒ}ƒbƒv‚Q */
+/* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚­ãƒ¥ãƒ¼ãƒ–ãƒãƒƒãƒ—ï¼’ */
 #if ( NND_OPT_TEX_SAMPLERCUBE2 != -1 )
 samplerCUBE s_texUserSamplerCube2 :register(SAMPLER_SAMPLERCUBE2);
 #endif
 
 /*------ Global Variable --------------------------------------------------*/
 
-static PS_INPUT	 g_Input;	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“ü—Í
-static PS_OUTPUT g_Output;	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[o—Í
+static PS_INPUT	 g_Input;	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¥åŠ›
+static PS_OUTPUT g_Output;	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å‡ºåŠ›
 
 static float4 g_VtxDiffCol;	// 
-// ’¸“_ƒVƒF[ƒ_‚©‚ço—Í‚³‚ê‚éƒXƒyƒLƒ…ƒ‰[‚É‚Â‚¢‚Ä
-//   ’¸“_’PˆÊ‚ÌƒVƒF[ƒfƒBƒ“ƒO‚Ìê‡
-//     ƒXƒyƒLƒ…ƒ‰[‚ª‚È‚¢‚Æ‚« float4( 0.0, 0.0, 0.0, 0.0)
-//   ƒsƒNƒZƒ‹’PˆÊ‚ÌƒVƒF[ƒfƒBƒ“ƒO‚Ìê‡
-//     ƒXƒyƒLƒ…ƒ‰[‚ª‚È‚¢‚Æ‚« float4( 1.0, 1.0, 1.0, 1.0)
+// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ã‹ã‚‰å‡ºåŠ›ã•ã‚Œã‚‹ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ã«ã¤ã„ã¦
+//   é ‚ç‚¹å˜ä½ã®ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã®å ´åˆ
+//     ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ãŒãªã„ã¨ã float4( 0.0, 0.0, 0.0, 0.0)
+//   ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã®ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã®å ´åˆ
+//     ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ãŒãªã„ã¨ã float4( 1.0, 1.0, 1.0, 1.0)
 //
-//   ¦ƒXƒyƒLƒ…ƒ‰[‚ª‚È‚¢‚Æ‚«‚ÍÀÛ‚É‚Ío—Í‚³‚ê‚Ä‚¢‚È‚¢
-//     ]‚Á‚Ä‚±‚ê‚ğQl‚É‚µ‚ÄƒvƒƒOƒ‰ƒ€‚ğÀ‘•‚·‚é‚±‚Æ
+//   â€»ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ãŒãªã„ã¨ãã¯å®Ÿéš›ã«ã¯å‡ºåŠ›ã•ã‚Œã¦ã„ãªã„
+//     å¾“ã£ã¦ã“ã‚Œã‚’å‚è€ƒã«ã—ã¦ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’å®Ÿè£…ã™ã‚‹ã“ã¨
 //
 static float4 g_VtxSpecCol = float4( 0.0, 0.0, 0.0, 0.0);
 
-static float3 g_FragColor;	// ŒvZ’†ƒtƒ‰ƒOƒƒ“ƒgƒJƒ‰[
-static float  g_FragAlpha;	// ŒvZ’†ƒtƒ‰ƒOƒƒ“ƒgƒAƒ‹ƒtƒ@
+static float3 g_FragColor;	// è¨ˆç®—ä¸­ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚«ãƒ©ãƒ¼
+static float  g_FragAlpha;	// è¨ˆç®—ä¸­ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚¢ãƒ«ãƒ•ã‚¡
 
 #if NND_OPT_FRAG_LIGHTING || ( NND_OPT_TEX_NORMAL != -1 ) || NND_FRAG_DUALPARAMAP
-/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒO—p */
+/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ç”¨ */
 static float3 g_FragNormal;
 
 static float3 g_FragDiffuse  = float3( 0.0, 0.0, 0.0 );
 static float3 g_FragSpecular = float3( 0.0, 0.0, 0.0 );
 
-static float3 g_Normal;		// –@ü
-static float3 g_EyeDir;		// ‹ü•ûŒü
+static float3 g_Normal;		// æ³•ç·š
+static float3 g_EyeDir;		// è¦–ç·šæ–¹å‘
 #endif
 
-/* Ú‹óŠÔ */
+/* æ¥ç©ºé–“ */
 #if NND_OPT_TANGENT_SPACE
 static float3 g_Tangent;
 static float3 g_Binormal;
 #endif
 
-/* ƒ‰ƒCƒgƒAƒ“ƒrƒGƒ“ƒg */
+/* ãƒ©ã‚¤ãƒˆã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆ */
 #if ( NND_OPT_FRAG_LIGHTING && NND_PROF_LIGHT_AMBIENT )
 static float3 g_FragAmbient = float3( 0.0, 0.0, 0.0 );
 #endif
 
-// –@üƒ}ƒbƒv
+// æ³•ç·šãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_NORMAL != -1 )
 static float4 g_smpNormal;
 #endif
-// ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒv
+// ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ—
 static float4 g_smpBase;
-//  ƒfƒJ[ƒ‹ƒ}ƒbƒv
+//  ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_DECAL != -1 )
 static float4 g_smpDecal;
 #endif
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚Q */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ */
 #if ( NND_OPT_TEX_DECAL2 != -1 )
 static float4 g_smpDecal2;
 #endif
-/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚R */
+/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ */
 #if ( NND_OPT_TEX_DECAL3 != -1 )
 static float4 g_smpDecal3;
 #endif
-// ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒv
+// ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_SPECULAR != -1 )
 static float4 g_smpSpecular;
 #endif
-// ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒ}ƒbƒv
+// ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_SHININESS != -1 )
 static float4 g_smpShininess;
 #endif
-// ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒv
+// åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
 static float4 g_smpDualParaboloid;
 #endif
-// ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv
+// ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_ENVMASK != -1 )
 static float4 g_smpEnvMask;
 #endif
-// æZƒeƒNƒXƒ`ƒƒ
+// ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_MODULATE != -1 )
 static float4 g_smpModulate;
 #endif
-// ‰ÁZƒeƒNƒXƒ`ƒƒ
+// åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_ADD != -1 )
 static float4 g_smpAdd;
 #endif
-// •s“§–¾“xƒeƒNƒXƒ`ƒƒ
+// ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_OPACITY != -1 )
 static float4	g_smpOpacity;
 #endif
-// ƒVƒƒƒhƒEƒ}ƒbƒv
+// ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_SHADOW != -1 )
 static float4 g_smpShadow;
 #endif
-// ƒVƒƒƒhƒEƒ}ƒbƒv
+// ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—
 #if ( NND_OPT_TEX_SHADOW2 != -1 )
 static float4 g_smpShadow2;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚PƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼‘ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER1 != -1 )
 static float4 g_smpUser1;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚QƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼’ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER2 != -1 )
 static float4 g_smpUser2;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚RƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼“ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER3 != -1 )
 static float4 g_smpUser3;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚SƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼”ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER4 != -1 )
 static float4 g_smpUser4;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚TƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼•ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER5 != -1 )
 static float4 g_smpUser5;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚UƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼–ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER6 != -1 )
 static float4 g_smpUser6;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚VƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼—ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER7 != -1 )
 static float4 g_smpUser7;
 #endif
-// ƒ†[ƒU[ƒ}ƒbƒv‚WƒeƒNƒXƒ`ƒƒ
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒãƒƒãƒ—ï¼˜ãƒ†ã‚¯ã‚¹ãƒãƒ£
 #if ( NND_OPT_TEX_USER8 != -1 )
 static float4 g_smpUser8;
 #endif
@@ -1154,10 +1170,10 @@ float4 shadow2DProj(sampler2D s, float4 t)
 	lerps = frac(tp.xy);
 #else
 	/*
-	  ƒhƒ‰ƒCƒo‚Ì•s‹ï‡‚Æv‚í‚ê‚éŒ´ˆö•s–¾‚ÌŒ»Û‚ª”­¶‚µ‚½ˆ× frac ŠÖ”‚ğƒRƒƒ“ƒg‚µ‚Ä
-	  Ÿ‚Ì‚æ‚¤‚É•ÏX‚µ‚Ä‰ñ”ğ‚µ‚½B
-	  •s‹ï‡‚ª”­¶‚µ‚½ƒrƒfƒIƒJ[ƒh‚Í
-	  EQuadro FX 4500(ƒhƒ‰ƒCƒo169.96)
+	  ãƒ‰ãƒ©ã‚¤ãƒã®ä¸å…·åˆã¨æ€ã‚ã‚Œã‚‹åŸå› ä¸æ˜ã®ç¾è±¡ãŒç™ºç”Ÿã—ãŸç‚º frac é–¢æ•°ã‚’ã‚³ãƒ¡ãƒ³ãƒˆã—ã¦
+	  æ¬¡ã®ã‚ˆã†ã«å¤‰æ›´ã—ã¦å›é¿ã—ãŸã€‚
+	  ä¸å…·åˆãŒç™ºç”Ÿã—ãŸãƒ“ãƒ‡ã‚ªã‚«ãƒ¼ãƒ‰ã¯
+	  ãƒ»Quadro FX 4500(ãƒ‰ãƒ©ã‚¤ãƒ169.96)
 	 */
 	lerps = tp.xy - floor(tp.xy);
 #endif
@@ -1189,22 +1205,22 @@ float4 shadow2DProj(sampler2D s, float4 t)
 	shadow[3] = step(tp.z+ofs[2].z, texDepth.r);
 	//
 	float4 sha;
-	// ƒoƒCƒŠƒjƒA•âŠÔ
+	// ãƒã‚¤ãƒªãƒ‹ã‚¢è£œé–“
 	sha = lerp(lerp(shadow[0], shadow[1], lerps.x),
 			   lerp(shadow[2], shadow[3], lerps.x), lerps.y);
-	// •½‹Ï
+	// å¹³å‡
 	//sha = (shadow[0] + shadow[1] + shadow[2] + shadow[3]) * 0.25;
 	return(sha);
 #endif
 }
 
-/* ƒXƒtƒBƒAƒ}ƒbƒv */
+/* ã‚¹ãƒ•ã‚£ã‚¢ãƒãƒƒãƒ— */
 #if ( NND_FRAG_SPHEREMAP )
 float2 CalcSphereMapTexCoord( void )
 {
 	float3 r;
 	float2 r2;
-#if 0 /* 2008.06.06(ƒoƒOC³) */
+#if 0 /* 2008.06.06(ãƒã‚°ä¿®æ­£) */
 	r = reflect( g_EyeDir, g_Normal );
 #else
 	r = reflect( g_EyeDir, g_FragNormal);
@@ -1215,7 +1231,7 @@ float2 CalcSphereMapTexCoord( void )
 }
 #endif
 
-/* ‘o•û•¨–Êƒ}ƒbƒvŒvZ */
+/* åŒæ–¹ç‰©é¢ãƒãƒƒãƒ—è¨ˆç®— */
 #if ( NND_FRAG_DUALPARAMAP )
 float2 CalcDualParaMapTexCoord( void )
 {
@@ -1223,21 +1239,21 @@ float2 CalcDualParaMapTexCoord( void )
 	float2 st;
 	float s1, izi;
 
-	/* ”½ËŒvZ */
+	/* åå°„è¨ˆç®— */
 	r = reflect( g_EyeDir, g_FragNormal );
 
-	/* ƒeƒNƒXƒ`ƒƒƒ}ƒgƒŠƒNƒX‚Å•ÏŠ·i’Êí‚Íƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·j */
+	/* ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒãƒˆãƒªã‚¯ã‚¹ã§å¤‰æ›ï¼ˆé€šå¸¸ã¯ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã«å¤‰æ›ï¼‰ */
 #if 0 /* 2008.06.04 */
 	r = mul( r, u_TextureMatrix[ NND_OPT_TEX_DUALPARABOLOID ] );
 #else
 	r = mul( r, u_DualParaboloidMatrix );
 #endif
 
-	/* ƒfƒ…ƒAƒ‹ƒpƒ‰ƒ{ƒƒCƒh•ÏŠ· */
+	/* ãƒ‡ãƒ¥ã‚¢ãƒ«ãƒ‘ãƒ©ãƒœãƒ­ã‚¤ãƒ‰å¤‰æ› */
 	izi = 1.0 + abs( r.z );
 	st = r.xy * float2( 1.0, -1.0 ) / izi;
 
-	/* ƒeƒNƒXƒ`ƒƒ‚Ì¶‰E”¼•ª‚¸‚Â‚É‚Q–‡•À‚×‚é•â³ */
+	/* ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å·¦å³åŠåˆ†ãšã¤ã«ï¼’æšä¸¦ã¹ã‚‹è£œæ­£ */
 	st = ( st + float2(1.0, 1.0) ) * 0.5;
 	s1 = step( 0.0, r.z );
 	st.x = ( 0.5 - s1 ) * st.x;
@@ -1245,15 +1261,15 @@ float2 CalcDualParaMapTexCoord( void )
 }
 #endif
 
-/* “ü—ÍƒxƒNƒgƒ‹‚ğ³‹K‰»‚µ‚Ü‚· */
+/* å…¥åŠ›ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–ã—ã¾ã™ */
 void NrmInput(void)
 {
 	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
-	/* ‹ü•ûŒü */
+	/* è¦–ç·šæ–¹å‘ */
 	g_EyeDir = normalize( g_Input.ViewPosFog.NND_SUFFIX_VPOS );
 	#endif
 
-	/* Ú‹óŠÔ */
+	/* æ¥ç©ºé–“ */
 	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
 	g_Normal = normalize( g_Input.NrmVec );
 		#if NND_OPT_TANGENT_SPACE
@@ -1263,42 +1279,42 @@ void NrmInput(void)
 	#endif
 }
 
-/* ƒeƒNƒXƒ`ƒƒƒTƒ“ƒvƒŠƒ“ƒO */
+/* ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚° */
 void SampleTexMap(void)
 {
-	/* –@üƒ}ƒbƒv */
+	/* æ³•ç·šãƒãƒƒãƒ— */
 	#if ( NND_OPT_FRAG_LIGHTING || NND_FRAG_DUALPARAMAP )
 		#if ( NND_OPT_TEX_NORMAL != -1 )
 		g_smpNormal  = tex2D( s_texNormal, g_Input.UV[ NND_UV_NO_NORMAL ].NND_UV_SUFFIX_NORMAL );
 
-		/* –@üæ“¾ */
+		/* æ³•ç·šå–å¾— */
 			#if NND_OPT_NORMALMAP_AXLY
-			/* ˆ³kƒ^ƒ“ƒWƒFƒ“ƒgƒXƒy[ƒX–@üƒ}ƒbƒv‚Ìê‡ */
+			/* åœ§ç¸®ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆã‚¹ãƒšãƒ¼ã‚¹æ³•ç·šãƒãƒƒãƒ—ã®å ´åˆ */
 			g_smpNormal = ( g_smpNormal - 0.5 ) * 2.0;
 			float3 tannormal = float3( g_smpNormal.a, g_smpNormal.r, sqrt( 1.0 -
 					( g_smpNormal.a*g_smpNormal.a + g_smpNormal.r*g_smpNormal.r ) ) );
 			tannormal = normalize( tannormal );
 			#else
-			/* ’Êí‚Ì–@üƒ}ƒbƒv‚Ìê‡ */
+			/* é€šå¸¸ã®æ³•ç·šãƒãƒƒãƒ—ã®å ´åˆ */
 			float3 tannormal = normalize( g_smpNormal.rgb - 0.5 );
 			#endif
-			/* –@ü‚ğƒJƒƒ‰À•WŒn‚É•ÏŠ· */
+			/* æ³•ç·šã‚’ã‚«ãƒ¡ãƒ©åº§æ¨™ç³»ã«å¤‰æ› */
 			#if NND_OPT_TANGENT_SPACE
 			g_FragNormal = tannormal.x * g_Tangent
 								+ tannormal.y * g_Binormal
 									+ tannormal.z * g_Normal;
 			g_FragNormal = normalize( g_FragNormal );
 			#else
-			/* –{—ˆ‚Í‚±‚±‚Í’Ê‚ç‚È‚¢ */
+			/* æœ¬æ¥ã¯ã“ã“ã¯é€šã‚‰ãªã„ */
 			g_FragNormal = tannormal;
 			#endif
 		#else
-		/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒO‚Ìê‡i–@üƒ}ƒbƒv‚È‚µj */
+		/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã®å ´åˆï¼ˆæ³•ç·šãƒãƒƒãƒ—ãªã—ï¼‰ */
 		g_FragNormal = g_Normal;
 		#endif
 	#endif
 
-	/* ŠÂ‹«ƒ}ƒbƒv—pƒeƒNƒXƒ`ƒƒÀ•WŒvZ */
+	/* ç’°å¢ƒãƒãƒƒãƒ—ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™è¨ˆç®— */
 	#if ( NND_FRAG_SPHEREMAP )
 		g_SphereMapTexCoord = CalcSphereMapTexCoord();
 	#endif
@@ -1306,12 +1322,12 @@ void SampleTexMap(void)
 		g_DualParaMapTexCoord = CalcDualParaMapTexCoord();
 	#endif
 
-	/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv */
+	/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_ENVMASK != -1 )
 	g_smpEnvMask = tex2D( s_texEnvMask, g_Input.UV[ NND_UV_NO_ENVMASK ].NND_UV_SUFFIX_ENVMASK );
 	#endif
 
-	/* ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒv */
+	/* ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_BASE != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_BASE == -1 )
 		g_smpBase = tex2D( s_texBase, g_SphereMapTexCoord );
@@ -1324,14 +1340,14 @@ void SampleTexMap(void)
 		g_smpBase = lerp( float4( 1.0, 1.0, 1.0, 1.0 ), g_smpBase, g_smpEnvMask.r );
 		#endif
 
-	/* ƒx[ƒXƒfƒBƒtƒ…[ƒYƒ}ƒbƒv•s“§–¾“x */
+	/* ãƒ™ãƒ¼ã‚¹ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºãƒãƒƒãƒ—ä¸é€æ˜åº¦ */
 	g_smpBase.a *= u_TexBaseAlpha;
 	#else
-	/* ƒx[ƒXƒeƒNƒXƒ`ƒƒ‚ª‚È‚¢ê‡‚ÍƒfƒtƒHƒ‹ƒg‚Ìƒx[ƒXF‚ğg—p‚·‚é */
+	/* ãƒ™ãƒ¼ã‚¹ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒãªã„å ´åˆã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ™ãƒ¼ã‚¹è‰²ã‚’ä½¿ç”¨ã™ã‚‹ */
 	g_smpBase = float4( 1.0, 1.0, 1.0, 1.0 );
 	#endif
 
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_DECAL != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL == -1 )
 		g_smpDecal = tex2D( s_texDecal, g_SphereMapTexCoord );
@@ -1340,14 +1356,14 @@ void SampleTexMap(void)
 		#else
 		g_smpDecal = tex2D( s_texDecal, g_Input.UV[ NND_UV_NO_DECAL ].NND_UV_SUFFIX_DECAL );
 		#endif
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv•s“§–¾“x */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ä¸é€æ˜åº¦ */
 	g_smpDecal.a *= u_TexDecalAlpha;
 		#if ( ( NND_OPT_TEXCOORD_DECAL == -1 || NND_OPT_TEXCOORD_DECAL == -3 ) && NND_OPT_TEX_ENVMASK != -1 )
 		g_smpDecal.a *= g_smpEnvMask.r;
 		#endif
 	#endif
 
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚Q */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ */
 	#if ( NND_OPT_TEX_DECAL2 != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL2 == -1 )
 		g_smpDecal2 = tex2D( s_texDecal2, g_SphereMapTexCoord );
@@ -1356,14 +1372,14 @@ void SampleTexMap(void)
 		#else
 		g_smpDecal2 = tex2D( s_texDecal2, g_Input.UV[ NND_UV_NO_DECAL2 ].NND_UV_SUFFIX_DECAL2 );
 		#endif
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚Q•s“§–¾“x */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼’ä¸é€æ˜åº¦ */
 	g_smpDecal2.a *= u_TexDecal2Alpha;
 		#if ( ( NND_OPT_TEXCOORD_DECAL2 == -1 || NND_OPT_TEXCOORD_DECAL2 == -3 ) && NND_OPT_TEX_ENVMASK != -1 )
 		g_smpDecal2.a *= g_smpEnvMask.r;
 		#endif
 	#endif
 
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚R */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ */
 	#if ( NND_OPT_TEX_DECAL3 != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_DECAL3 == -1 )
 		g_smpDecal3 = tex2D( s_texDecal3, g_SphereMapTexCoord );
@@ -1372,24 +1388,24 @@ void SampleTexMap(void)
 		#else
 		g_smpDecal3 = tex2D( s_texDecal3, g_Input.UV[ NND_UV_NO_DECAL3 ].NND_UV_SUFFIX_DECAL3 );
 		#endif
-	/* ƒfƒJ[ƒ‹ƒ}ƒbƒv‚R•s“§–¾“x */
+	/* ãƒ‡ã‚«ãƒ¼ãƒ«ãƒãƒƒãƒ—ï¼“ä¸é€æ˜åº¦ */
 	g_smpDecal3.a *= u_TexDecal3Alpha;
 		#if ( ( NND_OPT_TEXCOORD_DECAL3 == -1 || NND_OPT_TEXCOORD_DECAL3 == -1 ) && NND_OPT_TEX_ENVMASK != -1 )
 		g_smpDecal3.a *= g_smpEnvMask.r;
 		#endif
 	#endif
 
-	/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒv */
+	/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_SPECULAR != -1 )
 		g_smpSpecular = tex2D( s_texSpecular, g_Input.UV[ NND_UV_NO_SPECULAR ].NND_UV_SUFFIX_SPECULAR );
 	#endif
 
-	/* ƒXƒyƒLƒ…ƒ‰Œõ‘ò“xƒ}ƒbƒv */
+	/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©å…‰æ²¢åº¦ãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_SHININESS != -1 )
 		g_smpShininess = tex2D( s_texShininess, g_Input.UV[ NND_UV_NO_SHININESS ].NND_UV_SUFFIX_SHININESS );
 	#endif
 	
-	/* æZƒeƒNƒXƒ`ƒƒ */
+	/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_MODULATE != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_MODULATE == -1 )
 		g_smpModulate = tex2D( s_texModulate, g_SphereMapTexCoord );
@@ -1398,14 +1414,14 @@ void SampleTexMap(void)
 		#else
 		g_smpModulate = tex2D( s_texModulate, g_Input.UV[ NND_UV_NO_MODULATE ].NND_UV_SUFFIX_MODULATE );
 		#endif
-		/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv“K—p */
+		/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—é©ç”¨ */
 		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_MODULATE == -1 || NND_OPT_TEXCOORD_MODULATE == -3 ) )
 			g_smpModulate = float4( 1.0, 1.0, 1.0, 1.0 )
 				- ( float4( 1.0, 1.0, 1.0, 1.0 ) - g_smpModulate ) * g_smpEnvMask.r;
 		#endif
 	#endif
 
-	/* ‰ÁZƒeƒNƒXƒ`ƒƒ */
+	/* åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_ADD != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_ADD == -1 )
 		g_smpAdd = tex2D( s_texAdd, g_SphereMapTexCoord );
@@ -1414,35 +1430,35 @@ void SampleTexMap(void)
 		#else
 		g_smpAdd = tex2D( s_texAdd, g_Input.UV[ NND_UV_NO_ADD ].NND_UV_SUFFIX_ADD );
 		#endif
-		/* ‰ÁZƒ}ƒbƒv‹­“x */
+		/* åŠ ç®—ãƒãƒƒãƒ—å¼·åº¦ */
 		g_smpAdd *= u_TexAddLevel;
-		/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv“K—p */
+		/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—é©ç”¨ */
 		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_ADD == -1 || NND_OPT_TEXCOORD_ADD == -3 ) )
 		g_smpAdd *= g_smpEnvMask.r;
 		#endif
 	#endif
 
-	/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒv */
+	/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ— */
 	#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
 	g_smpDualParaboloid = tex2D( s_texDualParaboloid, g_DualParaMapTexCoord );
 		#if ( NND_OPT_TEX_ENVMASK != -1 )
 		g_smpDualParaboloid *= g_smpEnvMask.r;
 		#endif
-	/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒv‹­“x */
+	/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—å¼·åº¦ */
 	g_smpDualParaboloid *= u_TexDualParaboloidLevel;
 	#endif
 
-	/* ƒVƒƒƒhƒEƒ}ƒbƒvƒeƒNƒXƒ`ƒƒ */
+	/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_SHADOW != -1 )
 		g_smpShadow = shadow2DProj(s_texShadow, g_Input.TexShadow);
 	#endif
 
-	/* ƒVƒƒƒhƒEƒ}ƒbƒv‚QƒeƒNƒXƒ`ƒƒ */
+	/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ï¼’ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_SHADOW2 != -1 )
 		g_smpShadow2 = shadow2DProj(s_texShadow2, g_Input.TexShadow2);
 	#endif
 
-	/* •s“§–¾“xƒeƒNƒXƒ`ƒƒ */
+	/* ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_OPACITY != -1 )
 		#if ( NND_FRAG_SPHEREMAP && NND_OPT_TEXCOORD_OPACITY == -1 )
 		g_smpOpacity = tex2D( s_texOpacity, g_SphereMapTexCoord );
@@ -1451,13 +1467,13 @@ void SampleTexMap(void)
 		#else
 		g_smpOpacity = tex2D( s_texOpacity, g_Input.UV[ NND_UV_NO_OPACITY ].NND_UV_SUFFIX_OPACITY );
 		#endif
-		/* ŠÂ‹«ƒ}ƒXƒNƒ}ƒbƒv“K—p */
+		/* ç’°å¢ƒãƒã‚¹ã‚¯ãƒãƒƒãƒ—é©ç”¨ */
 		#if ( NND_OPT_TEX_ENVMASK != -1 && ( NND_OPT_TEXCOORD_OPACITY == -1 || NND_OPT_TEXCOORD_OPACITY == -3 ) )
 		g_smpOpacity *= ( 1.0 - g_smpEnvMask.r );
 		#endif
 	#endif
 
-	/* ƒx[ƒX‚¨‚æ‚ÑƒfƒJ[ƒ‹“\‚è */
+	/* ãƒ™ãƒ¼ã‚¹ãŠã‚ˆã³ãƒ‡ã‚«ãƒ¼ãƒ«è²¼ã‚Š */
 	#if ( NND_OPT_TEX_DECAL3 != -1 )
 	g_FragColor = lerp( lerp( lerp( g_smpBase.rgb, g_smpDecal.rgb, g_smpDecal.a ),
 					g_smpDecal2.rgb, g_smpDecal2.a ), g_smpDecal3.rgb, g_smpDecal3.a );
@@ -1471,7 +1487,7 @@ void SampleTexMap(void)
 	#endif
 }
 
-/* ƒ‰ƒCƒgŒvZ */
+/* ãƒ©ã‚¤ãƒˆè¨ˆç®— */
 void CalcLight(void)
 {
 	#if !( NND_OPT_TWOSIDED_LIGHTING )
@@ -1480,9 +1496,9 @@ void CalcLight(void)
 			g_VtxSpecCol = g_Input.FrontCol[1];
 		#endif
 	#else
-		/* DirextX ‚Í‰E‰ñ‚è‚ª•\‚Æ‚µ‚Äˆ—‚³‚ê‚Ü‚·‚ªA
-		   DXG20 ‚Í¶‰ñ‚è‚ğ•\‚Æ‚µ‚Ä‚¢‚é‚Ì‚ÅA
-		   vFace ‚Í‹t‚ÌˆÓ–¡‚É‚È‚è‚Ü‚· */
+		/* DirextX ã¯å³å›ã‚ŠãŒè¡¨ã¨ã—ã¦å‡¦ç†ã•ã‚Œã¾ã™ãŒã€
+		   DXG20 ã¯å·¦å›ã‚Šã‚’è¡¨ã¨ã—ã¦ã„ã‚‹ã®ã§ã€
+		   vFace ã¯é€†ã®æ„å‘³ã«ãªã‚Šã¾ã™ */
 		g_VtxDiffCol = ( g_Input.vFace < 0.0 ? g_Input.FrontCol[0] : g_Input.BackCol[0] );
 		#if NND_OPT_SPECULAR
 			g_VtxSpecCol = ( g_Input.vFace < 0.0 ? g_Input.FrontCol[1] : g_Input.BackCol[1] );
@@ -1490,19 +1506,19 @@ void CalcLight(void)
 	#endif
 
 	#if NND_OPT_FRAG_LIGHTING && NND_OPT_LIGHTING
-	/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒ‰ƒCƒeƒBƒ“ƒO */
+	/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚° */
 
 		#if ( NND_OPT_NUM_FRAG_PARALLEL_LIGHT > 0 )
-		/* ƒpƒ‰ƒŒƒ‹ƒ‰ƒCƒg‚ÌŒvZ */
+		/* ãƒ‘ãƒ©ãƒ¬ãƒ«ãƒ©ã‚¤ãƒˆã®è¨ˆç®— */
 		for ( int litno = 0;
 					litno < NND_OPT_NUM_FRAG_PARALLEL_LIGHT; litno++ ){
 			float3 litdir = u_LightSource[ litno ].position.xyz;
-			/* ƒfƒBƒtƒ…[ƒYŒvZ */
+			/* ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºè¨ˆç®— */
 			float fdiff = dot ( g_FragNormal, litdir );
 			//fdiff = max( fdiff, 0.0 );
 			fdiff = clamp( fdiff, 0.0, 1.0 );
 			g_FragDiffuse += fdiff * u_LightSource[ litno ].diffuse.rgb;
-			/* ƒXƒyƒLƒ…ƒ‰ŒvZ */
+			/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©è¨ˆç®— */
 			#if NND_OPT_SPECULAR
 			float3 halfvec = normalize(	litdir - g_EyeDir );
 			g_FragSpecular += u_LightSource[ litno ].specular.rgb *
@@ -1518,7 +1534,7 @@ void CalcLight(void)
 					);
 			#endif
 			#if ( NND_PROF_LIGHT_AMBIENT )
-			/* ƒAƒ“ƒrƒGƒ“ƒg */
+			/* ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆ */
 			g_FragAmbient += u_LightSource[litno].ambient.rgb;
 			#endif
 		}
@@ -1526,7 +1542,7 @@ void CalcLight(void)
 
 		#if ( NND_OPT_NUM_FRAG_POINT_LIGHT > 0 )
 		{
-		/* ƒ|ƒCƒ“ƒgƒ‰ƒCƒg‚ÌŒvZ */
+		/* ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®è¨ˆç®— */
 		for ( int litno = NND_OPT_NUM_FRAG_PARALLEL_LIGHT;
 				litno < NND_OPT_NUM_FRAG_PARALLEL_LIGHT
 									+ NND_OPT_NUM_FRAG_POINT_LIGHT; litno ++ )
@@ -1535,38 +1551,38 @@ void CalcLight(void)
 			float3 litpos, litdir;
 			int unino;
 
-			/* ƒ‰ƒCƒgˆÊ’u */
+			/* ãƒ©ã‚¤ãƒˆä½ç½® */
 			litpos = u_LightSource[ litno ].position.xyz - g_Input.ViewPosFog.NND_SUFFIX_VPOS;
 
-			/* Œ¸Š“x */
+			/* æ¸›è¡°åº¦ */
 			dist = length( litpos );
 			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 0 )
-			/* Œ¸Š‚È‚µ */
+			/* æ¸›è¡°ãªã— */
 			attn = 1.0;
 			#endif
 			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 1 )
-			/* ‹t */
+			/* é€† */
 			attn = 1.0 / dist;
 			#endif
 			#if ( NND_PROF_POINTLIGHT_DISTATTEN == 2 )
-			/* ‹t‚Qæ */
+			/* é€†ï¼’ä¹— */
 			attn = 1.0 / ( dist * dist );
 			#endif
-			/* ƒtƒH[ƒ‹ƒIƒt */
+			/* ãƒ•ã‚©ãƒ¼ãƒ«ã‚ªãƒ• */
 			unino = litno - NND_OPT_NUM_FRAG_PARALLEL_LIGHT;
 			attn *= clamp(
 					( u_PointLightFallOffEnd[ unino ] - dist )
 						* u_PointLightFallOffScale[ unino ], 0.0, 1.0 );
 
-			/* ƒ‰ƒCƒg•ûŒü */
+			/* ãƒ©ã‚¤ãƒˆæ–¹å‘ */
 			litdir = normalize( litpos );
 
-			/* ƒfƒBƒtƒ…[ƒY¬•ª */
+			/* ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºæˆåˆ† */
 			//diffcnt = max( dot( g_FragNormal, litdir ), 0.0 );
 			diffcnt = clamp( dot( g_FragNormal, litdir ), 0.0, 1.0 );
 			g_FragDiffuse += u_LightSource[litno].diffuse.rgb * diffcnt * attn;
 
-			/* ƒXƒyƒLƒ…ƒ‰ŒvZ */
+			/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©è¨ˆç®— */
 			#if NND_OPT_SPECULAR
 			float3 halfvec = normalize( litdir - g_EyeDir );
 			g_FragSpecular += u_LightSource[ litno ].specular.rgb *
@@ -1582,20 +1598,20 @@ void CalcLight(void)
 					) * attn;
 			#endif
 			#if ( NND_PROF_LIGHT_AMBIENT )
-			/* ƒAƒ“ƒrƒGƒ“ƒg */
+			/* ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆ */
 			g_FragAmbient += u_LightSource[litno].ambient.rgb * attn;
 			#endif
 		}
 		}
 		#endif
 
-		/* ƒfƒBƒtƒ…[ƒYAƒAƒ“ƒrƒGƒ“ƒgAƒGƒ~ƒbƒVƒ‡ƒ“¬•ª */
+		/* ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºã€ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆã€ã‚¨ãƒŸãƒƒã‚·ãƒ§ãƒ³æˆåˆ† */
 		#if ( NND_OPT_TEX_SHADOW != -1 )
-			/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Ìê‡ */
+			/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®å ´åˆ */
 			float3 shadowcolor = max( g_smpShadow.rgb, u_TexShadowColor.rgb );
 
 			#if ( NND_OPT_TEX_SHADOW2 != -1 )
-				/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Q‚ª‚ ‚éê‡ */
+				/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ï¼’ãŒã‚ã‚‹å ´åˆ */
 				shadowcolor *= max( g_smpShadow2.rgb, u_TexShadow2Color.rgb );
 			#endif
 			#if ( NND_PROF_LIGHT_AMBIENT )
@@ -1618,13 +1634,13 @@ void CalcLight(void)
 			#endif
 		#endif
 
-		/* ƒXƒyƒLƒ…ƒ‰¬•ª */
+		/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©æˆåˆ† */
 		#if ( NND_OPT_TEX_SPECULAR != -1 )
-		/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒv */
+		/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ— */
 		g_FragSpecular *= g_smpSpecular.rgb;
 		#endif
 		#if ( NND_OPT_TEX_SHADOW != -1 )
-			/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Ìê‡ */
+			/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®å ´åˆ */
 			#if NND_OPT_SPECULAR
 				g_FragColor += g_FragSpecular * shadowcolor
 							* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
@@ -1643,24 +1659,24 @@ void CalcLight(void)
 
 	#else
 	
-	/* ’¸“_’PˆÊƒ‰ƒCƒeƒBƒ“ƒO */
-	/* ƒfƒBƒtƒ…[ƒY */
+	/* é ‚ç‚¹å˜ä½ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚° */
+	/* ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚º */
 		#if ( NND_OPT_TEX_SHADOW != -1 )
-		/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Ìê‡ */
+		/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®å ´åˆ */
 		float3 shadowcolor = max( g_smpShadow.rgb, u_TexShadowColor.rgb );
 		#if ( NND_OPT_TEX_SHADOW2 != -1 )
-			/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Q‚ª‚ ‚éê‡ */
+			/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ï¼’ãŒã‚ã‚‹å ´åˆ */
 			shadowcolor *= max( g_smpShadow2.rgb, u_TexShadow2Color.rgb );
 		#endif
 		g_FragColor *= g_VtxDiffCol.rgb * shadowcolor;
 		#else
 		g_FragColor *= g_VtxDiffCol.rgb;
 		#endif
-	/* ƒXƒyƒLƒ…ƒ‰ */
+	/* ã‚¹ãƒšã‚­ãƒ¥ãƒ© */
 		#if ( NND_OPT_TEX_SPECULAR != -1 )
-		/* ƒXƒyƒLƒ…ƒ‰ƒ}ƒbƒv */
+		/* ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒãƒƒãƒ— */
 			#if ( NND_OPT_TEX_SHADOW != -1 )
-			/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Ìê‡ */
+			/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®å ´åˆ */
 			g_FragColor += g_smpSpecular.rgb * shadowcolor
 					* g_VtxSpecCol.rgb * u_FrontMaterial.specular.rgb;
 			#else
@@ -1669,7 +1685,7 @@ void CalcLight(void)
 			#endif
 		#else
 			#if ( NND_OPT_TEX_SHADOW != -1 )
-			/* ƒVƒƒƒhƒEƒ}ƒbƒv‚Ìê‡ */
+			/* ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ã®å ´åˆ */
 			g_FragColor += g_VtxSpecCol.rgb * shadowcolor
 								* u_FrontMaterial.specular.rgb;
 			#else
@@ -1681,29 +1697,29 @@ void CalcLight(void)
 	#endif
 }
 
-/* ƒeƒNƒXƒ`ƒƒƒtƒBƒ‹ƒ^[‚ğŠ|‚¯‚Ü‚· */
+/* ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ã‚’æ›ã‘ã¾ã™ */
 void BlendTexFilter(void)
 {
-	/* æZƒeƒNƒXƒ`ƒƒ */
+	/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_MODULATE != -1 )
 	g_FragColor *= g_smpModulate.rgb;
 	#endif
 
-	/* ‰ÁZƒeƒNƒXƒ`ƒƒ */
+	/* åŠ ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_ADD != -1 )
 	g_FragColor += g_smpAdd.rgb;
 	#endif
 
-	/* ‘o•û•¨–ÊŠÂ‹«ƒ}ƒbƒvƒeƒNƒXƒ`ƒƒ */
+	/* åŒæ–¹ç‰©é¢ç’°å¢ƒãƒãƒƒãƒ—ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_DUALPARABOLOID != -1 )
 	g_FragColor += g_smpDualParaboloid.rgb;
 	#endif
 }
 
-/* ƒAƒ‹ƒtƒ@’l‚ÌZo */
+/* ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã®ç®—å‡º */
 void CalcAlpha(void)
 {
-	/* ƒx[ƒXƒeƒNƒXƒ`ƒƒ */
+	/* ãƒ™ãƒ¼ã‚¹ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_DECAL3 != -1 )
 	g_FragAlpha = 1.0 - (1.0-g_smpBase.a) * (1.0-g_smpDecal.a) 
 							* (1.0-g_smpDecal2.a) * (1.0-g_smpDecal3.a);
@@ -1715,30 +1731,30 @@ void CalcAlpha(void)
 	#else
 	g_FragAlpha = g_smpBase.a;
 	#endif
-	/* •s“§–¾“xƒeƒNƒXƒ`ƒƒ */
+	/* ä¸é€æ˜åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ */
 	#if ( NND_OPT_TEX_OPACITY != -1 )
 	g_FragAlpha *= g_smpOpacity.r;
 	#endif
-	/* æZƒeƒNƒXƒ`ƒƒƒAƒ‹ƒtƒ@ */
+	/* ä¹—ç®—ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¢ãƒ«ãƒ•ã‚¡ */
 	#if ( NND_OPT_TEX_MODULATE != -1 )
 	g_FragAlpha *= g_smpModulate.a;
 	#endif
-	/* ’¸“_ƒJƒ‰[‚¨‚æ‚Ñƒ}ƒeƒŠƒAƒ‹‚ÌƒAƒ‹ƒtƒ@ */
+	/* é ‚ç‚¹ã‚«ãƒ©ãƒ¼ãŠã‚ˆã³ãƒãƒ†ãƒªã‚¢ãƒ«ã®ã‚¢ãƒ«ãƒ•ã‚¡ */
 	g_FragAlpha *= g_VtxDiffCol.a;
 
-	/* ƒJƒ‰[ƒNƒ‰ƒ“ƒv */
+	/* ã‚«ãƒ©ãƒ¼ã‚¯ãƒ©ãƒ³ãƒ— */
 	g_FragColor = clamp( g_FragColor, 0.0, 1.0 );
 }
 
-/* ƒtƒHƒbƒOŒvZ */
+/* ãƒ•ã‚©ãƒƒã‚°è¨ˆç®— */
 void CalcFog(void)
 {
-	/* ’¸“_ƒtƒHƒO */
+	/* é ‚ç‚¹ãƒ•ã‚©ã‚° */
 	#if ( !( NND_PROF_FRAG_FOG ) && ( NND_PROF_FOG_MODEL ) )
 		g_FragColor = lerp( u_Fog.color.rgb, g_FragColor , g_Input.ViewPosFog.NND_SUFFIX_FOG );
 	#endif
 
-	/* ƒtƒ‰ƒOƒƒ“ƒg’PˆÊƒtƒHƒO */
+	/* ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆå˜ä½ãƒ•ã‚©ã‚° */
 	#if ( NND_PROF_FRAG_FOG && NND_PROF_FOG_MODEL )
 		float fogd;
 		#if ( NND_PROF_FOG_MODEL == 1 )
@@ -1754,27 +1770,27 @@ void CalcFog(void)
 	#endif
 }
 
-/* ÅIo—ÍƒJƒ‰[‚Ìİ’è */
+/* æœ€çµ‚å‡ºåŠ›ã‚«ãƒ©ãƒ¼ã®è¨­å®š */
 void SetFinalColor(void)
 {
-	g_Output.Col.rgb = g_FragColor;		// ƒtƒ‰ƒOƒƒ“ƒgƒJƒ‰[o—Í
-	g_Output.Col.a   = g_FragAlpha;		// ƒtƒ‰ƒOƒƒ“ƒgƒAƒ‹ƒtƒ@o—Í
+	g_Output.Col.rgb = g_FragColor;		// ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚«ãƒ©ãƒ¼å‡ºåŠ›
+	g_Output.Col.a   = g_FragAlpha;		// ãƒ•ãƒ©ã‚°ãƒ¡ãƒ³ãƒˆã‚¢ãƒ«ãƒ•ã‚¡å‡ºåŠ›
 }
 
 /**************************/
-/* ƒsƒNƒZƒ‹ƒVƒF[ƒ_ƒƒCƒ“ */
+/* ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¡ã‚¤ãƒ³ */
 /**************************/
 PS_OUTPUT main(PS_INPUT Input)
 {
 	g_Input = Input;
 
-	NrmInput();				// “ü—ÍƒxƒNƒgƒ‹‚ğ³‹K‰»‚µ‚Ü‚·	
-	SampleTexMap();			// ƒeƒNƒXƒ`ƒƒƒTƒ“ƒvƒŠƒ“ƒO
-	CalcLight();			// ƒ‰ƒCƒgŒvZ
-	BlendTexFilter();		// ƒeƒNƒXƒ`ƒƒƒtƒBƒ‹ƒ^[‚ğŠ|‚¯‚Ü‚·
-	CalcAlpha();			// ƒAƒ‹ƒtƒ@’l‚ÌZo
-	CalcFog();				// ƒtƒHƒbƒOŒvZ
-	SetFinalColor();		// ÅIo—ÍƒJƒ‰[‚Ìİ’è
+	NrmInput();				// å…¥åŠ›ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–ã—ã¾ã™	
+	SampleTexMap();			// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
+	CalcLight();			// ãƒ©ã‚¤ãƒˆè¨ˆç®—
+	BlendTexFilter();		// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ã‚’æ›ã‘ã¾ã™
+	CalcAlpha();			// ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã®ç®—å‡º
+	CalcFog();				// ãƒ•ã‚©ãƒƒã‚°è¨ˆç®—
+	SetFinalColor();		// æœ€çµ‚å‡ºåŠ›ã‚«ãƒ©ãƒ¼ã®è¨­å®š
 	return( g_Output );
 }
 

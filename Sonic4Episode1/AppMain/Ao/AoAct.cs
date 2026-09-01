@@ -995,11 +995,9 @@ internal partial class AppMain
     {
         NNS_MATRIX aoActDrawPreMtx = AoActDrawPre_mtx;
         aoActDrawPreMtx.Clear();
-        nnMakeOrthoMatrix(aoActDrawPreMtx, 0.0f, g_ao_act_wide_h, g_ao_act_wide_w, 0.0f, 1f, 3f);
+        nnMakeOrthoMatrix(aoActDrawPreMtx, 0.0f, g_ao_act_wide_w, g_ao_act_wide_h, 0.0f, 1f, 3f);
         amDrawSetProjection(aoActDrawPreMtx, 1);
         nnMakeUnitMatrix(aoActDrawPreMtx);
-        nnRotateZMatrix(aoActDrawPreMtx, aoActDrawPreMtx, NNM_DEGtoA32(90f));
-        nnTranslateMatrix(aoActDrawPreMtx, aoActDrawPreMtx, 0.0f, -g_ao_act_wide_h, 0.0f);
         amDrawSetWorldViewMatrix(aoActDrawPreMtx);
         nnSetPrimitive3DMatrix(aoActDrawPreMtx);
     }
@@ -2060,16 +2058,6 @@ internal partial class AppMain
                     aoActDrawTaskPct[1].Pos.y += aosSprite1.center_y;
                     aoActDrawTaskPct[2].Pos.y += aosSprite1.center_y;
                     aoActDrawTaskPct[3].Pos.y += aosSprite1.center_y;
-                    if (SyGetEvtInfo().cur_evt_id >= 3)
-                    {
-                        float num = aoActDrawTaskPct[1].Pos.y - aoActDrawTaskPct[0].Pos.y;
-                        aoActDrawTaskPct[0].Pos.y *= 0.9f;
-                        aoActDrawTaskPct[0].Pos.y += 32f;
-                        aoActDrawTaskPct[2].Pos.y *= 0.9f;
-                        aoActDrawTaskPct[2].Pos.y += 32f;
-                        aoActDrawTaskPct[1].Pos.y = aoActDrawTaskPct[0].Pos.y + num;
-                        aoActDrawTaskPct[3].Pos.y = aoActDrawTaskPct[2].Pos.y + num;
-                    }
                     aoActDrawCorW(aoActDrawTask_pct_array, 0, 4U, aosSprite1.flag);
                     aoActDrawTaskPct[5] = aoActDrawTaskPct[3];
                     aoActDrawTaskPct[4] = aoActDrawTaskPct[1];
@@ -2127,13 +2115,6 @@ internal partial class AppMain
                     aoActDrawTaskPc[1].Pos.y += aosSprite1.center_y;
                     aoActDrawTaskPc[2].Pos.y += aosSprite1.center_y;
                     aoActDrawTaskPc[3].Pos.y += aosSprite1.center_y;
-                    float num = aoActDrawTaskPc[1].Pos.y - aoActDrawTaskPc[0].Pos.y;
-                    aoActDrawTaskPc[0].Pos.y *= 0.9f;
-                    aoActDrawTaskPc[0].Pos.y += 32f;
-                    aoActDrawTaskPc[2].Pos.y *= 0.9f;
-                    aoActDrawTaskPc[2].Pos.y += 32f;
-                    aoActDrawTaskPc[1].Pos.y = aoActDrawTaskPc[0].Pos.y + num;
-                    aoActDrawTaskPc[3].Pos.y = aoActDrawTaskPc[2].Pos.y + num;
                     aoActDrawCorW(aoActDrawTaskPc, 0, 4U, aosSprite1.flag);
                     aoActDrawTaskPc[5] = aoActDrawTaskPc[3];
                     aoActDrawTaskPc[4] = aoActDrawTaskPc[1];
@@ -2256,13 +2237,6 @@ internal partial class AppMain
                     buffer[index3 + 1].Pos.y += aosSprite2.center_y;
                     buffer[index3 + 2].Pos.y += aosSprite2.center_y;
                     buffer[index3 + 3].Pos.y += aosSprite2.center_y;
-                    float num5 = buffer[index3 + 1].Pos.y - buffer[index3].Pos.y;
-                    buffer[index3].Pos.y *= 0.9f;
-                    buffer[index3].Pos.y += 32f;
-                    buffer[index3 + 2].Pos.y *= 0.9f;
-                    buffer[index3 + 2].Pos.y += 32f;
-                    buffer[index3 + 1].Pos.y = buffer[index3].Pos.y + num5;
-                    buffer[index3 + 3].Pos.y = buffer[index3 + 2].Pos.y + num5;
                     aoActDrawCorW(setParam.vtxPCT3D, index3 - offset, 4U, aosSprite2.flag);
                     buffer[index3 + 5] = buffer[index3 + 3];
                     buffer[index3 + 4] = buffer[index3 + 1];
@@ -2309,13 +2283,6 @@ internal partial class AppMain
                     v[i0 + 1].Pos.y += aosSprite2.center_y;
                     v[i0 + 2].Pos.y += aosSprite2.center_y;
                     v[i0 + 3].Pos.y += aosSprite2.center_y;
-                    float num5 = v[i0 + 1].Pos.y - v[i0].Pos.y;
-                    v[i0].Pos.y *= 0.9f;
-                    v[i0].Pos.y += 32f;
-                    v[i0 + 2].Pos.y *= 0.9f;
-                    v[i0 + 2].Pos.y += 32f;
-                    v[i0 + 1].Pos.y = v[i0].Pos.y + num5;
-                    v[i0 + 3].Pos.y = v[i0 + 2].Pos.y + num5;
                     aoActDrawCorW(v, i0, 4U, aosSprite2.flag);
                     v[i0 + 5] = v[i0 + 3];
                     v[i0 + 4] = v[i0 + 1];

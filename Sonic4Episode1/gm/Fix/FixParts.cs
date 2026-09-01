@@ -22,8 +22,8 @@ internal static partial class GmFix
             var subpart = gmFixCreateSubpart(
                 "FIX_RING", gm_fix_ringcount_act_id_tbl[i], gmFixSubpartOutFunc);
 
-            if (i != 0)
-                ((OBS_OBJECT_WORK)subpart).pos.y += FX_F32_TO_FX32(5f);
+            //if (i != 0)
+            //    ((OBS_OBJECT_WORK)subpart).pos.y += FX_F32_TO_FX32(5f);
 
             part.sub_parts[i] = subpart;
         }

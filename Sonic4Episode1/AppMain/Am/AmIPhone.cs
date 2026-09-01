@@ -28,18 +28,17 @@ internal partial class AppMain
         config.WindowHeight = (int)height;
         this.nnConfigureSystemGL(config);
 
-        var fov = 45f + NNM_RADtoDEG((float)AppMain.nnArcTan2(height, width) - NNM_DEGtoRAD(45f));
+        var aspect = width / height;
 
-        nnMakePerspectiveMatrix(mtx, NNM_DEGtoA32(fov), height / (float)width, 1f, 10000f);
+        nnMakePerspectiveMatrix(mtx, NNM_DEGtoA32(45f), aspect, 1f, 10000f);
         nnSetProjection(mtx, 0);
 
-        _am_draw_video.draw_aspect = height / (float)width;
+        _am_draw_video.draw_aspect = aspect;
         _am_draw_video.draw_width = bbWidth;
         _am_draw_video.draw_height = bbHeight;
         _am_draw_video.disp_width = bbWidth;
         _am_draw_video.disp_height = bbHeight;
 
-        var aspect = width / height;
         g_ao_act_wide_w = _am_draw_video.width_2d = 720.0f * aspect;
         g_ao_act_wide_h = _am_draw_video.height_2d = 720.0f;
 
@@ -86,10 +85,27 @@ internal partial class AppMain
             + $" base={_am_draw_video.base_x_2d},{_am_draw_video.base_y_2d}"
             + $" draw={_am_draw_video.draw_width}x{_am_draw_video.draw_height}"
             + $" touch={caps.IsConnected}/{caps.MaximumTouchCount}"
+            + $" {mppDiagOrtho(pp.BackBufferWidth, pp.BackBufferHeight)}"
             // FNA writes this back to 0 when SDL_WINDOW_HIGH_PIXEL_DENSITY did not survive window
             // creation, so it says whether high DPI was refused rather than never asked for
             + $" highdpi={Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI")}"
             + $" mode={GraphicsAdapter.DefaultAdapter.CurrentDisplayMode}");
+    }
+
+    // the gameplay view in world units and the resulting pixel density per axis. the two densities
+    // must agree, and ortho height must not move when the window aspect does
+    private static string mppDiagOrtho(int bbWidth, int bbHeight)
+    {
+        if (bbWidth <= 0 || bbHeight <= 0 || g_obj.disp_height <= 0f)
+            return "ortho=n/a";
+
+        ObjCameraGetOrthoExtent(GMD_CAMERA_SCALE, bbWidth / (float)bbHeight, out float dx, out float dy);
+        float world_w = dx * 2f;
+        float world_h = dy * 2f;
+
+        return $"ortho={world_w:F3}x{world_h:F3}"
+            + $" px/unit={bbWidth / world_w:F4},{bbHeight / world_h:F4}"
+            + $" lcd={GMD_OBJ_LCD_X}x{GMD_OBJ_LCD_Y}";
     }
 
     public static void amIPhoneExitNN()
@@ -245,13 +261,12 @@ internal partial class AppMain
         if (width <= 0 || height <= 0)
             return;
 
-        // nominal 480, 288
+        // nominal 480 x 320, the space every hit rect in the game is written in
         X /= width;
         X *= 480;
 
         Y /= height;
-        Y *= 288;
-        Y += 16;
+        Y *= 320;
     }
 
     private static int amFindTouchIndex(int id)

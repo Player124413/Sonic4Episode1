@@ -6,13 +6,12 @@ namespace Sonic4Episode1.Viewer;
 // covers the same screen travel over a shorter distance, and clamps flat at both edges.
 internal static class StageParallax
 {
-    // GMD_OBJ_LCD_X is GMD_CAMERA_SCALE times the display height, and _Y folds in the draw aspect,
-    // which amIPhone sets to height/width. Widescreen is 1280x720. Both truncate to short.
-    // Parallax is defined against this, not against the viewer's window, so the layers line up the
-    // way they were authored however far out the free camera is zoomed.
+    // GMD_OBJ_LCD_X/Y at a 1280x720 window, both truncated to short. Parallax is defined against
+    // this, not against the viewer's window, so the layers line up the way they were authored
+    // however far out the free camera is zoomed.
     public static readonly Vector2 GameCamera = new Vector2(
-        (short)(AppMain.GMD_CAMERA_SCALE * 720f),
-        (short)(AppMain.GMD_CAMERA_SCALE * 720f * (720f / 1280f)));
+        (short)(AppMain.GMD_CAMERA_SCALE * 720f * (1280f / 720f)),
+        (short)(AppMain.GMD_CAMERA_SCALE * 720f));
 
     public static Vector2 ScrollScale(Vector2 layerSize, Vector2 mainSize)
     {

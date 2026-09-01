@@ -1558,7 +1558,7 @@ internal partial class AppMain
     {
         AMS_PARAM_DRAW_PRIMITIVE param = (AMS_PARAM_DRAW_PRIMITIVE)command.param;
         NNS_MATRIX sortPrimitive2DMtx = _amDrawSortPrimitive2D_mtx;
-        nnMakeOrthoMatrix(sortPrimitive2DMtx, 0.0f, g_ao_act_wide_h, g_ao_act_wide_w, 0.0f, 1.0f, 3.0f);
+        nnMakeOrthoMatrix(sortPrimitive2DMtx, 0.0f, g_ao_act_wide_w, g_ao_act_wide_h, 0.0f, 1.0f, 3.0f);
         amDrawSetProjection(sortPrimitive2DMtx, 1);
         if (param.texlist != null && param.texId != -1)
         {

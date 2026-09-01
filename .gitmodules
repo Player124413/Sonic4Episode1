@@ -7,6 +7,3 @@
 [submodule "FNA-XNA"]
 	path = Submodules/FNA
 	url = https://github.com/WamWooWam/FNA.git
-[submodule "Submodules/MojoShader"]
-	path = Submodules/MojoShader
-	url = https://github.com/MonoGame/MojoShader.git

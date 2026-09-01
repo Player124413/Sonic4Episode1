@@ -297,18 +297,18 @@ internal partial class AppMain
             for (; next2 != activeTail; next2 = next2.next)
             {
                 AMS_AME_RUNTIME_WORK_SIMPLE_SPRITE workSimpleSprite = (AMS_AME_RUNTIME_WORK_SIMPLE_SPRITE)(AMS_AME_RUNTIME_WORK)next2;
-                nnScaleVector(ref snnsVector5, ref snnsVector3, workSimpleSprite.size.y);
-                nnScaleVector(ref snnsVector6, ref snnsVector2, workSimpleSprite.size.x);
+                nnScaleVector(ref snnsVector5, ref snnsVector3, workSimpleSprite.size.x);
+                nnScaleVector(ref snnsVector6, ref snnsVector2, workSimpleSprite.size.y);
                 amVectorAdd(ref snnsVector4, workSimpleSprite.position, ref snnsVector1);
                 num2 = nnDistanceVector(ref snnsVector4, _am_ef_camPos);
-                nnSubtractVector(ref buffer[offset + 2].Pos, ref snnsVector4, ref snnsVector5);
-                nnAddVector(ref buffer[offset + 2].Pos, ref buffer[offset + 2].Pos, ref snnsVector6);
-                nnAddVector(ref buffer[offset].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref buffer[offset].Pos, ref snnsVector4, ref snnsVector5);
                 nnAddVector(ref buffer[offset].Pos, ref buffer[offset].Pos, ref snnsVector6);
-                nnSubtractVector(ref buffer[offset + 5].Pos, ref snnsVector4, ref snnsVector5);
-                nnSubtractVector(ref buffer[offset + 5].Pos, ref buffer[offset + 5].Pos, ref snnsVector6);
                 nnAddVector(ref buffer[offset + 1].Pos, ref snnsVector4, ref snnsVector5);
-                nnSubtractVector(ref buffer[offset + 1].Pos, ref buffer[offset + 1].Pos, ref snnsVector6);
+                nnAddVector(ref buffer[offset + 1].Pos, ref buffer[offset + 1].Pos, ref snnsVector6);
+                nnSubtractVector(ref buffer[offset + 2].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref buffer[offset + 2].Pos, ref buffer[offset + 2].Pos, ref snnsVector6);
+                nnAddVector(ref buffer[offset + 5].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref buffer[offset + 5].Pos, ref buffer[offset + 5].Pos, ref snnsVector6);
                 buffer[offset + 5].Col = AMD_RGBA8888(workSimpleSprite.color.r, workSimpleSprite.color.g, workSimpleSprite.color.b, workSimpleSprite.color.a);
                 buffer[offset].Col = buffer[offset + 1].Col = buffer[offset + 2].Col = buffer[offset + 5].Col;
                 Vector4D_Quat st = workSimpleSprite.st;
@@ -347,14 +347,14 @@ internal partial class AppMain
                 nnScaleVector(ref snnsVector6, ref snnsVector2, workSimpleSprite.size.y);
                 amVectorAdd(ref snnsVector4, workSimpleSprite.position, ref snnsVector1);
                 num2 = nnDistanceVector(ref snnsVector4, _am_ef_camPos);
-                nnSubtractVector(ref nnsPriM3DPcArray1[index + 2].Pos, ref snnsVector4, ref snnsVector5);
-                nnAddVector(ref nnsPriM3DPcArray1[index + 2].Pos, ref nnsPriM3DPcArray1[index + 2].Pos, ref snnsVector6);
-                nnAddVector(ref nnsPriM3DPcArray1[index].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref nnsPriM3DPcArray1[index].Pos, ref snnsVector4, ref snnsVector5);
                 nnAddVector(ref nnsPriM3DPcArray1[index].Pos, ref nnsPriM3DPcArray1[index].Pos, ref snnsVector6);
-                nnSubtractVector(ref nnsPriM3DPcArray1[index + 5].Pos, ref snnsVector4, ref snnsVector5);
-                nnSubtractVector(ref nnsPriM3DPcArray1[index + 5].Pos, ref nnsPriM3DPcArray1[index + 5].Pos, ref snnsVector6);
                 nnAddVector(ref nnsPriM3DPcArray1[index + 1].Pos, ref snnsVector4, ref snnsVector5);
-                nnSubtractVector(ref nnsPriM3DPcArray1[index + 1].Pos, ref nnsPriM3DPcArray1[index + 1].Pos, ref snnsVector6);
+                nnAddVector(ref nnsPriM3DPcArray1[index + 1].Pos, ref nnsPriM3DPcArray1[index + 1].Pos, ref snnsVector6);
+                nnSubtractVector(ref nnsPriM3DPcArray1[index + 2].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref nnsPriM3DPcArray1[index + 2].Pos, ref nnsPriM3DPcArray1[index + 2].Pos, ref snnsVector6);
+                nnAddVector(ref nnsPriM3DPcArray1[index + 5].Pos, ref snnsVector4, ref snnsVector5);
+                nnSubtractVector(ref nnsPriM3DPcArray1[index + 5].Pos, ref nnsPriM3DPcArray1[index + 5].Pos, ref snnsVector6);
                 nnsPriM3DPcArray1[index + 5].Col = AMD_RGBA8888(workSimpleSprite.color.r, workSimpleSprite.color.g, workSimpleSprite.color.b, workSimpleSprite.color.a);
                 nnsPriM3DPcArray1[index].Col = nnsPriM3DPcArray1[index + 1].Col = nnsPriM3DPcArray1[index + 2].Col = nnsPriM3DPcArray1[index + 5].Col;
                 nnsPriM3DPcArray1[index + 3] = nnsPriM3DPcArray1[index + 1];
