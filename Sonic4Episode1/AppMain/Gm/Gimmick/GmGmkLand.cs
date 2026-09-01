@@ -65,7 +65,11 @@
                 ((NNS_MOTION_KEY_Class5[])rideWork.obj_3d.motion.mmtn[0].pSubmotion[0].pKeyList)[0].Value.y = 1f;
                 break;
             default:
-                if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
+                // gmGmkLand.cpp:311-327 is one else-if chain with a _WII arm for 1-1 and 1-2 and an
+                // _IPHONE arm for 1-3 and 1-boss. On console neither compiles, so zone 1's platforms
+                // take no light override at all
+                if (!gm_gmk_as_console
+                    && (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3))
                 {
                     gmsEnemy3DWork.obj_3d.use_light_flag &= 4294967294U;
                     gmsEnemy3DWork.obj_3d.use_light_flag |= 2U;

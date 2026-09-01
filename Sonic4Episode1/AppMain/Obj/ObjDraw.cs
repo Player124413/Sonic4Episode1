@@ -439,14 +439,14 @@
                         NNS_MOTION motion = obj_3d.motion.mtnbuf[motion_id & ushort.MaxValue];
                         float frame = num + amMotionGetStartFrame(obj_3d.motion, motion_id);
                         if (obj_3d.motion != null && obj_3d.motion.mmobject != null)
-                            ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                            ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                         else
-                            ObjDraw3DNNDrawMotion(motion, frame, obj_3d._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                            ObjDraw3DNNDrawMotion(motion, frame, obj_3d._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                     }
                     else if (obj_3d.motion != null && obj_3d.motion.mmobject != null)
-                        ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                        ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                     else
-                        ObjDraw3DNNMotion(obj_3d.motion, obj_3d.motion._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                        ObjDraw3DNNMotion(obj_3d.motion, obj_3d.motion._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.mplt_cb_func, obj_3d.mplt_cb_param, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                 }
                 obj_3d.user_param = null;
                 obj_3d.mplt_cb_param = null;
@@ -460,9 +460,9 @@
                     if (((int)p_disp_flag1 & 134217728) != 0)
                         draw_state = obj_3d.draw_state;
                     if (obj_3d.motion != null && obj_3d.motion.mmobject != null)
-                        ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, null, null, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                        ObjDraw3DNNMotionMaterialMotion(obj_3d.motion, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, null, null, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                     else
-                        ObjDraw3DNNModel(obj_3d._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag);
+                        ObjDraw3DNNModel(obj_3d._object, obj_3d.texlist, obj_3d.drawflag, obj_3d.sub_obj_type, obj_3d.user_func, obj_3d.user_param, obj_3d.command_state, obj_3d.material_cb_func, obj_3d.material_cb_param, draw_state, obj_3d.use_light_flag, obj_3d.drawflag_ex);
                 }
                 obj_3d.user_param = null;
                 obj_3d.mplt_cb_param = null;
@@ -627,7 +627,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -641,6 +642,7 @@
         amsParamDrawObject.mtx = mtx;
         amsParamDrawObject.sub_obj_type = sub_obj_type;
         amsParamDrawObject.flag = drawflag;
+        amsParamDrawObject.flag_ex = drawflag_ex;
         amsParamDrawObject.texlist = texlist;
         amsParamDrawObject.material_func = null;
         amsParamDrawObject.scaleZ = 1f;
@@ -669,7 +671,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -681,6 +684,7 @@
         amsParamDrawObject.mtx = mtx;
         amsParamDrawObject.sub_obj_type = sub_obj_type;
         amsParamDrawObject.flag = drawflag;
+        amsParamDrawObject.flag_ex = drawflag_ex;
         amsParamDrawObject.texlist = texlist;
         amsParamDrawObject.material_func = null;
         amsParamDrawObject.scaleZ = 1f;
@@ -712,7 +716,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -725,6 +730,7 @@
         paramDrawMotionTrs.mtx = mtx;
         paramDrawMotionTrs.sub_obj_type = sub_obj_type;
         paramDrawMotionTrs.flag = drawflag;
+        paramDrawMotionTrs.flag_ex = drawflag_ex;
         paramDrawMotionTrs.texlist = texlist;
         paramDrawMotionTrs.trslist = amDrawAlloc_NNS_TRS(nodeNum);
         paramDrawMotionTrs.material_func = null;
@@ -762,7 +768,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -780,6 +787,7 @@
             paramDrawMotionTrs.mtx = mtx;
             paramDrawMotionTrs.sub_obj_type = sub_obj_type;
             paramDrawMotionTrs.flag = drawflag;
+            paramDrawMotionTrs.flag_ex = drawflag_ex;
             paramDrawMotionTrs.texlist = texlist;
             paramDrawMotionTrs.trslist = amDrawAlloc_NNS_TRS(nodeNum);
             paramDrawMotionTrs.material_func = null;
@@ -834,7 +842,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -846,6 +855,7 @@
         amsParamDrawMotion.mtx = mtx;
         amsParamDrawMotion.sub_obj_type = sub_obj_type;
         amsParamDrawMotion.flag = drawflag;
+        amsParamDrawMotion.flag_ex = drawflag_ex;
         amsParamDrawMotion.texlist = texlist;
         amsParamDrawMotion.motion = motion;
         amsParamDrawMotion.frame = frame;
@@ -885,7 +895,8 @@
       MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
       object material_cb_param,
       AMS_DRAWSTATE draw_state,
-      uint use_light_flag)
+      uint use_light_flag,
+      uint drawflag_ex = 0)
     {
         if (!GmMainIsDrawEnable())
             return;
@@ -897,6 +908,7 @@
         amsParamDrawMotion.mtx = mtx;
         amsParamDrawMotion.sub_obj_type = sub_obj_type;
         amsParamDrawMotion.flag = drawflag;
+        amsParamDrawMotion.flag_ex = drawflag_ex;
         amsParamDrawMotion.texlist = texlist;
         amsParamDrawMotion.motion = motion;
         amsParamDrawMotion.frame = frame;
@@ -1370,9 +1382,24 @@
                 amDrawExecCommand(obj_draw_3dnn_command_state_tbl[index], g_obj.drawflag);
                 if (obj_draw_3dnn_command_state_exe_end_scene_tbl[index])
                     amDrawEndScene();
+
+                // TODO(wam): off by default. Console gets a fresh depth buffer here for free,
+                // because gmMapFarDrawSeaUserFunc switches render target with
+                // D3DCLEAR_TARGET|ZBUFFER (0x4CA980), and a switch is a clear. The viewer does the
+                // same by hand at StageGame.cs:330. We do neither, but that only mattered while
+                // the projection was squashing depth into half its range, so this is an A/B
+                // switch rather than a fix. Delete it once the halo is settled either way.
+                if (mppClearDepthAfterMapFar
+                    && obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_POST_MAPFAR)
+                {
+                    mpp.OpenGL.glClearDepthf(1f);
+                    mpp.OpenGL.glClear(256U);
+                }
             }
         }
     }
+
+    internal static bool mppClearDepthAfterMapFar = false;
 
     public static void objDraw3DNNSetCamera(
       OBS_CAMERA obj_camera,
@@ -1437,6 +1464,81 @@
         amDrawRegistCommand(command_state, OBD_DRAW_USER_COMMAND_3DNN_SET_CAMERA, param3DnnSetCamera);
     }
 
+    // console defers every transparent object into the sort list, so blended geometry draws after all
+    // the depth writes rather than fighting them. objDraw.cpp:6020, the block the iPhone build
+    // compiles out. Three things there C# cannot say: a motion param cast to AMS_PARAM_DRAW_OBJECT
+    // on a shared prefix, the matrix palette living at the tail of the struct, and the handler
+    // recovering the struct from the command pointer. All three are copies here instead.
+    private static void objDraw3DNNRegistSortDraw(
+      OBS_DRAW_PARAM_3DNN_SORT_MODEL sortParam,
+      NNS_OBJECT _object,
+      NNS_TEXLIST texlist,
+      uint sub_obj_type,
+      uint flag,
+      uint flag_ex,
+      float scaleZ,
+      NNS_MATRIX[] plt_mtx,
+      int nMtx,
+      uint[] nstat,
+      float view_z,
+      uint drawflag,
+      int sort_command_id,
+      AMS_DRAWSTATE state,
+      MPP_VOID_OBJECT_DELEGATE user_func,
+      object user_param,
+      MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE material_cb_func,
+      object material_cb_param,
+      uint use_light_flag)
+    {
+        if (_object == null || (_object.fType & NND_OBJTYPE_TRANSPARENT) == 0)
+            return;
+
+        AMS_PARAM_DRAW_OBJECT draw = sortParam.draw_object;
+        draw._object = _object;
+        draw.texlist = texlist;
+        draw.sub_obj_type = sub_obj_type;
+        draw.flag = flag;
+        draw.flag_ex = flag_ex;
+        draw.scaleZ = scaleZ;
+
+        if (sortParam.plt_mtx == null || sortParam.plt_mtx.Length < nMtx)
+        {
+            sortParam.plt_mtx = new NNS_MATRIX[nMtx];
+            for (int index = 0; index < nMtx; ++index)
+                sortParam.plt_mtx[index] = GlobalPool<NNS_MATRIX>.Alloc();
+        }
+        for (int index = 0; index < nMtx; ++index)
+            sortParam.plt_mtx[index].Assign(plt_mtx[index]);
+
+        if (sortParam.nstat == null || sortParam.nstat.Length < nstat.Length)
+            sortParam.nstat = new uint[nstat.Length];
+        System.Array.Copy(nstat, sortParam.nstat, nstat.Length);
+
+        if (state != null)
+            sortParam.state.Assign(state);
+        else
+            amDrawGetState(sortParam.state);
+
+        AMS_PARAM_SORT_DRAW_OBJECT sort = sortParam.param;
+        sort.drawflag = drawflag;
+        sort.draw_object = draw;
+        sort.mtx = sortParam.plt_mtx;
+        sort.nstat_list = sortParam.nstat;
+        sort.draw_state = sortParam.state;
+
+        sortParam.cmd_header.command_id = sort_command_id;
+        sortParam.cmd_header.param = sortParam;
+        sortParam.cmd_header.state = 0U;
+
+        sortParam.use_light_flag = use_light_flag;
+        sortParam.user_func = user_func;
+        sortParam.user_param = user_param;
+        sortParam.material_cb_func = material_cb_func;
+        sortParam.material_cb_param = material_cb_param;
+
+        amDrawAddSort(sortParam.cmd_header, (int)((_object.Radius * scaleZ - view_z) * 100f));
+    }
+
     public static void objDraw3DNNModel_DT(AMS_COMMAND_HEADER command, uint drawflag)
     {
         NNS_MATRIX nnsMatrix = amDrawAlloc_NNS_MATRIX();
@@ -1449,7 +1551,7 @@
             drawParam3DnnModel.user_func(drawParam3DnnModel.user_param);
         AMS_PARAM_DRAW_OBJECT amsParamDrawObject = drawParam3DnnModel.param;
         int nNode = amsParamDrawObject._object.nNode;
-        OBS_DRAW_PARAM_3DNN_SORT_MODEL_Pool.Alloc();
+        OBS_DRAW_PARAM_3DNN_SORT_MODEL sortParam = OBS_DRAW_PARAM_3DNN_SORT_MODEL_Pool.Alloc();
         if (_objDraw3DNNModel_DT.plt_mtx == null || _objDraw3DNNModel_DT.plt_mtx.Length < nNode)
         {
             _objDraw3DNNModel_DT.plt_mtx = new NNS_MATRIX[nNode];
@@ -1478,16 +1580,31 @@
         }
         if (drawParam3DnnModel.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(drawParam3DnnModel.material_cb_func, drawParam3DnnModel.material_cb_param);
+        // opaque and punch through only; the transparent subobjects go in the sort list below
+        uint immediate = (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512)
+            | NND_SUBOBJTYPE_OPAQUE | NND_SUBOBJTYPE_PUNCHTHROUGH;
         if (command.command_id == OBD_DRAW_USER_COMMAND_3DNN_MODEL)
-            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | amDrawGetState().drawflag, alternativeLighting);
+            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, immediate, amsParamDrawObject.flag | drawflag | amDrawGetState().drawflag, alternativeLighting, amsParamDrawObject.flag_ex);
         else
-            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | amDrawGetState().drawflag);
+            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, immediate, amsParamDrawObject.flag | drawflag | amDrawGetState().drawflag, amsParamDrawObject.flag_ex);
         if (drawParam3DnnModel.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(null, null);
         if (drawParam3DnnModel.state != null)
             amDrawPopState();
         if (((int)g_obj.def_user_light_flag ^ (int)drawParam3DnnModel.use_light_flag) != 0)
             objDrawSetDefaultLight();
+
+        objDraw3DNNRegistSortDraw(sortParam,
+            amsParamDrawObject._object, amsParamDrawObject.texlist, amsParamDrawObject.sub_obj_type,
+            amsParamDrawObject.flag, amsParamDrawObject.flag_ex, amsParamDrawObject.scaleZ,
+            pltMtx, nNode, nstat, nnsMatrix.M23, drawflag,
+            command.command_id == OBD_DRAW_USER_COMMAND_3DNN_MODEL
+                ? OBD_DRAW_USER_COMMAND_SORT_3DNN_MODEL
+                : OBD_DRAW_USER_COMMAND_SORT_3DNN_MATMTN,
+            drawParam3DnnModel.state, drawParam3DnnModel.user_func, drawParam3DnnModel.user_param,
+            drawParam3DnnModel.material_cb_func, drawParam3DnnModel.material_cb_param,
+            drawParam3DnnModel.use_light_flag);
+
         amMatrixPop();
     }
 
@@ -1510,7 +1627,7 @@
             nnCalcMaterialMotion(mmobj, paramDrawMotionTrs._object, paramDrawMotionTrs.mmotion, paramDrawMotionTrs.mframe);
             paramDrawMotionTrs._object = mmobj;
         }
-        OBS_DRAW_PARAM_3DNN_SORT_MODEL_Pool.Alloc();
+        OBS_DRAW_PARAM_3DNN_SORT_MODEL sortParam = OBS_DRAW_PARAM_3DNN_SORT_MODEL_Pool.Alloc();
         if (_objDraw3DNNMotion_DT.plt_mtx == null || _objDraw3DNNMotion_DT.plt_mtx.Length < nMtxPal)
         {
             _objDraw3DNNMotion_DT.plt_mtx = new NNS_MATRIX[nMtxPal];
@@ -1543,16 +1660,31 @@
         }
         if (drawParam3DnnMotion.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(drawParam3DnnMotion.material_cb_func, drawParam3DnnMotion.material_cb_param);
+        uint immediate = (uint)((int)paramDrawMotionTrs.sub_obj_type | 256 | 512)
+            | NND_SUBOBJTYPE_OPAQUE | NND_SUBOBJTYPE_PUNCHTHROUGH;
         if (command.command_id == OBD_DRAW_USER_COMMAND_3DNN_MOTION)
-            nnDrawObject(paramDrawMotionTrs._object, pltMtx, nstat, (uint)((int)paramDrawMotionTrs.sub_obj_type | 256 | 512 | 7), paramDrawMotionTrs.flag | drawflag | amDrawGetState().drawflag, 0U);
+            nnDrawObject(paramDrawMotionTrs._object, pltMtx, nstat, immediate, paramDrawMotionTrs.flag | drawflag | amDrawGetState().drawflag, 0U, paramDrawMotionTrs.flag_ex);
         else
-            nnDrawMaterialMotionObject(paramDrawMotionTrs._object, pltMtx, nstat, (uint)((int)paramDrawMotionTrs.sub_obj_type | 256 | 512 | 7), paramDrawMotionTrs.flag | drawflag | amDrawGetState().drawflag);
+            nnDrawMaterialMotionObject(paramDrawMotionTrs._object, pltMtx, nstat, immediate, paramDrawMotionTrs.flag | drawflag | amDrawGetState().drawflag, paramDrawMotionTrs.flag_ex);
         if (drawParam3DnnMotion.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(null, null);
         if (drawParam3DnnMotion.state != null)
             amDrawPopState();
         if (((int)g_obj.def_user_light_flag ^ (int)drawParam3DnnMotion.use_light_flag) != 0)
             objDrawSetDefaultLight();
+
+        // objDraw.cpp:6335 drops scaleZ from the key here, and the motion param has none
+        objDraw3DNNRegistSortDraw(sortParam,
+            paramDrawMotionTrs._object, paramDrawMotionTrs.texlist, paramDrawMotionTrs.sub_obj_type,
+            paramDrawMotionTrs.flag, paramDrawMotionTrs.flag_ex, 1f,
+            pltMtx, nMtxPal, nstat, snnsMatrix.M23, drawflag,
+            command.command_id == OBD_DRAW_USER_COMMAND_3DNN_MOTION
+                ? OBD_DRAW_USER_COMMAND_SORT_3DNN_MODEL
+                : OBD_DRAW_USER_COMMAND_SORT_3DNN_MATMTN,
+            drawParam3DnnMotion.state, drawParam3DnnMotion.user_func, drawParam3DnnMotion.user_param,
+            drawParam3DnnMotion.material_cb_func, drawParam3DnnMotion.material_cb_param,
+            drawParam3DnnMotion.use_light_flag);
+
         amMatrixPop();
     }
 
@@ -1633,6 +1765,7 @@
             param3DnnDrawMotion.user_func(param3DnnDrawMotion.user_param);
         AMS_PARAM_DRAW_MOTION amsParamDrawMotion = param3DnnDrawMotion.param;
         int nNode = amsParamDrawMotion._object.nNode;
+        OBS_DRAW_PARAM_3DNN_SORT_MODEL sortParam = OBS_DRAW_PARAM_3DNN_SORT_MODEL_Pool.Alloc();
         if (_objDraw3DNNDrawMotion_DT.plt_mtx == null || _objDraw3DNNDrawMotion_DT.plt_mtx.Length < nNode)
         {
             _objDraw3DNNDrawMotion_DT.plt_mtx = new NNS_MATRIX[nNode];
@@ -1664,16 +1797,30 @@
         if (param3DnnDrawMotion.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(param3DnnDrawMotion.material_cb_func, param3DnnDrawMotion.material_cb_param);
         uint alternativeLighting = param3DnnDrawMotion.use_light_flag & 98304U;
+        uint immediate = (uint)((int)amsParamDrawMotion.sub_obj_type | 256 | 512)
+            | NND_SUBOBJTYPE_OPAQUE | NND_SUBOBJTYPE_PUNCHTHROUGH;
         if (command.command_id == OBD_DRAW_USER_COMMAND_3DNN_DRAW_MOTION)
-            nnDrawObject(amsParamDrawMotion._object, pltMtx, nstat, (uint)((int)amsParamDrawMotion.sub_obj_type | 256 | 512 | 7), amsParamDrawMotion.flag | drawflag | amDrawGetState().drawflag, alternativeLighting);
+            nnDrawObject(amsParamDrawMotion._object, pltMtx, nstat, immediate, amsParamDrawMotion.flag | drawflag | amDrawGetState().drawflag, alternativeLighting, amsParamDrawMotion.flag_ex);
         else
-            nnDrawMaterialMotionObject(amsParamDrawMotion._object, pltMtx, nstat, (uint)((int)amsParamDrawMotion.sub_obj_type | 256 | 512 | 7), amsParamDrawMotion.flag | drawflag | amDrawGetState().drawflag);
+            nnDrawMaterialMotionObject(amsParamDrawMotion._object, pltMtx, nstat, immediate, amsParamDrawMotion.flag | drawflag | amDrawGetState().drawflag, amsParamDrawMotion.flag_ex);
         if (param3DnnDrawMotion.material_cb_func != null)
             objDraw3DNNSetMaterialCallback(null, null);
         if (param3DnnDrawMotion.state != null)
             amDrawPopState();
         if (((int)g_obj.def_user_light_flag ^ (int)param3DnnDrawMotion.use_light_flag) != 0)
             objDrawSetDefaultLight();
+
+        objDraw3DNNRegistSortDraw(sortParam,
+            amsParamDrawMotion._object, amsParamDrawMotion.texlist, amsParamDrawMotion.sub_obj_type,
+            amsParamDrawMotion.flag, amsParamDrawMotion.flag_ex, 1f,
+            pltMtx, nNode, nstat, nnsMatrix.M23, drawflag,
+            command.command_id == OBD_DRAW_USER_COMMAND_3DNN_DRAW_MOTION
+                ? OBD_DRAW_USER_COMMAND_SORT_3DNN_MODEL
+                : OBD_DRAW_USER_COMMAND_SORT_3DNN_MATMTN,
+            param3DnnDrawMotion.state, param3DnnDrawMotion.user_func, param3DnnDrawMotion.user_param,
+            param3DnnDrawMotion.material_cb_func, param3DnnDrawMotion.material_cb_param,
+            param3DnnDrawMotion.use_light_flag);
+
         amMatrixPop();
     }
 
@@ -1703,9 +1850,9 @@
         }
         objDraw3DNNSetMaterialCallback(param3DnnSortModel.material_cb_func, param3DnnSortModel.material_cb_param);
         if (command.command_id == OBD_DRAW_USER_COMMAND_SORT_3DNN_MODEL)
-            nnDrawObject(drawObject._object, paramSortDrawObject.mtx, paramSortDrawObject.nstat_list, (uint)((int)drawObject.sub_obj_type | 256 | 512 | 2), drawObject.flag | paramSortDrawObject.drawflag | amDrawGetState().drawflag, 0U);
+            nnDrawObject(drawObject._object, paramSortDrawObject.mtx, paramSortDrawObject.nstat_list, (uint)((int)drawObject.sub_obj_type | 256 | 512 | 2), drawObject.flag | paramSortDrawObject.drawflag | amDrawGetState().drawflag, 0U, drawObject.flag_ex);
         else
-            nnDrawMaterialMotionObject(drawObject._object, paramSortDrawObject.mtx, paramSortDrawObject.nstat_list, (uint)((int)drawObject.sub_obj_type | 256 | 512 | 2), drawObject.flag | paramSortDrawObject.drawflag | amDrawGetState().drawflag);
+            nnDrawMaterialMotionObject(drawObject._object, paramSortDrawObject.mtx, paramSortDrawObject.nstat_list, (uint)((int)drawObject.sub_obj_type | 256 | 512 | 2), drawObject.flag | paramSortDrawObject.drawflag | amDrawGetState().drawflag, drawObject.flag_ex);
         objDraw3DNNSetMaterialCallback(null, null);
         if (paramSortDrawObject.draw_state != null)
             amDrawPopState();

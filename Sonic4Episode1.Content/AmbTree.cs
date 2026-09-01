@@ -145,7 +145,7 @@ internal static class AmbTree
 
         var descriptor = new ArchiveDescriptor
         {
-            BigEndian = IsBigEndian(header),
+            BigEndian = header.big_endian,
             Origin = origin,
         };
 
@@ -236,7 +236,7 @@ internal static class AmbTree
             });
         }
 
-        return AppMain.writeAmbArchive(entries, IsBigEndian(header));
+        return AppMain.writeAmbArchive(entries, header.big_endian);
     }
 
     public static byte[] Normalise(byte[] archive)
@@ -279,15 +279,6 @@ internal static class AmbTree
         }
 
         return AppMain.writeAmbArchive(entries, descriptor.BigEndian);
-    }
-
-    // the reader decides byte order from the header size at 0x04 but doesn't keep the answer
-    public static bool IsBigEndian(AppMain.AMS_AMB_HEADER header)
-    {
-        if (!header.is_real_amb || header.data.Length < 8)
-            return false;
-
-        return BitConverter.ToInt32(header.data, 4) != AppMain.AMB_HEADER_SIZE;
     }
 
     // unpack and pack derive the on-disk name the same way from the same ordered list, so the

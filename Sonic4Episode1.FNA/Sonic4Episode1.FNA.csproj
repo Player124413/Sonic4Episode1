@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
+		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net10.0</TargetFrameworks>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;HAS_DISCORD;SPLIT_LOOP;</DefineConstants>
+		<!-- BGM_STREAM or BGM_MEDIAPLAYER; override to A/B the two backends -->
+		<BgmBackend Condition="'$(BgmBackend)' == ''">BGM_STREAM</BgmBackend>
+		<DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;HAS_DISCORD;SPLIT_LOOP;$(BgmBackend);</DefineConstants>
     <IsAotCompatible>true</IsAotCompatible>
     <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
     <ApplicationIcon>s4.ico</ApplicationIcon>
@@ -13,7 +15,7 @@
 
   <PropertyGroup>
     <!-- desktop gets the console model and texture sets alongside the mobile ones -->
-    <ContentProfile>desktop-hd</ContentProfile>
+    <ContentProfile>desktop-hd-dxt</ContentProfile>
   </PropertyGroup>
 
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
@@ -73,6 +75,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+	  <PackageReference Include="NVorbis" Version="0.10.5" />
 	</ItemGroup>
 	
 </Project>

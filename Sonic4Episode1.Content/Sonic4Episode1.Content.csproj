@@ -8,7 +8,7 @@
     <AssemblyName>s4content</AssemblyName>
     <RootNamespace>Sonic4Episode1.Content</RootNamespace>
     <!-- must match Sonic4Episode1.Viewer and .Tests so the shared code compiles the same way -->
-    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;BGM_STREAM;</DefineConstants>
     <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;CS0168;CS0219;CS0162;CS0642;CA2022;</NoWarn>
   </PropertyGroup>
 
@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NVorbis" Version="0.10.5" />
     <PackageReference Include="Tomlyn" Version="0.19.0" />
     <!-- decode, BC encode, mip generation and format conversion in one place. Windows-only native
          interop, which is fine for a build-time tool. -->

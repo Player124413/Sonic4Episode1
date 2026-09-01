@@ -100,6 +100,12 @@ internal partial class AppMain
         return amFsReadBackground(file_name, null);
     }
 
+    public static AMS_FS amFsReadBackgroundAs(string file_name, int BytesPerFrame, string variant)
+    {
+        FsReadSpeedBytesPerFrame = BytesPerFrame;
+        return amFsReadBackground(file_name, null, variant);
+    }
+
     public static AMS_FS amFsReadBackground(
         string file_name,
         FsBackgroundReadComplete callback)
@@ -194,36 +200,46 @@ internal partial class AppMain
     public const int AMB_FILE_ID = 0x424D4123;
     public const int AMB_HEADER_SIZE = 0x20;
 
+    // amBindConv stamps file_id[0] with '!' once it has converted an archive in place, and asserts
+    // only on file_id[1..3] == "AMB". so must we
+    private const int AMB_FILE_ID_MASK = unchecked((int)0xFFFFFF00);
+
+    // flag is a byte array precisely so it can be read before the byte order is known, which is why
+    // amBindConv's swap list covers every scalar except it
+    private const int AMB_FLAG_OFFSET = 0x0C;
+
+    // the caller owns `stream`, so nothing here is disposed: a BinaryReader holds no resource of
+    // its own, and disposing one would close a stream that outlives this call
     public static void readAmbHeader(Stream stream, ref AMS_AMB_HEADER amb)
     {
-        using (BinaryReader binaryReader = new BinaryReader(stream))
+        var reader = new BinaryReader(stream);
+
+        var fileId = reader.ReadInt32();
+        if ((fileId & AMB_FILE_ID_MASK) != (AMB_FILE_ID & AMB_FILE_ID_MASK))
         {
-            var fileId = binaryReader.ReadInt32();
-            if (fileId != AMB_FILE_ID)
-            {
-                readLegacyAmbHeader(binaryReader, ref amb, fileId);
-                return;
-            }
-
-            var headerSize = binaryReader.ReadInt32();
-            if (headerSize == AMB_HEADER_SIZE)
-            {
-                readRealAmbHeader(binaryReader, ref amb);
-                return;
-            }
-
-            if (BinaryPrimitives.ReverseEndianness(headerSize) == AMB_HEADER_SIZE)
-            {
-                amb.big_endian = true;
-                readRealAmbHeader(new EndianBinaryReader(stream, bigEndian: true), ref amb);
-                return;
-            }
-
-            throw new InvalidDataException($"#AMB header size 0x{headerSize:X8} is not 0x20 in either byte order");
+            readLegacyAmbHeader(reader, ref amb, fileId);
+            return;
         }
+
+        var headerSize = reader.ReadInt32();
+        var sizeSaysBig = headerSize != AMB_HEADER_SIZE;
+        if (sizeSaysBig && BinaryPrimitives.ReverseEndianness(headerSize) != AMB_HEADER_SIZE)
+            throw new InvalidDataException($"#AMB header size 0x{headerSize:X8} is not 0x20 in either byte order");
+
+        stream.Position = AMB_FLAG_OFFSET;
+        var flag = reader.ReadBytes(4);
+        var bigEndian = (flag[0] & AMD_AMB_FLAG0_ENDIAN_BIG) != 0;
+
+        // 0x20 and 0x20000000 cannot both be the header size, so a disagreement means we have
+        // misparsed the header rather than merely mislabelled it
+        if (bigEndian != sizeSaysBig)
+            throw new InvalidDataException($"#AMB flag[0] 0x{flag[0]:X2} disagrees with header size 0x{headerSize:X8}");
+
+        amb.big_endian = bigEndian;
+        readRealAmbHeader(bigEndian ? new EndianBinaryReader(stream, bigEndian: true) : reader, ref amb, flag);
     }
 
-    private static void readRealAmbHeader(BinaryReader reader, ref AMS_AMB_HEADER amb)
+    private static void readRealAmbHeader(BinaryReader reader, ref AMS_AMB_HEADER amb, byte[] flag)
     {
         reader.BaseStream.Position = 0x10;
         amb.file_num = reader.ReadInt32();
@@ -239,7 +255,11 @@ internal partial class AppMain
         amb.offsets = new int[amb.file_num];
         amb.lengths = new int[amb.file_num];
         amb.buf = new object[amb.file_num];
-        amb.flag = new sbyte[4] {127, 127, 127, 127};
+        amb.flag = new sbyte[flag.Length];
+        for (int i = 0; i < flag.Length; i++)
+        {
+            amb.flag[i] = (sbyte)flag[i];
+        }
         for (int i = 0; i < amb.file_num; i++)
         {
             reader.BaseStream.Seek(entryTableOffset + (i * 0x10), SeekOrigin.Begin);
@@ -317,6 +337,29 @@ internal partial class AppMain
         }
 
         return null;
+    }
+
+    // member names carry Windows separators (".\RING.ENO"), and Path only splits on '\' when it
+    // happens to be running on Windows
+    private static readonly char[] mpp_amb_name_separators = new char[] { '/', '\\' };
+
+    internal static string mppAmbMemberName(string member)
+    {
+        if (member == null)
+            return null;
+
+        int cut = member.LastIndexOfAny(mpp_amb_name_separators);
+        return cut < 0 ? member : member.Substring(cut + 1);
+    }
+
+    internal static string mppAmbMemberBaseName(string member)
+    {
+        string name = mppAmbMemberName(member);
+        if (name == null)
+            return null;
+
+        int dot = name.LastIndexOf('.');
+        return dot < 0 ? name : name.Substring(0, dot);
     }
 
     private static bool mppIsNnMotionMember(string extension)

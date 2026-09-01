@@ -17,7 +17,10 @@
         obj_work.move_flag |= 8448U;
         obj_work.disp_flag |= 4194304U;
         work.broketype = (ushort)(eve_rec.flag & 1U);
-        if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
+        // gmGmkBreakWall.cpp:1416 wraps the whole if and its body in _IPHONE, so console takes no
+        // light override here
+        if (!gm_gmk_as_console
+            && (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3))
         {
             gmsEnemy3DWork.obj_3d.use_light_flag &= 4294967294U;
             gmsEnemy3DWork.obj_3d.use_light_flag |= 2U;

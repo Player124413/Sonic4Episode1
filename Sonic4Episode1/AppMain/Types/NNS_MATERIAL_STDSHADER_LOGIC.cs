@@ -33,9 +33,14 @@ internal partial class AppMain
             return this;
         }
 
+        // Xenon stores its own render state enums here, so they are translated on the way in and
+        // every reader downstream sees D3D9 numbering. fFlag, BlendColor, LogicOp and AlphaRef are
+        // the same on both platforms, which is what anchors the offsets.
         public static NNS_MATERIAL_STDSHADER_LOGIC Read(BinaryReader reader)
         {
-            return new NNS_MATERIAL_STDSHADER_LOGIC
+            bool xenon = reader is EndianBinaryReader endian && endian.IsBigEndian;
+
+            var logic = new NNS_MATERIAL_STDSHADER_LOGIC
             {
                 fFlag = reader.ReadUInt32(),
                 SrcFactorRGB = reader.ReadUInt16(),
@@ -49,6 +54,19 @@ internal partial class AppMain
                 DepthFunc = reader.ReadUInt16(),
                 AlphaRef = reader.ReadUInt32(),
             };
+
+            if (!xenon)
+                return logic;
+
+            logic.SrcFactorRGB = mppXenonBlend(logic.SrcFactorRGB);
+            logic.DstFactorRGB = mppXenonBlend(logic.DstFactorRGB);
+            logic.SrcFactorA = mppXenonBlend(logic.SrcFactorA);
+            logic.DstFactorA = mppXenonBlend(logic.DstFactorA);
+            logic.BlendOp = mppXenonBlendOp(logic.BlendOp);
+            logic.AlphaFunc = mppXenonCmpFunc(logic.AlphaFunc);
+            logic.DepthFunc = mppXenonCmpFunc(logic.DepthFunc);
+
+            return logic;
         }
     }
 }

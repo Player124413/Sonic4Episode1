@@ -81,6 +81,9 @@ internal partial class AppMain
         gm_gamedat_load_work = work;
         work.Clear();
         gm_gamedat_load_work.stage_id = stage_id;
+        gmMapSelectVariant(stage_id);
+        gmDecoSelectVariant(stage_id);
+        gmGmkSelectVariant(stage_id);
         for (int index = 0; index < 1; ++index)
             work.char_id[index] = (ushort)char_id_list[index];
         work.proc_type = proc_type;
@@ -366,7 +369,10 @@ internal partial class AppMain
             if (loadData.proc_pre != null)
                 loadData.proc_pre(context);
             int stageId = context.stage_id;
-            context.fs_req = 7 == stageId && "G_ZONE2/BOSS/BOSS02.AMB" == context.file_path || 11 == stageId && "G_ZONE3/BOSS/BOSS03.AMB" == context.file_path || (15 == stageId && "G_ZONEF/BOSS/BOSS04.AMB" == context.file_path || 16 == stageId && "G_ZONEF/BOSS/BOSS05.AMB" == context.file_path) ? amFsReadBackground(context.file_path, 8192) : amFsReadBackground(context.file_path, 65536);
+            int bytes_per_frame = 7 == stageId && "G_ZONE2/BOSS/BOSS02.AMB" == context.file_path || 11 == stageId && "G_ZONE3/BOSS/BOSS03.AMB" == context.file_path || (15 == stageId && "G_ZONEF/BOSS/BOSS04.AMB" == context.file_path || 16 == stageId && "G_ZONEF/BOSS/BOSS05.AMB" == context.file_path) ? 8192 : 65536;
+            context.fs_req = gmMapOwnsLoad(loadData)
+                ? amFsReadBackgroundAs(context.file_path, bytes_per_frame, gm_map_variant.fs_variant)
+                : amFsReadBackground(context.file_path, bytes_per_frame);
             context.state = GME_GAMEDAT_LOAD_STATE.GMD_GAMEDAT_LOAD_STATE_LOADING;
         }
         else if (amFsIsComplete(context.fs_req))
@@ -442,6 +448,12 @@ internal partial class AppMain
                 }
                 goto case 2;
             case 1:
+                // console ships one NN model per block id, so the archive stays a header for
+                // GmMapBuildDataLoop to register. reading it as #TVX walks vertex floats off model
+                // data and lands wherever
+                if (gm_map_variant.blocks_as_model)
+                    goto case 2;
+
                 AMS_AMB_HEADER gGmGamedat = (AMS_AMB_HEADER)g_gm_gamedat_map[context.data_no];
                 TVX_FILE[] tvxFileArray = new TVX_FILE[gGmGamedat.file_num];
                 for (int index = 0; index < gGmGamedat.file_num; ++index)

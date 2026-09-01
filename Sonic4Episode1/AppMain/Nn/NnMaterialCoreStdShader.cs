@@ -28,7 +28,6 @@ internal partial class AppMain
     private static BlendState nngShaderBlendState;
     private static DepthStencilState nngShaderDepthState;
     private static RasterizerState nngShaderRasterState;
-
     public static void nnSetRenderState(int state, uint value)
     {
         if (state < 0 || state >= nngShaderRenderState.Length || nngShaderRenderState[state] == value)
@@ -40,7 +39,12 @@ internal partial class AppMain
 
     public static void mppApplyStdShaderRenderState()
     {
-        GraphicsDevice device = OpenGL.mppglGetDevice();
+        mppApplyStdShaderRenderState(OpenGL.mppglGetDevice());
+    }
+
+    // the viewer runs its own device rather than the one OpenGL holds, and applies the same state
+    public static void mppApplyStdShaderRenderState(GraphicsDevice device)
+    {
         if (nngShaderRenderStateDirty)
         {
             nngShaderBlendState = mppBuildBlendState();
@@ -226,10 +230,6 @@ internal partial class AppMain
 
     public static void nnPutMaterialLogicStdShader(NNS_DRAWCALLBACK_VAL val, NNS_MATERIAL_STDSHADER_LOGIC pLogic)
     {
-        // everything below is D3D9 numbering; Xenon's render state enums are different values
-        NNM_ASSERT(!(val.pVtxListPtr?.pVtxList is NNS_VTXLIST_DX_DESC { mppBigEndian: true }),
-            "Xenon render state enums are not translated\n");
-
         uint logicflag = pLogic.fFlag;
         if ((logicflag & 1) != 0)
         {
@@ -268,7 +268,6 @@ internal partial class AppMain
 
         NNM_ASSERT((logicflag & 4) == 0, "Direct3D9 not support LogicOp \n");
 
-        // TODO(wam): alpha test needs a clip() in the wrapper, XNA4 dropped the fixed-function one.
         if ((logicflag & 8) == 0)
         {
             nnSetRenderState(D3DRS_ALPHATESTENABLE, 0);
@@ -316,6 +315,32 @@ internal partial class AppMain
         if (pMatDesc.pLogic != nnmaterialcore.nngpPreMatLogic && pMatDesc.pLogic != null)
             nnPutMaterialLogicStdShader(val, pMatDesc.pLogic);
 
+        mppLogMaterialState(pMatDesc);
         return 1;
+    }
+
+    // TODO(wam): temporary. Both the game and the editor come through here, so their output is
+    // directly comparable; the editor renders the haloed geometry correctly and the game does not.
+    private static readonly System.Collections.Generic.HashSet<string> mppMaterialStateSeen = new();
+
+    private static void mppLogMaterialState(NNS_MATERIAL_STDSHADER_DESC desc)
+    {
+        if (mppMaterialStateSeen.Count >= 40)
+            return;
+
+        string line =
+            $"fFlag {desc.fFlag:X4} logic {(desc.pLogic == null ? "ABSENT" : "present")}"
+            + $" texType {desc.fTexType:X6}"
+            + $" | blend {nngShaderRenderState[D3DRS_ALPHABLENDENABLE]}"
+            + $" {nngShaderRenderState[D3DRS_SRCBLEND]}/{nngShaderRenderState[D3DRS_DESTBLEND]}"
+            + $" op {nngShaderRenderState[D3DRS_BLENDOP]}"
+            + $" write {nngShaderRenderState[D3DRS_COLORWRITEENABLE]}"
+            + $" | atest {nngShaderRenderState[D3DRS_ALPHATESTENABLE]}"
+            + $" func {nngShaderRenderState[D3DRS_ALPHAFUNC]} ref {nngShaderRenderState[D3DRS_ALPHAREF] & 0xFF}"
+            + $" | z {nngShaderRenderState[D3DRS_ZENABLE]}/{nngShaderRenderState[D3DRS_ZFUNC]}"
+            + $" zw {nngShaderRenderState[D3DRS_ZWRITEENABLE]} cull {nngShaderRenderState[D3DRS_CULLMODE]}";
+
+        if (mppMaterialStateSeen.Add(line))
+            System.Diagnostics.Debug.WriteLine("[matstate] " + line);
     }
 }

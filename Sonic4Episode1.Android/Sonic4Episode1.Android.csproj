@@ -10,7 +10,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsAotCompatible>true</IsAotCompatible>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);TRACE;MONOGAME;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;MONOGAME;THIRD_PARTY_DDS;ASYNC_IO;AOT;SPLIT_LOOP;BGM_MEDIAPLAYER;</DefineConstants>
     <NoWarn>1701;1702;CA1416;</NoWarn>
     <UseMonoRuntime>false</UseMonoRuntime>
     <PublishAot>true</PublishAot>
@@ -20,16 +20,13 @@
   </PropertyGroup>
   <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
   <PropertyGroup>
-    <ContentProfile>mobile-hd</ContentProfile>
+    <ContentProfile>mobile-hd-astc</ContentProfile>
     <ContentItemType>AndroidAsset</ContentItemType>
   </PropertyGroup>
   <Import Project="..\Content.targets" />
+  <Import Project="..\Shaders\Shaders.targets" />
 
   <ItemGroup>
-    <AndroidAsset Condition="'$(SkipContentCopy)' != 'true'"
-                  Include="$(ContentDir)**\*.*" AssetPack="content" DeliveryType="FastFollow">
-      <Link>Assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </AndroidAsset>
     <PackageReference Include="DdsKtxXna.MonoGame" Version="0.4.4" />
     <PackageReference Include="MonoGame.Framework.Android" Version="3.8.*" />
     <PackageReference Include="Xamarin.Google.Android.Play.Asset.Delivery" Version="2.3.0.5" />

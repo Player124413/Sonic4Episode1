@@ -1,14 +1,14 @@
 ﻿internal partial class AppMain
 {
-    public static void GmDecoGlareSetData(AMS_AMB_HEADER amb_header)
+    // takes the decoration texture archive, GMD_DECO_DATA_INDEX_AMB_TEX, already parsed. Its first
+    // member is a TXB naming one texture, GLARE.DDS on console and the whole atlas on mobile, which
+    // is why glare only exists on the console arm.
+    public static void GmDecoGlareSetData(AMS_AMB_HEADER tex_amb)
     {
         pIF.Clear();
-        string sPath;
-        pIF.amb_header = readAMBFile(amBindGet(amb_header, 1, out sPath));
-        pIF.amb_header.dir = sPath;
+        pIF.amb_header = tex_amb;
         TXB_HEADER txb = readTXBfile(amBindGet(pIF.amb_header, 0));
         pIF.tex_buf = amTxbGetTexFileList(txb);
-        mppAssertNotImpl();
         nnSetUpTexlist(out pIF.texlist, pIF.tex_buf.nTex, ref pIF.texlistbuf);
         pIF.regId = amTextureLoad(pIF.texlist, pIF.tex_buf, null, pIF.amb_header);
         pIF.drawFlag = 1;

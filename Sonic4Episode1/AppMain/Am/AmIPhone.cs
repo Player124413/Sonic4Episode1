@@ -67,6 +67,29 @@ internal partial class AppMain
 
 
         GlobalPool<NNS_MATRIX>.Release(mtx);
+
+        mppDiagSurface("initNN");
+    }
+
+    // TODO(wam): remove, iOS blank screen diagnostics
+    public static void mppDiagSurface(string where)
+    {
+        var pp = m_game.GraphicsDevice.PresentationParameters;
+        var vp = m_game.GraphicsDevice.Viewport;
+        var bounds = m_game.Window.ClientBounds;
+        var caps = Microsoft.Xna.Framework.Input.Touch.TouchPanel.GetCapabilities();
+
+        Console.WriteLine($"[s4diag] {where} bb={pp.BackBufferWidth}x{pp.BackBufferHeight}"
+            + $" vp={vp.X},{vp.Y},{vp.Width}x{vp.Height} client={bounds.Width}x{bounds.Height}"
+            + $" 2d={_am_draw_video.width_2d}x{_am_draw_video.height_2d}"
+            + $" scale={_am_draw_video.scale_x_2d},{_am_draw_video.scale_y_2d}"
+            + $" base={_am_draw_video.base_x_2d},{_am_draw_video.base_y_2d}"
+            + $" draw={_am_draw_video.draw_width}x{_am_draw_video.draw_height}"
+            + $" touch={caps.IsConnected}/{caps.MaximumTouchCount}"
+            // FNA writes this back to 0 when SDL_WINDOW_HIGH_PIXEL_DENSITY did not survive window
+            // creation, so it says whether high DPI was refused rather than never asked for
+            + $" highdpi={Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI")}"
+            + $" mode={GraphicsAdapter.DefaultAdapter.CurrentDisplayMode}");
     }
 
     public static void amIPhoneExitNN()
@@ -118,6 +141,8 @@ internal partial class AppMain
     }
 
     static bool wasPressed = false;
+    // TODO(wam): remove, iOS blank screen diagnostics
+    private static int _mppDiagLastTouchCount = -1;
     public static void onTouchEvents()
     {
         // PATCH
@@ -125,6 +150,23 @@ internal partial class AppMain
         if (TouchPanel.GetCapabilities().IsConnected)
         {
             state.AddRange(TouchPanel.GetState());
+        }
+
+        // TODO(wam): remove, iOS blank screen diagnostics
+        if (state.Count != _mppDiagLastTouchCount)
+        {
+            _mppDiagLastTouchCount = state.Count;
+            var b = m_game.Window.ClientBounds;
+            foreach (var t in state)
+            {
+                float rx = t.Position.X, ry = t.Position.Y;
+                screen2real(ref rx, ref ry);
+                Console.WriteLine($"[s4diag] touch id={t.Id} {t.State}"
+                    + $" raw={t.Position.X},{t.Position.Y} real={rx},{ry} client={b.Width}x{b.Height}");
+            }
+
+            if (state.Count == 0)
+                Console.WriteLine("[s4diag] touch none");
         }
 
         var mouseState = Mouse.GetState();
@@ -190,16 +232,24 @@ internal partial class AppMain
     private static void screen2real(ref float X, ref float Y)
     {
 #if WINDOWSPHONE7_5
-        var bounds = new Rectangle(0,0,800,480);
+        var width = 800;
+        var height = 480;
 #else
-        var bounds = m_game.Window.ClientBounds;
+        // TouchPanel scales a finger by DisplayWidth/Height, which FNA sets from the back buffer,
+        // so that is the space these coordinates are already in. ClientBounds is points rather than
+        // pixels once high DPI is on, and dividing by it loses the display scale
+        var width = m_game.GraphicsDevice.PresentationParameters.BackBufferWidth;
+        var height = m_game.GraphicsDevice.PresentationParameters.BackBufferHeight;
 #endif
 
+        if (width <= 0 || height <= 0)
+            return;
+
         // nominal 480, 288
-        X /= bounds.Width;
+        X /= width;
         X *= 480;
 
-        Y /= bounds.Height;
+        Y /= height;
         Y *= 288;
         Y += 16;
     }

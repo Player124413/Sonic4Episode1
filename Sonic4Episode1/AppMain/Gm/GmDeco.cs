@@ -22,8 +22,8 @@ internal partial class AppMain
     public static void GmDecoExit()
     {
         gmDecoExitMgr();
-        gmDeco_motionHeader = null;
         gmDeco_matMotionHeader = null;
+        gmDeco_motionHeader = null;
     }
 
     public static void gmDecoDrawServerMain(MTS_TASK_TCB tcb)
@@ -299,22 +299,30 @@ internal partial class AppMain
         return gmDecoInitModelMotioinMaterial(dec_rec, x, y, type).obj_work;
     }
 
+    // the glare quads, gmDeco.cpp:4864. Mobile has no glare subsystem at all.
     private static OBS_OBJECT_WORK GmDecoInitPrimitive3D(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
       int y,
       byte type)
     {
-        return null;
+        return gm_deco_as_model
+            ? gmDecoInitPrimitive3D(dec_rec, x, y, type)?.obj_work
+            : null;
     }
 
+    // the sunflowers and the log, which react to the player running past. The mobile arm is
+    // GMD_DECO_USE_DRAW_TVX_NOMOTION at gmDeco.cpp:4744: degrade to a static model, because the
+    // mobile MTN archive is empty. Not a slip, do not "fix" it.
     private static OBS_OBJECT_WORK GmDecoInitModelMotionTouch(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
       int y,
       byte type)
     {
-        return gmDecoInitModel(dec_rec, x, y, type)?.obj_work;
+        return gm_deco_as_model
+            ? gmDecoInitModelMotionTouch(dec_rec, x, y, type)?.obj_work
+            : gmDecoInitModel(dec_rec, x, y, type)?.obj_work;
     }
 
     private static OBS_OBJECT_WORK GmDecoInitFall(
@@ -324,10 +332,17 @@ internal partial class AppMain
       byte type)
     {
         GMS_DECO_WORK gmsDecoWork = gmDecoInitFall(dec_rec, x, y, type);
-        OBS_OBJECT_WORK objWork = gmsDecoWork.obj_work;
-        OBS_ACTION3D_NN_WORK obj3d = gmsDecoWork.obj_3d;
-        float frame = amMotionMaterialGetEndFrame(obj3d.motion, obj3d.mat_act_id) - amMotionMaterialGetStartFrame(obj3d.motion, obj3d.mat_act_id);
-        gmDecoAddFallEvent(dec_rec, objWork.pos.x + objWork.ofst.x, obj3d.texlist, frame);
+
+        // the registration is draw server bookkeeping, gmDeco.cpp:4907, and nothing reads it on
+        // console because gmDecoDrawServerMain does not exist there
+        if (!gm_deco_as_model)
+        {
+            OBS_OBJECT_WORK objWork = gmsDecoWork.obj_work;
+            OBS_ACTION3D_NN_WORK obj3d = gmsDecoWork.obj_3d;
+            float frame = amMotionMaterialGetEndFrame(obj3d.motion, obj3d.mat_act_id) - amMotionMaterialGetStartFrame(obj3d.motion, obj3d.mat_act_id);
+            gmDecoAddFallEvent(dec_rec, objWork.pos.x + objWork.ofst.x, obj3d.texlist, frame);
+        }
+
         return gmsDecoWork.obj_work;
     }
 
@@ -401,21 +416,33 @@ internal partial class AppMain
     // unit 1, and NN hands both to the shader. Our material only has the artwork, and the
     // offset map is one of the two files the mobile content dropped, so game code loads it
     // explicitly the way dwaterLoadTexture does and the callback supplies it directly.
-    private static void gmDecoLoadFallBaseTexture(AMS_AMB_HEADER amb)
+    //
+    // It lives in a different place in each build. Console ships it inside TEX_FALL, where it
+    // belongs; mobile has it only because Content.Src/patches appends it to the outer archive, and
+    // amBindSearchBaseName does not recurse. So look in both.
+    private static void gmDecoLoadFallBaseTexture(AMS_AMB_HEADER outer, AMS_AMB_HEADER fall_tex)
     {
         _gm_deco_fall_base = null;
+
+        if (!gmDecoLoadFallBaseTextureFrom(fall_tex))
+            gmDecoLoadFallBaseTextureFrom(outer);
+    }
+
+    private static bool gmDecoLoadFallBaseTextureFrom(AMS_AMB_HEADER amb)
+    {
         if (amb == null)
-            return;
+            return false;
 
         int index = amBindSearchBaseName(amb, "Z1_FALL_TEST");
         if (index < 0)
-            return;
+            return false;
 
         AMS_PARAM_LOAD_TEXTURE_IMAGE dst = new AMS_PARAM_LOAD_TEXTURE_IMAGE();
         amTextureLoad(dst, amBindGet(amb, index, out string _),
             System.IO.Path.GetExtension(amb.files[index]),
             AMD_FILTER_LINEAR, AMD_FILTER_LINEAR, AMD_WRAP_REPEAT, AMD_WRAP_REPEAT);
         _gm_deco_fall_base = dst;
+        return true;
     }
 
     private static void GmDecoInitData(AMS_AMB_HEADER amb)
@@ -427,37 +454,61 @@ internal partial class AppMain
 
     private static void GmDecoBuildData()
     {
-        int num = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
+        int zone_type = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_DECO_DATA info = gmDecoDataGetInfo();
         AMS_AMB_HEADER header = null;
         if (info != null)
             header = gmDecoDataGetAmbHeader();
-        gmDecoLoadFallBaseTexture(header);
         string sPath;
-        if (gmDecoIsUseModel(0))
+
+        if (gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_NORMAL))
         {
-            info.tvx_model = readAMBFile(amBindGet(header, 0, out sPath));
-            info.tvx_model_data = new TVX_FILE[info.tvx_model.file_num];
-            info.tvx_model.dir = sPath;
-            AoTexBuild(info.tvx_tex, readAMBFile(amBindGet(header, 1)));
-            AoTexLoad(info.tvx_tex);
+            if (gm_deco_as_model)
+            {
+                AMS_AMB_HEADER mdl_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_MDL, out sPath));
+                mdl_amb.dir = sPath;
+                AMS_AMB_HEADER tex_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_TEX, out sPath));
+                tex_amb.dir = sPath;
+                info.obj_3d_list = GmGameDBuildRegBuildModel(mdl_amb, tex_amb, 0);
+
+                // gmDeco.cpp:4405, zone types 1 to 3. The glare texture is named by the same
+                // archive's TXB, so it shares the header rather than reading it again
+                if (zone_type <= GSD_MAIN_ZONE_TYPE_3)
+                    GmDecoGlareSetData(tex_amb);
+            }
+            else
+            {
+                info.tvx_model = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_MDL, out sPath));
+                info.tvx_model_data = new TVX_FILE[info.tvx_model.file_num];
+                info.tvx_model.dir = sPath;
+                AoTexBuild(info.tvx_tex, readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_TEX)));
+                AoTexLoad(info.tvx_tex);
+            }
         }
-        if (!gmDecoIsUseModel(1))
+
+        if (!gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_RENDER))
             return;
-        AMS_AMB_HEADER mdl_amb = readAMBFile(amBindGet(header, 4, out sPath));
-        mdl_amb.dir = sPath;
-        AMS_AMB_HEADER tex_amb = readAMBFile(amBindGet(header, 5, out sPath));
-        tex_amb.dir = sPath;
-        uint draw_flag = 0;
-        info.obj_3d_list_fall = GmGameDBuildRegBuildModel(mdl_amb, tex_amb, draw_flag);
+
+        AMS_AMB_HEADER fall_mdl_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_MDL_RENDER, out sPath));
+        fall_mdl_amb.dir = sPath;
+        AMS_AMB_HEADER fall_tex_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_TEX_RENDER, out sPath));
+        fall_tex_amb.dir = sPath;
+        gmDecoLoadFallBaseTexture(header, fall_tex_amb);
+
+        // gmDeco.cpp:4396. Measured with viewer --deco-shaders: the console fall materials are
+        // user profile 1, and their permutation is only built with the sampler bit. Without it the
+        // key comes back unbuilt, so this is not optional on console the way it is on mobile.
+        uint fall_flag_ex = gm_deco_as_model ? NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 : 0;
+        info.obj_3d_list_fall = GmGameDBuildRegBuildModel(fall_mdl_amb, fall_tex_amb, 0, fall_flag_ex);
     }
 
+    // the console arm has nothing of its own to wait on: GmGameDBuildCheckBuildModel already drains
+    // the model registration, and only the TVX atlas goes through AoTex
     private static bool GmDecoCheckLoading()
     {
         GMS_DECO_DATA info = gmDecoDataGetInfo();
-        if (gmDecoIsUseModel(0) && !AoTexIsLoaded(info.tvx_tex))
+        if (!gm_deco_as_model && gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_NORMAL) && !AoTexIsLoaded(info.tvx_tex))
             return false;
-        gmDecoIsUseModel(1);
         return true;
     }
 
@@ -470,35 +521,55 @@ internal partial class AppMain
 
     private static void GmDecoFlushData()
     {
-        int num = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_DECO_DATA info = gmDecoDataGetInfo();
         AMS_AMB_HEADER header = null;
         if (info != null)
             header = gmDecoDataGetAmbHeader();
-        if (gmDecoIsUseModel(0))
-            AoTexRelease(info.tvx_tex);
-        if (!gmDecoIsUseModel(1))
-            return;
         string sPath;
-        AMS_AMB_HEADER amsAmbHeader = readAMBFile(amBindGet(header, 4, out sPath));
-        amsAmbHeader.dir = sPath;
-        GmGameDBuildRegFlushModel(info.obj_3d_list_fall, amsAmbHeader.file_num);
+
+        if (gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_NORMAL))
+        {
+            if (gm_deco_as_model)
+            {
+                AMS_AMB_HEADER mdl_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_MDL, out sPath));
+                mdl_amb.dir = sPath;
+                GmGameDBuildRegFlushModel(info.obj_3d_list, mdl_amb.file_num);
+                info.obj_3d_list = null;
+            }
+            else
+            {
+                AoTexRelease(info.tvx_tex);
+            }
+        }
+
+        if (!gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_RENDER))
+            return;
+
+        AMS_AMB_HEADER fall_mdl_amb = readAMBFile(amBindGet(header, GMD_DECO_DATA_INDEX_AMB_MDL_RENDER, out sPath));
+        fall_mdl_amb.dir = sPath;
+        GmGameDBuildRegFlushModel(info.obj_3d_list_fall, fall_mdl_amb.file_num);
         info.obj_3d_list_fall = null;
     }
 
     private static bool GmDecoCheckFlushing()
     {
         GMS_DECO_DATA info = gmDecoDataGetInfo();
-        return !gmDecoIsUseModel(0) || AoTexIsReleased(info.tvx_tex);
+        return gm_deco_as_model
+            || !gmDecoIsUseModel(GMD_DECO_USE_MODEL_TYPE_NORMAL)
+            || AoTexIsReleased(info.tvx_tex);
     }
 
+    // registered against no id in g_gm_decorate_tbl, so this has never run. Wired for symmetry with
+    // the other three; if it ever fires, the dispatch table changed.
     private static OBS_OBJECT_WORK GmDecoInitModelMotion(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
       int y,
       byte type)
     {
-        return null;
+        return gm_deco_as_model
+            ? gmDecoInitModelMotion(dec_rec, x, y, type)?.obj_work
+            : null;
     }
 
     private static void GmDecoSetFrameMotion(int frame, int index)
@@ -662,6 +733,31 @@ internal partial class AppMain
             case 73:
                 obsActioN3DNnWorkArray = info.obj_3d_list_fall;
                 break;
+
+            // the glare and the effects have no model of their own. gmDeco.cpp:5313 and :5502 list
+            // them out; they never reach here anyway, since g_gm_decorate_tbl sends them to
+            // GmDecoInitPrimitive3D and the GmDecoInitEffect family instead
+            case 14:
+            case 15:
+            case 16:
+            case 54:
+            case 66:
+            case 67:
+            case 68:
+            case 69:
+            case 99:
+            case 100:
+            case 109:
+            case 110:
+            case 142:
+            case 182:
+                break;
+
+            // no variant branch: obj_3d_list is only ever built by the console arm, so on mobile it
+            // is null and gmDecoInitModel's own null check still picks the TVX path
+            default:
+                obsActioN3DNnWorkArray = info.obj_3d_list;
+                break;
         }
         return obsActioN3DNnWorkArray;
     }
@@ -693,13 +789,13 @@ internal partial class AppMain
             case 179:
             case 183:
                 AMS_AMB_HEADER ambHeader = gmDecoDataGetAmbHeader();
-                if (gmDeco_matMotionHeader == null)
+                if (gmDeco_motionHeader == null)
                 {
                     string sPath;
-                    gmDeco_matMotionHeader = readAMBFile(amBindGet(ambHeader, 2, out sPath));
-                    gmDeco_matMotionHeader.dir = sPath;
+                    gmDeco_motionHeader = readAMBFile(amBindGet(ambHeader, 2, out sPath));
+                    gmDeco_motionHeader.dir = sPath;
                 }
-                amsAmbHeader = gmDeco_matMotionHeader;
+                amsAmbHeader = gmDeco_motionHeader;
                 break;
         }
         return amsAmbHeader;
@@ -750,13 +846,13 @@ internal partial class AppMain
             case 179:
             case 183:
                 AMS_AMB_HEADER ambHeader = gmDecoDataGetAmbHeader();
-                if (gmDeco_motionHeader == null)
+                if (gmDeco_matMotionHeader == null)
                 {
                     string sPath;
-                    gmDeco_motionHeader = readAMBFile(amBindGet(ambHeader, 3, out sPath));
-                    gmDeco_motionHeader.dir = sPath;
+                    gmDeco_matMotionHeader = readAMBFile(amBindGet(ambHeader, 3, out sPath));
+                    gmDeco_matMotionHeader.dir = sPath;
                 }
-                amsAmbHeader = gmDeco_motionHeader;
+                amsAmbHeader = gmDeco_matMotionHeader;
                 break;
         }
         return amsAmbHeader;
@@ -993,15 +1089,17 @@ internal partial class AppMain
         return target;
     }
 
-    // The C++ binds the scene copy to NNE_USER_SAMPLER_2D_1 and pushes the projection out as
-    // four user uniforms (gmDeco.cpp:6589). NN then picks a shader whose profile declares that
-    // sampler. We have no per-material shader selection, so this just records what the material
-    // callback needs and the callback binds the effect.
+    // gmDeco.cpp:6589. The _PC | _XBOX arm is mppBindFallShaderUserSampler verbatim, which is why
+    // that helper lives in GmMap and is shared. The mobile arm has no fall shader at all, so there
+    // the target is only recorded and gmDecoFallMaterialCallback binds a standalone effect instead.
     private static void gmDecoDrawFallRender(
       AMS_RENDER_TARGET render_target,
       NNS_MATRIX proj_mtx)
     {
         _gm_deco_fall_render_target = render_target;
+
+        if (gm_deco_as_model)
+            mppBindFallShaderUserSampler(render_target);
     }
 
     private static void gmDecoDrawFallFrontUserFunc(object data)
@@ -1072,10 +1170,7 @@ internal partial class AppMain
     {
         ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, obj_work.obj_3d.command_state);
         ObjDraw3DNNUserFunc(_gmDecoDrawFallFrontUserFunc, null, 0, obj_work.obj_3d.command_state);
-        // _PC sets NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 here and lets NN pick the shader
-        // (gmDeco.cpp:6700); the _WII arm below it uses the callback, which is our route
-        obj_work.obj_3d.material_cb_func = _gmDecoFallMaterialCallback;
-        obj_work.obj_3d.material_cb_param = null;
+        gmDecoSetFallMaterialCallback(obj_work);
         gmDecoDraw(obj_work);
     }
 
@@ -1083,9 +1178,73 @@ internal partial class AppMain
     {
         ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, 1, obj_work.obj_3d.command_state);
         ObjDraw3DNNUserFunc(_gmDecoDrawFallBackUserFunc, null, 0, obj_work.obj_3d.command_state);
-        obj_work.obj_3d.material_cb_func = _gmDecoFallMaterialCallback;
-        obj_work.obj_3d.material_cb_param = null;
+        gmDecoSetFallMaterialCallback(obj_work);
         gmDecoDraw(obj_work);
+    }
+
+    // _PC sets NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 and lets NN pick the shader (gmDeco.cpp:6700);
+    // the _WII arm below it uses a callback and a standalone effect, which is the mobile route.
+    // The callback assumes the material carries only the artwork, which is true of mobile's fall
+    // material and false of console's, so it must not run on console data.
+    private static void gmDecoSetFallMaterialCallback(OBS_OBJECT_WORK obj_work)
+    {
+        obj_work.obj_3d.material_cb_func = gm_deco_as_model ? null : _gmDecoFallMaterialCallback;
+        obj_work.obj_3d.material_cb_param = null;
+    }
+
+    // GMD_DECO_USE_DRAW_SERVER is (1 & (_IPHONE | _PC)), so it is on for mobile and PC and OFF for
+    // Xbox. g_gm_deco_func_out forks on it at gmDeco.cpp:2741, :2754, :2774 and :2788: the draw
+    // server route registers a fall into g_deco_fall_manager and draws every registration as one
+    // scrolling primitive strip, where the console route draws each fall as its own NN model
+    // through the fall shader. Our table is the draw server arm, so these eight swap back.
+    //
+    // It matters for what the strip is textured with as much as for the shader. The strip takes
+    // texlist->nTex - 1, the last texture the fall model names, which is the artwork on mobile
+    // because mobile names exactly one and Z1_fall_add2 on console because console names three.
+    private static MPP_VOID_OBS_OBJECT_WORK gmDecoOutFunc(int id)
+    {
+        if (!gm_deco_as_model)
+            return g_gm_deco_func_out[id];
+
+        switch (id)
+        {
+            case 20:
+            case 40:
+            case 41:
+            case 42:
+                return _gmDecoDrawFallFront;
+
+            case 27:
+            case 47:
+            case 48:
+            case 49:
+                return _gmDecoDrawFallBack;
+
+            default:
+                return g_gm_deco_func_out[id];
+        }
+    }
+
+    private static readonly MPP_VOID_OBS_OBJECT_WORK _gmDecoDrawFallFront =
+        new MPP_VOID_OBS_OBJECT_WORK(gmDecoDrawFallFront);
+
+    private static readonly MPP_VOID_OBS_OBJECT_WORK _gmDecoDrawFallBack =
+        new MPP_VOID_OBS_OBJECT_WORK(gmDecoDrawFallBack);
+
+    // gmDeco.cpp:3869 ships two tables; console's is ours with the buckets it has no slot for
+    // collapsed onto 3DNN. Checked positionally across all 184 entries, so it is a remap rather
+    // than a second table.
+    private static uint gmDecoCommandState(int id)
+    {
+        uint state = g_gm_deco_command_state[id];
+        if (!gm_map_variant.blocks_as_model)
+            return state;
+
+        return state == OBD_DRAW_CMD_STATE_3DNN_PRE
+            || state == OBD_DRAW_CMD_STATE_3DNN_POST
+            || state == OBD_DRAW_CMD_STATE_3DNN_WS
+            ? OBD_DRAW_CMD_STATE_3DNN
+            : state;
     }
 
     private static GMS_DECO_WORK gmDecoLoadObj(
@@ -1439,7 +1598,7 @@ internal partial class AppMain
             dec_rec.pos_x = byte.MaxValue;
             return null;
         }
-        GMS_DECO_WORK gmsDecoWork = gmDecoLoadObj(dec_rec, work_size, x, y, g_gm_deco_func_main[id], g_gm_deco_func_move[id], g_gm_deco_func_out[id], g_gm_deco_func_dest[id]);
+        GMS_DECO_WORK gmsDecoWork = gmDecoLoadObj(dec_rec, work_size, x, y, g_gm_deco_func_main[id], g_gm_deco_func_move[id], gmDecoOutFunc(id), g_gm_deco_func_dest[id]);
         gmsDecoWork.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
         gmsDecoWork.obj_work.user_work = g_gm_deco_user_work[id];
         gmsDecoWork.obj_work.user_timer = g_gm_deco_user_timer[id];
@@ -1484,12 +1643,12 @@ internal partial class AppMain
         {
             deco_work.model_tex = gmDecoDataGetInfo().tvx_tex;
             int num = g_gm_deco_model_index[id][0];
-            deco_work.obj_3d.command_state = g_gm_deco_command_state[id];
+            deco_work.obj_3d.command_state = gmDecoCommandState(id);
             deco_work.model_index = num;
             if (index1 != -1)
             {
                 GMS_DECO_SUBMODEL_WORK decoSubmodelWork = (GMS_DECO_SUBMODEL_WORK)deco_work;
-                decoSubmodelWork.obj_3d_sub.command_state = g_gm_deco_command_state[id];
+                decoSubmodelWork.obj_3d_sub.command_state = gmDecoCommandState(id);
                 decoSubmodelWork.sub_model_index = index1;
             }
             deco_work.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
@@ -1500,7 +1659,7 @@ internal partial class AppMain
             if (index2 != -1)
             {
                 gmDecoLoadModel(deco_work, obj3Dlist[index2]);
-                deco_work.obj_3d.command_state = g_gm_deco_command_state[id];
+                deco_work.obj_3d.command_state = gmDecoCommandState(id);
             }
             if (index1 != -1)
             {
@@ -1512,7 +1671,7 @@ internal partial class AppMain
                     decoSubmodelWork.obj_3d_sub.use_light_flag &= 4294967294U;
                     decoSubmodelWork.obj_3d_sub.use_light_flag |= 4U;
                 }
-                decoSubmodelWork.obj_3d_sub.command_state = g_gm_deco_command_state[id];
+                decoSubmodelWork.obj_3d_sub.command_state = gmDecoCommandState(id);
             }
             deco_work.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
             if (((int)deco_work.obj_work.disp_flag & 1) != 0)
@@ -1773,7 +1932,7 @@ internal partial class AppMain
         gmsEffect3DesWork.efct_com.obj_work.user_flag = (uint)num1;
         int num2 = (int)gmsEffect3DesWork.efct_com.obj_work.user_work | (int)g_gm_deco_user_work[id];
         gmsEffect3DesWork.efct_com.obj_work.user_work = (uint)num2;
-        gmsEffect3DesWork.obj_3des.command_state = g_gm_deco_command_state[id];
+        gmsEffect3DesWork.obj_3des.command_state = gmDecoCommandState(id);
         if (gmsDecoWork.obj_work.ppFunc != null)
         {
             gmsEffect3DesWork.efct_com.obj_work.ppFunc = gmsDecoWork.obj_work.ppFunc;
@@ -1801,7 +1960,7 @@ internal partial class AppMain
         efct_3des.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
         efct_3des.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
         efct_3des.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
-        efct_3des.obj_3des.command_state = g_gm_deco_command_state[id];
+        efct_3des.obj_3des.command_state = gmDecoCommandState(id);
         efct_3des.efct_com.obj_work.user_flag |= gmsDecoWork.obj_work.user_flag;
         if (gmsDecoWork.obj_work.ppFunc != null)
         {
@@ -1836,13 +1995,13 @@ internal partial class AppMain
         gmsEffect3DesWork1.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
         gmsEffect3DesWork1.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
         gmsEffect3DesWork1.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
-        gmsEffect3DesWork1.obj_3des.command_state = g_gm_deco_command_state[id];
+        gmsEffect3DesWork1.obj_3des.command_state = gmDecoCommandState(id);
         GMS_EFFECT_3DES_WORK gmsEffect3DesWork2 = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx + 1);
         gmsEffect3DesWork2.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
         gmsEffect3DesWork2.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
         gmsEffect3DesWork2.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
         gmsEffect3DesWork2.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
-        gmsEffect3DesWork2.obj_3des.command_state = g_gm_deco_command_state[id];
+        gmsEffect3DesWork2.obj_3des.command_state = gmDecoCommandState(id);
         if (gmsDecoWork.obj_work.ppFunc != null)
         {
             gmsEffect3DesWork1.efct_com.obj_work.ppFunc = gmsDecoWork.obj_work.ppFunc;

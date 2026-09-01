@@ -111,6 +111,7 @@ internal static partial class DmTitleOp
     internal static int dm_titleop_scrl_x_ofst;
     internal static OBF_DRAW_USER_DT_FUNC _dmTitleOpPreDrawDT;
     internal static OBF_DRAW_USER_DT_FUNC _dmTitleOpFallShaderPreRenderUserFunc;
+    internal static OBF_DRAW_USER_DT_FUNC _dmTitleOpDrawFallShaderPreSettingUserFunc;
 
     internal static DMS_LOGO_COM_LOAD_FILE_INFO[] dm_titleop_com_fileinfo_list = new DMS_LOGO_COM_LOAD_FILE_INFO[2]
     {
@@ -169,5 +170,6 @@ internal static partial class DmTitleOp
         dm_titleop_aos_tex = null;
         _dmTitleOpPreDrawDT = new OBF_DRAW_USER_DT_FUNC(DmTitleOp.dmTitleOpPreDrawDT);
         _dmTitleOpFallShaderPreRenderUserFunc = new OBF_DRAW_USER_DT_FUNC(DmTitleOp.dmTitleOpFallShaderPreRenderUserFunc);
+        _dmTitleOpDrawFallShaderPreSettingUserFunc = new OBF_DRAW_USER_DT_FUNC(DmTitleOp.dmTitleOpDrawFallShaderPreSettingUserFunc);
     }
 }

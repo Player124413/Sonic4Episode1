@@ -7,7 +7,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsAotCompatible>true</IsAotCompatible>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;BGM_STREAM;</DefineConstants>
     <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
     
     <!--
@@ -18,6 +18,7 @@
     <ProvisioningType>manual</ProvisioningType>
     <CodesignKey>iPhone Developer</CodesignKey>
     <PublishAot>true</PublishAot>
+    <ValidateXcodeVersion>false</ValidateXcodeVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -29,6 +30,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+    <PackageReference Include="NVorbis" Version="0.10.5" />
 
     <NativeReference Include="..\Dependencies\FNA\lib-iphone\libFAudio.a">
       <Kind>Static</Kind>
@@ -55,17 +57,16 @@
 
   <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
   <PropertyGroup>
-    <ContentProfile>mobile-hd</ContentProfile>
-    <ContentItemType>None</ContentItemType>
+    <ContentProfile>mobile-hd-dxt</ContentProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <EnableSGenConc>True</EnableSGenConc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <EnableSGenConc>True</EnableSGenConc>
   </PropertyGroup>
   <Import Project="..\Content.targets" />
+  <Import Project="..\Shaders\Shaders.targets" />
 
-  <ItemGroup Condition="'$(SkipContentCopy)' != 'true'">
-    <Content Include="$(ContentDir)**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Content>
-  </ItemGroup>
-  
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 </Project>

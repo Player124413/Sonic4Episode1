@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 	<PropertyGroup>
-		<TargetFramework>net10.0-browser</TargetFramework>
+		<TargetFramework>net11.0-browser</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DefineConstants>TRACE;FNA;AOT;WASM;ASYNC_IO;</DefineConstants>
+		<DefineConstants>TRACE;FNA;AOT;WASM;ASYNC_IO;BGM_STREAM;</DefineConstants>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sonic4Episode1.Shared\Sonic4Episode1.Shared.csproj" />
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0-preview.7.26381.103" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -53,21 +53,33 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<NativeFileReference Include=".\lib\wasm\SDL2.a" />
+		<NativeFileReference Include=".\lib\wasm\SDL3.a" />
 		<NativeFileReference Include=".\lib\wasm\FNA3D.a" />
 		<NativeFileReference Include=".\lib\wasm\FAudio.a" />
 		<NativeFileReference Include=".\lib\wasm\libmojoshader.a" />
-		<EmccExportedRuntimeMethod Include="SDL" />
-		<EmccExportedRuntimeMethod Include="GL" />
+		<!--<EmccExportedRuntimeMethod Include="SDL" />-->
+		<!--<EmccExportedRuntimeMethod Include="GL" />-->
 		<EmccExportedRuntimeMethod Include="FS" />
 		<EmccExportedRuntimeMethod Include="IDBFS" />
-		<EmccExportedRuntimeMethod Include="setMainLoop" />
+		<!--<EmccExportedRuntimeMethod Include="setMainLoop" />-->
 		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
 	</ItemGroup>
 	
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<!--<Exec Command="pnpm install" WorkingDirectory="$(MSBuildProjectDirectory)\lib" />
-		<Exec Command="pnpm run build" WorkingDirectory="$(MSBuildProjectDirectory)\lib\installer" />-->
-		<Copy SourceFiles="$(MSBuildProjectDirectory)\lib\installer\dist\index.js" DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\js" />
+	<ItemGroup>
+		<HostJsSource Include="lib\host\src\**\*.ts;lib\host\_framework\**\*.ts;lib\host\package.json;lib\host\pnpm-lock.yaml;lib\host\tsconfig.json;lib\host\build.mjs" />
+	</ItemGroup>
+
+	<Target Name="BuildHostJs" BeforeTargets="ResolveProjectStaticWebAssets;BeforeBuild"
+			Inputs="@(HostJsSource)" Outputs="wwwroot\js\index.js">
+		<Exec Command="pnpm install --frozen-lockfile" WorkingDirectory="$(MSBuildProjectDirectory)\lib\host" />
+		<Exec Command="pnpm run build" WorkingDirectory="$(MSBuildProjectDirectory)\lib\host" />
+	</Target>
+
+	<!-- wwwroot is globbed at evaluation time, so a bundle written during the build has to be added by hand -->
+	<Target Name="IncludeHostJs" BeforeTargets="ResolveProjectStaticWebAssets" DependsOnTargets="BuildHostJs">
+		<ItemGroup>
+			<Content Remove="wwwroot\js\index.js" />
+			<Content Include="wwwroot\js\index.js" />
+		</ItemGroup>
 	</Target>
 </Project>

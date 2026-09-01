@@ -12,9 +12,9 @@ namespace Sonic4Episode1.Content;
 internal sealed class BuildReport
 {
     public int Emitted;
+    public int AssetsCopied;
     public int OverlaysEmitted;
     public int VariantsEmitted;
-    public int VariantsSkippedIncomplete;
     public int VariantsWithoutBase;
     public List<string> Variants = new List<string>();
     public int TexturesConverted;
@@ -53,7 +53,6 @@ internal sealed class BuildReport
         Emitted += other.Emitted;
         OverlaysEmitted += other.OverlaysEmitted;
         VariantsEmitted += other.VariantsEmitted;
-        VariantsSkippedIncomplete += other.VariantsSkippedIncomplete;
         VariantsWithoutBase += other.VariantsWithoutBase;
         TexturesConverted += other.TexturesConverted;
         TexturesFailed += other.TexturesFailed;
@@ -86,24 +85,6 @@ internal sealed class CheckReport
 
 internal static class ContentBuild
 {
-    // <STEM>_MDL / _TEX / _MTN / _MAT is the game's own model set convention; a variant supplying
-    // only part of one is refused, see docs/pc-asset-plan.md
-    private static readonly string[] GroupSuffixes = { "_MDL", "_TEX", "_MTN", "_MAT" };
-
-    private static string GroupOf(string relative)
-    {
-        var directory = Path.GetDirectoryName(relative)?.Replace('\\', '/') ?? string.Empty;
-        var stem = Path.GetFileNameWithoutExtension(relative).ToUpperInvariant();
-
-        foreach (var suffix in GroupSuffixes)
-        {
-            if (stem.EndsWith(suffix, StringComparison.Ordinal))
-                return directory + "/" + stem.Substring(0, stem.Length - suffix.Length);
-        }
-
-        return null;
-    }
-
     private static Dictionary<string, string> Archives(ContentSource source)
     {
         var found = Archives(source.Root);
@@ -198,6 +179,9 @@ internal static class ContentBuild
             EmitMemberVariant(variant, source, baseArchives, profile, report);
         }
 
+        foreach (var asset in sources.Assets)
+            CopyAssets(asset, sources.Source(asset.Source), profile, report);
+
         if (report.VariantsWithoutBase > 0)
             report.Notes.Add($"{report.VariantsWithoutBase} variant archives the base has no counterpart for");
 
@@ -205,8 +189,80 @@ internal static class ContentBuild
         report.Problems.Sort(StringComparer.OrdinalIgnoreCase);
 
         WriteManifest(profile, report);
+        WriteShipMarker(profile);
 
         return report;
+    }
+
+    // verbatim, and deliberately not parallel: these are big and mostly one stream each, so the
+    // archive emission above is where the cores are worth spending
+    private static void CopyAssets(AssetSpec asset, ContentSource source, ContentProfile profile,
+        BuildReport report)
+    {
+        var into = asset.Into == null
+            ? profile.Output
+            : Path.Combine(profile.Output, asset.Into);
+
+        if (asset.Paths.Count == 0)
+        {
+            report.AssetsCopied += CopyTree(source.Root, into);
+            return;
+        }
+
+        foreach (var path in asset.Paths)
+        {
+            var from = Path.Combine(source.Root, path);
+            var to = Path.Combine(into, path);
+
+            if (Directory.Exists(from))
+            {
+                report.AssetsCopied += CopyTree(from, to);
+            }
+            else if (File.Exists(from))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(to));
+                File.Copy(from, to, true);
+                report.AssetsCopied++;
+            }
+            else
+            {
+                report.Problems.Add($"asset '{path}' is not in source '{asset.Source}' ({from})");
+            }
+        }
+    }
+
+    private static int CopyTree(string from, string to)
+    {
+        var copied = 0;
+        Directory.CreateDirectory(to);
+
+        foreach (var file in Directory.EnumerateFiles(from, "*", SearchOption.AllDirectories))
+        {
+            var target = Path.Combine(to, Path.GetRelativePath(from, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(target));
+            File.Copy(file, target, true);
+            copied++;
+        }
+
+        return copied;
+    }
+
+    // MSBuild cannot read the TOML, so the ship flag has to reach Content.targets as a file. Its
+    // presence is what the Release gate tests for
+    public const string NotShippedName = ".notshipped";
+
+    private static void WriteShipMarker(ContentProfile profile)
+    {
+        var path = Path.Combine(profile.Output, NotShippedName);
+        if (profile.Ship)
+        {
+            File.Delete(path);
+            return;
+        }
+
+        File.WriteAllText(path,
+            $"'{profile.Name}' is a diagnostic tree and must not ship. It is the only profile that " +
+            "may carry PVR." + Environment.NewLine);
     }
 
     // archives are independent: each reads its own source and writes its own output, so the only
@@ -341,7 +397,7 @@ internal static class ContentBuild
         if (Append(entries, consumed, relative, report, patches))
             changed = true;
 
-        return changed ? AppMain.writeAmbArchive(entries, AmbTree.IsBigEndian(header)) : null;
+        return changed ? AppMain.writeAmbArchive(entries, header.big_endian) : null;
     }
 
     // a patch file whose member doesn't exist is an addition, not a replacement; appended members
@@ -546,7 +602,7 @@ internal static class ContentBuild
             if (picked.Count == 0)
                 return;
 
-            var sparse = AppMain.writeAmbArchive(picked.Values.ToList(), AmbTree.IsBigEndian(actual));
+            var sparse = AppMain.writeAmbArchive(picked.Values.ToList(), actual.big_endian);
 
             var output = Path.Combine(profile.Output, VariantName(key, spec.Name));
             Directory.CreateDirectory(Path.GetDirectoryName(output));

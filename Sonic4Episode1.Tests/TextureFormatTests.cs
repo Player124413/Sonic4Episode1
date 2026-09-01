@@ -193,11 +193,65 @@ public class TextureFormatTests
         Assert.Equal(256 * 256 * 4, TextureFormats.GpuBytes(png));
     }
 
+    private static byte[] Astc(int blockX, int blockY, int width, int height, int payload = 256)
+    {
+        var bytes = new byte[16 + payload];
+        BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(0, 4), 0x5CA1AB13);
+        bytes[4] = (byte)blockX;
+        bytes[5] = (byte)blockY;
+        bytes[6] = 1;
+
+        Write24(bytes, 7, width);
+        Write24(bytes, 10, height);
+        Write24(bytes, 13, 1);
+
+        return bytes;
+    }
+
+    private static void Write24(byte[] bytes, int offset, int value)
+    {
+        bytes[offset] = (byte)value;
+        bytes[offset + 1] = (byte)(value >> 8);
+        bytes[offset + 2] = (byte)(value >> 16);
+    }
+
+    [Theory]
+    [InlineData(4, 4, TextureFormat.Astc4x4)]
+    [InlineData(6, 6, TextureFormat.Astc6x6)]
+    public void AstcFootprintComesFromTheBlockDimensions(int blockX, int blockY, TextureFormat expected)
+    {
+        var info = TextureFormats.Probe(Astc(blockX, blockY, 256, 128));
+
+        Assert.Equal(expected, info.Format);
+        Assert.Equal(256, info.Width);
+        Assert.Equal(128, info.Height);
+    }
+
+    // only the two footprints the pipeline emits are known; anything else must not be guessed at
+    [Fact]
+    public void UnplannedAstcFootprintIsUnknownRatherThanApproximated()
+    {
+        var info = TextureFormats.Probe(Astc(8, 8, 256, 128));
+
+        Assert.Equal(TextureFormat.Unknown, info.Format);
+        Assert.Contains("8x8", info.Detail);
+    }
+
+    // 128 bits a block whatever the footprint, so 6x6 is the smaller upload
+    [Fact]
+    public void AstcGpuBytesCountsBlocksNotTexels()
+    {
+        Assert.Equal(64 * 32 * 16, TextureFormats.GpuBytes(TextureFormats.Probe(Astc(4, 4, 256, 128))));
+        Assert.Equal(43 * 22 * 16, TextureFormats.GpuBytes(TextureFormats.Probe(Astc(6, 6, 256, 128))));
+    }
+
     [Theory]
     [InlineData("dxt1", TextureFormat.Bc1)]
     [InlineData("bc1", TextureFormat.Bc1)]
     [InlineData("DXT5", TextureFormat.Bc3)]
     [InlineData("png", TextureFormat.Png)]
+    [InlineData("astc4x4", TextureFormat.Astc4x4)]
+    [InlineData("ASTC6x6", TextureFormat.Astc6x6)]
     public void TokensParseWithTheirDxtAliases(string token, TextureFormat expected)
     {
         Assert.True(TextureFormats.TryParse(token, out var format));

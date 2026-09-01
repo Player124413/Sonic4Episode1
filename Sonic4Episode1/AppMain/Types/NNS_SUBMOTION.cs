@@ -73,6 +73,17 @@ internal partial class AppMain
             submotion.fType = reader.ReadUInt32();
             submotion.fIPType = reader.ReadUInt32();
             submotion.Id = reader.ReadInt32();
+
+            // Id is two halfwords and Id0 is the first of them in file order, so big-endian data
+            // arrives with the halves the other way round. nnt.h:321-324 switches the packing on
+            // NND_PLATFORM_GC for exactly this reason. Node motions use Id whole as a node index,
+            // so only the material kind gets normalised.
+            if (motionType == NND_MOTIONTYPE_MATERIAL
+                && reader is EndianBinaryReader endian && endian.IsBigEndian)
+            {
+                uint id = (uint)submotion.Id;
+                submotion.Id = (int)((id >> 16) | (id << 16));
+            }
             submotion.StartFrame = reader.ReadSingle();
             submotion.EndFrame = reader.ReadSingle();
             submotion.StartKeyFrame = reader.ReadSingle();

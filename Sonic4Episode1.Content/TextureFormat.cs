@@ -17,6 +17,8 @@ public enum TextureFormat
     Bgra32,
     L8,
     Pvr,
+    Astc4x4,
+    Astc6x6,
 }
 
 internal readonly struct ImageInfo
@@ -88,6 +90,9 @@ internal static class TextureFormats
 
         if (IsPvr(bytes))
             return ProbePvr(bytes);
+
+        if (bytes.Length >= 4 && ReadInt(bytes, 0) == ASTC_MAGIC)
+            return ProbeAstc(bytes);
 
         return ImageInfo.None;
     }
@@ -224,6 +229,70 @@ internal static class TextureFormats
         };
     }
 
+    // 16 byte header: magic, then one byte each of block x/y/z, then three 24-bit LE dimensions
+    private const int ASTC_MAGIC = 0x5CA1AB13;
+    private const int ASTC_HEADER_SIZE = 16;
+
+    private static ImageInfo ProbeAstc(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.Length < ASTC_HEADER_SIZE)
+            return Unknown("truncated ASTC");
+
+        var format = (bytes[4], bytes[5], bytes[6]) switch
+        {
+            (4, 4, 1) => TextureFormat.Astc4x4,
+            (6, 6, 1) => TextureFormat.Astc6x6,
+            _ => TextureFormat.Unknown,
+        };
+
+        if (format == TextureFormat.Unknown)
+            return Unknown($"ASTC block {bytes[4]}x{bytes[5]}x{bytes[6]}");
+
+        return new ImageInfo
+        {
+            Format = format,
+            Width = Read24(bytes, 7),
+            Height = Read24(bytes, 10),
+            MipLevels = 1,
+        };
+    }
+
+    private static int Read24(ReadOnlySpan<byte> bytes, int offset)
+    {
+        return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16);
+    }
+
+    // beside ProbeAstc so the two halves of the header can't drift
+    public static byte[] WrapAstc(TextureFormat format, int width, int height,
+        ReadOnlySpan<byte> blocks)
+    {
+        var block = AstcBlock(format);
+        var output = new byte[ASTC_HEADER_SIZE + blocks.Length];
+
+        BinaryPrimitives.WriteInt32LittleEndian(output, ASTC_MAGIC);
+        output[4] = (byte)block.X;
+        output[5] = (byte)block.Y;
+        output[6] = 1;
+        Write24(output, 7, width);
+        Write24(output, 10, height);
+        Write24(output, 13, 1);
+        blocks.CopyTo(output.AsSpan(ASTC_HEADER_SIZE));
+
+        return output;
+    }
+
+    public static ReadOnlySpan<byte> AstcBlocks(ReadOnlySpan<byte> bytes)
+    {
+        return bytes.Slice(ASTC_HEADER_SIZE);
+    }
+
+    private static void Write24(Span<byte> bytes, int offset, int value)
+    {
+        bytes[offset] = (byte)value;
+        bytes[offset + 1] = (byte)(value >> 8);
+        bytes[offset + 2] = (byte)(value >> 16);
+    }
+
     // PVRv3 leads with its magic; PVRv2 puts "PVR!" at 0x2C of a 52 byte header.
     private static bool IsPvr(ReadOnlySpan<byte> bytes)
     {
@@ -269,10 +338,23 @@ internal static class TextureFormats
             case TextureFormat.Bc2:
             case TextureFormat.Bc3:
             case TextureFormat.Bc7:
+            case TextureFormat.Astc4x4:
+            case TextureFormat.Astc6x6:
                 return true;
             default:
                 return false;
         }
+    }
+
+    public static bool IsAstc(TextureFormat format)
+    {
+        return format == TextureFormat.Astc4x4 || format == TextureFormat.Astc6x6;
+    }
+
+    // ASTC is a fixed 128 bits a block whatever the footprint; only the block size changes
+    public static (int X, int Y) AstcBlock(TextureFormat format)
+    {
+        return format == TextureFormat.Astc6x6 ? (6, 6) : (4, 4);
     }
 
     public static string Token(TextureFormat format)
@@ -296,6 +378,8 @@ internal static class TextureFormats
             case "bgra32": format = TextureFormat.Bgra32; return true;
             case "l8": format = TextureFormat.L8; return true;
             case "pvr": format = TextureFormat.Pvr; return true;
+            case "astc4x4": format = TextureFormat.Astc4x4; return true;
+            case "astc6x6": format = TextureFormat.Astc6x6; return true;
             default: format = TextureFormat.Unknown; return false;
         }
     }
@@ -306,6 +390,8 @@ internal static class TextureFormats
         {
             case TextureFormat.Png: return ".PNG";
             case TextureFormat.Pvr: return ".PVR";
+            case TextureFormat.Astc4x4:
+            case TextureFormat.Astc6x6: return ".AST";
             case TextureFormat.Unknown: return null;
             default: return ".DDS";
         }
@@ -335,6 +421,13 @@ internal static class TextureFormats
             case TextureFormat.Bc3:
             case TextureFormat.Bc7:
                 return Blocks(info) * 16;
+            case TextureFormat.Astc4x4:
+            case TextureFormat.Astc6x6:
+            {
+                var block = AstcBlock(info.Format);
+                return (long)((info.Width + block.X - 1) / block.X)
+                       * ((info.Height + block.Y - 1) / block.Y) * 16;
+            }
             case TextureFormat.L8:
                 return info.Texels;
             case TextureFormat.Unknown:

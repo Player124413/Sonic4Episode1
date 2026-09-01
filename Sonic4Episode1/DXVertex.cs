@@ -2,22 +2,35 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 
-// nnstdshader's VS_INPUT layout; a rigid permutation just leaves the blend elements unread, so
-// every mesh can share this one declaration
+// nnstdshader's VS_INPUT layout, at the widest any retail permutation asks for. Every element has
+// to be here whether or not a given mesh uses it: D3D11's CreateInputLayout rejects a declaration
+// that is missing anything the shader declares, where GL just leaves the attribute disabled.
+// A permutation that does not read one leaves it unread, so one declaration serves every mesh.
+// See docs/nn-stdshader-ubershader.md.
 internal struct DXVertex : IVertexType
 {
     public Vector3 Position;
     public Vector3 BlendWeights;
     public Byte4 BlendIndices;
     public Vector3 Normal;
+    public Vector3 Tangent;
+    public Vector3 Binormal;
     public Vector2 TexCoord;
+    public Vector2 TexCoord2;
+    public Vector2 TexCoord3;
+    public Color Color;
 
     public static readonly VertexDeclaration Declaration = new VertexDeclaration(
         new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
         new VertexElement(12, VertexElementFormat.Vector3, VertexElementUsage.BlendWeight, 0),
         new VertexElement(24, VertexElementFormat.Byte4, VertexElementUsage.BlendIndices, 0),
         new VertexElement(28, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0),
-        new VertexElement(40, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0));
+        new VertexElement(40, VertexElementFormat.Vector3, VertexElementUsage.Tangent, 0),
+        new VertexElement(52, VertexElementFormat.Vector3, VertexElementUsage.Binormal, 0),
+        new VertexElement(64, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0),
+        new VertexElement(72, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 1),
+        new VertexElement(80, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 2),
+        new VertexElement(88, VertexElementFormat.Color, VertexElementUsage.Color, 0));
 
     VertexDeclaration IVertexType.VertexDeclaration => Declaration;
 }

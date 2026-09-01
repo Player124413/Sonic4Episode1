@@ -50,6 +50,14 @@ internal partial class AppMain
         return count;
     }
 
+    // sampler_def.h carries on past the material's maps with the shadow maps and then the six user
+    // samplers, each taking the next free register, so a user sampler sits behind everything else
+    public static int mppStdShaderUserSamplerSlot(
+        uint fTexType, int shadowMaps, NNE_USER_SAMPLER sampler)
+    {
+        return mppStdShaderSamplerCount(fTexType) + shadowMaps + (int)sampler;
+    }
+
     public static NNS_MATERIAL_STDSHADER_TEXMAP_DESC mppStdShaderTexMap(
         NNS_MATERIAL_STDSHADER_DESC material, uint mapBit)
     {

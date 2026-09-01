@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if BGM_MEDIAPLAYER
+using System;
 using System.IO;
 using System.Runtime.InteropServices.JavaScript;
 
@@ -14,11 +15,13 @@ namespace Microsoft.Xna.Framework.Media
     {
         [JSImport("MediaPlayer_GetVolume", "main.js")]
         internal static partial float MediaPlayer_GetVolume();
+
         [JSImport("MediaPlayer_SetVolume", "main.js")]
         internal static partial void MediaPlayer_SetVolume([JSMarshalAs<JSType.Number>] float value);
 
         [JSImport("MediaPlayer_Play", "main.js")]
         internal static partial void MediaPlayer_Play([JSMarshalAs<JSType.String>] string path);
+        
         [JSImport("MediaPlayer_PlayLooped", "main.js")]
         internal static partial void MediaPlayer_PlayLooped([JSMarshalAs<JSType.String>] string path, [JSMarshalAs<JSType.Number>] double loopPos);
 
@@ -84,3 +87,4 @@ namespace Microsoft.Xna.Framework.Media
         }
     }
 }
+#endif

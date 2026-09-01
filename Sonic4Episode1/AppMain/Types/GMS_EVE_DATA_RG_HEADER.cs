@@ -18,7 +18,9 @@ internal partial class AppMain
         {
             using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
             {
-                using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+                using (BinaryReader binaryReader = gmMapCellsAreBigEndian(data, 2)
+                    ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                    : new BinaryReader(memoryStream))
                 {
                     this.width = binaryReader.ReadUInt16();
                     this.height = binaryReader.ReadUInt16();

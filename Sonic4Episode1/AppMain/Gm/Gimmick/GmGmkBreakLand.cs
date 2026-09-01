@@ -84,7 +84,11 @@
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work;
         ObjObjectCopyAction3dNNModel(obj_work, gm_gmk_breakland_obj_3d_list[vect == 0 ? 0 : 1], gmsEnemy3DWork.obj_3d);
-        if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
+        // gmGmkBreakLand.cpp:771-780 wraps only the *condition* in _IPHONE, not the body, so console
+        // does this on every stage and mobile only on 1-3 and 1-boss. Read it twice: a #if around a
+        // bare if with the body outside means "iPhone only does this sometimes", not "iPhone only".
+        if (gm_gmk_as_console
+            || g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
         {
             obj_work.obj_3d.use_light_flag &= 4294967294U;
             obj_work.obj_3d.use_light_flag |= 32U;

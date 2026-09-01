@@ -93,6 +93,7 @@ internal partial class AppMain
         dest_obj_3d.blend_spd = 0.25f;
         dest_obj_3d.sub_obj_type = src_obj_3d.sub_obj_type;
         dest_obj_3d.drawflag = src_obj_3d.drawflag;
+        dest_obj_3d.drawflag_ex = src_obj_3d.drawflag_ex;
         dest_obj_3d.draw_state.Assign(g_obj_draw_3dnn_draw_state);
         dest_obj_3d.reg_index = -1;
     }

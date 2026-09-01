@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S4E1 texture capability probe</title>
+<style>
+  body { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; margin: 12px; }
+  table { border-collapse: collapse; margin: 8px 0; width: 100%; max-width: 640px; }
+  td, th { border: 1px solid #8888; padding: 2px 6px; text-align: left; }
+  th { font-weight: bold; }
+  .y { color: #0a0; }
+  .n { color: #a00; }
+  textarea { width: 100%; max-width: 640px; height: 9em; }
+  h2 { font-size: 14px; margin: 14px 0 4px; }
+</style>
+</head>
+<body>
+<h2>summary</h2>
+<textarea id="summary" readonly></textarea>
+<h2>context</h2>
+<table id="context"></table>
+<h2>compressed formats</h2>
+<table id="formats"></table>
+<h2>all reported extensions</h2>
+<textarea id="exts" readonly></textarea>
+<script>
+// each entry uploads one real block through compressedTexImage2D, because an extension can be
+// listed and the enum still rejected. bw/bh are the block footprint, bytes is one block.
+var FORMATS = [
+  { name: "BC1 rgb  (DXT1)",  ext: "WEBGL_compressed_texture_s3tc",       fmt: 0x83F0, bw: 4,  bh: 4,  bytes: 8  },
+  { name: "BC1 rgba (DXT1)",  ext: "WEBGL_compressed_texture_s3tc",       fmt: 0x83F1, bw: 4,  bh: 4,  bytes: 8  },
+  { name: "BC2      (DXT3)",  ext: "WEBGL_compressed_texture_s3tc",       fmt: 0x83F2, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "BC3      (DXT5)",  ext: "WEBGL_compressed_texture_s3tc",       fmt: 0x83F3, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "BC3 srgb",         ext: "WEBGL_compressed_texture_s3tc_srgb",  fmt: 0x8C4F, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "BC7      (BPTC)",  ext: "EXT_texture_compression_bptc",        fmt: 0x8E8C, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "BC4      (RGTC)",  ext: "EXT_texture_compression_rgtc",        fmt: 0x8DBB, bw: 4,  bh: 4,  bytes: 8  },
+  { name: "ETC2 rgb",         ext: "WEBGL_compressed_texture_etc",        fmt: 0x9274, bw: 4,  bh: 4,  bytes: 8  },
+  { name: "ETC2 rgba",        ext: "WEBGL_compressed_texture_etc",        fmt: 0x9278, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "ASTC 4x4",         ext: "WEBGL_compressed_texture_astc",       fmt: 0x93B0, bw: 4,  bh: 4,  bytes: 16 },
+  { name: "ASTC 5x5",         ext: "WEBGL_compressed_texture_astc",       fmt: 0x93B2, bw: 5,  bh: 5,  bytes: 16 },
+  { name: "ASTC 6x6",         ext: "WEBGL_compressed_texture_astc",       fmt: 0x93B4, bw: 6,  bh: 6,  bytes: 16 },
+  { name: "ASTC 8x8",         ext: "WEBGL_compressed_texture_astc",       fmt: 0x93B7, bw: 8,  bh: 8,  bytes: 16 },
+  { name: "PVRTC 4bpp rgba",  ext: "WEBGL_compressed_texture_pvrtc",      fmt: 0x8C02, bw: 8,  bh: 8,  bytes: 32 }
+];
+
+function cell(row, text, cls) {
+  var td = document.createElement("td");
+  td.textContent = text;
+  if (cls) td.className = cls;
+  row.appendChild(td);
+}
+
+function addRow(table, cells) {
+  var tr = document.createElement("tr");
+  for (var i = 0; i < cells.length; i++) {
+    cell(tr, cells[i][0], cells[i][1]);
+  }
+  table.appendChild(tr);
+}
+
+function probe() {
+  var canvas = document.createElement("canvas");
+  var version = 2;
+  var gl = canvas.getContext("webgl2");
+  if (!gl) {
+    version = 1;
+    gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  }
+
+  var contextTable = document.getElementById("context");
+  if (!gl) {
+    addRow(contextTable, [["webgl", ""], ["NO CONTEXT", "n"]]);
+    document.getElementById("summary").value = "no webgl context at all";
+    return;
+  }
+
+  var exts = gl.getSupportedExtensions() || [];
+  var dbg = gl.getExtension("WEBGL_debug_renderer_info");
+
+  addRow(contextTable, [["webgl version", ""], [String(version), ""]]);
+  addRow(contextTable, [["vendor", ""], [String(gl.getParameter(gl.VENDOR)), ""]]);
+  addRow(contextTable, [["renderer", ""], [String(gl.getParameter(gl.RENDERER)), ""]]);
+  if (dbg) {
+    addRow(contextTable, [["unmasked vendor", ""], [String(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL)), ""]]);
+    addRow(contextTable, [["unmasked renderer", ""], [String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)), ""]]);
+  }
+  addRow(contextTable, [["max texture size", ""], [String(gl.getParameter(gl.MAX_TEXTURE_SIZE)), ""]]);
+  addRow(contextTable, [["max texture units", ""], [String(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS)), ""]]);
+  addRow(contextTable, [["user agent", ""], [navigator.userAgent, ""]]);
+
+  var formatTable = document.getElementById("formats");
+  addRow(formatTable, [["format", ""], ["extension", ""], ["listed", ""], ["uploads", ""]]);
+
+  var working = {};
+  for (var i = 0; i < FORMATS.length; i++) {
+    var f = FORMATS[i];
+    var listed = exts.indexOf(f.ext) !== -1;
+    var uploads = false;
+
+    if (listed && gl.getExtension(f.ext)) {
+      var tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      while (gl.getError() !== gl.NO_ERROR) { /* drain */ }
+      gl.compressedTexImage2D(gl.TEXTURE_2D, 0, f.fmt, f.bw, f.bh, 0, new Uint8Array(f.bytes));
+      uploads = gl.getError() === gl.NO_ERROR;
+      gl.deleteTexture(tex);
+    }
+
+    if (uploads) working[f.ext] = true;
+    addRow(formatTable, [
+      [f.name, ""],
+      [f.ext.replace("WEBGL_compressed_texture_", "").replace("EXT_texture_compression_", ""), ""],
+      [listed ? "yes" : "no", listed ? "y" : "n"],
+      [uploads ? "yes" : "no", uploads ? "y" : "n"]
+    ]);
+  }
+
+  document.getElementById("exts").value = exts.join("\n");
+
+  var s3tc = working["WEBGL_compressed_texture_s3tc"] ? "Y" : "N";
+  var astc = working["WEBGL_compressed_texture_astc"] ? "Y" : "N";
+  var etc2 = working["WEBGL_compressed_texture_etc"] ? "Y" : "N";
+  var bc7 = working["EXT_texture_compression_bptc"] ? "Y" : "N";
+  var set = astc === "Y" ? "astc" : (s3tc === "Y" ? "bc" : "none, needs cpu decode");
+
+  document.getElementById("summary").value =
+    "webgl" + version +
+    " s3tc=" + s3tc + " bc7=" + bc7 + " astc=" + astc + " etc2=" + etc2 +
+    " maxtex=" + gl.getParameter(gl.MAX_TEXTURE_SIZE) +
+    "\nwould fetch: " + set +
+    "\n" + (dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : String(gl.getParameter(gl.RENDERER))) +
+    "\n" + navigator.userAgent;
+}
+
+probe();
+</script>
+</body>
+</html>

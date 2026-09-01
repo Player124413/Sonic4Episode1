@@ -10,8 +10,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
 
-#if WASM
-using MediaPlayer = Microsoft.Xna.Framework.Media.WasmMediaPlayer;
+#if !BGM_STREAM && !BGM_MEDIAPLAYER
+#error define exactly one of BGM_STREAM or BGM_MEDIAPLAYER
+#endif
+#if BGM_STREAM && BGM_MEDIAPLAYER
+#error define exactly one of BGM_STREAM or BGM_MEDIAPLAYER
 #endif
 
 internal partial class AppMain
@@ -91,7 +94,6 @@ internal partial class AppMain
         private const float NON_AISAC = -1000f;
         public MediaState m_stGMState;
         public float m_fBGVolume;
-        public static string m_ActiveSong;
         public int type;
         public bool status_paused;
         public string se_name;
@@ -107,13 +109,7 @@ internal partial class AppMain
 
         public float pan;
 
-        public static Song m_songBGMIntro;
-        public static Song m_songBGMLoop;
-
-#if MONOGAME
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Add")]
-        extern static void MediaQueue_Add(MediaQueue c, Song song);
-#endif
+        private CriAuBgmVoice bgm;
 
         public CriAuPlayer()
         {
@@ -176,8 +172,7 @@ internal partial class AppMain
             else
             {
                 this.m_stGMState = MediaState.Stopped;
-                if (this.se_name != null && this.se_name == m_ActiveSong)
-                    Microsoft.Xna.Framework.Media.MediaPlayer.Stop();
+                this.bgm?.Stop();
                 this.status = STATUS_STOP;
             }
 
@@ -206,7 +201,7 @@ internal partial class AppMain
                     else
                         flag = false;
 
-                    this.sound[this.activefx].Volume = this.volume[0];
+                    this.sound[this.activefx].Volume = this.volume[0] * gs_sound_volume[1];
                 }
                 else
                 {
@@ -214,7 +209,7 @@ internal partial class AppMain
                     {
                         if (this.sound[index] != null)
                         {
-                            this.sound[index].Volume = this.volume[index];
+                            this.sound[index].Volume = this.volume[index] * gs_sound_volume[1];
                             if (this.status != STATUS_PLAYING || this.sound[index].State != SoundState.Stopped)
                             {
                                 flag = false;
@@ -230,11 +225,18 @@ internal partial class AppMain
 
             if (this.type != 1)
                 return;
-            if (m_ActiveSong == this.se_name &&
-                m_fBGVolume != (double)this.volume[0])
+
+            if (this.bgm != null)
             {
-                Microsoft.Xna.Framework.Media.MediaPlayer.Volume = this.volume[0];
-                this.m_fBGVolume = this.volume[0];
+                this.bgm.Update();
+                if (this.bgm.Ended)
+                    this.m_stGMState = MediaState.Stopped;
+
+                if (m_fBGVolume != (double)this.volume[0])
+                {
+                    this.bgm.Volume = this.volume[0];
+                    this.m_fBGVolume = this.volume[0];
+                }
             }
 
             if (this.status != STATUS_PLAYING || this.m_stGMState != MediaState.Stopped)
@@ -285,23 +287,14 @@ internal partial class AppMain
             else if (pause)
             {
                 this.m_stGMState = MediaState.Paused;
-                if (this.se_name != m_ActiveSong)
-                    return;
-                Microsoft.Xna.Framework.Media.MediaPlayer.Pause();
-            }
-            else if (m_ActiveSong != this.se_name)
-            {
-                string seName = this.se_name;
-                this.se_name = null;
-                this.SetCue(seName);
-                this.Play();
+                this.bgm?.Pause(true);
             }
             else
             {
                 this.m_stGMState = MediaState.Playing;
                 this.status = STATUS_PLAYING;
                 this.m_fBGVolume = -1f;
-                Microsoft.Xna.Framework.Media.MediaPlayer.Resume();
+                this.bgm?.Pause(false);
             }
         }
 
@@ -321,11 +314,11 @@ internal partial class AppMain
             }
             else
             {
-                if (m_ActiveSong != this.se_name || m_fBGVolume == (double)volume)
+                if (this.bgm == null || m_fBGVolume == (double)volume)
                     return;
                 this.m_fBGVolume = volume;
                 this.volume[0] = volume;
-                Microsoft.Xna.Framework.Media.MediaPlayer.Volume = volume;
+                this.bgm.Volume = volume;
             }
         }
 
@@ -461,36 +454,13 @@ internal partial class AppMain
                     }
                     else
                     {
-                        m_songBGMIntro = gsSoundGetPreloadedBGM(soundTable.filename[0] + "Intro");
-                        if (m_songBGMIntro == null)
+                        this.bgm ??= new CriAuBgmVoice();
+                        if (!this.bgm.Load(se_name, soundTable.filename[0], soundTable.loop[0]))
                         {
-                            m_songBGMIntro = Sonic4Ep1.pInstance.Content.Load<Song>("SOUND\\" + soundTable.filename[0] + "\\Intro");
-                            bgmPreloadedList.Add(soundTable.filename[0] + "Intro", m_songBGMIntro);
-
-#if WASM
-                            MediaPlayer.LoadSong(m_songBGMIntro);
-#endif
+                            this.status = STATUS_ERROR;
+                            return;
                         }
 
-                        //Console.WriteLine(m_songBGMIntro);
-
-                        if (soundTable.loop[0])
-                        {
-                            m_songBGMLoop = gsSoundGetPreloadedBGM(soundTable.filename[0] + "Loop");
-                            if (m_songBGMLoop == null)
-                            {
-                                m_songBGMLoop = Sonic4Ep1.pInstance.Content.Load<Song>("SOUND\\" + soundTable.filename[0] + "\\Loop");
-                                bgmPreloadedList.Add(soundTable.filename[0] + "Loop", m_songBGMLoop);
-                            }
-
-                            //Console.WriteLine(m_songBGMLoop);
-                        }
-                        else
-                        {
-                            m_songBGMLoop = null;
-                        }
-
-                        m_ActiveSong = se_name;
                         this.m_fBGVolume = -1f;
                         this.m_bLoop = soundTable.loop[0];
                     }
@@ -511,43 +481,16 @@ internal partial class AppMain
         {
             if (this.type == 1)
             {
-                if (this.se_name != m_ActiveSong)
+                if (this.se_name != null && this.bgm != null)
                 {
-                    string seName = this.se_name;
-                    this.se_name = null;
-                    this.SetCue(seName);
-                }
-
-                if (this.se_name != null)
-                {
-                    if (this.se_name == m_ActiveSong)
+                    try
                     {
-                        try
-                        {
-#if WASM
-                            MediaPlayer.Stop();
-                            MediaPlayer.IsRepeating = false;
-                            MediaPlayer.Play(m_songBGMIntro, m_songBGMLoop);
-#else
-                            Microsoft.Xna.Framework.Media.MediaPlayer.Stop();
-                            Microsoft.Xna.Framework.Media.MediaPlayer.IsRepeating = false;
-                            Microsoft.Xna.Framework.Media.MediaPlayer.Play(m_songBGMIntro);
-
-#if FNA || MONOGAME
-                            if (m_songBGMLoop != null)
-#if FNA
-                                Microsoft.Xna.Framework.Media.MediaPlayer.LoadSong(m_songBGMLoop);
-#elif MONOGAME
-                                MediaQueue_Add(MediaPlayer.Queue, m_songBGMLoop);
-#endif
-#endif
-#endif
-                            this.m_stGMState = MediaState.Playing;
-                        }
-                        catch (UnauthorizedAccessException ext)
-                        {
-                            g_ao_sys_global.is_playing_device_bgm_music = true;
-                        }
+                        this.bgm.Play();
+                        this.m_stGMState = MediaState.Playing;
+                    }
+                    catch (UnauthorizedAccessException ext)
+                    {
+                        g_ao_sys_global.is_playing_device_bgm_music = true;
                     }
                 }
 
@@ -609,9 +552,7 @@ internal partial class AppMain
             else
             {
                 this.m_stGMState = MediaState.Stopped;
-                if (this.se_name != null && this.se_name == m_ActiveSong)
-                    Microsoft.Xna.Framework.Media.MediaPlayer.Stop();
-                m_ActiveSong = null;
+                this.bgm?.Release();
                 this.status = STATUS_STOP;
             }
 
@@ -640,7 +581,7 @@ internal partial class AppMain
 
         internal int GetNumPlayedSamples()
         {
-            return 1;
+            return this.bgm != null ? (int)this.bgm.NumPlayedSamples : 1;
         }
 
         internal void Destroy()
@@ -717,38 +658,31 @@ internal partial class AppMain
 
     private static bool gsSoundFillBGMCache(int iListIndex)
     {
+        bool ready = true;
         foreach (string index in bgmLists[iListIndex])
         {
             SOUND_TABLE soundBgm = sound_bgm_list[index];
-            if (soundBgm.loop[0])
-            {
-                var intro = Sonic4Ep1.pInstance.Content.Load<Song>($"SOUND\\{soundBgm.filename[0]}\\Intro");
-                var loop = Sonic4Ep1.pInstance.Content.Load<Song>($"SOUND\\{soundBgm.filename[0]}\\Loop");
-                bgmPreloadedList.Add(soundBgm.filename[0] + "Intro", intro);
-                bgmPreloadedList.Add(soundBgm.filename[0] + "Loop", loop);
-            }
-            else
-            {
-                Song song = Sonic4Ep1.pInstance.Content.Load<Song>("SOUND\\" + soundBgm.filename[0] + "\\Intro");
-                bgmPreloadedList.Add(soundBgm.filename[0] + "Intro", song);
-            }
+            if (!CriAuBgmVoice.Preload(soundBgm.filename[0], soundBgm.loop[0]))
+                ready = false;
         }
 
-        return true;
+        return ready;
     }
 
-    private static Song gsSoundGetPreloadedBGM(string sName)
-    {
-        Song song;
-        return !bgmPreloadedList.TryGetValue(sName, out song) ? null : song;
-    }
+    private static int m_iBGMPreparingLevel = -1;
 
     public static bool GsSoundPrepareBGMForLevel(int iLevel)
     {
         if (m_iBGMPreparedLevel == iLevel)
             return true;
-        bgmPreloadedList.Clear();
-        gsSoundFillBGMCache(0);
+
+        if (m_iBGMPreparingLevel != iLevel)
+        {
+            CriAuBgmVoice.ClearPreload();
+            m_iBGMPreparingLevel = iLevel;
+        }
+
+        bool ready = gsSoundFillBGMCache(0);
         int iListIndex = 0;
         if (iLevel >= 0 && iLevel <= 3)
             iListIndex = 1;
@@ -758,8 +692,12 @@ internal partial class AppMain
             iListIndex = 3;
         else if (iLevel >= 12 && iLevel <= 15)
             iListIndex = 4;
-        if (iListIndex != 0)
-            gsSoundFillBGMCache(iListIndex);
+        if (iListIndex != 0 && !gsSoundFillBGMCache(iListIndex))
+            ready = false;
+
+        if (!ready)
+            return false;
+
         m_iBGMPreparedLevel = iLevel;
         return true;
     }
@@ -852,103 +790,6 @@ internal partial class AppMain
         }
     }
 
-#if MONOGAME
-    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "songs")]
-    extern static ref List<Song> MediaQueue_songs(MediaQueue c);
-#endif
-
-    public static void MediaPlayer_ActiveSongChanged(object sender, EventArgs e)
-    {
-#if FNA 
-        Microsoft.Xna.Framework.Media.MediaPlayer.IsRepeating = Microsoft.Xna.Framework.Media.MediaPlayer.Queue.ActiveSongIndex == 1;
-#endif
-#if MONOGAME 
-        if(MediaPlayer.Queue.ActiveSongIndex == 1)
-        {
-
-            MediaPlayer.IsRepeating = true;
-            MediaQueue_songs(MediaPlayer.Queue).RemoveAt(0);
-            MediaPlayer.Queue.ActiveSongIndex = 0;
-        }
-#endif
-    }
-
-    public static void MediaPlayer_MediaStateChanged(object sender, EventArgs e)
-    {
-        if (g_ao_sys_global.is_playing_device_bgm_music)
-            return;
-
-        MediaState state = Microsoft.Xna.Framework.Media.MediaPlayer.State;
-        AMS_CRIAUDIO_INTERFACE global = amCriAudioGetGlobal();
-        string str = Microsoft.Xna.Framework.Media.MediaPlayer.Queue.ActiveSong?.Name;
-        for (int index = 0; index < global.auply.Length; ++index)
-        {
-            var auply = global.auply[index];
-
-            //Console.WriteLine(CriAuPlayer.m_ActiveSong);
-            if (auply.type == CriAuPlayer.TYPE_BGM && auply.se_name == CriAuPlayer.m_ActiveSong) // TYPE_BGM
-            {
-                if (state == MediaState.Stopped && auply.status == CriAuPlayer.STATUS_PLAYING) // STATUS_PLAYING
-                {
-                    auply.m_stGMState = state;
-                    auply.status = CriAuPlayer.STATUS_PLAYEND; // STATUS_PLAYEND
-                }
-            }
-
-#if !FNA
-            if (state != MediaState.Playing && 
-                auply.m_stGMState != MediaState.Stopped && 
-                auply.m_bLoop && CriAuPlayer.m_songBGMLoop != null && 
-                str != CriAuPlayer.m_songBGMLoop?.Name)
-            {
-                MediaPlayer.Play(CriAuPlayer.m_songBGMLoop);
-                MediaPlayer.IsRepeating = true;
-            }
-#endif
-
-            //if (str != null && auply.se_name != null && (str == CriAuPlayer.m_songBGMIntro.Name || str == CriAuPlayer.m_songBGMLoop?.Name))
-            //{
-            //    double songDiuration = AppMain.CriAuPlayer.m_songBGMIntro.Duration.TotalMilliseconds;
-            //    double playPosition = MediaPlayer.PlayPosition.TotalMilliseconds;
-            //    if (state == MediaState.Paused && auply.m_stGMState != MediaState.Paused)
-            //    {
-            //        if (playPosition + 1.0 >= songDiuration || playPosition == 0.0)
-            //        {
-            //            if (!auply.m_bLoop && auply.se_name.IndexOf("_speedup") != -1)
-            //            {
-            //                string se_name = auply.se_name.Replace("_speedup", "");
-            //                auply.SetCue(se_name);
-            //                auply.Play();
-            //                break;
-            //            }
-
-            //            auply.m_stGMState = MediaState.Stopped;
-            //            auply.status = 3;
-            //            break;
-            //        }
-
-            //        if (auply.m_stGMState != MediaState.Playing)
-            //            break;
-
-            //        MediaPlayer.Resume();
-            //        break;
-            //    }
-
-            //    if (playPosition == 0.0 && !auply.m_bLoop && auply.se_name.IndexOf("_speedup") != -1)
-            //    {
-            //        string se_name = auply.se_name.Replace("_speedup", "");
-            //        auply.SetCue(se_name);
-            //        auply.Play();
-            //        break;
-            //    }
-
-            //    auply.m_stGMState = state;
-            //    auply.status = 3;
-            //    break;
-            //}
-        }
-    }
-
     private static readonly GSS_SND_SYS_MAIN_INFO gs_sound_sys_main_info;
     private static readonly GSS_SND_SCB[] gs_sound_scb_heap;
     private static readonly byte[] gs_sound_scb_heap_usage_flag;
@@ -970,8 +811,7 @@ internal partial class AppMain
 
     private static void GsSoundInit()
     {
-        Microsoft.Xna.Framework.Media.MediaPlayer.MediaStateChanged += new EventHandler<EventArgs>(MediaPlayer_MediaStateChanged);
-        Microsoft.Xna.Framework.Media.MediaPlayer.ActiveSongChanged += MediaPlayer_ActiveSongChanged;
+        CriAuBgmVoice.SystemInit();
         if (sound_fx_list == null)
         {
             var modernSfx = SSave.CreateInstance().GetRemaster().ModernSoundEffects;
@@ -1260,9 +1100,8 @@ internal partial class AppMain
 
     private static void GsSoundPlayBgm(GSS_SND_SCB scb, string bgm_name, int fade_frame)
     {
-#if WASM
-        fade_frame = 0;
-#endif
+        if (!CriAuBgmVoice.SupportsFade)
+            fade_frame = 0;
 
         scb.cur_pause_level = 0U;
         if (scb.snd_data_type == 1 || g_ao_sys_global.is_playing_device_bgm_music)
@@ -1274,16 +1113,6 @@ internal partial class AppMain
         {
             criAuPlayer.ReleaseCue();
             criAuPlayer.ResetParameters();
-        }
-
-        for (int index = 0; index < global.auply.Length; ++index)
-        {
-            if (global.auply[index].se_name == bgm_name)
-            {
-                global.auply[index].ReleaseCue();
-                global.auply[index].ResetParameters();
-                break;
-            }
         }
 
         amCriAudioStrmPlay((uint)scb.auply_no, bgm_name);
@@ -1340,9 +1169,6 @@ internal partial class AppMain
     private static void GsSoundSetVolume(int snd_type, float vol)
     {
         gs_sound_volume[snd_type] = vol;
-        if (snd_type != 1)
-            return;
-        SoundEffect.MasterVolume = vol;
     }
 
     private static void GsSoundScbSetVolume(GSS_SND_SCB scb, float vol)
@@ -1516,6 +1342,12 @@ internal partial class AppMain
         }
         else if (((int)gs_sound_se_handle_error.flag & 16) != 0)
             GsSoundFreeSeHandle(gs_sound_se_handle_error);
+
+        for (int index = 0; index < 8; ++index)
+        {
+            if (((int)gs_sound_scb_heap[index].flag & 1) != 0)
+                amCriAudioGetGlobal().auply[gs_sound_scb_heap[index].auply_no].Update();
+        }
 
         for (int index = 0; index < 8; ++index)
         {
@@ -1850,7 +1682,8 @@ internal partial class AppMain
     {
         if (se_handle.au_player == null)
             return;
-        se_handle.au_player.SetVolume(se_handle.snd_ctrl_param.volume * se_handle.snd_ctrl_param.fade_vol *
+        se_handle.au_player.SetVolume(gs_sound_volume[1] * se_handle.snd_ctrl_param.volume *
+                                      se_handle.snd_ctrl_param.fade_vol *
                                       se_handle.snd_ctrl_param.fade_sub_vol * gsSoundGetGlobalVolume());
         se_handle.au_player.SetPitch(se_handle.snd_ctrl_param.pitch);
     }

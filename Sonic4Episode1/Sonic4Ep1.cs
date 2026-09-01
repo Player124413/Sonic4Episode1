@@ -19,8 +19,8 @@ using GameFramework;
 using System.Linq;
 
 
-#if WINDOWSPHONE7_5 || WASM
-#if !WASM
+#if WINDOWSPHONE7_5 || WASM || IOS || ANDROID
+#if WINDOWSPHONE7_5
 using System.Windows;
 #endif
 using Microsoft.Devices.Sensors;
@@ -51,7 +51,7 @@ public class Sonic4Ep1 : Game
 
     private string storePath;
 
-#if WINDOWSPHONE7_5 || WASM
+#if WINDOWSPHONE7_5 || WASM || IOS || ANDROID
     private Accelerometer _accelerometer;
 #endif
 
@@ -85,7 +85,14 @@ public class Sonic4Ep1 : Game
 #if WINDOWSPHONE7_5
         this.graphics.PreferredBackBufferWidth = 533;
         this.graphics.PreferredBackBufferHeight = 320;
-#elif IOS || WINDOWS_UAP
+#elif IOS
+        var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+        GetFixedWidthBackBuffer(displayMode.Width, displayMode.Height, out var preferredWidth, out var preferredHeight);
+        this.graphics.PreferredBackBufferWidth = preferredWidth;
+        this.graphics.PreferredBackBufferHeight = preferredHeight;
+
+        System.Diagnostics.Debug.WriteLine(displayMode);
+#elif WINDOWS_UAP
         this.graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         this.graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 #else
@@ -102,7 +109,21 @@ public class Sonic4Ep1 : Game
         this.graphics.PreparingDeviceSettings += (object sender, PreparingDeviceSettingsEventArgs e) =>
         {
             e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
+#if !IOS && !ANDROID
             e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
+#endif
+
+#if IOS
+            /* FNA subscribes to ClientSizeChanged itself and re-pins the back buffer to the window,
+             * which beats PreferredBackBuffer. This event is raised at the end of
+             * INTERNAL_CreateGraphicsDeviceInformation, after that has happened and on both the
+             * CreateDevice and ApplyChanges paths, so it is the only place the fixed width sticks.
+             */
+            var pp = e.GraphicsDeviceInformation.PresentationParameters;
+            GetFixedWidthBackBuffer(pp.BackBufferWidth, pp.BackBufferHeight, out var bbWidth, out var bbHeight);
+            pp.BackBufferWidth = bbWidth;
+            pp.BackBufferHeight = bbHeight;
+#endif
 
 #if ANDROID
             var largestSupported = e.GraphicsDeviceInformation.Adapter.SupportedDisplayModes
@@ -134,6 +155,24 @@ public class Sonic4Ep1 : Game
         this.Window.ClientSizeChanged += OnClientSizeChanged;
     }
 
+#if IOS
+    // TODO(wam): revisit when ultrawide gets a real pass
+    private const int FixedBackBufferWidth = 1920;
+
+    // the surface arrives portrait when the orientation lock has not settled yet, and we only ever
+    // run landscape, so take the long side as the width rather than trusting which way round it is
+    private static void GetFixedWidthBackBuffer(int surfaceWidth, int surfaceHeight, out int width, out int height)
+    {
+        var longSide = Math.Max(surfaceWidth, surfaceHeight);
+        var shortSide = Math.Min(surfaceWidth, surfaceHeight);
+
+        width = FixedBackBufferWidth;
+        height = longSide > 0
+            ? (int)Math.Round(FixedBackBufferWidth * (double)shortSide / longSide)
+            : 1080;
+    }
+#endif
+
     private bool resizedFlag = false;
     private int newWidth = 0, newHeight = 0;
     private void OnClientSizeChanged(object sender, EventArgs e)
@@ -148,7 +187,7 @@ public class Sonic4Ep1 : Game
         //LiveFeature.GAME = this;
         //LiveFeature.getInstance();
 
-#if WINDOWSPHONE7_5
+#if WINDOWSPHONE7_5 || WASM || IOS || ANDROID
         try
         {
             if (_accelerometer == null)

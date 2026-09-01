@@ -48,13 +48,12 @@ internal static partial class DmTitleOp
         ObjDrawSetNNCommandStateTbl(4U, 4U, true);
         ObjDrawSetNNCommandStateTbl(5U, 5U, true);
         AoActSysClearPeak();
+        dmTitleOpSelectVariant();
         GmGameDBuildModelBuildInit();
         dm_titleop_obj_3d_list = GmGameDBuildRegBuildModel((AMS_AMB_HEADER)dm_titleop_mapfar_data[0], (AMS_AMB_HEADER)dm_titleop_mapfar_data[1], 0U);
-        dm_titleop_water_obj_3d_list = GmGameDBuildRegBuildModel((AMS_AMB_HEADER)dm_titleop_mapfar_data[3], (AMS_AMB_HEADER)dm_titleop_mapfar_data[1], 0U);
-#if GMD_MAP_FAR_USE_SEA_SHADER
-        gmMapFarLoadSeaTextures((AMS_AMB_HEADER)dm_titleop_mapfar_data[1]);
-        gmMapFarBuildSeaShader();
-#endif
+        dm_titleop_water_obj_3d_list = GmGameDBuildRegBuildModel(
+            (AMS_AMB_HEADER)dm_titleop_mapfar_data[3], (AMS_AMB_HEADER)dm_titleop_mapfar_data[1],
+            0U, dm_titleop_variant.sea_samples_the_scene ? NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 : 0U);
     }
 
     internal static bool DmTitleOpBuildCheck()
@@ -346,7 +345,7 @@ internal static partial class DmTitleOp
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork1 = DMM_TITLEOP_CREATE_3D_OBJ(24576, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_SKYT");
         OBS_OBJECT_WORK obj_work1 = (OBS_OBJECT_WORK)titleopObj3DnnWork1;
         obj_work1.obj_type = 1;
-        ObjObjectCopyAction3dNNModel(obj_work1, dm_titleop_obj_3d_list[0], titleopObj3DnnWork1.obj_3d);
+        ObjObjectCopyAction3dNNModel(obj_work1, dm_titleop_obj_3d_list[dm_titleop_variant.sky_top_index], titleopObj3DnnWork1.obj_3d);
         obj_work1.obj_3d.command_state = 3U;
         ObjAction3dNNMaterialMotionLoad(titleopObj3DnnWork1.obj_3d, 0, null, null, 0, (AMS_AMB_HEADER)dm_titleop_mapfar_data[2]);
         ObjDrawObjectActionSet3DNNMaterial(obj_work1, 0);
@@ -355,7 +354,7 @@ internal static partial class DmTitleOp
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork2 = DMM_TITLEOP_CREATE_3D_OBJ(16384, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_SKYB");
         OBS_OBJECT_WORK obj_work2 = (OBS_OBJECT_WORK)titleopObj3DnnWork2;
         obj_work2.obj_type = 1;
-        ObjObjectCopyAction3dNNModel(obj_work2, dm_titleop_obj_3d_list[0], titleopObj3DnnWork2.obj_3d);
+        ObjObjectCopyAction3dNNModel(obj_work2, dm_titleop_obj_3d_list[dm_titleop_variant.sky_bottom_index], titleopObj3DnnWork2.obj_3d);
         obj_work2.obj_3d.command_state = 1U;
         ObjAction3dNNMaterialMotionLoad(titleopObj3DnnWork2.obj_3d, 0, null, null, 0, (AMS_AMB_HEADER)dm_titleop_mapfar_data[2]);
         ObjDrawObjectActionSet3DNNMaterial(obj_work2, 0);
@@ -378,13 +377,17 @@ internal static partial class DmTitleOp
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = DMM_TITLEOP_CREATE_3D_OBJ(24832, 0, () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_ROCKT");
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)titleopObj3DnnWork;
         obj_work.obj_type = 1;
-        ObjObjectCopyAction3dNNModel(obj_work, dm_titleop_obj_3d_list[(int)(1U + type)], titleopObj3DnnWork.obj_3d);
+        ObjObjectCopyAction3dNNModel(obj_work, dm_titleop_obj_3d_list[dm_titleop_variant.rock_top_index + (int)type], titleopObj3DnnWork.obj_3d);
         obj_work.obj_3d.command_state = 3U;
-        obj_work.disp_flag |= 5242880U;
-        obj_work.disp_flag |= 268435456U;
+        obj_work.disp_flag |= OBD_DISP_NODIRFLIP | OBD_DISP_NODRAWSCALE;
+        if (dm_titleop_variant.rock_top_no_clip)
+            obj_work.disp_flag |= OBD_DISP_NOCLIP;
         obj_work.ppOut = dmTitleOpObjRockDraw;
         titleopObj3DnnWork.rock_setting = dm_titleop_rock_setting[(int)type];
         titleopObj3DnnWork.rock_setting_num = dm_titleop_rock_setting_num[(int)type];
+
+        if (!dm_titleop_variant.draws_bottom_rock)
+            return;
 
         var top3d_work = DMM_TITLEOP_CREATE_3D_OBJ(DMD_TITLEOP_TASK_PRIO_FAR_ROCK_B, DMD_TITLEOP_TASK_GROUP_FAR_ROCK_B,
                         () => new DMS_TITLEOP_OBJ_3DNN_WORK(), "DM_TOP_ROCKB");
@@ -392,7 +395,7 @@ internal static partial class DmTitleOp
         obj_work.obj_type = DMD_TITLEOP_OBJTYPE_MAPFAR;
         // モデルロード
         ObjObjectCopyAction3dNNModel(obj_work,
-                        dm_titleop_obj_3d_list[IDB_MAPFAR_ZONE1_MDL_Z1_ROCK_A_T_D_INO + type],
+                        dm_titleop_obj_3d_list[dm_titleop_variant.rock_bottom_index + (int)type],
                         top3d_work.obj_3d);
         obj_work.obj_3d.command_state = DMD_TITLEOP_DRAW_CMD_STATE_MAPFAR_B;
         //obj_work.disp_flag |= OBD_DISP_NODIRFLIP | OBD_DISP_NOSCALE | OBD_DISP_NODRAWSCALE;
@@ -414,10 +417,6 @@ internal static partial class DmTitleOp
         obj_work.obj_3d.command_state = 2U;
         ObjAction3dNNMaterialMotionLoad(titleopObj3DnnWork.obj_3d, 0, null, null, 1, (AMS_AMB_HEADER)dm_titleop_mapfar_data[2]);
         ObjDrawObjectActionSet3DNNMaterial(obj_work, 0);
-#if GMD_MAP_FAR_USE_SEA_SHADER
-        obj_work.obj_3d.material_cb_func = _gmMapFarSeaMaterialCallback;
-        obj_work.obj_3d.material_cb_param = null;
-#endif
         obj_work.obj_3d.mat_speed = 0.2f;
         obj_work.dir.y = 49152;
         obj_work.disp_flag |= 5308420U;
@@ -504,14 +503,28 @@ internal static partial class DmTitleOp
         amDrawSetBGColor(dm_titleop_clear_color);
     }
 
+    // dmTitleOp.cpp:1913-1920. mobile never takes this branch because it never sets the flag
+    private static void dmTitleOpRegistFallShaderSetting(OBS_OBJECT_WORK obj_work)
+    {
+        if (obj_work.obj_3d == null)
+            return;
+        if ((obj_work.obj_3d.drawflag_ex & NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1) == 0U)
+            return;
+
+        ObjDraw3DNNUserFunc(_dmTitleOpDrawFallShaderPreSettingUserFunc, null, 0,
+            obj_work.obj_3d.command_state);
+    }
+
     internal static void dmTitleOpObjDraw(OBS_OBJECT_WORK obj_work)
     {
+        dmTitleOpRegistFallShaderSetting(obj_work);
         ObjDrawActionSummary(obj_work);
     }
 
     internal static void dmTitleOpObjRockDraw(OBS_OBJECT_WORK obj_work)
     {
         DMS_TITLEOP_OBJ_3DNN_WORK titleopObj3DnnWork = (DMS_TITLEOP_OBJ_3DNN_WORK)obj_work;
+        dmTitleOpRegistFallShaderSetting(obj_work);
         for (int index = 0; index < titleopObj3DnnWork.rock_setting_num; ++index)
         {
             obj_work.pos.Assign(titleopObj3DnnWork.rock_setting[index].pos);
@@ -538,16 +551,14 @@ internal static partial class DmTitleOp
         if (target.width == 0)
             return;
         amRenderCopyTarget(target, color);
-#if GMD_MAP_FAR_USE_SEA_SHADER
-        _gm_map_far_sea_render_target = target;
-#endif
     }
 
-    internal static void dmTitleOpDrawFallShaderPreSettingUserFunc(ref object data)
+    internal static void dmTitleOpDrawFallShaderPreSettingUserFunc(object data)
     {
-        if ((_am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target).width == 0)
+        AMS_RENDER_TARGET target = _am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target;
+        if (target.width == 0)
             return;
-        amDrawGetProjectionMatrix();
+        mppBindFallShaderUserSampler(target);
     }
 
     internal static void dmTitleOpCamera(OBS_CAMERA camera)

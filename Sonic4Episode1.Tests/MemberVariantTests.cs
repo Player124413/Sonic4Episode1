@@ -5,6 +5,7 @@ namespace Sonic4Episode1.Tests;
 // The pipeline half of this is checked by `content check`, which asserts the sparse sibling's
 // members line up with the base indices the manifest names. This is the runtime half: the manifest
 // parse, the screen-level gate, and the splice that puts a sibling member in front of a base one.
+[Collection(FsVariantCollection.Name)]
 public class MemberVariantTests
 {
     private const string Cpit = "G_COM/CPIT/CPIT_MAIN.AMB";

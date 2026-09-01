@@ -41,16 +41,17 @@ internal partial class AppMain
                 var ext = "";
                 var fileNames = new string[] {
                     fName,
-                    Path.ChangeExtension(fName, ".png"), 
+                    Path.ChangeExtension(fName, ".png"),
                     Path.ChangeExtension(fName, ".dds"), // we leave these formats in even if they're not supported so we can at least
-                    Path.ChangeExtension(fName, ".pvr")  // throw an error if the game tries to load them, instead of just silently failing 
+                    Path.ChangeExtension(fName, ".pvr"), // throw an error if the game tries to load them, instead of just silently failing
+                    Path.ChangeExtension(fName, ".ast")
                 };
 
                 for (int i = 0; i < amb.files.Length; i++)
                 {
                     for (int j = 0; j < fileNames.Length; j++)
                     {
-                        if (string.Compare(Path.GetFileName(amb.files[i]), fileNames[j],
+                        if (string.Compare(mppAmbMemberName(amb.files[i]), fileNames[j],
                             StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             ext = Path.GetExtension(fileNames[j]);
@@ -125,6 +126,45 @@ internal partial class AppMain
         BitConverter.GetBytes(flags & ~MPP_DDSD_PITCH).CopyTo(data, offset + 8);
     }
 
+#if MONOGAME
+    // FNA has Texture2D.ASTCFromStreamEXT for this; MonoGame carries the surface formats but no
+    // loader, so the header walk is here instead. Keep it in step with FNA's Texture.ParseASTC
+    private const uint MPP_ASTC_MAGIC = 0x5CA1AB13;
+    private const int MPP_ASTC_HEADER_SIZE = 16;
+
+    private static Texture2D mppAstcDecode(byte[] data, int offset, int length)
+    {
+        if (length < MPP_ASTC_HEADER_SIZE || BitConverter.ToUInt32(data, offset) != MPP_ASTC_MAGIC)
+            throw new InvalidDataException("Not an ASTC!");
+
+        int blockX = data[offset + 4];
+        int blockY = data[offset + 5];
+        int blockZ = data[offset + 6];
+
+        SurfaceFormat format;
+        if (blockX == 4 && blockY == 4 && blockZ == 1)
+            format = SurfaceFormat.Astc4X4Rgba;
+        else if (blockX == 6 && blockY == 6 && blockZ == 1)
+            format = SurfaceFormat.Astc6X6Rgba;
+        else
+            throw new InvalidDataException(
+                $"Unsupported ASTC block footprint: {blockX}x{blockY}x{blockZ}");
+
+        int width = mppAstcRead24(data, offset + 7);
+        int height = mppAstcRead24(data, offset + 10);
+
+        // one level, so whatever is left after the header is the whole surface
+        var texture = new Texture2D(m_game.GraphicsDevice, width, height, false, format);
+        texture.SetData(0, null, data, offset + MPP_ASTC_HEADER_SIZE, length - MPP_ASTC_HEADER_SIZE);
+        return texture;
+    }
+
+    private static int mppAstcRead24(byte[] data, int offset)
+    {
+        return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16);
+    }
+#endif
+
     public static Texture2D amTextureDecode(byte[] data, int offset, int length, string ext)
     {
         if (ext.Equals(".dds", StringComparison.InvariantCultureIgnoreCase))
@@ -139,6 +179,17 @@ internal partial class AppMain
             return (Texture2D)DdsKtxXna.DdsKtxLoader.FromStream(m_game.GraphicsDevice, memoryStream);
 #else
             throw new InvalidOperationException("DDS textures are not supported on this platform.");
+#endif
+        }
+
+        if (ext.Equals(".ast", StringComparison.InvariantCultureIgnoreCase))
+        {
+#if FNA
+            return Texture2D.ASTCFromStreamEXT(m_game.GraphicsDevice, memoryStream);
+#elif MONOGAME
+            return mppAstcDecode(data, offset, length);
+#else
+            throw new InvalidOperationException("ASTC textures are not supported on this platform.");
 #endif
         }
 

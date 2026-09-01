@@ -31,7 +31,7 @@
     {
         AMS_AME_RUNTIME_WORK amsAmeRuntimeWork = _am_work_ref[_am_work_alloc];
         ++_am_work_alloc;
-        if (_am_work_alloc >= 1024)
+        if (_am_work_alloc >= AMD_AME_WORK_SIZE)
             _am_work_alloc = 0;
         amsAmeRuntimeWork.Clear();
         return amsAmeRuntimeWork;

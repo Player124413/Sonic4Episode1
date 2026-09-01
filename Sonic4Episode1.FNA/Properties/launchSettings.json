@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sonic4Episode1.FNA": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "FNA3D_FORCE_DRIVER": "D3D11"
+      }
+    }
+  }
+}

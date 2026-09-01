@@ -1,21 +1,30 @@
 <Project>
 
   <!--
-    Compiles Shaders\*.fx to D3D9 effect blobs and copies them next to the game as
-    Content\Shaders\*.fxb.
+    Compiles Shaders\*.fx and copies the result next to the game as Content\Shaders\*.
 
-    FNA's ContentManager resolves Content.Load<Effect>("Shaders\name") to a raw .fxb:
-    effectExtensions in Submodules/FNA/src/Content/ContentManager.cs:98 lists ".fxb", and
-    the loader falls through to new Effect(device, data) at :362. So no .xnb wrapper and
-    no MGCB is needed for the FNA-family backends.
+    Two backends, because the two families do not read the same blob:
 
-    MonoGame has no such fallthrough and needs MGCB-built .xnb; that path is not wired up
-    yet, so the Android backend will log a shader load failure and fall back.
+    FNA takes a raw D3D9 effect from fxc. Its ContentManager resolves
+    Content.Load<Effect>("Shaders\name") straight to a .fxb, effectExtensions in
+    Submodules/FNA/src/Content/ContentManager.cs:98 lists it and the loader falls through to
+    new Effect(device, data) at :362, so no .xnb wrapper is involved.
+
+    MonoGame has no such fallthrough and its Effect ctor wants MGFX, so that side goes through
+    mgfxc into .mgfxo. Both are loaded as a raw stream at runtime, see mppLoadStdShader, so
+    neither needs MGCB.
+
+    Set ShaderBackend before importing. ContentItemType picks how the blobs are packaged and
+    means the same thing it does in Content.targets.
   -->
 
   <PropertyGroup>
     <ShadersDir>$(MSBuildThisFileDirectory)</ShadersDir>
-    <ShaderOutDir>$(ShadersDir)FNA\</ShaderOutDir>
+    <ShaderBackend Condition="'$(ShaderBackend)' == '' AND '$(ContentItemType)' == 'AndroidAsset'">MonoGame</ShaderBackend>
+    <ShaderBackend Condition="'$(ShaderBackend)' == ''">FNA</ShaderBackend>
+    <ShaderOutDir>$(ShadersDir)$(ShaderBackend)\</ShaderOutDir>
+    <ShaderExtension Condition="'$(ShaderBackend)' == 'MonoGame'">.mgfxo</ShaderExtension>
+    <ShaderExtension Condition="'$(ShaderExtension)' == ''">.fxb</ShaderExtension>
     <!-- SM2 keeps us inside Reach; the effects are small enough to fit ps_2_0 -->
     <ShaderModel Condition="'$(ShaderModel)' == ''">SM2</ShaderModel>
   </PropertyGroup>
@@ -25,9 +34,9 @@
   </ItemGroup>
 
   <!-- the NN standard shader is not built here, run Shaders/nn/Build-Permutations.ps1
-       to produce its permutations into Shaders/FNA/nnstd/ -->
+       to produce its permutations into Shaders/$(ShaderBackend)/nnstd/ -->
 
-  <Target Name="LocateFxc">
+  <Target Name="LocateFxc" Condition="'$(ShaderBackend)' == 'FNA'">
     <ItemGroup>
       <FxcCandidate Include="$(MSBuildProgramFiles32)\Windows Kits\10\bin\*\x64\fxc.exe" />
       <FxcCandidate Include="$(ProgramFiles)\Windows Kits\10\bin\*\x64\fxc.exe" />
@@ -40,16 +49,40 @@
     <Warning Condition="'$(FxcPath)' == ''" Text="fxc.exe not found; shaders will not be rebuilt. Install the Windows SDK if you need to change them." />
   </Target>
 
+  <!-- Shaders/mgfx/Build-Mgfxc.ps1 puts a patched mgfxc here, which is the only one that can
+       compile an effect with a struct uniform, see docs/monogame-mojoshader-ctab.md. water and
+       waterfall have none, so a global mgfxc is still good enough for them and is worth falling
+       back to. Neither is on the restore graph, so absence is a warning and stale blobs rather
+       than a build failure, the same way a missing fxc is treated -->
+  <Target Name="LocateMgfxc" Condition="'$(ShaderBackend)' == 'MonoGame'">
+    <PropertyGroup>
+      <MgfxcLocalPath>$(ShadersDir)mgfx\tool\mgfxc.exe</MgfxcLocalPath>
+      <MgfxcPath Condition="Exists('$(MgfxcLocalPath)')">$(MgfxcLocalPath)</MgfxcPath>
+    </PropertyGroup>
+    <!-- it installs as `mgfxc`, not `dotnet-mgfxc`, so `dotnet mgfxc` does not find it. Called
+         with no arguments it prints usage and exits 1, which is enough to say it is there -->
+    <Exec Condition="'$(MgfxcPath)' == ''" Command="mgfxc" IgnoreExitCode="true"
+          StandardOutputImportance="low" StandardErrorImportance="low" EchoOff="true">
+      <Output TaskParameter="ExitCode" PropertyName="MgfxcExitCode" />
+    </Exec>
+    <PropertyGroup>
+      <MgfxcPath Condition="'$(MgfxcPath)' == '' AND '$(MgfxcExitCode)' == '1'">mgfxc</MgfxcPath>
+    </PropertyGroup>
+    <Warning Condition="'$(MgfxcPath)' == ''" Text="mgfxc not found; MonoGame shaders will not be rebuilt. Run: Shaders\mgfx\Build-Mgfxc.ps1" />
+  </Target>
+
   <!-- the condition belongs on the Exec, not the target: MSBuild evaluates a target's
-       Condition before running DependsOnTargets, so gating here would skip LocateFxc -->
+       Condition before running DependsOnTargets, so gating here would skip the locate steps -->
   <Target Name="CompileShaders"
-          DependsOnTargets="LocateFxc"
+          DependsOnTargets="LocateFxc;LocateMgfxc"
           BeforeTargets="BeforeBuild"
           Inputs="@(ShaderSource);$(ShadersDir)Macros.fxh"
-          Outputs="@(ShaderSource->'$(ShaderOutDir)%(Filename).fxb')">
-    <MakeDir Condition="'$(FxcPath)' != ''" Directories="$(ShaderOutDir)" />
-    <Exec Condition="'$(FxcPath)' != ''"
+          Outputs="@(ShaderSource->'$(ShaderOutDir)%(Filename)$(ShaderExtension)')">
+    <MakeDir Condition="'$(FxcPath)' != '' OR '$(MgfxcPath)' != ''" Directories="$(ShaderOutDir)" />
+    <Exec Condition="'$(ShaderBackend)' == 'FNA' AND '$(FxcPath)' != ''"
           Command="&quot;$(FxcPath)&quot; /nologo /T fx_2_0 /D $(ShaderModel)=1 /Fo &quot;$(ShaderOutDir)%(ShaderSource.Filename).fxb&quot; &quot;%(ShaderSource.FullPath)&quot;" />
+    <Exec Condition="'$(ShaderBackend)' == 'MonoGame' AND '$(MgfxcPath)' != ''"
+          Command="&quot;$(MgfxcPath)&quot; &quot;%(ShaderSource.FullPath)&quot; &quot;$(ShaderOutDir)%(ShaderSource.Filename).mgfxo&quot; /Profile:OpenGL /Defines:$(ShaderModel)=1" />
   </Target>
 
   <!-- globbed inside a target so a shader added this build has its .fxb by the time this runs.
@@ -60,18 +93,34 @@
           DependsOnTargets="CompileShaders"
           BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <ShaderBlob Include="$(ShaderOutDir)*.fxb" />
+      <ShaderBlob Include="$(ShaderOutDir)*$(ShaderExtension)" />
+      <!-- own subdirectory since mppLoadStdShader opens a permutation by its shader key name -->
+      <NnStdShaderBlob Include="$(ShaderOutDir)nnstd\*$(ShaderExtension)" />
+
       <!-- metadata is qualified with the item name; a bare %(Filename) here batches over every
            existing Content item and drags unrelated files into Content\Shaders -->
-      <Content Include="@(ShaderBlob)"
+      <Content Condition="'$(ContentItemType)' != 'AndroidAsset'"
+               Include="@(ShaderBlob)"
                Link="Content\Shaders\%(ShaderBlob.Filename)%(ShaderBlob.Extension)"
                CopyToOutputDirectory="PreserveNewest" />
-
-      <!-- own subdirectory since mppLoadStdShader opens a permutation by its shader key name -->
-      <NnStdShaderBlob Include="$(ShaderOutDir)nnstd\*.fxb" />
-      <Content Include="@(NnStdShaderBlob)"
+      <Content Condition="'$(ContentItemType)' != 'AndroidAsset'"
+               Include="@(NnStdShaderBlob)"
                Link="Content\Shaders\nnstd\%(NnStdShaderBlob.Filename)%(NnStdShaderBlob.Extension)"
                CopyToOutputDirectory="PreserveNewest" />
+
+      <!-- same asset pack as the content tree, not the base apk: DirectoryRoot.Root points at the
+           pack, so anything outside it is not on a path AndroidTitleContainer can open. Nothing
+           draws before the pack is there anyway, Sonic4Activity only calls Run() once it lands -->
+      <AndroidAsset Condition="'$(ContentItemType)' == 'AndroidAsset'"
+                    Include="@(ShaderBlob)"
+                    Link="Assets\Content\Shaders\%(ShaderBlob.Filename)%(ShaderBlob.Extension)"
+                    AssetPack="$(ContentAssetPack)"
+                    DeliveryType="$(ContentAssetPackDelivery)" />
+      <AndroidAsset Condition="'$(ContentItemType)' == 'AndroidAsset'"
+                    Include="@(NnStdShaderBlob)"
+                    Link="Assets\Content\Shaders\nnstd\%(NnStdShaderBlob.Filename)%(NnStdShaderBlob.Extension)"
+                    AssetPack="$(ContentAssetPack)"
+                    DeliveryType="$(ContentAssetPackDelivery)" />
     </ItemGroup>
   </Target>
 

@@ -69,7 +69,8 @@ internal partial class AppMain
         gmsEnemy3DWork.ene_com.col_work.obj_col.flag |= 134217728U;
         work.pos.z = -131072;
         work.ppFunc = null;
-        work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetPoleL);
+        if (!gm_gmk_as_console)
+            work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetPoleL);
         return work;
     }
 
@@ -89,7 +90,8 @@ internal partial class AppMain
         gmsEnemy3DWork.ene_com.col_work.obj_col.flag |= 134217728U;
         work.pos.z = -131072;
         work.ppFunc = null;
-        work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetPoleR);
+        if (!gm_gmk_as_console)
+            work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetPoleR);
         return work;
     }
 
@@ -109,7 +111,8 @@ internal partial class AppMain
         gmsEnemy3DWork.ene_com.col_work.obj_col.flag |= 134217728U;
         work.pos.z = -131072;
         work.ppFunc = null;
-        work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeN);
+        if (!gm_gmk_as_console)
+            work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeN);
         return work;
     }
 
@@ -131,7 +134,8 @@ internal partial class AppMain
         gmsEnemy3DWork.ene_com.col_work.obj_col.flag |= 134217728U;
         work.pos.z = -131072;
         work.ppFunc = null;
-        work.ppOut = eve_rec.id != 95 ? new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeTR) : new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeTL);
+        if (!gm_gmk_as_console)
+            work.ppOut = eve_rec.id != 95 ? new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeTR) : new MPP_VOID_OBS_OBJECT_WORK(gmGmkPulleyDrawSetRopeTL);
         return work;
     }
 

@@ -84,6 +84,19 @@
         if (((int)obj_work.disp_flag & 32) != 0)
             return;
         uint lightColor = GmMainGetLightColor();
+
+        // gmGmkBridge.cpp:349. GMD_GMK_BRIDGE_PRIM is a bare (1) with no platform expression, but
+        // it is the iPhone fork's value: the prim arm hardcodes UV 0.1..0.9 under SEGA's own
+        // "(暫定)", provisional, and console ships a 256x128 atlas holding two planks side by side,
+        // GMK_BRIDGE at u 0.546..0.963 and GMK_BRIDGE_CUT at u 0.045..0.455. Those UVs smear across
+        // both planks and the gap. The #else draws one model per plank, which is what the per-plank
+        // UVs and the otherwise unreferenced CUT model are for. See docs/console-gimmicks.md.
+        if (gm_gmk_as_console)
+        {
+            gmGmkBridgeDrawModels(obj_work, num1, num2, denom1, denom2, v1);
+            return;
+        }
+
         NNS_TEXLIST texlist = obj_work.obj_3d.texlist;
         VecFx32 vecFx32 = new VecFx32();
         vecFx32.x = obj_work.pos.x + obj_work.ofst.x;
@@ -146,6 +159,33 @@
         amMatrixPop();
         GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Release(prim);
         GlobalPool<NNS_MATRIX>.Release(nnsMatrix);
+    }
+
+    // the #else arm: one ObjDrawActionSummary per plank, walking ofst.x along by the gap. Same
+    // ofst.y sag as the prim arm computes, so the two differ only in what they issue.
+    private static void gmGmkBridgeDrawModels(
+      OBS_OBJECT_WORK obj_work,
+      int num1,
+      int num2,
+      int denom1,
+      int denom2,
+      int v1)
+    {
+        for (int index1 = 0; index1 < (short)obj_work.user_work; ++index1)
+        {
+            for (int index2 = 0; index2 < 5; ++index2)
+            {
+                if (obj_work.user_timer != 0)
+                {
+                    int numer = index1 * 53248 * 5 + index2 * 53248;
+                    int v2 = numer >= num2 ? (numer <= num2 ? 4096 : FX_Div(num1 - numer, denom2)) : FX_Div(numer, denom1);
+                    obj_work.ofst.y = 26624 + FX_Mul(v1, v2) * obj_work.user_timer / 16;
+                }
+
+                ObjDrawActionSummary(obj_work);
+                obj_work.ofst.x += 53248;
+            }
+        }
     }
 
     public static void gmGmkBridgeDecoDrawFunc(OBS_OBJECT_WORK obj_work)

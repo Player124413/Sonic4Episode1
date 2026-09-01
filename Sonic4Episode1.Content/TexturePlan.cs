@@ -17,7 +17,8 @@ internal readonly struct TexturePlan
 }
 
 // the first entry of `encode` whose predicate holds wins, so an empty `encode` can't change
-// anything; a block compressed source only ever matches its own format, never re-encodes lossy to lossy
+// anything. BC never re-encodes lossy to lossy; ASTC is the one exception, because the console
+// variants only exist as DDS and an ASTC device cannot upload those at all
 internal static class TexturePlanner
 {
     public static TexturePlan Choose(
@@ -80,6 +81,18 @@ internal static class TexturePlanner
 
             case TextureFormat.Bc3:
                 return Blocks(source) && !TextureFormats.IsBlockCompressed(source.Format);
+
+            // ASTC pads a partial block itself, so unlike BC there is no dimension gate. The alpha
+            // test is not about alpha: every ASTC footprint carries full 8-bit alpha. It is a proxy
+            // for how much detail a texture has, and 6x6's 3.56bpp cannot hold the busy ones.
+            // Measured, along with what happens without it: docs/astc-encoding.md.
+            // BC sources take a second lossy hop; only ASTC is refused, so a footprint never churns
+            case TextureFormat.Astc6x6:
+                return !TextureFormats.IsAstc(source.Format)
+                    && alpha() != AlphaShape.Partial;
+
+            case TextureFormat.Astc4x4:
+                return !TextureFormats.IsAstc(source.Format);
 
             // BC2/BC7 are never encode targets: nothing produces DXT3 deliberately, and BC7 is
             // parseable but never capability-checked, so it'd risk a black texture without BPTC

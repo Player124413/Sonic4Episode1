@@ -7,6 +7,7 @@ internal partial class AppMain
         public NNS_TEXLIST texlist;
         public uint sub_obj_type;
         public uint flag;
+        public uint flag_ex;
         public NNS_MATERIALCALLBACK_FUNC material_func;
         public NNS_MOTION motion;
         public float frame;

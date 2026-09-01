@@ -7,6 +7,10 @@ internal partial class AppMain
         public NNS_TEXLIST texlist;
         public uint sub_obj_type;
         public uint flag;
+
+        // NNF_DRAWOBJ is 64 bit and this port keeps it as two words; everything from bit 32 up,
+        // which is where the MATCTRL and SHADOWMAP bits live, arrives here
+        public uint flag_ex;
         public NNS_MATERIALCALLBACK_FUNC material_func;
         public float scaleZ;
         public readonly object holder;

@@ -32,6 +32,49 @@ public class BigEndianAmbTests
         Assert.False(ReadArchive("GMK_SPRING_MTN.AMB").big_endian);
     }
 
+    // SEGA declares the byte order in flag[0], which is why it is a byte array: amBindConv's swap
+    // list covers every scalar in the header except that one
+    [Fact]
+    public void KeepsTheDeclaredEndianFlag()
+    {
+        var big = ReadArchive("RING_MDL_HD.AMB");
+        Assert.Equal(AppMain.AMD_AMB_FLAG0_ENDIAN_BIG, (byte)big.flag[0] & AppMain.AMD_AMB_FLAG0_ENDIAN_BIG);
+
+        var little = ReadArchive("RING_TEX_HD.AMB");
+        Assert.Equal(4, little.flag.Length);
+    }
+
+    // header size and flag[0] are independent statements of the same fact, so a disagreement means
+    // the header is misparsed rather than merely mislabelled
+    [Fact]
+    public void RefusesAHeaderWhoseFlagDisagreesWithItsSize()
+    {
+        var bytes = File.ReadAllBytes(Fixture("RING_MDL_HD.AMB"));
+        bytes[0x0C] = 0;
+
+        var header = new AppMain.AMS_AMB_HEADER { data = bytes };
+        using var stream = new MemoryStream(bytes);
+
+        Assert.Throws<InvalidDataException>(() => AppMain.readAmbHeader(stream, ref header));
+    }
+
+    // amBindConv stamps file_id[0] with '!' once it has converted in place, and asserts only on
+    // file_id[1..3] == "AMB"
+    [Fact]
+    public void AcceptsAConvertedMark()
+    {
+        var bytes = File.ReadAllBytes(Fixture("RING_MDL_HD.AMB"));
+        bytes[0] = (byte)'!';
+
+        var header = new AppMain.AMS_AMB_HEADER { data = bytes };
+        using var stream = new MemoryStream(bytes);
+        AppMain.readAmbHeader(stream, ref header);
+
+        Assert.True(header.is_real_amb);
+        Assert.True(header.big_endian);
+        Assert.Equal(1, header.file_num);
+    }
+
     [Fact]
     public void DetectsBigEndianArchive()
     {

@@ -4,5 +4,6 @@ internal partial class AppMain
     {
         public ushort map_w;
         public ushort map_h;
+        public RG_INFO[][] cells;
     }
 }

@@ -54,6 +54,30 @@ if (args.Length > 0 && args[0] == "--describe-motion")
     return MotionDescribe.Run(args[1], first, last);
 }
 
+// --stage-shaders <id|name> <content root> reports the permutation each block material selects
+if (args.Length > 2 && args[0] == "--stage-shaders")
+{
+    return StageShaderSurvey.Run(args[1], args[2]);
+}
+
+// --deco-shaders <id|name> <content root> does the same for the stage's decorations
+if (args.Length > 2 && args[0] == "--deco-shaders")
+{
+    return StageDecoSurvey.Run(args[1], args[2]);
+}
+
+// --stage-info <id|name> [content root] prints what a stage loads, without opening a window
+if (args.Length > 1 && args[0] == "--stage-info")
+{
+    return StageProgram.Describe(args[1], args.Length > 2 ? args[2] : null);
+}
+
+// --stage [id|name] [content root] reports what a stage loads; with no id it lists them
+if (args.Length > 0 && args[0] == "--stage")
+{
+    return StageProgram.Run(args.Length > 1 ? args[1] : null, args.Length > 2 ? args[2] : null);
+}
+
 string modelPath = args.Length > 0 ? args[0] : null;
 string texturePath = args.Length > 1 ? args[1] : null;
 string motionPath = args.Length > 2 ? args[2] : null;

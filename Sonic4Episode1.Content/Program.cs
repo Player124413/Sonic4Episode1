@@ -23,6 +23,7 @@ internal static class Program
   texformats <tree>                count every texture member by format, with disk and GPU bytes
   profiles                         list what content-sources.toml declares
   roundtrip <tree>                 unpack, pack, unpack again and check nothing moved
+  xenonenums [pc] [xbla]           pair render state enums across two sources' shared models
 
 Output is always #AMB. The legacy magic-less layout is read only.";
 
@@ -49,6 +50,7 @@ Output is always #AMB. The legacy magic-less layout is read only.";
                 case "texformats": return TexFormats(args);
                 case "profiles": return Profiles(args);
                 case "roundtrip": return RoundTrip(args);
+                case "xenonenums": return XenonEnums.Run(args);
                 default:
                     Console.Error.WriteLine($"unknown verb '{args[0]}'");
                     Console.WriteLine(Usage);
@@ -186,6 +188,25 @@ Output is always #AMB. The legacy magic-less layout is read only.";
 
         var sources = LoadSources();
         var profile = sources.Profile(args[1]);
+
+        if (profile.Abstract)
+        {
+            Console.Error.WriteLine(
+                $"'{profile.Name}' declares no textures; it is an assembly for other profiles to " +
+                $"extend. Build one of: {string.Join(", ", sources.Extending(profile.Name))}");
+            return 1;
+        }
+
+        var unsupported = profile.Encode.Where(f => !TextureTranscode.CanEncode(f)).ToList();
+        if (unsupported.Count > 0)
+        {
+            Console.Error.WriteLine(
+                $"'{profile.Name}' encodes to {string.Join(", ", unsupported.Select(TextureFormats.Token))}, " +
+                "which nothing in the pipeline can produce yet. Building would emit a tree with every " +
+                "texture left in its source format.");
+            return 1;
+        }
+
         var report = ContentBuild.Run(sources, profile);
 
         Console.WriteLine($"{profile.Name} -> {profile.Output}");
@@ -193,8 +214,8 @@ Output is always #AMB. The legacy magic-less layout is read only.";
         if (report.OverlaysEmitted > 0)
             Console.WriteLine($"  overlay archives  : {report.OverlaysEmitted}");
         Console.WriteLine($"  variant siblings  : {report.VariantsEmitted}");
-        if (report.VariantsSkippedIncomplete > 0)
-            Console.WriteLine($"  skipped, part set : {report.VariantsSkippedIncomplete}");
+        if (report.AssetsCopied > 0)
+            Console.WriteLine($"  loose assets      : {report.AssetsCopied}");
 
         if (report.Moves.Count > 0)
         {
@@ -243,6 +264,13 @@ Output is always #AMB. The legacy magic-less layout is read only.";
 
         var sources = LoadSources();
         var profile = sources.Profile(args[1]);
+
+        if (profile.Abstract)
+        {
+            Console.Error.WriteLine($"'{profile.Name}' is an assembly; there is no tree to check");
+            return 1;
+        }
+
         var report = ContentBuild.Check(sources, profile);
         var problems = report.Problems;
 
@@ -476,16 +504,22 @@ Output is always #AMB. The legacy magic-less layout is read only.";
             var variants = profile.Variants.Count == 0
                 ? "none"
                 : string.Join(", ", profile.Variants.Select(v => v.Members.Count == 0
-                    ? $"{v.Source}({v.Archives.Count})"
-                    : $"{v.Source}({v.Members.Count} members)"));
-            var heads = profile.Heads.Count == 0 ? "any" : string.Join(",", profile.Heads);
+                    ? $"{v.Group}({v.Archives.Count})"
+                    : $"{v.Group}({v.Archives.Count}+{v.Members.Count}m)"));
+            var heads = profile.Heads.Count == 0 ? "none" : string.Join(",", profile.Heads);
             var overlays = profile.Overlays.Count == 0 ? "none" : string.Join(",", profile.Overlays);
             var patches = profile.Patches.Count == 0 ? "none" : string.Join(",", profile.Patches);
-            Console.WriteLine($"  {profile.Name,-12} base={profile.Base,-8} variants={variants,-12} " +
-                              $"heads={heads} audio={profile.Audio}");
-            Console.WriteLine($"  {"",-12} overlays={overlays} patches={patches}");
-            Console.WriteLine($"  {"",-12} {profile.DescribeTextures()}");
-            Console.WriteLine($"  {"",-12} -> {profile.Output}");
+
+            Console.WriteLine($"  {profile.Name,-16} base={profile.Base,-10} " +
+                              $"{(profile.Extends == null ? "" : "extends=" + profile.Extends + " ")}" +
+                              $"{(profile.Abstract ? "ASSEMBLY" : profile.Ship ? "ships" : "NOT SHIPPED")}");
+            Console.WriteLine($"  {"",-16} overlays={overlays} patches={patches}");
+            Console.WriteLine($"  {"",-16} variants={variants}");
+            if (!profile.Abstract)
+            {
+                Console.WriteLine($"  {"",-16} {profile.DescribeTextures()} heads={heads}");
+                Console.WriteLine($"  {"",-16} -> {profile.Output}");
+            }
         }
 
         return 0;
@@ -680,7 +714,7 @@ Output is always #AMB. The legacy magic-less layout is read only.";
                 if (!before.is_real_amb)
                     legacy++;
 
-                var packed = AppMain.writeAmbArchive(AppMain.readAmbEntries(before), AmbTree.IsBigEndian(before));
+                var packed = AppMain.writeAmbArchive(AppMain.readAmbEntries(before), before.big_endian);
                 var after = AmbTree.Read(packed);
 
                 var problem = Compare(before, after);

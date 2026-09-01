@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Android.App;
@@ -25,24 +26,57 @@ namespace Sonic4Episode1.Android
     )]
     public class Sonic4Activity : AndroidGameActivity
     {
+        // the Guide shim needs an Activity to get onto the UI thread with, and the game loop only
+        // ever knows about Game
+        internal static Sonic4Activity Current { get; private set; }
+
         private Sonic4Ep1 _game;
         private View _view;
         private IAssetPackManager _assetPackManager;
         private AssetPackStateUpdateListenerWrapper _listener;
 
         private ProgressDialog _dialog;
+        private bool _listening;
+        private bool _running;
 
+        // Completed can arrive more than once across a resume, and Game.Run does not survive being
+        // called twice
         private void Run()
         {
-            _dialog?.Hide();
+            if (_running)
+                return;
 
-            DirectoryRoot.Root = Path.Combine(_assetPackManager.GetPackLocation("content").Path(), "assets");
+            _running = true;
+
+            _dialog?.Dismiss();
+            _dialog = null;
+
+            DirectoryRoot.Root = _assetPackManager.GetPackLocation("content").AssetsPath();
             _game.Run();
+        }
+
+        private void StartListening()
+        {
+            if (_listening)
+                return;
+
+            _listening = true;
+            _assetPackManager.RegisterListener(_listener.Listener);
+        }
+
+        private void StopListening()
+        {
+            if (!_listening)
+                return;
+
+            _listening = false;
+            _assetPackManager.UnregisterListener(_listener.Listener);
         }
 
         protected override async void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+            Current = this;
 
             var controller = WindowCompat.GetInsetsController(Window, Window.DecorView);
             controller.SystemBarsBehavior = WindowInsetsControllerCompat.BehaviorShowTransientBarsBySwipe;
@@ -56,30 +90,34 @@ namespace Sonic4Episode1.Android
             _listener.StateUpdate += Listener_StateUpdate;
 
             _assetPackManager = AssetPackManagerFactory.GetInstance(_view.Context);
-            _assetPackManager.RegisterListener(_listener.Listener);
+            StartListening();
 
-            var assetPackPath = _assetPackManager.GetPackLocation("content");
-            var assetsFolderPath = assetPackPath?.AssetsPath() ?? null;
-            if (assetsFolderPath is null)
-            {
-                var result = await _assetPackManager.Fetch(["content"])
-                     .AsAsync<AssetPackStates>();
-            }
-            else
+            var assetsFolderPath = _assetPackManager.GetPackLocation("content")?.AssetsPath();
+            if (assetsFolderPath is not null)
             {
                 Run();
+                return;
+            }
+
+            try
+            {
+                await _assetPackManager.Fetch(["content"]).AsAsync<AssetPackStates>();
+            }
+            catch (Exception ex)
+            {
+                ContentUnavailable(ex.Message);
             }
         }
 
         protected override void OnResume()
         {
-            _assetPackManager.RegisterListener(_listener.Listener);
+            StartListening();
             base.OnResume();
         }
 
         protected override void OnPause()
         {
-            _assetPackManager.UnregisterListener(_listener.Listener);
+            StopListening();
             base.OnPause();
         }
 
@@ -100,11 +138,12 @@ namespace Sonic4Episode1.Android
 
                     long downloaded = e.State.BytesDownloaded();
                     long totalSize = e.State.TotalBytesToDownload();
-                    double percent = 100.0 * downloaded / totalSize;
+                    double percent = totalSize > 0 ? 100.0 * downloaded / totalSize : 0;
                     _dialog.Progress = (int)percent;
                     Log.Info("Listener_StateUpdate", $"Downloading {percent}");
                     break;
                 case AssetPackStatus.Failed:
+                    ContentUnavailable($"asset pack error {e.State.ErrorCode()}");
                     break;
                 case AssetPackStatus.Completed:
                     {
@@ -118,5 +157,20 @@ namespace Sonic4Episode1.Android
             }
         }
 
+        // without this a failed fetch leaves the progress dialog up forever with nothing said
+        private void ContentUnavailable(string detail)
+        {
+            Log.Error(nameof(Sonic4Activity), $"content pack unavailable: {detail}");
+
+            _dialog?.Dismiss();
+            _dialog = null;
+
+            // TODO(wam): the message the player actually sees when content cannot be downloaded
+            new AlertDialog.Builder(_view.Context)
+                .SetTitle("Content unavailable")
+                .SetMessage(detail)
+                .SetCancelable(false)
+                .Show();
+        }
     }
 }

@@ -760,6 +760,10 @@ internal partial class AppMain
     private const int GME_PLY_MTN_ID_MAX = 130;
     public const float GMD_MAP_BLOCK_LOCAL_SIZE = 20f;
     public const int GMD_MAP_BLOCK_SIZE = 64;
+
+    // events, rings and decorations sit on their own coarser grid, which is why their coordinates
+    // fit in a byte apiece. map_file_format.h
+    public const int GMD_MAP_EVENT_BLOCK_SIZE = 256;
     public const int GMD_MAP_ADJUST_POS_Z_FINAL_M = -64;
     public const float GMD_OBJ_DRAW_SCALE = 3.2f;
     public const int GMD_OBJ_DRAW_SCALE_FX = 13107;
@@ -843,13 +847,13 @@ internal partial class AppMain
     public const int GMD_DECO_USER_FLAG_NOCLIP = 512;
     public const int GMD_DECO_DATA_INDEX_INVALID = -1;
     public const int GMD_DECO_FX32_BITSHIFT_BLOCK_SIZE = 6;
-    private const int GMD_DECO_DATA_INDEX_AMB_MDL = 0;
-    private const int GMD_DECO_DATA_INDEX_AMB_TEX = 1;
-    private const int GMD_DECO_DATA_INDEX_AMB_MTN = 2;
-    private const int GMD_DECO_DATA_INDEX_AMB_MAT = 3;
-    private const int GMD_DECO_DATA_INDEX_AMB_MDL_RENDER = 4;
-    private const int GMD_DECO_DATA_INDEX_AMB_TEX_RENDER = 5;
-    private const int GMD_DECO_DATA_INDEX_AMB_NUM = 6;
+    internal const int GMD_DECO_DATA_INDEX_AMB_MDL = 0;
+    internal const int GMD_DECO_DATA_INDEX_AMB_TEX = 1;
+    internal const int GMD_DECO_DATA_INDEX_AMB_MTN = 2;
+    internal const int GMD_DECO_DATA_INDEX_AMB_MAT = 3;
+    internal const int GMD_DECO_DATA_INDEX_AMB_MDL_RENDER = 4;
+    internal const int GMD_DECO_DATA_INDEX_AMB_TEX_RENDER = 5;
+    internal const int GMD_DECO_DATA_INDEX_AMB_NUM = 6;
     private const int GMD_DECO_LOOP_STATE_WAIT = 0;
     private const int GMD_DECO_LOOP_STATE_LOOP = 1;
     private const int GMD_DECO_LOOP_STATE_END = 2;
@@ -1128,7 +1132,12 @@ internal partial class AppMain
     public const int GMD_GAMEDAT_MAP_MODEL = 1;
     public const int GMD_GAMEDAT_MAP_TEX = 2;
     public const int GMD_GAMEDAT_MAP_ATTR = 3;
-    public const int GMD_GAMEDAT_MAP_MAX = 4;
+
+    // gmGameDat.h:64-67 keeps these two out of the iPhone build behind
+    // GMD_GAMEDAT_NO_CREATE_MAP_MOTION, so the mobile arm just leaves them null
+    public const int GMD_GAMEDAT_MAP_MTN = 4;
+    public const int GMD_GAMEDAT_MAP_MMTN = 5;
+    public const int GMD_GAMEDAT_MAP_MAX = 6;
     private const int GMD_GAMEDAT_MAPSET_A_MP = 0;
     private const int GMD_GAMEDAT_MAPSET_B_MP = 1;
     private const int GMD_GAMEDAT_MAPSET_A_MD = 2;
@@ -5568,7 +5577,7 @@ internal partial class AppMain
     private const int GME_MAP_DRAW_SIZE_ZONE4_BOSS = 6;
     private const int GME_MAP_DRAW_SIZE_ZONE4_BOSS_2 = 7;
     private const int GME_MAP_DRAW_SIZE_ZONEF_BOSS = 8;
-    private const int GME_MAP_DRAW_SIZE_NUM = 9;
+    internal const int GME_MAP_DRAW_SIZE_NUM = 9;
     public const int GMD_MAP_DRAW_INIT_COUNT = 1;
     public const int GMD_MAP_USE_PRIM_MTX_NUM = 16;
     public const int GMD_MAP_OBJECT_NUM = 300;
@@ -5577,8 +5586,19 @@ internal partial class AppMain
     public const int GMD_MAP_DRAW_DF_SIZE = 8;
     public const int GMD_MAP_DRAW_WIDTH_DEF = 6;
     public const int GMD_MAP_DRAW_HEIGHT_DEF = 6;
-    public const int GMD_MAP_DRAW_CHECK_WIDTH = 24;
-    public const int GMD_MAP_DRAW_CHECK_HEIGHT = 24;
+
+    // GmMapSetDrawMarginMag widens the window by one more block each side than SEGA's fixed margin.
+    // that is this port's own, and the check buffer has to be sized for it: worst case index is
+    // DF_SIZE + span + 7, where 7 is the largest ofst a 4-bit signed MD_BLOCK can carry
+    public const int GMD_MAP_DRAW_MARGIN_ADJUST_MAX = 1;
+
+    // the console gmMapMain pushes gm_map_draw_size to 8 for zone 2-2, so one buffer covering both
+    // arms is sized off that rather than off the default 6. measured 28 in the retail binary
+    public const int GMD_MAP_DRAW_WIDTH_MAX = 8;
+    public const int GMD_MAP_DRAW_CHECK_WIDTH =
+        GMD_MAP_DRAW_WIDTH_MAX + (GMD_MAP_DRAW_MARGIN + GMD_MAP_DRAW_MARGIN_ADJUST_MAX) * 2 + GMD_MAP_DRAW_DF_SIZE * 2;
+    public const int GMD_MAP_DRAW_CHECK_HEIGHT =
+        GMD_MAP_DRAW_WIDTH_MAX + (GMD_MAP_DRAW_MARGIN + GMD_MAP_DRAW_MARGIN_ADJUST_MAX) * 2 + GMD_MAP_DRAW_DF_SIZE * 2;
     public const float GMD_MAP_A_POS_Z = 128f;
     public const float GMD_MAP_B_POS_Z = -128f;
     public const float GMD_MAP_N_POS_Z = 256f;
@@ -13182,7 +13202,7 @@ internal partial class AppMain
     public const int AMD_AME_ECB_SIZE = 128;
     public const int AMD_AME_ENTRY_SIZE = 512;
     public const int AMD_AME_RUNTIME_SIZE = 512;
-    public const int AMD_AME_WORK_SIZE = 1024;
+    public const int AMD_AME_WORK_SIZE = 2560;
     public const float AMD_AME_UNIT_FRAME = 1f;
     public const float AMD_AME_UNIT_TIME = 0.01666667f;
     public const int AMD_AME_STATE_KILL = 32768;
@@ -13738,7 +13758,6 @@ internal partial class AppMain
     private static string[] sLevel_4_BGMList;
     private static string[][] bgmLists;
     private static int m_iBGMPreparedLevel;
-    private static Dictionary<string, Song> bgmPreloadedList;
     private static int g_iCurrentCachedIndex;
     private static bool g_bSoundsPrecached;
     private static bool b_bPrioritySoundsLoaded;
@@ -13801,9 +13820,9 @@ internal partial class AppMain
     private static OBS_ACTION3D_NN_WORK[] gm_ene_harisenbo_r_obj_3d_list;
     private static NNS_MATRIX gmEneHariMotionCallback_node_mtx;
     private static NNS_MATRIX gmEneHariMotionCallback_base_mtx;
-    private static readonly int[][] g_gm_deco_model_index;
-    private static readonly uint[] g_gm_deco_disp_flag;
-    private static readonly int[][] g_gm_deco_node_motion_index;
+    internal static readonly int[][] g_gm_deco_model_index;
+    internal static readonly uint[] g_gm_deco_disp_flag;
+    internal static readonly int[][] g_gm_deco_node_motion_index;
     private static readonly int[][] g_gm_deco_mat_motion_index;
     private static uint[] g_gm_deco_user_work;
     private static int[] g_gm_deco_user_timer;
@@ -13811,9 +13830,9 @@ internal partial class AppMain
     public static OBS_RECT_WORK_Delegate1[] g_gm_deco_func_rect;
     public static readonly short[][] g_gm_deco_rect_size;
     private static uint[] g_gm_deco_user_flag;
-    private static readonly ushort[] g_gm_deco_rot_z;
+    internal static readonly ushort[] g_gm_deco_rot_z;
     private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_main;
-    private static readonly int[][] g_gm_deco_pos;
+    internal static readonly int[][] g_gm_deco_pos;
     private static readonly GSF_TASK_PROCEDURE[] g_gm_deco_func_dest;
     private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_move;
     private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_out;
@@ -13824,8 +13843,8 @@ internal partial class AppMain
     private static GMS_DECO_MGR g_deco_mgr;
     private static readonly GMS_DECO_DATA g_deco_data_real;
     private static GMS_DECO_DATA g_deco_data;
-    private static AMS_AMB_HEADER gmDeco_matMotionHeader;
     private static AMS_AMB_HEADER gmDeco_motionHeader;
+    private static AMS_AMB_HEADER gmDeco_matMotionHeader;
     private static OBF_DRAW_USER_DT_FUNC _gmDecoTcbProcPostDT;
     private static OBF_DRAW_USER_DT_FUNC _gmDecoDrawFallFrontUserFunc;
     private static OBF_DRAW_USER_DT_FUNC _gmDecoDrawFallBackUserFunc;
@@ -14072,7 +14091,7 @@ internal partial class AppMain
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map_SS06;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map_SS07;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map_ending;
-    private static readonly GMS_GAMEDAT_LOAD_INFO[] gm_gamedat_tbl_map_info_tbl;
+    internal static readonly GMS_GAMEDAT_LOAD_INFO[] gm_gamedat_tbl_map_info_tbl;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_effect01_01;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_effect01_02;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_effect01_03;
@@ -15203,9 +15222,18 @@ internal partial class AppMain
     private static Dictionary<int, A2S_SUB_KEY[]> readAMAFile_subkeyHash;
     public static int GMD_MAP_DRAW_BGM_TIMER;
     private static readonly int[] gm_map_prim_draw_tvx_alpha_set_z2;
-    private static OBS_ACTION3D_NN_WORK gm_map_obj3d;
+    private static OBS_ACTION3D_NN_WORK[] gm_map_obj3d;
     private static int gm_map_reg_obj3d_num;
     private static int gm_map_release_obj3d_num;
+    private static bool gm_map_use_fall_shader;
+    private static uint gm_map_fall_rander_command_state = OBD_DRAW_CMD_STATE_WATER_BACK;
+
+    // not in any source we have, only in the retail binary: gmMapMain clears it, each waterfall
+    // block sets it, and the setting func copies the render target only if one actually drew
+    private static bool gm_map_fall_shader_drawn;
+
+    // zone 3-2 runs every near-layer model off one frame counter so they animate in lockstep
+    private static float gm_map_z32_share_frame;
     private static MTS_TASK_TCB gm_map_tcb;
     private static uint gm_map_draw_command_state;
     private static AOS_TEXTURE gm_map_texture;
@@ -15218,16 +15246,16 @@ internal partial class AppMain
     private static int gm_map_draw_bgm_timer;
     private static uint gm_map_draw_margin_adjust;
     private static short[,] gm_map_block_check;
-    private static int[] gm_map_add_tbl_use_no;
+    internal static int[] gm_map_add_tbl_use_no;
     private static NNS_MATRIX[] gm_map_use_prim_mtx;
     private static uint gm_map_prim_draw_tvx_color;
     private static int[] gm_map_prim_draw_tvx_alpha_set;
-    private static int[] gm_map_addmap_camera_tbl;
-    private static float[] gm_map_addmap_pos_z_tbl;
+    internal static int[] gm_map_addmap_camera_tbl;
+    internal static float[] gm_map_addmap_pos_z_tbl;
     private static uint[] gm_map_addmap_command_state_tbl;
     private static uint[] gm_map_addmap_command_state_z1_act2_3_z3_act1_3_tbl;
     private static uint[] gm_map_addmap_command_state_zf_tbl;
-    private static uint[,] gm_map_set_draw_size;
+    internal static uint[,] gm_map_set_draw_size;
     private static float gmMapTransX;
     private static NNS_VECTOR[] main_camera_pos;
     private static NNS_MATRIX gmMapMain_mtx;
@@ -15530,7 +15558,18 @@ internal partial class AppMain
         OpenGL.glDepthMask(true);
         amDrawEnd();
         OpenGL.glFlush();
+
+        // TODO(wam): remove, iOS blank screen diagnostics
+        if (_mppDiagFrame < 240 && (++_mppDiagFrame % 60) == 0)
+        {
+            Console.WriteLine($"[s4diag] frame {_mppDiagFrame}"
+                + $" prims={OpenGL.drawPrimitives_Count} vbuf={OpenGL.drawVertexBuffer_Count}");
+            mppDiagSurface("draw");
+        }
     }
+
+    // TODO(wam): remove, iOS blank screen diagnostics
+    private static int _mppDiagFrame;
 
     public int AppMainLoop()
     {

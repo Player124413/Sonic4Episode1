@@ -39,7 +39,8 @@ internal partial class AppMain
             {
                 long position = reader.BaseStream.Position;
                 reader.BaseStream.Seek(data0Pos + num, SeekOrigin.Begin);
-                nnsMaterialptr.pMaterial = ReadMaterial(reader, data0Pos, platform, out transparentMaterial);
+                nnsMaterialptr.pMaterial = ReadMaterial(
+                    reader, data0Pos, platform, nnsMaterialptr.fType, out transparentMaterial);
                 reader.BaseStream.Seek(position, SeekOrigin.Begin);
             }
             return nnsMaterialptr;
@@ -49,6 +50,7 @@ internal partial class AppMain
           BinaryReader reader,
           long data0Pos,
           NNE_PLATFORM platform,
+          uint fType,
           out bool transparentMaterial)
         {
             transparentMaterial = false;
@@ -57,7 +59,11 @@ internal partial class AppMain
                 case NNE_PLATFORM.GLES11:
                     return NNS_MATERIAL_GLES11_DESC.Read(reader, data0Pos, out transparentMaterial);
                 case NNE_PLATFORM.DXG20:
-                    return NNS_MATERIAL_STDSHADER_DESC.Read(reader, data0Pos);
+                    // the descriptor carries a trailing UserProfile word when fType says so, and
+                    // zone 2's refraction materials are the only ones in the corpus that do
+                    return (fType & NND_MATTYPE_USERPROFILE) != 0
+                        ? NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE.Read(reader, data0Pos)
+                        : (object)NNS_MATERIAL_STDSHADER_DESC.Read(reader, data0Pos);
                 default:
                     throw new NotSupportedException($"no material reader for {platform}");
             }

@@ -8,18 +8,34 @@ internal partial class AppMain
         NNS_MATRIX[] mtxpal,
         uint[] nodestatlist,
         uint subobjtype,
-        uint flag)
+        uint flag,
+        uint drawFlagEx = 0,
+        uint alternativeLighting = 0)
     {
         if (((int)flag & 1) != 0 || obj.nSubobj <= 0)
             return;
 
         OpenGL.glFlush();
 
+        // the per-object light override, which nnDrawObjectVertexList applies for the fixed
+        // function path (NnDraw.cs:211-217) and which nnBindStdShader reads back off the wrapper.
+        // This is what tints Splash Hill act 3 and the zone 1 boss.
+        if (alternativeLighting != 0U)
+        {
+            OpenGL.glArray4f direction = new OpenGL.glArray4f(0.0f, 0.0f, -1f, 0.0f);
+            OpenGL.glArray4f diffuse = ((int)alternativeLighting & 32768) == 0
+                ? GmMainGetLightColorArray4f()
+                : BreakWall_1_3_Color;
+            OpenGL.glLightfv(16384U, 4612U, ref direction);
+            OpenGL.glLightfv(16384U, 4609U, ref diffuse);
+        }
+
         nngDrawCallBackVal.pObject = obj;
         nngDrawCallBackVal.pMatrixPalette = mtxpal;
         nngDrawCallBackVal.pNodeStatusList = nodestatlist;
         nngDrawCallBackVal.DrawSubobjType = subobjtype;
         nngDrawCallBackVal.DrawFlag = flag;
+        nngDrawCallBackVal.DrawFlagEx = drawFlagEx;
         nngDrawCallBackVal.iPrevMaterial = -1;
         nngDrawCallBackVal.iPrevVtxList = -1;
 

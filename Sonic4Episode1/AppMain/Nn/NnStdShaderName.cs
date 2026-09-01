@@ -53,6 +53,9 @@ internal partial class AppMain
         public int bUserSamplerCube1 { get => fields[34]; set => fields[34] = value; }
         public int bUserSamplerCube2 { get => fields[35]; set => fields[35] = value; }
 
+        // bUserSampler2D1 through bUserSamplerCube2, in NNE_USER_SAMPLER order
+        public int GetUserSampler(NNE_USER_SAMPLER sampler) => fields[30 + (int)sampler];
+
         // in the order the maps above are used, DualParaboloid and Shadow excluded
         public int GetTexCoord(int index) => fields[36 + index];
         public void SetTexCoord(int index, int value) => fields[36 + index] = value;

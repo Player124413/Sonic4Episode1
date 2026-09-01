@@ -41,7 +41,17 @@ internal partial class AppMain
 #else
         try
         {
+#if MONOGAME
+            // MonoGame's ContentManager only resolves .xnb, and Shaders.targets ships raw .mgfxo,
+            // so this reads it the same way mppLoadStdShader does
+            using var stream = TitleContainer.OpenStream(
+                "Content\\Shaders\\" + name + MPP_SHADER_EXTENSION);
+            var code = new byte[stream.Length];
+            stream.ReadExactly(code, 0, code.Length);
+            return new Effect(Sonic4Ep1.pInstance.GraphicsDevice, code);
+#else
             return Sonic4Ep1.pInstance.Content.Load<Effect>("Shaders\\" + name);
+#endif
         }
         catch (Exception ex)
         {

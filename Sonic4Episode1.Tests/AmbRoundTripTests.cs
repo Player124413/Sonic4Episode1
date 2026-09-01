@@ -142,7 +142,7 @@ public class AmbRoundTripTests
             try
             {
                 var before = Read(File.ReadAllBytes(path));
-                AssertSameMembers(before, RoundTrip(before, IsBigEndian(before)));
+                AssertSameMembers(before, RoundTrip(before, before.big_endian));
             }
             catch (Exception ex)
             {
@@ -152,13 +152,6 @@ public class AmbRoundTripTests
 
         Assert.True(total > 0, $"no archives found under {root}");
         Assert.True(failures.Count == 0, string.Join("\n", failures.Take(10)));
-    }
-
-    private static bool IsBigEndian(AppMain.AMS_AMB_HEADER header)
-    {
-        return header.is_real_amb
-            && header.data.Length >= 8
-            && BitConverter.ToInt32(header.data, 4) != AppMain.AMB_HEADER_SIZE;
     }
 
     // see docs/amb-archives.md for ZONE1_M_M.AMB, which has this exact shape

@@ -32,6 +32,9 @@ internal partial class AppMain
         public float blend_spd;
         public uint sub_obj_type;
         public uint drawflag;
+
+        // the high half of NNF_DRAWOBJ; NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 and friends go here
+        public uint drawflag_ex;
         public uint use_light_flag;
         public MPP_VOID_OBJECT_DELEGATE user_func;
         public object user_param;
@@ -79,6 +82,7 @@ internal partial class AppMain
             this.blend_spd = 0.0f;
             this.sub_obj_type = 0U;
             this.drawflag = 0U;
+            this.drawflag_ex = 0U;
             this.draw_state.Clear();
             this.use_light_flag = 0U;
             this.user_func = null;

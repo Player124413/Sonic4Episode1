@@ -21,9 +21,11 @@ internal sealed class ContentSource
 
 // an alternative build of specific archives, emitted as <STEM>.<source>.AMB beside the base. The
 // archive list is explicit rather than "everything the source also has", since a source and the
-// base can diverge in member count/order for an archive that must never be selected as a sibling
+// base can diverge in member count/order for an archive that must never be selected as a sibling.
+// Declared once as a [group.*] and referenced by name, so two profiles cannot drift apart
 internal sealed class VariantSpec
 {
+    public string Group;
     public string Source;
     // what the emitted sibling is called, and what am_fs_variant has to be set to. defaults to the
     // source, but a mode can be assembled from more than one provenance
@@ -53,13 +55,13 @@ internal readonly struct MemberRef
         Member = member;
     }
 
-    public static MemberRef Parse(string profile, string source, string declared)
+    public static MemberRef Parse(string group, string declared)
     {
         var hash = declared.IndexOf('#');
         if (hash <= 0 || hash == declared.Length - 1)
         {
             throw new InvalidDataException(
-                $"profile '{profile}' variant '{source}': '{declared}' is not <archive>#<member>");
+                $"group '{group}': '{declared}' is not <archive>#<member>");
         }
 
         return new MemberRef(
@@ -68,9 +70,28 @@ internal readonly struct MemberRef
     }
 }
 
+// loose files copied into every profile's tree untouched. Declared once at the top level rather
+// than per profile: what a head needs beside the archives does not vary with the texture set
+internal sealed class AssetSpec
+{
+    public string Source;
+
+    // named entries under the source root, each a directory copied recursively or a single file.
+    // empty means the whole root, which is what `into` is for
+    public List<string> Paths = new List<string>();
+
+    // where the copy lands in the tree, relative to its root. null puts each path at its own name
+    public string Into;
+}
+
 internal sealed class ContentProfile
 {
     public string Name;
+
+    // the assembly this profile takes its base, overlays, patches and variants from; only the
+    // texture set, heads and Ship differ between a profile and what it extends
+    public string Extends;
+
     public string Base;
     public List<VariantSpec> Variants = new List<VariantSpec>();
     // sources whose archives are emitted at their own paths, for content that has no counterpart in
@@ -86,7 +107,14 @@ internal sealed class ContentProfile
     // authored replacements laid out exactly as `unpack` writes a tree; a patch replaces bytes only, the member keeps its index
     public List<string> Patches = new List<string>();
 
-    public string Audio = "passthrough";
+    // an assembly declares no textures of its own and only exists to be extended; building one
+    // would emit an untranscoded tree nobody asked for
+    public bool Abstract;
+
+    // false keeps a profile out of a Release build. The raw passthrough profile is the only one,
+    // and it is the only place PVR is allowed to survive
+    public bool Ship = true;
+
     public string Output;
 
     public string DescribeTextures()
@@ -100,24 +128,56 @@ internal sealed class ContentProfile
 }
 
 // what each head can actually hand to the GPU, so a profile can't declare a format its consumers
-// can't read; only fna reads anything beyond PNG right now
+// can't read. wasm lists both sets because it is the one head that meets devices with only BC and
+// devices with only ASTC; which tree it gets is a packaging choice, not a capability
+// (docs/webgl-texture-capabilities.md)
 internal static class HeadCapabilities
 {
-    private static readonly TextureFormat[] FnaFormats =
+    private static readonly TextureFormat[] Bc =
     {
         TextureFormat.Png, TextureFormat.Bc1, TextureFormat.Bc2, TextureFormat.Bc3,
         TextureFormat.Rgba32, TextureFormat.Bgra32,
     };
 
+    private static readonly TextureFormat[] BcAndAstc =
+    {
+        TextureFormat.Png, TextureFormat.Bc1, TextureFormat.Bc2, TextureFormat.Bc3,
+        TextureFormat.Rgba32, TextureFormat.Bgra32,
+        TextureFormat.Astc4x4, TextureFormat.Astc6x6,
+    };
+
+    private static readonly TextureFormat[] PngAndAstc =
+    {
+        TextureFormat.Png, TextureFormat.Astc4x4, TextureFormat.Astc6x6,
+    };
+
     private static readonly TextureFormat[] PngOnly = { TextureFormat.Png };
 
-    public static readonly string[] Known = { "fna", "xna", "wp7", "uwp", "android" };
+    private static readonly Dictionary<string, TextureFormat[]> ByHead =
+        new Dictionary<string, TextureFormat[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "fna", Bc },
+            { "wasm", BcAndAstc },
+            // measured, not assumed: the Mali row in docs/webgl-texture-capabilities.md has no
+            // s3tc, and Adreno is the same. android reads DDS through DdsKtxXna, but reading it
+            // and uploading it are different questions and this table is about the second
+            { "android", PngAndAstc },
+            { "ios", PngAndAstc },
+            { "xna", PngOnly },
+            { "wp7", PngOnly },
+            { "uwp", PngOnly },
+        };
+
+    public static readonly string[] Known = ByHead.Keys.OrderBy(k => k, StringComparer.Ordinal).ToArray();
+
+    public static bool Knows(string head)
+    {
+        return ByHead.ContainsKey(head);
+    }
 
     public static bool Reads(string head, TextureFormat format)
     {
-        var formats = string.Equals(head, "fna", StringComparison.OrdinalIgnoreCase)
-            ? FnaFormats
-            : PngOnly;
+        var formats = ByHead.TryGetValue(head, out var known) ? known : PngOnly;
 
         return Array.IndexOf(formats, format) >= 0;
     }
@@ -132,15 +192,27 @@ internal sealed class ContentSources
     public Dictionary<string, ContentProfile> Profiles =
         new Dictionary<string, ContentProfile>(StringComparer.OrdinalIgnoreCase);
 
+    public List<AssetSpec> Assets = new List<AssetSpec>();
+
     public ContentSource Source(string name)
     {
         if (!Sources.TryGetValue(name, out var source))
             throw new InvalidDataException($"no source '{name}' in {FileName}");
 
         if (!Directory.Exists(source.Root))
-            throw new DirectoryNotFoundException($"source '{name}' root does not exist: {source.Root}");
+            throw new DirectoryNotFoundException(
+                $"source '{name}' root does not exist: {source.Root}{Environment.NewLine}" +
+                "see Sources/README.md for what to copy in there");
 
         return source;
+    }
+
+    public IEnumerable<string> Extending(string name)
+    {
+        return Profiles.Values
+            .Where(p => string.Equals(p.Extends, name, StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.Name)
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
     }
 
     public ContentProfile Profile(string name)
@@ -168,12 +240,34 @@ internal sealed class ContentSources
         return null;
     }
 
-    private static VariantSpec ReadVariant(string profile, TomlTable body)
+    private static AssetSpec ReadAsset(TomlTable body)
     {
         if (!body.TryGetValue("source", out var source))
-            throw new InvalidDataException($"profile '{profile}' has a variant with no source");
+            throw new InvalidDataException("an [[assets]] entry has no source");
 
-        var spec = new VariantSpec { Source = (string)source };
+        var spec = new AssetSpec { Source = (string)source };
+        spec.Into = body.TryGetValue("into", out var into) ? (string)into : null;
+
+        if (body.TryGetValue("paths", out var paths))
+        {
+            foreach (var path in (TomlArray)paths)
+                spec.Paths.Add(((string)path).Replace('\\', '/'));
+        }
+
+        if (spec.Paths.Count == 0 && spec.Into == null)
+            throw new InvalidDataException(
+                $"[[assets]] on '{spec.Source}' needs either paths or into, or it would copy the " +
+                "whole source root over the tree");
+
+        return spec;
+    }
+
+    private static VariantSpec ReadGroup(string group, TomlTable body)
+    {
+        if (!body.TryGetValue("source", out var source))
+            throw new InvalidDataException($"group '{group}' has no source");
+
+        var spec = new VariantSpec { Group = group, Source = (string)source };
         spec.Name = body.TryGetValue("name", out var name) ? (string)name : spec.Source;
         spec.Flip = body.TryGetValue("flip", out var flip) && (bool)flip;
 
@@ -186,13 +280,12 @@ internal sealed class ContentSources
         if (body.TryGetValue("members", out var members))
         {
             foreach (var member in (TomlArray)members)
-                spec.Members.Add(MemberRef.Parse(profile, spec.Source, (string)member));
+                spec.Members.Add(MemberRef.Parse(group, (string)member));
         }
 
         if (spec.Archives.Count == 0 && spec.Members.Count == 0)
             throw new InvalidDataException(
-                $"profile '{profile}' variant '{spec.Source}' names no archives or members; list them " +
-                "explicitly");
+                $"group '{group}' names no archives or members; list them explicitly");
 
         // a whole-archive swap and a member swap of the same archive would both want the same
         // sibling filename, and the member one would lose
@@ -200,8 +293,8 @@ internal sealed class ContentSources
         {
             if (spec.Archives.Contains(member.Archive, StringComparer.OrdinalIgnoreCase))
                 throw new InvalidDataException(
-                    $"profile '{profile}' variant '{spec.Source}': {member.Archive} is named as both a " +
-                    "whole archive and a member swap");
+                    $"group '{group}': {member.Archive} is named as both a whole archive and a " +
+                    "member swap");
         }
 
         return spec;
@@ -236,6 +329,16 @@ internal sealed class ContentSources
 
     private static void Validate(ContentProfile profile)
     {
+        if (profile.Abstract)
+        {
+            if (profile.Heads.Count > 0)
+                throw new InvalidDataException(
+                    $"profile '{profile.Name}' declares no textures, so it is an assembly to be " +
+                    "extended and cannot name heads");
+
+            return;
+        }
+
         foreach (var format in profile.Encode)
         {
             if (!profile.Accept.Contains(format))
@@ -244,9 +347,16 @@ internal sealed class ContentSources
                     "not accept it");
         }
 
+        // the one format that must never reach a player. PVR only survives in the passthrough
+        // profile, which exists to isolate a texture bug from the rest of the pipeline
+        if (profile.Ship && profile.Accept.Contains(TextureFormat.Pvr))
+            throw new InvalidDataException(
+                $"profile '{profile.Name}' accepts pvr but is a shipping profile; set ship = false " +
+                "or drop pvr from accept");
+
         foreach (var head in profile.Heads)
         {
-            if (Array.IndexOf(HeadCapabilities.Known, head.ToLowerInvariant()) < 0)
+            if (!HeadCapabilities.Knows(head))
                 throw new InvalidDataException(
                     $"profile '{profile.Name}' names an unknown head '{head}'; known: " +
                     string.Join(", ", HeadCapabilities.Known));
@@ -286,61 +396,124 @@ internal sealed class ContentSources
             }
         }
 
-        if (table.TryGetValue("profile", out var profiles))
+        var groups = new Dictionary<string, VariantSpec>(StringComparer.OrdinalIgnoreCase);
+        if (table.TryGetValue("group", out var declaredGroups))
         {
-            foreach (var pair in (TomlTable)profiles)
-            {
-                var body = (TomlTable)pair.Value;
-                var profile = new ContentProfile { Name = pair.Key };
+            foreach (var pair in (TomlTable)declaredGroups)
+                groups[pair.Key] = ReadGroup(pair.Key, (TomlTable)pair.Value);
+        }
 
-                if (!body.TryGetValue("base", out var profileBase))
-                    throw new InvalidDataException($"profile '{pair.Key}' has no base");
-                profile.Base = (string)profileBase;
+        if (table.TryGetValue("assets", out var declaredAssets))
+        {
+            foreach (var entry in (TomlTableArray)declaredAssets)
+                sources.Assets.Add(ReadAsset(entry));
+        }
 
-                if (body.TryGetValue("variants", out var variants))
-                {
-                    foreach (var variant in (TomlArray)variants)
-                        profile.Variants.Add(ReadVariant(pair.Key, (TomlTable)variant));
-                }
+        if (!table.TryGetValue("profile", out var profiles))
+            return sources;
 
-                if (body.TryGetValue("overlays", out var overlays))
-                {
-                    foreach (var overlay in (TomlArray)overlays)
-                        profile.Overlays.Add((string)overlay);
-                }
+        // two passes: a profile may extend one declared after it
+        var bodies = new Dictionary<string, TomlTable>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in (TomlTable)profiles)
+            bodies[pair.Key] = (TomlTable)pair.Value;
 
-                if (body.TryGetValue("patches", out var patches))
-                {
-                    foreach (var patch in (TomlArray)patches)
-                        profile.Patches.Add((string)patch);
-                }
-
-                if (body.TryGetValue("texture", out _))
-                    throw new InvalidDataException(
-                        $"profile '{pair.Key}' still uses the old scalar 'texture'; replace it with " +
-                        "textures = { encode = [...], accept = [...] }");
-
-                ReadTextures(pair.Key, body, profile);
-
-                if (body.TryGetValue("heads", out var heads))
-                {
-                    foreach (var head in (TomlArray)heads)
-                        profile.Heads.Add((string)head);
-                }
-
-                Validate(profile);
-
-                if (body.TryGetValue("audio", out var audio))
-                    profile.Audio = (string)audio;
-
-                profile.Output = body.TryGetValue("output", out var output)
-                    ? Path.GetFullPath((string)output, root)
-                    : Path.Combine(root, "Content.Build", pair.Key);
-
-                sources.Profiles[pair.Key] = profile;
-            }
+        foreach (var pair in bodies)
+        {
+            var profile = ReadProfile(pair.Key, pair.Value, bodies, groups, root);
+            Validate(profile);
+            sources.Profiles[pair.Key] = profile;
         }
 
         return sources;
+    }
+
+    private static ContentProfile ReadProfile(string name, TomlTable body,
+        Dictionary<string, TomlTable> bodies, Dictionary<string, VariantSpec> groups, string root)
+    {
+        var profile = new ContentProfile { Name = name };
+        var assembly = body;
+
+        if (body.TryGetValue("extends", out var extends))
+        {
+            profile.Extends = (string)extends;
+
+            if (!bodies.TryGetValue(profile.Extends, out assembly))
+                throw new InvalidDataException(
+                    $"profile '{name}' extends '{profile.Extends}', which is not declared");
+
+            if (assembly.ContainsKey("extends"))
+                throw new InvalidDataException(
+                    $"profile '{name}' extends '{profile.Extends}', which itself extends something; " +
+                    "one level only");
+        }
+
+        ReadAssembly(name, assembly, groups, profile);
+
+        if (body.TryGetValue("texture", out _))
+            throw new InvalidDataException(
+                $"profile '{name}' still uses the old scalar 'texture'; replace it with " +
+                "textures = { encode = [...], accept = [...] }");
+
+        if (body.TryGetValue("textures", out _))
+            ReadTextures(name, body, profile);
+        else
+            profile.Abstract = true;
+
+        if (body.TryGetValue("heads", out var heads))
+        {
+            foreach (var head in (TomlArray)heads)
+                profile.Heads.Add((string)head);
+        }
+
+        if (body.TryGetValue("ship", out var ship))
+            profile.Ship = (bool)ship;
+
+        profile.Output = body.TryGetValue("output", out var output)
+            ? Path.GetFullPath((string)output, root)
+            : Path.Combine(root, "Content.Build", name);
+
+        return profile;
+    }
+
+    // base, overlays, patches and variants all come from the extended profile when there is one,
+    // so two flavours of the same tree cannot describe different content
+    private static void ReadAssembly(string name, TomlTable body,
+        Dictionary<string, VariantSpec> groups, ContentProfile profile)
+    {
+        if (!body.TryGetValue("base", out var profileBase))
+            throw new InvalidDataException($"profile '{name}' has no base");
+
+        profile.Base = (string)profileBase;
+
+        if (body.TryGetValue("variants", out var variants))
+        {
+            foreach (var variant in (TomlArray)variants)
+            {
+                if (variant is TomlTable)
+                    throw new InvalidDataException(
+                        $"profile '{name}' declares a variant inline; variants now name [group.*] " +
+                        "entries so two profiles cannot drift apart");
+
+                var group = (string)variant;
+                if (!groups.TryGetValue(group, out var spec))
+                    throw new InvalidDataException(
+                        $"profile '{name}' names variant group '{group}', which is not declared; " +
+                        $"known: {string.Join(", ", groups.Keys)}");
+
+                profile.Variants.Add(spec);
+            }
+        }
+
+        if (body.TryGetValue("overlays", out var overlays))
+        {
+            foreach (var overlay in (TomlArray)overlays)
+                profile.Overlays.Add((string)overlay);
+        }
+
+        if (body.TryGetValue("patches", out var patches))
+        {
+            foreach (var patch in (TomlArray)patches)
+                profile.Patches.Add((string)patch);
+        }
     }
 }

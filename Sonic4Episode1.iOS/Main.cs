@@ -7,11 +7,17 @@ static class Program
     static int Main(string[] args)
     {
         SDL_SetHint("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
+        Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
+
+        // GraphicsDeviceManager.SupportedOrientations is a no-op on FNA, and the plist alone does
+        // not settle it either, so this is the only thing that keeps us out of portrait
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
         // Keep mouse and touch input separate.
         SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
         SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
-        SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
+        SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0"); 
+        
 
         // Don't let the accelerometer take over controller slot 0.
         // SDL3.SDL.SDL_SetHint(SDL3.SDL.SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");

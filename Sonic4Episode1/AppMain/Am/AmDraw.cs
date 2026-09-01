@@ -423,10 +423,20 @@ internal partial class AppMain
     {
         _am_draw_offset_x = 0;
         amRenderSetTarget(target, flag, color, depth, stencil);
-        if (_am_draw_in_scene != 0 || flag == 0U)
-            return true;
+        amRenderClear(flag, color, depth);
+        return true;
+    }
+
+    // Split out of amDrawBegin so a target switch can clear too. In the retail binary the flag is
+    // handed straight to IDirect3DDevice9::Clear, and amRenderSetTarget drops out of the scene
+    // before rebinding, which is what lets this fire on every switch (0x467580 -> 0x452AF0).
+    private static void amRenderClear(uint flag, NNS_RGBA_U8 color, float depth)
+    {
+        if (flag == 0U || _am_draw_in_scene != 0)
+            return;
+
         uint mask = 0;
-        if (((int)flag & (int)AMD_RENDER_CLEAR_COLOR) != 0)
+        if ((flag & AMD_RENDER_CLEAR_COLOR) != 0U)
         {
             if (color != null)
             {
@@ -438,13 +448,16 @@ internal partial class AppMain
             OpenGL.glClearColor(_am_draw_bg_color.r / (float)byte.MaxValue, _am_draw_bg_color.g / (float)byte.MaxValue, _am_draw_bg_color.b / (float)byte.MaxValue, _am_draw_bg_color.a / (float)byte.MaxValue);
             mask |= 16384U;
         }
-        if (((int)flag & (int)AMD_RENDER_CLEAR_DEPTH) != 0)
+        if ((flag & AMD_RENDER_CLEAR_DEPTH) != 0U)
         {
             OpenGL.glClearDepthf(depth);
             mask |= 256U;
         }
+        if (mask == 0U)
+            return;
+
         OpenGL.glClear(mask);
-        return true;
+        _am_draw_in_scene = 1;
     }
 
     private static void amDrawEnd()
@@ -1395,9 +1408,9 @@ internal partial class AppMain
             nnSetTextureList(amsParamDrawObject.texlist);
         nnSetMaterialCallback(amsParamDrawObject.material_func);
         if (command.command_id == -6)
-            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag, 0U);
+            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag, 0U, amsParamDrawObject.flag_ex);
         else
-            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag);
+            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag, amsParamDrawObject.flag_ex);
         if (amsParamDrawObject.material_func != null)
             nnSetMaterialCallback(null);
         amMatrixPop();
@@ -1964,7 +1977,7 @@ internal partial class AppMain
         target.target = new RenderTarget2D(
             device, width, height, false,
             SurfaceFormat.Color, DepthFormat.Depth24Stencil8,
-            0, RenderTargetUsage.PreserveContents);
+            1, RenderTargetUsage.PreserveContents);
 
         if (target.tex_name == 0U)
             OpenGL.glGenTexture(out target.tex_name);
@@ -2013,10 +2026,15 @@ internal partial class AppMain
         if (prev == target)
             return prev != _am_render_default ? prev : null;
 
+        // ends the scene before rebinding, the way the binary does, so the clear below can fire
+        _am_draw_in_scene = 0;
+
         OpenGL.mppglSetRenderTarget(target.target);
         manager.targetp = target;
         manager.target_now = target;
         OpenGL.glViewport(0, 0, target.width, target.height);
+
+        amRenderClear(flag, color, z);
 
         return prev != _am_render_default ? prev : null;
     }

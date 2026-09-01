@@ -10,16 +10,18 @@
     internal static OBS_ACTION3D_NN_WORK[] GmGameDBuildRegBuildModel(
       AMS_AMB_HEADER mdl_amb,
       AMS_AMB_HEADER tex_amb,
-      uint draw_flag)
+      uint draw_flag,
+      uint draw_flag_ex = 0)
     {
-        return GmGameDBuildRegBuildModel(mdl_amb, tex_amb, draw_flag, null);
+        return GmGameDBuildRegBuildModel(mdl_amb, tex_amb, draw_flag, null, draw_flag_ex);
     }
 
     internal static OBS_ACTION3D_NN_WORK[] GmGameDBuildRegBuildModel(
       AMS_AMB_HEADER mdl_amb,
       AMS_AMB_HEADER tex_amb,
       uint draw_flag,
-      TXB_HEADER txb)
+      TXB_HEADER txb,
+      uint draw_flag_ex = 0)
     {
         GMS_GDBUILD_BUILD_MDL_WORK gdbuildBuildMdlWork = gm_obj_build_model_work_buf[gm_obj_build_model_work_reg_num];
         ++gm_obj_build_model_work_reg_num;
@@ -28,6 +30,7 @@
         gdbuildBuildMdlWork.mdl_amb = mdl_amb;
         gdbuildBuildMdlWork.tex_amb = tex_amb;
         gdbuildBuildMdlWork.draw_flag = draw_flag;
+        gdbuildBuildMdlWork.draw_flag_ex = draw_flag_ex;
         gdbuildBuildMdlWork.txb = txb;
         gdbuildBuildMdlWork.build_state = GME_GAME_DBUILD_MDL_STATE.GME_GAME_DBUILD_MDL_STATE_REG_WAIT;
         return gdbuildBuildMdlWork.obj_3d_list;
@@ -53,6 +56,7 @@
                         while (GsMainSysGetDisplayListRegistNum() <= 188 && regNum < (~arrayPointer1).num)
                         {
                             ObjAction3dNNModelLoad(~arrayPointer2, null, null, regNum, (~arrayPointer1).mdl_amb, null, (~arrayPointer1).tex_amb, (~arrayPointer1).draw_flag);
+                            (~arrayPointer2).drawflag_ex |= (~arrayPointer1).draw_flag_ex;
                             ++regNum;
                             ++arrayPointer2;
                         }
@@ -67,6 +71,7 @@
                         while (GsMainSysGetDisplayListRegistNum() <= 188 && regNum < (~arrayPointer1).num)
                         {
                             ObjAction3dNNModelLoadTxb(arrayPointer2, null, null, regNum, (~arrayPointer1).mdl_amb, null, (~arrayPointer1).tex_amb, (~arrayPointer1).draw_flag, (~arrayPointer1).txb);
+                            (~arrayPointer2).drawflag_ex |= (~arrayPointer1).draw_flag_ex;
                             ++regNum;
                             ++arrayPointer2;
                         }

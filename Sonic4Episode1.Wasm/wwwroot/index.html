@@ -52,6 +52,45 @@
             justify-content: center;
             align-items: stretch;
         }
+
+        #tap-to-play.visible {
+            display: flex;
+        }
+
+        #picker {
+            background: #1f1f1f;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 16px 20px;
+            min-width: 260px;
+            font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
+        }
+
+        #picker p {
+            margin: 0 0 12px;
+            font-size: 11pt;
+        }
+
+        #picker label {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 5px 0;
+            cursor: pointer;
+            font-size: 12pt;
+        }
+
+        #picker .size {
+            margin-left: auto;
+            opacity: 0.6;
+            font-size: 10pt;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #picker button {
+            width: 100%;
+            margin-top: 14px;
+        }
     </style>
 </head>
 
@@ -68,8 +107,17 @@
         <canvas id="canvas" width="800" height="480"></canvas>
     </div>
 
+    <!-- the Go button is also the user gesture WebAudio needs, so it is shown even when a choice
+         is already remembered -->
     <div id="tap-to-play">
-        <button>Tap to play!</button>
+        <div id="picker">
+            <!-- TODO(wam): a line of copy explaining what SD/HD/Console mean goes here -->
+            <p>TODO(wam)</p>
+            <label><input type="radio" name="content" value="sd"> SD <span class="size" id="size-sd"></span></label>
+            <label><input type="radio" name="content" value="hd" checked> HD <span class="size" id="size-hd"></span></label>
+            <label><input type="radio" name="content" value="console"> Console <span class="size" id="size-console"></span></label>
+            <button id="go">Go</button>
+        </div>
     </div>
 
     <noscript>

@@ -94,6 +94,47 @@ internal partial class AppMain
         ObjDataAlloc(994);
         ObjDrawESEffectSystemInit(0, 20480U, 5U);
         amTrailEFInitialize();
+        // the bucket table forks, and this runs before gmMainLoad reaches GmGameDatLoadInit, so the
+        // arm has to be resolved here or it would still be the previous stage's. pure lookup, so
+        // resolving it twice costs nothing
+        gmMapSelectVariant(g_gs_main_sys_info.stage_id);
+        gmDecoSelectVariant(g_gs_main_sys_info.stage_id);
+        gmGmkSelectVariant(g_gs_main_sys_info.stage_id);
+        gmMainSetNNCommandStateTbl();
+        AoActSysClearPeak();
+        if (((int)g_gs_main_sys_info.game_flag & 16) == 0)
+            gmMainLoad(0);
+        else
+            gmMainRebuild();
+
+        //AoPresenceSet((AOE_PRESENCE)GsGetMainSysInfo().stage_id, false);
+    }
+
+    // console has 13 buckets against iPhone's 16: 3DNN_PRE, 3DNN_POST and 3DNN_WS do not exist
+    // there. slot 0's end_scene is the one that matters, because with it FALSE the mirrored group
+    // and the real scenery share a scene, which is what the sea reflection depends on
+    private static void gmMainSetNNCommandStateTbl()
+    {
+        if (gm_map_variant.blocks_as_model)
+        {
+            ObjDrawSetNNCommandStateTbl(0U, OBD_DRAW_CMD_STATE_PRE_MAPFAR, false);
+            ObjDrawSetNNCommandStateTbl(1U, OBD_DRAW_CMD_STATE_MAPFAR, false);
+            ObjDrawSetNNCommandStateTbl(2U, OBD_DRAW_CMD_STATE_POST_MAPFAR, true);
+            ObjDrawSetNNCommandStateTbl(3U, OBD_DRAW_CMD_STATE_WATER_BACK, true);
+            ObjDrawSetNNCommandStateTbl(4U, OBD_DRAW_CMD_STATE_MAPMID, true);
+            ObjDrawSetNNCommandStateTbl(5U, OBD_DRAW_CMD_STATE_WATER_MAPMID, true);
+            ObjDrawSetNNCommandStateTbl(6U, OBD_DRAW_CMD_STATE_3DNN, true);
+            ObjDrawSetNNCommandStateTbl(7U, OBD_DRAW_CMD_STATE_PRE_WATER, true);
+            ObjDrawSetNNCommandStateTbl(8U, OBD_DRAW_CMD_STATE_WATER, true);
+            ObjDrawSetNNCommandStateTbl(9U, OBD_DRAW_CMD_STATE_POST_WATER, true);
+            ObjDrawSetNNCommandStateTbl(10U, OBD_DRAW_CMD_STATE_NEAR_MAP, true);
+            ObjDrawSetNNCommandStateTbl(11U, OBD_DRAW_CMD_STATE_3DFIX, true);
+            ObjDrawSetNNCommandStateTbl(12U, OBD_DRAW_CMD_STATE_2DAMA, true);
+            for (uint slot = 13U; slot < OBD_DRAW_CMD_STATE_MAX; ++slot)
+                ObjDrawSetNNCommandStateTbl(slot, OBD_DRAW_CMD_STATE_INVALID, false);
+            return;
+        }
+
         ObjDrawSetNNCommandStateTbl(0U, 1U, true);
         ObjDrawSetNNCommandStateTbl(1U, 2U, false);
         ObjDrawSetNNCommandStateTbl(2U, 3U, true);
@@ -113,13 +154,6 @@ internal partial class AppMain
         ObjDrawSetNNCommandStateTbl(13U, 7U, true);
         ObjDrawSetNNCommandStateTbl(14U, 10U, true);
         ObjDrawSetNNCommandStateTbl(15U, 6U, true);
-        AoActSysClearPeak();
-        if (((int)g_gs_main_sys_info.game_flag & 16) == 0)
-            gmMainLoad(0);
-        else
-            gmMainRebuild();
-
-        //AoPresenceSet((AOE_PRESENCE)GsGetMainSysInfo().stage_id, false);
     }
 
     private static void GmMainEnd()

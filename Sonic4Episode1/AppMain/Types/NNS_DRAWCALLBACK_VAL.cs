@@ -16,6 +16,9 @@ internal partial class AppMain
         public uint[] pNodeStatusList;
         public uint DrawSubobjType;
         public uint DrawFlag;
+
+        // NNF_DRAWOBJ's high half; nnSetupShaderProfile reads every MATCTRL bit out of this word
+        public uint DrawFlagEx;
         public int bModified;
         public int bReDraw;
     }

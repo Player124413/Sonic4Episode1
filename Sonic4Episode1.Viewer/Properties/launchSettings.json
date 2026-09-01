@@ -2,7 +2,7 @@
   "profiles": {
     "Sonic4Episode1.Viewer": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Sonic the Hedgehog 4 EP 1\\G_COM\\PLY\\SON_MDL.AMB\" \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Sonic the Hedgehog 4 EP 1\\G_COM\\PLY\\SON_TEX.AMB\" \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Sonic the Hedgehog 4 EP 1\\G_COM\\PLY\\SON_MTN.AMB\""
+      "commandLineArgs": "--stage ZONE41 \"C:/Users/wamwo/Downloads/Sonic_the_Hedgehog_4_-_Episode_I_(Feb_6,_2010_prototype)/Sonic_4_Episode_1(2Builds)/Sonic_4_Episode_1/58410A07/000D0000/data\""
     }
   }
 }

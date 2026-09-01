@@ -49,9 +49,95 @@ internal static class MotionDescribe
             var obj = objects[i];
             Console.WriteLine($"  object {i}: {obj.nNode} node(s), {obj.nMtxPal} palette entries,"
                 + $" {obj.nMaterial} material(s), {obj.nSubobj} subobject(s), {obj.nVtxList} vertex list(s)");
+
+            DescribeSkinning(obj);
         }
 
         return 0;
+    }
+
+    // Whether a mesh is skinned is not a property of the model, it is what nnSetupShaderProfile
+    // decides from the subobject type and the vertex format. A mesh that comes out rigid ignores
+    // node motion entirely and draws in its bind pose, which looks like "the motion is not playing".
+    private static void DescribeSkinning(AppMain.NNS_OBJECT obj)
+    {
+        for (int s = 0; s < obj.nSubobj; s++)
+        {
+            var subobj = obj.pSubobjList[s];
+
+            for (int m = 0; m < subobj.nMeshset; m++)
+            {
+                var meshset = subobj.pMeshsetList[m];
+                if (!(obj.pVtxListPtrList[meshset.iVtxList].pVtxList is AppMain.NNS_VTXLIST_DX_DESC desc))
+                {
+                    Console.WriteLine($"    subobj {s} mesh {m}: not a DX vertex list");
+                    continue;
+                }
+
+                bool rigidType = (subobj.fType & AppMain.NND_SUBOBJTYPE_RIGID) != 0;
+                uint blend = desc.Format & AppMain.NND_VTXMEMBER_DX_BLEND_MASK;
+                bool rigidBlend = blend != AppMain.NND_VTXMEMBER_DX_BLEND4FIXED;
+                bool rigid = rigidType || rigidBlend;
+
+                int mode = rigid ? 0 : ((desc.Format & AppMain.NND_VTXMEMBER_DX_BLENDFMT_I8) != 0 ? 2 : 1);
+
+                // shader skinning reads the bones out of pBoneMtxList; without it
+                // nnSetShaderBoneMatrix leaves the count at zero and the mesh draws in bind pose
+                var bones = desc.pBoneMtxList == null
+                    ? "pBoneMtxList NULL, would draw in bind pose"
+                    : $"nBoneMtx {desc.nBoneMtx}, list {desc.pBoneMtxList.Length}";
+
+                Console.WriteLine($"    subobj {s} mesh {m}: VtxTfmMode {mode}"
+                    + $" ({(rigid ? "rigid, ignores node motion" : "skinned")})"
+                    + $"  subobjType 0x{subobj.fType:X}"
+                    + $"  vtxFormat 0x{desc.Format:X8} blend 0x{blend:X}"
+                    + (rigidType ? "  SUBOBJTYPE_RIGID" : "")
+                    + (rigidBlend ? "  blend is not BLEND4FIXED" : ""));
+                Console.WriteLine($"        {bones}");
+
+                // the permutation the mesh actually asks for, at the draw-time flags
+                var profile = new AppMain.NNS_STDSHADER_PROFILE();
+                if (AppMain.nnSetupShaderProfile(
+                        profile, obj.pMatPtrList[meshset.iMaterial],
+                        AppMain.NND_DRAWOBJ_FRAGPARALIGHT1, 0, subobj.fType, desc.Format) < 0)
+                {
+                    Console.WriteLine("        no profile");
+                    continue;
+                }
+
+                var key = AppMain.nnGetStdShaderName(profile).ToString();
+                Console.WriteLine($"        key {key} profile.VtxTfmMode={profile.VtxTfmMode}"
+                    + $"  {(NnShaderCache.BuiltPermutations().Contains(key) ? "built" : "*** NOT BUILT ***")}");
+
+                // what the skinning actually reads per vertex. Weights that decode to nothing, or
+                // indices that decode reversed, both leave a model that draws but never deforms.
+                var arrays = DXVertexArrays.Decode(desc, desc.mppBigEndian);
+                Console.WriteLine($"        bigEndian={desc.mppBigEndian} nVertex={desc.nVertex}"
+                    + $" stride={desc.Stride}");
+
+                if (arrays.TexCoords != null)
+                {
+                    float u0 = float.MaxValue, u1 = float.MinValue;
+                    float v0 = float.MaxValue, v1 = float.MinValue;
+                    foreach (var uv in arrays.TexCoords)
+                    {
+                        u0 = Math.Min(u0, uv.X); u1 = Math.Max(u1, uv.X);
+                        v0 = Math.Min(v0, uv.Y); v1 = Math.Max(v1, uv.Y);
+                    }
+                    Console.WriteLine($"          uv u {u0:0.000}..{u1:0.000}  v {v0:0.000}..{v1:0.000}");
+                }
+
+                for (int v = 0; v < Math.Min(3, desc.nVertex); v++)
+                {
+                    var w = arrays.BlendWeights != null ? arrays.BlendWeights[v] : Microsoft.Xna.Framework.Vector4.Zero;
+                    var idx = arrays.BlendIndices != null
+                        ? string.Join(",", arrays.BlendIndices[v])
+                        : "none";
+                    Console.WriteLine($"          v{v} wt=({w.X:0.000},{w.Y:0.000},{w.Z:0.000},{w.W:0.000})"
+                        + $" idx=[{idx}]");
+                }
+            }
+        }
     }
 
     private static void Describe(int index, AppMain.NNS_MOTION motion)

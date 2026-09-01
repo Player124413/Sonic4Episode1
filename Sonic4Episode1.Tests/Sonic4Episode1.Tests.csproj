@@ -8,7 +8,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- must match Sonic4Episode1.Viewer so the shared code compiles the same way -->
-    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;FNA;ASYNC_IO;AOT;SPLIT_LOOP;BGM_STREAM;</DefineConstants>
     <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;CS0168;CS0219;CS0162;CS0642;CA2022;</NoWarn>
   </PropertyGroup>
 
@@ -21,6 +21,17 @@
          these files touches DirectXTexNet, so the test host never loads the native DLL -->
     <Compile Include="..\Sonic4Episode1.Content\TextureFormat.cs" Link="TextureFormat.cs" />
     <Compile Include="..\Sonic4Episode1.Content\TexturePlan.cs" Link="TexturePlan.cs" />
+    <!-- same reason: the stage loader is pure parsing, no graphics device anywhere in it -->
+    <Compile Include="..\Sonic4Episode1.Viewer\StageTable.cs" Link="StageTable.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageMap.cs" Link="StageMap.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageMapFar.cs" Link="StageMapFar.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageMapFarTable.cs" Link="StageMapFarTable.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageMapFarCamera.cs" Link="StageMapFarCamera.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StagePlacement.cs" Link="StagePlacement.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageParallax.cs" Link="StageParallax.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageMarkers.cs" Link="StageMarkers.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\StageDeco.cs" Link="StageDeco.cs" />
+    <Compile Include="..\Sonic4Episode1.Viewer\NnArchive.cs" Link="NnArchive.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +44,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="NVorbis" Version="0.10.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />

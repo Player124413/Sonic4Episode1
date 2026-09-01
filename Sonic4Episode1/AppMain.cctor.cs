@@ -7025,7 +7025,6 @@ internal partial class AppMain
         sLevel_4_BGMList
         };
         m_iBGMPreparedLevel = -1;
-        bgmPreloadedList = new Dictionary<string, Song>();
         gs_sound_sys_main_info = new GSS_SND_SYS_MAIN_INFO();
         gs_sound_scb_heap = New<GSS_SND_SCB>(8);
         gs_sound_scb_heap_usage_flag = new byte[1];
@@ -14634,8 +14633,8 @@ internal partial class AppMain
         g_deco_mgr = null;
         g_deco_data_real = new GMS_DECO_DATA();
         g_deco_data = null;
-        gmDeco_matMotionHeader = null;
         gmDeco_motionHeader = null;
+        gmDeco_matMotionHeader = null;
         _gmDecoTcbProcPostDT = new OBF_DRAW_USER_DT_FUNC(gmDecoTcbProcPostDT);
         _gmDecoDrawFallFrontUserFunc = new OBF_DRAW_USER_DT_FUNC(gmDecoDrawFallFrontUserFunc);
         _gmDecoDrawFallBackUserFunc = new OBF_DRAW_USER_DT_FUNC(gmDecoDrawFallBackUserFunc);
@@ -16053,7 +16052,7 @@ internal partial class AppMain
         gm_gmk_gear_opt_obj_3d_list = null;
         gm_gmk_gear_add_data = new object[19];
         gm_gmk_dash_panel_obj_3d_list = null;
-        g_gm_gamedat_map = new object[4];
+        g_gm_gamedat_map = new object[GMD_GAMEDAT_MAP_MAX];
         g_gm_gamedat_map_set = new object[9];
         g_gm_gamedat_map_set_add = new object[10];
         g_gm_gamedat_map_attr_set = new object[3];
@@ -23819,9 +23818,9 @@ internal partial class AppMain
         AMD_RENDER_FLAG_TILED = 16384U;
         AMD_RENDER_FLAG_DELETE = 32768U;
         AMD_RENDER_CLEAR_COLOR = 1U;
-        AMD_RENDER_CLEAR_DEPTH = 1U;
-        AMD_RENDER_CLEAR_STENCIL = 1U;
-        AMD_RENDER_CLEAR_ALL = 1U;
+        AMD_RENDER_CLEAR_DEPTH = 2U;
+        AMD_RENDER_CLEAR_STENCIL = 4U;
+        AMD_RENDER_CLEAR_ALL = 7U;
         _am_render_manager = new AMS_RENDER_MANAGER();
         _am_render_default = new AMS_RENDER_TARGET();
         _am_pad = New<AMS_PAD_DATA>(4);
@@ -29050,7 +29049,7 @@ internal partial class AppMain
         gm_map_prim_draw_work = New<GMS_MAP_PRIM_DRAW_WORK>(16);
         gm_map_draw_size = new uint[2];
         gm_map_draw_margin_adjust = 0U;
-        gm_map_block_check = new short[24, 24];
+        gm_map_block_check = new short[GMD_MAP_DRAW_CHECK_WIDTH, GMD_MAP_DRAW_CHECK_HEIGHT];
         gm_map_add_tbl_use_no = new int[]
         {
         2,

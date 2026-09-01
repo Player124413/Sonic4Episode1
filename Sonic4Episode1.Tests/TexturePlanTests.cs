@@ -180,6 +180,62 @@ public class TexturePlanTests
         Assert.False(asked);
     }
 
+    // the ASTC set pairs footprint to the BC rule it stands in for: 6x6 where BC1 would apply,
+    // 4x4 where BC3 would. docs/webgl-texture-capabilities.md
+    [Theory]
+    [InlineData(AlphaShape.Opaque, TextureFormat.Astc6x6)]
+    [InlineData(AlphaShape.PunchThrough, TextureFormat.Astc6x6)]
+    [InlineData(AlphaShape.Partial, TextureFormat.Astc4x4)]
+    public void AlphaShapeChoosesTheAstcFootprint(AlphaShape alpha, TextureFormat expected)
+    {
+        var encode = new[] { TextureFormat.Astc6x6, TextureFormat.Astc4x4 };
+        var plan = Plan(Source(TextureFormat.Png), encode,
+            Accept(TextureFormat.Astc4x4, TextureFormat.Astc6x6, TextureFormat.Png), alpha,
+            out var problem);
+
+        Assert.Null(problem);
+        Assert.Equal(expected, plan.Target);
+    }
+
+    // ASTC pads a partial block itself, so unlike BC there is no multiple-of-four gate
+    [Fact]
+    public void AstcTakesDimensionsBlockCompressionWouldRefuse()
+    {
+        var encode = new[] { TextureFormat.Astc6x6 };
+        var plan = Plan(Source(TextureFormat.Png, 30, 18), encode,
+            Accept(TextureFormat.Astc6x6, TextureFormat.Png), AlphaShape.Opaque, out var problem);
+
+        Assert.Null(problem);
+        Assert.Equal(TextureFormat.Astc6x6, plan.Target);
+    }
+
+    // the one place a second lossy hop is right: the console variants only exist as DDS, and an
+    // ASTC device cannot upload those at all, so BC has to come across
+    [Fact]
+    public void AstcTakesTheSecondLossyHopFromBc()
+    {
+        var encode = new[] { TextureFormat.Astc6x6, TextureFormat.Astc4x4 };
+        var plan = Plan(Source(TextureFormat.Bc3), encode,
+            Accept(TextureFormat.Astc4x4, TextureFormat.Astc6x6, TextureFormat.Bc3),
+            AlphaShape.Partial, out var problem);
+
+        Assert.Null(problem);
+        Assert.Equal(TextureFormat.Astc4x4, plan.Target);
+    }
+
+    // but a footprint must never churn into the other one
+    [Fact]
+    public void AstcIsNeverReEncodedIntoTheOtherFootprint()
+    {
+        var encode = new[] { TextureFormat.Astc6x6, TextureFormat.Astc4x4 };
+        var plan = Plan(Source(TextureFormat.Astc4x4), encode,
+            Accept(TextureFormat.Astc4x4, TextureFormat.Astc6x6), AlphaShape.Opaque,
+            out var problem);
+
+        Assert.Null(problem);
+        Assert.Equal(TextureFormat.Astc4x4, plan.Target);
+    }
+
     [Fact]
     public void AlphaIsNotInspectedWhenNothingCouldBeEncoded()
     {

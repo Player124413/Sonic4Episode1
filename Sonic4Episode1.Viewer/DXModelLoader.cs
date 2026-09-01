@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +19,13 @@ internal sealed class LoadedMesh
 
     // material as read, plus its maps resolved into sampler_def.h's sampler slots for this permutation
     public AppMain.NNS_MATERIAL_STDSHADER_DESC Material;
+
+    // the pointer it hangs off, which is what nnPutMaterialCoreStdShader wants
+    public AppMain.NNS_MATERIALPTR MaterialPtr;
+
+    // meshset.iMaterial. Material motion animates a clone of pMatPtrList, so anything that plays one
+    // has to look the material up by index each frame rather than use the two fields above.
+    public int MaterialIndex;
     public Texture2D[] SamplerTextures = Array.Empty<Texture2D>();
     public SamplerState[] SamplerStates = Array.Empty<SamplerState>();
     public string Permutation;
@@ -45,6 +52,11 @@ internal sealed class LoadedObject
     public AppMain.NNS_OBJECT Object;
     public readonly List<LoadedMesh> Meshes = new List<LoadedMesh>();
 
+    // every texture the object's NNS_TEXFILELIST names, resolved once and indexed the way
+    // NNS_MATERIAL_STDSHADER_TEXMAP_DESC.iTexIdx does. Material motion animates that index, so a
+    // playing material has to be able to swap textures without re-resolving by name each frame.
+    public Texture2D[] TexturesByFileIndex = Array.Empty<Texture2D>();
+
     // pose in model space, base matrix left out so the camera can move without rebuilding it
     public Matrix[] Palette = Array.Empty<Matrix>();
 
@@ -68,6 +80,26 @@ internal sealed class LoadedObject
     {
         return nodeIndex >= 0 && nodeIndex < _nodeStatus.Length
             && (_nodeStatus[nodeIndex] & AppMain.NND_NODESTATUS_HIDE) != 0;
+    }
+
+    public Matrix ModelView(int paletteIndex, Matrix modelView)
+    {
+        return paletteIndex < 0 || paletteIndex >= Palette.Length
+            ? modelView
+            : Palette[paletteIndex] * modelView;
+    }
+
+    // palette holds the pose in model space, camera folds in here rather than in the node walk
+    public Matrix[] GatherBones(LoadedMesh mesh, Matrix modelView)
+    {
+        int[] indices = mesh.BoneMatrixIndices;
+        if (indices == null)
+            return mesh.BoneMatrices;
+
+        for (int i = 0; i < indices.Length; ++i)
+            mesh.BoneMatrices[i] = ModelView(indices[i], modelView);
+
+        return mesh.BoneMatrices;
     }
 
     // a null motion means the bind pose
@@ -184,7 +216,10 @@ internal static class DXModelLoader
                 + $" {obj.nNode} node(s), {obj.nMaterial} material(s), {obj.nVtxList} vertex list(s),"
                 + $" {obj.nSubobj} subobject(s)");
 
-            var textures = LoadTextures(device, texturePath, texfilelist, log);
+            var textures = LoadTextures(device, texturePath, log);
+            for (int i = 0; texfilelist != null && i < texfilelist.nTex; ++i)
+                log.Add($"  texfilelist[{i}] = {texfilelist.pTexFileList[i].Filename}");
+
             var loaded = new LoadedObject(obj);
             ReportNodes(obj, log);
             BuildMeshes(device, loaded, obj, texfilelist, textures, bigEndian, flipV, log, ref min, ref max);
@@ -270,13 +305,12 @@ internal static class DXModelLoader
     }
 
     private static Dictionary<string, Texture2D> LoadTextures(
-        GraphicsDevice device, string texturePath, AppMain.NNS_TEXFILELIST texfilelist, List<string> log)
+        GraphicsDevice device, string texturePath, List<string> log)
     {
-        var byName = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
         if (texturePath == null || !File.Exists(texturePath))
         {
             log.Add("no texture archive");
-            return byName;
+            return new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
         }
 
         byte[] raw = File.ReadAllBytes(texturePath);
@@ -285,6 +319,16 @@ internal static class DXModelLoader
         using (var stream = new MemoryStream(raw))
             AppMain.readAmbHeader(stream, ref header);
 
+        return LoadTextures(device, header, log);
+    }
+
+    // the members a stage's ZONEx_T.AMB opens with are a .TXB name bundle, not a texture; it fails
+    // the DDS read like any other member and is skipped
+    public static Dictionary<string, Texture2D> LoadTextures(
+        GraphicsDevice device, AppMain.AMS_AMB_HEADER header, List<string> log)
+    {
+        var byName = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
+
         log.Add($"texture archive: {header.file_num} member(s)");
 
         for (int i = 0; i < header.file_num; ++i)
@@ -292,8 +336,8 @@ internal static class DXModelLoader
             string name = Path.GetFileName(header.files[i] ?? i.ToString());
             try
             {
-                NormaliseDdsFlags(raw, header.offsets[i]);
-                using var member = new MemoryStream(raw, header.offsets[i], header.lengths[i]);
+                NormaliseDdsFlags(header.data, header.offsets[i]);
+                using var member = new MemoryStream(header.data, header.offsets[i], header.lengths[i]);
                 var texture = Texture2D.DDSFromStreamEXT(device, member);
                 byName[name] = texture;
                 log.Add($"  [{i}] {name} {texture.Width}x{texture.Height} {texture.Format}");
@@ -304,13 +348,55 @@ internal static class DXModelLoader
             }
         }
 
-        if (texfilelist != null)
-        {
-            for (int i = 0; i < texfilelist.nTex; ++i)
-                log.Add($"  texfilelist[{i}] = {texfilelist.pTexFileList[i].Filename}");
-        }
-
         return byName;
+    }
+
+    // one archive member, already located, built against textures the caller owns. The stage loader
+    // uses this rather than Load: 200-odd block models share one ZONEx_T.AMB between them.
+    public static LoadedObject LoadObject(
+        GraphicsDevice device,
+        AppMain.AmbChunk chunk,
+        Dictionary<string, Texture2D> textures,
+        List<string> log,
+        ref Vector3 min,
+        ref Vector3 max,
+        uint drawFlag = ViewerDrawFlag,
+        uint drawFlagEx = 0)
+    {
+        var bytes = new byte[chunk.length];
+        Array.Copy(chunk.array, chunk.offset, bytes, 0, chunk.length);
+
+        bool bigEndian = DetectBigEndian(bytes);
+
+        using var stream = new MemoryStream(bytes);
+        using BinaryReader reader = bigEndian
+            ? new EndianBinaryReader(stream, bigEndian: true)
+            : new BinaryReader(stream);
+
+        AppMain.amObjectSetup(out var obj, out var texfilelist, reader);
+        if (obj == null)
+            return null;
+
+        var loaded = new LoadedObject(obj);
+        loaded.TexturesByFileIndex = ResolveEveryTexture(texfilelist, textures);
+        BuildMeshes(device, loaded, obj, texfilelist, textures, bigEndian, false, log, ref min, ref max, drawFlag, drawFlagEx);
+        loaded.SetPose(null, 0f);
+        return loaded;
+    }
+
+    private static Texture2D[] ResolveEveryTexture(
+        AppMain.NNS_TEXFILELIST texfilelist, Dictionary<string, Texture2D> textures)
+    {
+        if (texfilelist == null)
+            return Array.Empty<Texture2D>();
+
+        var discard = new List<string>();
+        var byIndex = new Texture2D[texfilelist.nTex];
+
+        for (int i = 0; i < texfilelist.nTex; i++)
+            byIndex[i] = ResolveTexture(texfilelist, textures, i, discard);
+
+        return byIndex;
     }
 
     private const uint ViewerDrawFlag = AppMain.NND_DRAWOBJ_FRAGPARALIGHT1;
@@ -322,12 +408,16 @@ internal static class DXModelLoader
         uint subobjFType,
         AppMain.NNS_VTXLIST_DX_DESC desc,
         LoadedMesh mesh,
-        List<string> log)
+        List<string> log,
+        uint drawFlag = ViewerDrawFlag,
+        uint drawFlagEx = 0)
     {
         var matPtr = obj.pMatPtrList[meshset.iMaterial];
         var profile = new AppMain.NNS_STDSHADER_PROFILE();
+
+        // the user sampler bits live in drawFlagEx, a separate word from the NND_DRAWOBJ_* one
         int result = AppMain.nnSetupShaderProfile(
-            profile, matPtr, ViewerDrawFlag, 0, subobjFType, desc.Format);
+            profile, matPtr, drawFlag, drawFlagEx, subobjFType, desc.Format);
 
         if (result < 0)
         {
@@ -368,7 +458,9 @@ internal static class DXModelLoader
         bool flipV,
         List<string> log,
         ref Vector3 min,
-        ref Vector3 max)
+        ref Vector3 max,
+        uint drawFlag = ViewerDrawFlag,
+        uint drawFlagEx = 0)
     {
         for (int s = 0; s < obj.nSubobj; ++s)
         {
@@ -376,7 +468,7 @@ internal static class DXModelLoader
             for (int m = 0; m < subobj.nMeshset; ++m)
             {
                 var meshset = subobj.pMeshsetList[m];
-                var mesh = BuildMesh(device, obj, texfilelist, meshset, subobj.fType, textures, bigEndian, flipV, log, ref min, ref max);
+                var mesh = BuildMesh(device, obj, texfilelist, meshset, subobj.fType, textures, bigEndian, flipV, log, ref min, ref max, drawFlag, drawFlagEx);
                 if (mesh != null)
                     loaded.Meshes.Add(mesh);
             }
@@ -406,7 +498,9 @@ internal static class DXModelLoader
         bool flipV,
         List<string> log,
         ref Vector3 min,
-        ref Vector3 max)
+        ref Vector3 max,
+        uint drawFlag = ViewerDrawFlag,
+        uint drawFlagEx = 0)
     {
         if (!(obj.pVtxListPtrList[meshset.iVtxList].pVtxList is AppMain.NNS_VTXLIST_DX_DESC desc))
         {
@@ -420,6 +514,16 @@ internal static class DXModelLoader
             return null;
         }
 
+        static Vector2 ReadUv(Vector2[] set, int i, bool flipV)
+        {
+            if (set == null)
+                return Vector2.Zero;
+            var uv = set[i];
+            if (flipV)
+                uv.Y = 1f - uv.Y;
+            return uv;
+        }
+
         var arrays = DXVertexArrays.Decode(desc, bigEndian);
         var indices = DXStripList.ToTriangleList(strip);
         if (indices.Length == 0)
@@ -429,9 +533,9 @@ internal static class DXModelLoader
         for (int i = 0; i < vertices.Length; ++i)
         {
             var position = arrays.Positions[i];
-            var uv = arrays.TexCoords != null ? arrays.TexCoords[i] : Vector2.Zero;
-            if (flipV)
-                uv.Y = 1f - uv.Y;
+            var uv = ReadUv(arrays.TexCoords, i, flipV);
+            var uv2 = ReadUv(arrays.TexCoords2, i, flipV);
+            var uv3 = ReadUv(arrays.TexCoords3, i, flipV);
 
             var weights = arrays.BlendWeights != null ? arrays.BlendWeights[i] : Vector4.Zero;
             var bones = arrays.BlendIndices != null ? arrays.BlendIndices[i] : null;
@@ -445,6 +549,9 @@ internal static class DXModelLoader
                     : new Byte4(bones[0], bones[1], bones[2], bones[3]),
                 Normal = arrays.Normals != null ? arrays.Normals[i] : Vector3.Up,
                 TexCoord = uv,
+                TexCoord2 = uv2,
+                TexCoord3 = uv3,
+                Color = arrays.Colors != null ? arrays.Colors[i] : Color.White,
             };
 
             min = Vector3.Min(min, position);
@@ -471,7 +578,7 @@ internal static class DXModelLoader
         }
 
         ApplyMaterial(obj, texfilelist, meshset, textures, mesh, log);
-        mesh.Permutation = ShaderKeyFor(obj, meshset, subobjFType, desc, mesh, log);
+        mesh.Permutation = ShaderKeyFor(obj, meshset, subobjFType, desc, mesh, log, drawFlag, drawFlagEx);
 
         if (mesh.VtxTfmMode != 0)
             log.Add($"  {desc.nBoneMtx} bone matrix indices [{string.Join(",", mesh.BoneMatrixIndices ?? Array.Empty<int>())}]");
@@ -503,6 +610,8 @@ internal static class DXModelLoader
         }
 
         mesh.Material = material;
+        mesh.MaterialPtr = obj.pMatPtrList[meshset.iMaterial];
+        mesh.MaterialIndex = meshset.iMaterial;
 
         if (material.pColor != null)
         {
@@ -576,16 +685,10 @@ internal static class DXModelLoader
                 return candidate.Value;
         }
 
-        int i = 0;
-        foreach (var candidate in textures)
-        {
-            if (i++ == texIndex)
-            {
-                log.Add($"texture '{wanted}' not found by name, using archive member {texIndex}");
-                return candidate.Value;
-            }
-        }
-
+        // no positional fallback: the dictionary is in hash order, so "member texIndex" picked an
+        // essentially arbitrary texture and quietly bound the wrong one. Better to draw untextured
+        // and say so than to draw something plausible and wrong.
+        log.Add($"texture '{wanted}' is not in the texture archive");
         return null;
     }
 }

@@ -30,7 +30,8 @@ internal partial class AppMain
     public const int AMB_ALIGN = 0x20;
     private const short AMB_VER_MAJOR = 0;
     private const short AMB_VER_MINOR = 4;
-    private const byte AMD_AMB_FLAG0_ENDIAN_BIG = 0x01;
+    // amBind.h:49
+    public const byte AMD_AMB_FLAG0_ENDIAN_BIG = 0x01;
 
     internal static byte[] writeAmbArchive(IReadOnlyList<AmbEntry> entries, bool bigEndian)
     {

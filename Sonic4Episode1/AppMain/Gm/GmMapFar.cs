@@ -1,40 +1,13 @@
-﻿#if GMD_MAP_FAR_USE_SEA_SHADER
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using mpp;
-#endif
-
-internal partial class AppMain
+﻿internal partial class AppMain
 {
-#if GMD_MAP_FAR_USE_SEA_SHADER
-	private static int _gm_map_far_sea_log = 1;
-	private static AMS_RENDER_TARGET _gm_map_far_sea_render_target;
-	private static AMS_PARAM_LOAD_TEXTURE_IMAGE _gm_map_far_sea_base;
-	private static AMS_PARAM_LOAD_TEXTURE_IMAGE _gm_map_far_sea_color;
-	private static readonly AMS_SHADER _gm_map_far_sea_shader = new AMS_SHADER();
-	private static readonly MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE _gmMapFarSeaMaterialCallback =
-		new MPP_BOOL_NNSDRAWCALLBACKVAL_OBJECT_DELEGATE(gmMapFarSeaMaterialCallback);
 	private static readonly OBF_DRAW_USER_DT_FUNC _gmMapFarDrawSeaUserFunc =
 		new OBF_DRAW_USER_DT_FUNC(gmMapFarDrawSeaUserFunc);
-#endif
 
 	public static void GmMapFarInitData(AMS_AMB_HEADER amb)
 	{
 		gmMapFarDataInit();
 		gmMapFarDataSetAmbHeader(amb);
-#if GMD_MAP_FAR_USE_SEA_SHADER
-		gmMapFarBuildSeaShader();
-#endif
 	}
-
-#if GMD_MAP_FAR_USE_SEA_SHADER
-	// the title screen draws the same sea model but never goes through GmMapFarInitData
-	private static void gmMapFarBuildSeaShader()
-	{
-		if (!amShaderIsValid(_gm_map_far_sea_shader))
-			amShaderBuild("sea", _gm_map_far_sea_shader);
-	}
-#endif
 
 	private static void GmMapFarBuildData()
 	{
@@ -222,7 +195,7 @@ internal partial class AppMain
 	private static void gmMapFarClearColor()
 	{
 		int zoneType = gmMapFarGetZoneType(gmMapFarGetStageId());
-		amDrawSetBGColor(g_gm_map_far_clear_color[zoneType]);
+		amDrawSetBGColor(gm_map_far_variant.clear_color[zoneType]);
 	}
 
 	public static void gmMapFarDataInit()
@@ -377,13 +350,16 @@ internal partial class AppMain
 		int num = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
 		ObjDraw3DNNUserFunc(_gmMapFarTcbProcPreDrawDT, null, 0, 1U);
 		gmMapFarCameraApply();
+		// the colours and ranges are shared; only whether the fog is lit at all forks, and zone 4
+		// gets no call on either arm
+		int fog = gm_map_far_variant.fog_enabled[num] ? 1 : 0;
 		if (num == 0)
 		{
-			amDrawSetFog(1U, 1);
+			amDrawSetFog(1U, fog);
 			if (g_gs_main_sys_info.stage_id == 2 || g_gs_main_sys_info.stage_id == 3)
 			{
 				amDrawSetFogColor(1U, 0.85f, 0.5f, 0.25f);
-				if (g_gs_main_sys_info.stage_id == 3)
+				if (g_gs_main_sys_info.stage_id == 3 && gm_map_far_variant.fog_off_at_zone_1_boss)
 					amDrawSetFog(1U, 0);
 			}
 			else
@@ -392,25 +368,25 @@ internal partial class AppMain
 		}
 		else if (1 == num)
 		{
-			amDrawSetFog(1U, 0);
+			amDrawSetFog(1U, fog);
 			amDrawSetFogColor(1U, 0.0f, 0.0f, 0.3f);
 			amDrawSetFogRange(1U, 450f, 650f);
 		}
 		else if (2 == num)
 		{
-			amDrawSetFog(1U, 0);
+			amDrawSetFog(1U, fog);
 			amDrawSetFogColor(1U, 0.3333333f, 0.4627451f, 0.427451f);
 			amDrawSetFogRange(1U, 300f, 1300f);
 		}
 		else if (4 == num)
 		{
-			amDrawSetFog(1U, 0);
+			amDrawSetFog(1U, fog);
 			amDrawSetFogColor(1U, 0.1f, 0.08f, 0.22f);
 			amDrawSetFogRange(1U, 160f, 1100f);
 		}
 		else if (5 == num)
 		{
-			amDrawSetFog(1U, 1);
+			amDrawSetFog(1U, fog);
 			amDrawSetFogColor(1U, 0.0f, 0.0f, 0.0f);
 			amDrawSetFogRange(1U, 100f, 1000f);
 		}
@@ -586,7 +562,8 @@ internal partial class AppMain
 		if (mat_amb_header != null)
 		{
 			ObjAction3dNNMaterialMotionLoad(gmsMapFarObjWork.obj_3d, 0, null, null, (int)mat_motion_index, mat_amb_header);
-			if (gmMapFarGetZoneType(gmMapFarGetStageId()) == 5)
+			if (gm_map_far_variant.applies_ss_startframe_hack
+				&& gmMapFarGetZoneType(gmMapFarGetStageId()) == GSD_MAIN_ZONE_TYPE_SS)
 			{
 				AMS_MOTION motion = gmsMapFarObjWork.obj_3d.motion;
 				motion.mmtn[motion.mmotion_id].StartFrame = 2400f;
@@ -678,6 +655,14 @@ internal partial class AppMain
 		}
 		else if (stageId == 3)
 		{
+			if (gm_map_far_variant.zone_1_draws_extra_boss_rocks)
+			{
+				nnMakeUnitMatrix(obj3d.user_obj_mtx);
+				nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, num + 180f, y, 40f);
+				nnScaleMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, 0.7f, 0.7f, 0.7f);
+				ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
+			}
+
 			nnMakeUnitMatrix(obj3d.user_obj_mtx);
 			nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, num - 30f, y, -100f);
 			nnScaleMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, 3f, 3f, 3f);
@@ -740,6 +725,13 @@ internal partial class AppMain
 		}
 		else if (stageId == 3)
 		{
+			if (gm_map_far_variant.zone_1_draws_extra_boss_rocks)
+			{
+				nnMakeUnitMatrix(obj3d.user_obj_mtx);
+				nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, x + 30f, y, -40f);
+				ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
+			}
+
 			nnMakeUnitMatrix(obj3d.user_obj_mtx);
 			nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, x, y, 75f);
 			nnScaleMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, 5f, 5f, 5f);
@@ -825,123 +817,127 @@ internal partial class AppMain
 
 	private static int gmMapFarDrawCheckRock()
 	{
-		var stage_id = gmMapFarGetStageId();
+		return gm_map_far_variant.zone_1_rocks_are_hidden() ? 0 : 1;
+	}
 
-		if (stage_id == GSD_MAIN_STAGE_ID_1_3)
+	// hand-tuned windows that hide the rocks where the terrain already covers them. the two arms
+	// were tuned against different cameras, so they are whole separate sets rather than the same
+	// set with different numbers
+	private static bool gmMapFarRocksAreHiddenMobile()
+	{
+		var pos = g_map_far_data.pos;
+
+		switch (gmMapFarGetStageId())
 		{
+			case GSD_MAIN_STAGE_ID_1_BOSS:
+				return true;
 
+			case GSD_MAIN_STAGE_ID_1_1:
+				if (pos.y <= 5.2f && pos.z >= -436.0f) return true;
+				if (pos.y <= 4.14f && pos.z < -436.0f && pos.z >= -471.4f) return true;
+				if (pos.y <= 10.0f && pos.z < -182.0f && pos.z >= -192.0f) return true;
+				if (pos.y <= 5.40f && pos.z <= -62.0f && pos.z >= -110.0f) return true;
+				if (pos.y <= 8.85f && pos.z <= -267.0f && pos.z >= -308.0f) return true;
+				if (pos.y <= 9.97f && pos.z <= -337.0f && pos.z >= -358.0f) return true;
+				if (pos.y >= 7.0f && pos.z <= -347.0f && pos.z >= -359.0f) return true;
+				if (pos.z <= -495.0f && pos.z >= -503.0f) return true;
+				return false;
+
+			case GSD_MAIN_STAGE_ID_1_2:
+				if (pos.y <= 2.95f) return true;
+				if (pos.y <= 6.47f && pos.z <= -135.4f && pos.z >= -156.0f) return true;
+				if (pos.y <= 4.5f && pos.z <= -135.4f && pos.z >= -170.0f) return true;
+				if (pos.z <= -419.0f) return true;
+				return false;
+
+			default:
+				return false;
 		}
-		else if (stage_id == GSD_MAIN_STAGE_ID_1_BOSS)
+	}
+
+	private static bool gmMapFarRocksAreHiddenConsole()
+	{
+		var pos = g_map_far_data.pos;
+
+		switch (gmMapFarGetStageId())
 		{
-#if GMD_MAP_FAR_2DBG
-		return 0;
-#endif
-		}
-		// Zone1-1
-		else if (stage_id == GSD_MAIN_STAGE_ID_1_1)
-		{
-#if _IPHONE
-		if ( g_map_far_data.pos.y <= 5.2f && g_map_far_data.pos.z >= -436.0f) return 0;
-		if ( g_map_far_data.pos.y <= 4.14f && g_map_far_data.pos.z < -436.0f && g_map_far_data.pos.z >= -471.4f) return 0;
-		if ( g_map_far_data.pos.y <= 10.0f && g_map_far_data.pos.z < -182.0f && g_map_far_data.pos.z >= -192.0f) return 0;
-#else
-			if (g_map_far_data.pos.y <= 5.2f) return 0;
-#endif
-			if (g_map_far_data.pos.y <= 5.40f && g_map_far_data.pos.z <= -62.0f && g_map_far_data.pos.z >= -110.0f)
-			{
-				return 0;
-			}
-#if !_IPHONE
-			if (g_map_far_data.pos.y <= 13.0f && g_map_far_data.pos.z <= -179.0f && g_map_far_data.pos.z >= -182.0f)
-			{
-				return 0;
-			}
-#endif // !_IPHONE
-			if (g_map_far_data.pos.y <= 8.85f && g_map_far_data.pos.z <= -267.0f && g_map_far_data.pos.z >= -308.0f)
-			{
-				return 0;
-			}
+			case GSD_MAIN_STAGE_ID_1_1:
+				if (pos.y <= 5.2f) return true;
+				if (pos.y <= 5.40f && pos.z <= -62.0f && pos.z >= -110.0f) return true;
+				if (pos.y <= 13.0f && pos.z <= -179.0f && pos.z >= -182.0f) return true;
+				if (pos.y <= 8.85f && pos.z <= -267.0f && pos.z >= -308.0f) return true;
+				if (pos.y <= 9.97f && pos.z <= -337.0f && pos.z >= -358.0f) return true;
+				if (pos.y >= 7.0f && pos.z <= -347.0f && pos.z >= -359.0f) return true;
+				if (pos.z <= -495.0f && pos.z >= -503.0f) return true;
+				return false;
 
-			if (g_map_far_data.pos.y <= 9.97f && g_map_far_data.pos.z <= -337.0f && g_map_far_data.pos.z >= -358.0f)
-			{
-				return 0;
-			}
-			if (g_map_far_data.pos.y >= 7.0f && g_map_far_data.pos.z <= -347.0f && g_map_far_data.pos.z >= -359.0f)
-			{
-				return 0;
-			}
-			if (g_map_far_data.pos.z <= -495.0f && g_map_far_data.pos.z >= -503.0f)
-			{
-				return 0;
-			}
-		}
-		else if (stage_id == GSD_MAIN_STAGE_ID_1_2)
-		{
-#if _IPHONE
-		if (g_map_far_data.pos.y <= 2.95f) return 0;
-#else
-			if (g_map_far_data.pos.y <= 4.62f) return 0;
-			if (g_map_far_data.pos.y <= 5.85f && g_map_far_data.pos.z >= -50.0f) return 0;
-#endif
+			case GSD_MAIN_STAGE_ID_1_2:
+				if (pos.y <= 4.62f) return true;
+				if (pos.y <= 5.85f && pos.z >= -50.0f) return true;
+				if (pos.y <= 6.47f && pos.z <= -135.4f && pos.z >= -156.0f) return true;
+				if (pos.y <= 4.5f && pos.z <= -135.4f && pos.z >= -170.0f) return true;
+				if (pos.z <= -419.0f) return true;
+				return false;
 
-			if (g_map_far_data.pos.y <= 6.47f && g_map_far_data.pos.z <= -135.4f && g_map_far_data.pos.z >= -156.0f) return 0;
-			if (g_map_far_data.pos.y <= 4.5f && g_map_far_data.pos.z <= -135.4f && g_map_far_data.pos.z >= -170.0f) return 0;
-			if (g_map_far_data.pos.z <= -419.0f) return 0;
+			default:
+				return false;
 		}
-
-		return 1;
 	}
 
 	private static int gmMapFarDrawCheckYakei()
 	{
-		var stage_id = gmMapFarGetStageId();
-		if (stage_id == GSD_MAIN_STAGE_ID_2_1)
-		{
-#if _IPHONE
-			if ( g_map_far_data.pos.y >= 26.5f && g_map_far_data.pos.z <= -36.7f && g_map_far_data.pos.z >= -41.9f) return 0;
-			if ( g_map_far_data.pos.y <= 25.46f && g_map_far_data.pos.z <= -50.88f && g_map_far_data.pos.z >= -58.56f )
-			{
-				return 0;
-			}
-			if ( g_map_far_data.pos.y >= 7.06f && g_map_far_data.pos.y <= 31.67f && g_map_far_data.pos.z <= -62.56f && g_map_far_data.pos.z >= -64.97f )
-			{
-				return 0;
-			}
-#else
-			if (g_map_far_data.pos.y <= 10.0f && g_map_far_data.pos.z <= -48.0f && g_map_far_data.pos.z >= -50.8f) return 0;
-			if (g_map_far_data.pos.y <= 33.0f && g_map_far_data.pos.z <= -170.0f && g_map_far_data.pos.z >= -186.0f)
-			{
-				return 0;
-			}
-			if (g_map_far_data.pos.y >= 32.0f && g_map_far_data.pos.z <= -123.0f && g_map_far_data.pos.z >= -138.0f)
-			{
-				return 0;
-			}
-			if (g_map_far_data.pos.y >= 19.0f && g_map_far_data.pos.y <= 27.0f &&
-				g_map_far_data.pos.z <= -208.0f && g_map_far_data.pos.z >= -224.0f)
-			{
-				return 0;
-			}
-#endif // _IPHONE
-		}
-		else if (stage_id == GSD_MAIN_STAGE_ID_2_3)
-		{
-#if _IPHONE
-			if ( g_map_far_data.pos.y <= 9.55f) return 0;
-			if ( g_map_far_data.pos.y <= 15.31f && g_map_far_data.pos.y >= 13.0f && g_map_far_data.pos.z <= -56.48f) return 0;
-			if ( g_map_far_data.pos.y <= 19.39f && g_map_far_data.pos.y >= 16.63f && g_map_far_data.pos.z <= -58.88f) return 0;
-			if ( g_map_far_data.pos.y <= 19.39f && g_map_far_data.pos.y >= 16.42f && g_map_far_data.pos.z >= -37.0f) return 0;
-			if ( g_map_far_data.pos.y <= 32.49f && g_map_far_data.pos.y >= 29.01f && g_map_far_data.pos.z >= -29.98f) return 0;
-#else
-			if (g_map_far_data.pos.y <= 11.95f) return 0;
-			if (g_map_far_data.pos.y <= 24.0f && g_map_far_data.pos.z <= -197.0f && g_map_far_data.pos.z >= -229.0f) return 0;
-			if (g_map_far_data.pos.y <= 24.0f && g_map_far_data.pos.y >= 20.38f && g_map_far_data.pos.z >= -116.5f) return 0;
-			if (g_map_far_data.pos.y >= 35.55f && g_map_far_data.pos.y <= 40.76f && g_map_far_data.pos.z >= -95.0f) return 0;
-			if (g_map_far_data.pos.y >= 35.55f && g_map_far_data.pos.z >= -81.0f) return 0;
-#endif // _IPHONE
-		}
+		return gm_map_far_variant.zone_2_night_view_is_hidden() ? 0 : 1;
+	}
 
-		return 1;
+	private static bool gmMapFarNightViewIsHiddenMobile()
+	{
+		var pos = g_map_far_data.pos;
+
+		switch (gmMapFarGetStageId())
+		{
+			case GSD_MAIN_STAGE_ID_2_1:
+				if (pos.y >= 26.5f && pos.z <= -36.7f && pos.z >= -41.9f) return true;
+				if (pos.y <= 25.46f && pos.z <= -50.88f && pos.z >= -58.56f) return true;
+				if (pos.y >= 7.06f && pos.y <= 31.67f && pos.z <= -62.56f && pos.z >= -64.97f) return true;
+				return false;
+
+			case GSD_MAIN_STAGE_ID_2_3:
+				if (pos.y <= 9.55f) return true;
+				if (pos.y <= 15.31f && pos.y >= 13.0f && pos.z <= -56.48f) return true;
+				if (pos.y <= 19.39f && pos.y >= 16.63f && pos.z <= -58.88f) return true;
+				if (pos.y <= 19.39f && pos.y >= 16.42f && pos.z >= -37.0f) return true;
+				if (pos.y <= 32.49f && pos.y >= 29.01f && pos.z >= -29.98f) return true;
+				return false;
+
+			default:
+				return false;
+		}
+	}
+
+	private static bool gmMapFarNightViewIsHiddenConsole()
+	{
+		var pos = g_map_far_data.pos;
+
+		switch (gmMapFarGetStageId())
+		{
+			case GSD_MAIN_STAGE_ID_2_1:
+				if (pos.y <= 10.0f && pos.z <= -48.0f && pos.z >= -50.8f) return true;
+				if (pos.y <= 33.0f && pos.z <= -170.0f && pos.z >= -186.0f) return true;
+				if (pos.y >= 32.0f && pos.z <= -123.0f && pos.z >= -138.0f) return true;
+				if (pos.y >= 19.0f && pos.y <= 27.0f && pos.z <= -208.0f && pos.z >= -224.0f) return true;
+				return false;
+
+			case GSD_MAIN_STAGE_ID_2_3:
+				if (pos.y <= 11.95f) return true;
+				if (pos.y <= 24.0f && pos.z <= -197.0f && pos.z >= -229.0f) return true;
+				if (pos.y <= 24.0f && pos.y >= 20.38f && pos.z >= -116.5f) return true;
+				if (pos.y >= 35.55f && pos.y <= 40.76f && pos.z >= -95.0f) return true;
+				if (pos.y >= 35.55f && pos.z >= -81.0f) return true;
+				return false;
+
+			default:
+				return false;
+		}
 	}
 
 	private static void gmMapFarSceneObjFuncDrawBg(OBS_OBJECT_WORK pWork)
@@ -1063,12 +1059,35 @@ internal partial class AppMain
 						return;
 					break;
 				case 3:
-					return;
+					if (gm_map_far_variant.zone_1_sky_hidden_at_boss)
+						return;
+					break;
 			}
 			nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, g_map_far_data.pos.x, -10f, g_map_far_data.pos.z);
 		}
 		else if (4 == num)
+		{
 			pWork.disp_flag |= 13705472U;
+
+			// the earth, its cloud layer and the atmosphere sit on the same transform and turn at
+			// their own rates, told apart by the user_work the init loop stamped. 23.4 degrees is
+			// the axial tilt they all share
+			if (gm_map_far_variant.zone_final_rotates_per_object)
+			{
+				nnTranslateMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, -100f, -10f, -100f);
+
+				if (pWork.user_work == (uint)GMD_MAP_FAR_OBJ_INDEX.GMD_MAP_FAR_OBJ_INDEX_ZONE_FINAL_CLOUD)
+					nnRotateYMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, (ushort)NNM_DEGtoA16(g_map_far_data.degSky2));
+				else if (pWork.user_work == (uint)GMD_MAP_FAR_OBJ_INDEX.GMD_MAP_FAR_OBJ_INDEX_ZONE_FINAL_FILM)
+					nnRotateYMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, (ushort)NNM_DEGtoA16(75f));
+				else
+					nnRotateYMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, (ushort)NNM_DEGtoA16(g_map_far_data.degSky));
+
+				nnRotateZMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, (ushort)NNM_DEGtoA16(23.4f));
+				ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
+				return;
+			}
+		}
 		nnRotateYMatrix(obj3d.user_obj_mtx, obj3d.user_obj_mtx, (ushort)NNM_DEGtoA16(g_map_far_data.degSky));
 		ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
 	}
@@ -1079,7 +1098,7 @@ internal partial class AppMain
 		float y = -30f;
 		float x = 50f;
 		int stageId = gmMapFarGetStageId();
-		if (7 == stageId)
+		if (7 == stageId && gm_map_far_variant.zone_2_scenery_hidden_at_boss)
 			return;
 		pWork.disp_flag |= 4U;
 		pWork.disp_flag |= 9502720U;
@@ -1115,7 +1134,7 @@ internal partial class AppMain
 		float y = -30f;
 		float x = 50f;
 		int stageId = gmMapFarGetStageId();
-		if (7 == stageId)
+		if (7 == stageId && gm_map_far_variant.zone_2_scenery_hidden_at_boss)
 			return;
 		pWork.disp_flag |= 4U;
 		pWork.disp_flag |= 9502720U;
@@ -1140,14 +1159,11 @@ internal partial class AppMain
 		int stageId = gmMapFarGetStageId();
 		// the C++ passes OBD_DRAW_CMD_STATE_MAPFAR literally (gmMapFar.cpp:4181); the object
 		// carries that same state and going through it is what the working deco path does
-#if GMD_MAP_FAR_USE_SEA_SHADER
-		ObjDraw3DNNUserFunc(_gmMapFarDrawSeaUserFunc, null, 0, obj3d.command_state);
-		obj3d.material_cb_func = _gmMapFarSeaMaterialCallback;
-		obj3d.material_cb_param = null;
-#endif
+		if (gm_map_far_variant.zone_1_sea_samples_the_scene)
+			ObjDraw3DNNUserFunc(_gmMapFarDrawSeaUserFunc, null, 0, obj3d.command_state);
 		pWork.disp_flag |= 4U;
 		pWork.disp_flag |= 13705472U;
-		if (stageId != 0 && stageId != 1 && (stageId != 2 && stageId == 3))
+		if (gm_map_far_variant.zone_1_sea_is_hidden())
 			return;
 		nnMakeUnitMatrix(obj3d.user_obj_mtx);
 		float x = 40f;
@@ -1155,20 +1171,14 @@ internal partial class AppMain
 		ObjDrawAction3DNN(pWork.obj_3d, new VecFx32?(pWork.pos), new AppMain.VecU16?(pWork.dir), pWork.scale, ref pWork.disp_flag);
 	}
 
-#if GMD_MAP_FAR_USE_SEA_SHADER
 	// The C++ switches the bound target to _am_draw_target and clears it (gmMapFar.cpp:4296),
 	// leaving the scene so far in _gm_mapFar_render_work to sample. That relies on the PC's
 	// frame structure; here amDrawBegin binds _gm_mapFar_render_work and amDrawDisplay blits
 	// whatever is bound at the end, so switching mid-frame drops everything drawn before this
 	// point and the display keeps the previous frame. Copy into the other target instead and
 	// keep rendering where we were, which is what the deco falls do.
-	//
-	// The projection goes out as four user uniforms in the C++ (gmMapFar.cpp:4319) because NN
-	// has no matrix binding; we read it back in the callback instead.
 	private static void gmMapFarDrawSeaUserFunc(object data)
 	{
-		_gm_map_far_sea_render_target = null;
-
 		AMS_RENDER_TARGET target = _am_render_manager.targetp != _gm_mapFar_render_work
 			? _gm_mapFar_render_work
 			: _am_draw_target;
@@ -1177,93 +1187,8 @@ internal partial class AppMain
 
 		amDrawEndScene();
 		amRenderCopyTarget(target, g_deco_rendaer_target_color);
-		_gm_map_far_sea_render_target = target;
+		mppBindFallShaderUserSampler(target);
 	}
-
-	// SEA_REFRACT and SEA_COLOR are the pair the mobile content dropped in favour of the
-	// scrolling SEA_U_D/SEA_V_D fake, so they are loaded by name the way the deco fall's
-	// offset map is rather than coming off the material.
-	//
-	// They live in MAPFAR_TEX.AMB, not alongside it: dmTitleOpLoadPostFuncMapFar walks every
-	// entry of the outer archive and readAMBFile's each one, so a non-archive entry there
-	// parses as the old format and reads a garbage string length.
-	private static void gmMapFarLoadSeaTextures(AMS_AMB_HEADER amb)
-	{
-		_gm_map_far_sea_base = gmMapFarLoadSeaTexture(amb, "SEA_REFRACT", AMD_WRAP_REPEAT);
-		_gm_map_far_sea_color = gmMapFarLoadSeaTexture(amb, "SEA_COLOR", AMD_WRAP_REPEAT);
-	}
-
-	private static AMS_PARAM_LOAD_TEXTURE_IMAGE gmMapFarLoadSeaTexture(AMS_AMB_HEADER amb, string basename, int wrap)
-	{
-		if (amb == null)
-			return null;
-
-		int index = amBindSearchBaseName(amb, basename);
-		if (index < 0)
-			return null;
-
-		AMS_PARAM_LOAD_TEXTURE_IMAGE dst = new AMS_PARAM_LOAD_TEXTURE_IMAGE();
-		amTextureLoad(dst, amBindGet(amb, index, out string _),
-			System.IO.Path.GetExtension(amb.files[index]),
-			AMD_FILTER_LINEAR, AMD_FILTER_LINEAR, wrap, wrap);
-		return dst;
-	}
-
-	private static bool gmMapFarSeaMaterialCallback(NNS_DRAWCALLBACK_VAL val, object param)
-	{
-		int ret = nnPutMaterialCore(val);
-
-		if (_gm_map_far_sea_render_target == null || _gm_map_far_sea_render_target.target == null ||
-			!amShaderIsValid(_gm_map_far_sea_shader))
-		{
-			if (--_gm_map_far_sea_log <= 0)
-			{
-				_gm_map_far_sea_log = 120;
-				amSystemLog($"[sea] cb hit but bailed: target={(_gm_map_far_sea_render_target == null ? "null" : (_gm_map_far_sea_render_target.target == null ? "no-rt" : "ok"))}" +
-							$" shader={amShaderIsValid(_gm_map_far_sea_shader)}\n");
-			}
-			return ret == 1;
-		}
-
-		Texture2D texBase = _gm_map_far_sea_base != null ? _gm_map_far_sea_base.texture : null;
-		Texture2D texDecal = _gm_map_far_sea_color != null ? _gm_map_far_sea_color.texture : null;
-
-		if (--_gm_map_far_sea_log <= 0)
-		{
-			_gm_map_far_sea_log = 120;
-			OpenGL.mppglGetDiffuse(out Vector3 dc, out float da);
-			OpenGL.mppglGetFog(out bool fe, out Vector3 fc, out float fs, out float ff);
-			amSystemLog($"[sea] cb hit: refract={(texBase == null ? "null" : texBase.Width + "x" + texBase.Height)}" +
-						$" color={(texDecal == null ? "null" : texDecal.Width + "x" + texDecal.Height)}" +
-						$" diffuse=({dc.X:F2},{dc.Y:F2},{dc.Z:F2}) a={da:F2}" +
-						$" fog={fe} col=({fc.X:F2},{fc.Y:F2},{fc.Z:F2}) range={fs:F1}..{ff:F1}\n");
-		}
-
-		if (texBase == null || texDecal == null)
-			return ret == 1;
-
-		OpenGL.mppglGetFog(out bool fogEnabled, out Vector3 fogColor, out float fogStart, out float fogEnd);
-		OpenGL.mppglGetDiffuse(out Vector3 diffuseColor, out float diffuseAlpha);
-
-		Effect effect = _gm_map_far_sea_shader.effect;
-		effect.Parameters["View"].SetValue(OpenGL.mppglGetView());
-		effect.Parameters["Projection"].SetValue(OpenGL.mppglGetProjection());
-		effect.Parameters["TexBase"].SetValue(texBase);
-		effect.Parameters["TexDecal"].SetValue(texDecal);
-		effect.Parameters["TexUserSampler2D1"].SetValue(_gm_map_far_sea_render_target.target);
-		effect.Parameters["BaseAlpha"].SetValue(1f);
-		effect.Parameters["DecalAlpha"].SetValue(1f);
-		effect.Parameters["FogColor"].SetValue(fogColor);
-		effect.Parameters["FogStart"].SetValue(fogStart);
-		effect.Parameters["FogEnd"].SetValue(fogEnd);
-		effect.Parameters["FogEnabled"].SetValue(fogEnabled ? 1f : 0f);
-		effect.Parameters["DiffuseColor"].SetValue(diffuseColor);
-		effect.Parameters["DiffuseAlpha"].SetValue(diffuseAlpha);
-		OpenGL.mppglSetEffectOverride(effect);
-
-		return ret == 1;
-	}
-#endif
 
 	private static void gmMapFarZone1Build()
 	{
@@ -1275,13 +1200,12 @@ internal partial class AppMain
 		AMS_AMB_HEADER tex_amb = readAMBFile(amBindGet(ambHeader, 1, out sPath));
 		tex_amb.dir = sPath;
 		info.obj_3d_list = GmGameDBuildRegBuildModel(mdl_amb1, tex_amb, 0U);
-		uint draw_flag = 0;
+		uint draw_flag_ex = gm_map_far_variant.zone_1_sea_samples_the_scene
+			? NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1
+			: 0U;
 		AMS_AMB_HEADER mdl_amb2 = readAMBFile(amBindGet(ambHeader, 3, out sPath));
 		mdl_amb2.dir = sPath;
-		info.obj_3d_list_render = GmGameDBuildRegBuildModel(mdl_amb2, tex_amb, draw_flag);
-#if GMD_MAP_FAR_USE_SEA_SHADER
-		gmMapFarLoadSeaTextures(tex_amb);
-#endif
+		info.obj_3d_list_render = GmGameDBuildRegBuildModel(mdl_amb2, tex_amb, 0U, draw_flag_ex);
 	}
 
 	private static bool gmMapFarZone1CheckLoading()
@@ -1332,28 +1256,90 @@ internal partial class AppMain
 		int scrollDistance2 = gmMapFarCameraGetScrollDistance(scroll_list2, (uint)num2);
 		gmMapFarCameraSetSpeed(scrollDistance1 / (float)(mapsetMpA.map_w * 64), scrollDistance2 / (float)(mapsetMpA.map_h * 64));
 		GMS_MAP_FAR_DATA info = gmMapFarDataGetInfo();
-		for (int index = 0; 6 > index; ++index)
+		GMS_MAP_FAR_VARIANT variant = gm_map_far_variant;
+		int obj_num = variant.zone_1_obj_data.Length;
+
+		for (int index = 0; index < obj_num; ++index)
 		{
-			uint num3 = g_map_far_zone_1_scene_obj_data[index];
-			OBS_ACTION3D_NN_WORK obj_3d_work = index != 0 ? info.obj_3d_list[(int)num3] : info.obj_3d_list_render[(int)num3];
-			// gmMapFar.cpp:4657 is "i >= GMD_MAP_FAR_OBJ_INDEX_ZONE_1_SEA ? MAPFAR : PRE_MAPFAR".
-			// On PC that index is 4, so the four mirrored _B_ models land in PRE_MAPFAR and the
-			// sea plus the real sky and rocks in MAPFAR. The iPhone enum drops the _B_ group and
-			// puts SEA at 0, which makes the PRE_MAPFAR arm unreachable. Faithful either way.
-			uint command_state = index < 0 ? 1U : 2U;
-			uint mat_motion_index = g_map_far_zone_1_scene_obj_data_mat_motion[index];
+			if (gmMapFarZone1SkipObj(variant, index))
+				continue;
+
+			uint num3 = variant.zone_1_obj_data[index];
+			OBS_ACTION3D_NN_WORK obj_3d_work = index != variant.zone_1_render_index
+				? info.obj_3d_list[(int)num3]
+				: info.obj_3d_list_render[(int)num3];
+
+			// the mirrored group draws first so the sea has something to reflect, then the sea,
+			// then the real scenery over it
+			uint command_state =
+				index < variant.zone_1_pre_mapfar_below || index == variant.zone_1_skip_index
+					? 1U
+					: 2U;
+
+			uint mat_motion_index = variant.zone_1_obj_data_mat_motion[index];
 			AMS_AMB_HEADER mat_amb_header = null;
 			if (uint.MaxValue != mat_motion_index)
 				mat_amb_header = readAMBFile(amBindGet(gmMapFarDataGetAmbHeader(), 2));
-			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj_3d_work, mat_motion_index, mat_amb_header, 0U, null, g_map_far_zone_1_scene_obj_func_main[index], g_map_far_zone_1_scene_obj_func_out[index], command_state);
+			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj_3d_work, mat_motion_index, mat_amb_header, 0U, null, variant.zone_1_obj_func_main[index], variant.zone_1_obj_func_out[index], command_state);
 		}
-		gmMapFarDataGetObjWork(GMD_MAP_FAR_OBJ_INDEX.GMD_MAP_FAR_OBJ_INDEX_ZONE_1_SKY).scale.y = 8192;
-		OBS_OBJECT_WORK objWork = gmMapFarDataGetObjWork(GMD_MAP_FAR_OBJ_INDEX.GMD_MAP_FAR_OBJ_INDEX_ZONE_1_SEA);
+
+		gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)variant.zone_1_sky_index).scale.y = 8192;
+		OBS_OBJECT_WORK objWork = gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)variant.zone_1_sea_index);
 		objWork.disp_flag |= 4U;
 		ObjDrawObjectActionSet3DNNMaterial(objWork, 0);
 		objWork.obj_3d.mat_speed = 0.2f;
-		for (int index = 0; 6 > index; ++index)
+
+		for (int index = 0; index < obj_num; ++index)
+		{
+			if (gmMapFarZone1SkipObj(variant, index))
+				continue;
+
 			gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)index).user_work = (uint)index;
+		}
+	}
+
+	// the whole cull is #if !_IPHONE, commented there that the menu shows speckles otherwise, so
+	// mobile draws the sea on every act and only the flat backdrop replaces it at the boss
+	private static bool gmMapFarSeaIsHiddenMobile()
+	{
+		return gmMapFarGetStageId() == GSD_MAIN_STAGE_ID_1_BOSS;
+	}
+
+	private static bool gmMapFarSeaIsHiddenConsole()
+	{
+		var pos = g_map_far_data.pos;
+
+		switch (gmMapFarGetStageId())
+		{
+			case GSD_MAIN_STAGE_ID_1_1:
+				if (pos.y <= 6.36f) return true;
+				if (pos.y <= 10.0f && pos.z <= -182.0f && pos.z >= -191.8f) return true;
+				if (pos.y <= 7.85f && pos.z <= -269.0f && pos.z >= -304.0f) return true;
+				if (pos.y <= 9.97f && pos.z <= -337.0f && pos.z >= -358.0f) return true;
+				if (pos.y >= 7.0f && pos.z <= -347.0f && pos.z >= -359.0f) return true;
+				if (pos.z <= -495.0f && pos.z >= -503.0f) return true;
+				return false;
+
+			case GSD_MAIN_STAGE_ID_1_2:
+				if (pos.y <= 6.18f) return true;
+				if (pos.y <= 6.47f && pos.z <= -135.4f && pos.z >= -156.0f) return true;
+				if (pos.z <= -419.0f) return true;
+				return false;
+
+			case GSD_MAIN_STAGE_ID_1_3:
+				return pos.y <= 1.49f;
+
+			default:
+				return false;
+		}
+	}
+
+	private static bool gmMapFarZone1SkipObj(GMS_MAP_FAR_VARIANT variant, int index)
+	{
+		if (index == variant.zone_1_skip_index)
+			return true;
+
+		return !variant.zone_1_draws_mirror_group && index < variant.zone_1_pre_mapfar_below;
 	}
 
 	private static void gmMapFarZone1Release()
@@ -1415,37 +1401,49 @@ internal partial class AppMain
 		{
 			scroll_list1 = g_map_far_zone_2_boss_scroll_x;
 			num1 = g_map_far_zone_2_boss_scroll_x.Length;
-			scroll_list2 = g_map_far_zone_2_boss_scroll_y;
-			num2 = g_map_far_zone_2_boss_scroll_y.Length;
+			scroll_list2 = gm_map_far_variant.zone_2_boss_scroll_y;
+			num2 = gm_map_far_variant.zone_2_boss_scroll_y.Length;
 		}
 		else
 		{
-			scroll_list1 = g_map_far_zone_2_scroll_x;
-			num1 = g_map_far_zone_2_scroll_num_x;
-			scroll_list2 = g_map_far_zone_2_scroll_y;
-			num2 = g_map_far_zone_2_scroll_num_y;
+			scroll_list1 = gm_map_far_variant.zone_2_scroll_x;
+			num1 = gm_map_far_variant.zone_2_scroll_x.Length;
+			scroll_list2 = gm_map_far_variant.zone_2_scroll_y;
+			num2 = gm_map_far_variant.zone_2_scroll_y.Length;
 		}
 		MP_HEADER mapsetMpA = gmMapFarGetMapsetMpA();
 		int scrollDistance1 = gmMapFarCameraGetScrollDistance(scroll_list1, (uint)num1);
 		int scrollDistance2 = gmMapFarCameraGetScrollDistance(scroll_list2, (uint)num2);
 		gmMapFarCameraSetSpeed(scrollDistance1 / (float)(mapsetMpA.map_w * 64), scrollDistance2 / (float)(mapsetMpA.map_h * 64));
 		GMS_MAP_FAR_DATA info = gmMapFarDataGetInfo();
-		for (int index = 0; 3 > index; ++index)
+		GMS_MAP_FAR_VARIANT variant = gm_map_far_variant;
+		int obj_num = variant.zone_2_obj_data.Length;
+
+		for (int index = 0; index < obj_num; ++index)
 		{
-			uint num3 = g_map_far_zone_2_scene_obj_data[index];
+			uint num3 = variant.zone_2_obj_data[index];
 			OBS_ACTION3D_NN_WORK obj3d = info.obj_3d_list[(int)num3];
 			uint command_state = 1;
-			uint motion_index = g_map_far_zone_2_scene_obj_data_motion[index];
+			uint motion_index = variant.zone_2_obj_data_motion[index];
 			AMS_AMB_HEADER mtn_amb_header = null;
 			if (uint.MaxValue != motion_index)
 				mtn_amb_header = readAMBFile(amBindGet(gmMapFarDataGetAmbHeader(), 1));
-			uint mat_motion_index = g_map_far_zone_2_scene_obj_data_mat_motion[index];
+			uint mat_motion_index = variant.zone_2_obj_data_mat_motion[index];
 			AMS_AMB_HEADER mat_amb_header = null;
 			if (uint.MaxValue != mat_motion_index)
 				mat_amb_header = readAMBFile(amBindGet(gmMapFarDataGetAmbHeader(), 2));
-			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, mat_motion_index, mat_amb_header, motion_index, mtn_amb_header, g_map_far_zone_2_scene_obj_func_main[index], g_map_far_zone_2_scene_obj_func_out[index], command_state);
+			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, mat_motion_index, mat_amb_header, motion_index, mtn_amb_header, variant.zone_2_obj_func_main[index], variant.zone_2_obj_func_out[index], command_state);
 		}
-		for (int index = 0; 3 > index; ++index)
+
+		if (variant.zone_2_scales_sky)
+		{
+			OBS_OBJECT_WORK sky_work = gmMapFarDataGetObjWork(GMD_MAP_FAR_OBJ_INDEX.GMD_MAP_FAR_OBJ_INDEX_ZONE_2DBG);
+			sky_work.scale.x = 8192;
+			sky_work.scale.y = 8192;
+			sky_work.scale.z = 8192;
+		}
+
+		for (int index = 0; index < obj_num; ++index)
 			gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)index).user_work = (uint)index;
 	}
 
@@ -1464,7 +1462,7 @@ internal partial class AppMain
 		NNS_VECTOR getCameraPosResult = gmMapFarZone2GetCameraPos_result;
 		getCameraPosResult.Assign(player_camera_pos);
 		getCameraPosResult.y += mapsetMpA.map_h * 64;
-		NNS_VECTOR pos = gmMapFarCameraGetPos(getCameraPosResult, g_map_far_zone_2_scroll_x, (uint)g_map_far_zone_2_scroll_num_x, g_map_far_zone_2_scroll_y, (uint)g_map_far_zone_2_scroll_num_y);
+		NNS_VECTOR pos = gmMapFarCameraGetPos(getCameraPosResult, gm_map_far_variant.zone_2_scroll_x, (uint)gm_map_far_variant.zone_2_scroll_x.Length, gm_map_far_variant.zone_2_scroll_y, (uint)gm_map_far_variant.zone_2_scroll_y.Length);
 		float z = pos.z;
 		pos.z = -pos.x;
 		pos.y = pos.y;
@@ -1499,27 +1497,27 @@ internal partial class AppMain
 	{
 		gmMapFarChangeTcbProcDraw(new GSF_TASK_PROCEDURE(gmMpaFarZone3TcbProcDraw));
 		gmMapFarCameraSetInfo(1, 0);
-		GMS_MAP_FAR_SCROLL[] mapFarZone3ScrollX = g_map_far_zone_3_scroll_x;
-		int farZone3ScrollNumX = g_map_far_zone_3_scroll_num_x;
-		GMS_MAP_FAR_SCROLL[] mapFarZone3ScrollY = g_map_far_zone_3_scroll_y;
-		int farZone3ScrollNumY = g_map_far_zone_3_scroll_num_y;
+		GMS_MAP_FAR_SCROLL[] mapFarZone3ScrollX = gm_map_far_variant.zone_3_scroll_x;
+		int farZone3ScrollNumX = mapFarZone3ScrollX.Length;
+		GMS_MAP_FAR_SCROLL[] mapFarZone3ScrollY = gm_map_far_variant.zone_3_scroll_y;
+		int farZone3ScrollNumY = mapFarZone3ScrollY.Length;
 		MP_HEADER mapsetMpA = gmMapFarGetMapsetMpA();
 		int scrollDistance1 = gmMapFarCameraGetScrollDistance(mapFarZone3ScrollX, (uint)farZone3ScrollNumX);
 		int scrollDistance2 = gmMapFarCameraGetScrollDistance(mapFarZone3ScrollY, (uint)farZone3ScrollNumY);
 		gmMapFarCameraSetSpeed(scrollDistance1 / (float)(mapsetMpA.map_w * 64), scrollDistance2 / (float)(mapsetMpA.map_h * 64));
 		GMS_MAP_FAR_DATA info = gmMapFarDataGetInfo();
-		for (int index = 0; 1 > index; ++index)
+		for (int index = 0; index < g_map_far_zone_3_scene_obj_data.Length; ++index)
 		{
 			uint num = g_map_far_zone_3_scene_obj_data[index];
 			OBS_ACTION3D_NN_WORK obj3d = info.obj_3d_list[(int)num];
 			uint command_state = 2;
-			uint mat_motion_index = g_map_far_zone_3_scene_obj_data_mat_motion[index];
+			uint mat_motion_index = gm_map_far_variant.zone_3_obj_data_mat_motion[index];
 			AMS_AMB_HEADER mat_amb_header = null;
 			if (uint.MaxValue != mat_motion_index)
 				mat_amb_header = readAMBFile(amBindGet(gmMapFarDataGetAmbHeader(), 2));
 			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, mat_motion_index, mat_amb_header, 0U, null, g_map_far_zone_3_scene_obj_func_main[index], g_map_far_zone_3_scene_obj_func_out[index], command_state);
 		}
-		for (int index = 0; 1 > index; ++index)
+		for (int index = 0; index < g_map_far_zone_3_scene_obj_data.Length; ++index)
 			gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)index).user_work = (uint)index;
 	}
 
@@ -1538,7 +1536,7 @@ internal partial class AppMain
 		NNS_VECTOR getCameraPosResult = gmMapFarZone3GetCameraPos_result;
 		getCameraPosResult.Assign(player_camera_pos);
 		getCameraPosResult.y += mapsetMpA.map_h * 64;
-		NNS_VECTOR pos = gmMapFarCameraGetPos(getCameraPosResult, g_map_far_zone_3_scroll_x, (uint)g_map_far_zone_3_scroll_num_x, g_map_far_zone_3_scroll_y, (uint)g_map_far_zone_3_scroll_num_y);
+		NNS_VECTOR pos = gmMapFarCameraGetPos(getCameraPosResult, gm_map_far_variant.zone_3_scroll_x, (uint)gm_map_far_variant.zone_3_scroll_x.Length, gm_map_far_variant.zone_3_scroll_y, (uint)gm_map_far_variant.zone_3_scroll_y.Length);
 		float z = pos.z;
 		pos.z = -pos.x;
 		pos.y = pos.y;
@@ -1608,13 +1606,16 @@ internal partial class AppMain
 		int scrollDistance2 = gmMapFarCameraGetScrollDistance(zoneFinalScrollY, (uint)zoneFinalScrollNumY);
 		gmMapFarCameraSetSpeed(scrollDistance1 / (float)(mapsetMpA.map_w * 64), scrollDistance2 / (float)(mapsetMpA.map_h * 64));
 		GMS_MAP_FAR_DATA info = gmMapFarDataGetInfo();
-		for (int index = 0; 1 > index; ++index)
+		GMS_MAP_FAR_VARIANT variant = gm_map_far_variant;
+		int obj_num = variant.zone_final_obj_data.Length;
+
+		for (int index = 0; index < obj_num; ++index)
 		{
-			uint num = g_map_far_zone_final_scene_obj_data[index];
+			uint num = variant.zone_final_obj_data[index];
 			OBS_ACTION3D_NN_WORK obj3d = info.obj_3d_list[(int)num];
-			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, uint.MaxValue, null, 0U, null, g_map_far_zone_final_scene_obj_func_main[index], g_map_far_zone_final_scene_obj_func_out[index], 2U);
+			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, uint.MaxValue, null, 0U, null, variant.zone_final_obj_func_main[index], variant.zone_final_obj_func_out[index], 2U);
 		}
-		for (int index = 0; 1 > index; ++index)
+		for (int index = 0; index < obj_num; ++index)
 			gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)index).user_work = (uint)index;
 	}
 

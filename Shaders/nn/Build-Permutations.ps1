@@ -5,36 +5,56 @@ Compiles nnstdshader permutations, one per NN shader key.
 .DESCRIPTION
 Each key is the 26 digit base 32 name NN gives a shader profile (see
 docs/nn-stdshader-ubershader.md). This decodes a key back into NNS_STDSHADER_PROFILE, turns the
-profile into the NND_OPT_* defines nnMakeShaderHeader would have emitted, and compiles one .fxb.
+profile into the NND_OPT_* defines nnMakeShaderHeader would have emitted, and compiles one blob.
 
 Output is named by the key, so the runtime can compute a material's key and load it directly rather
 than consulting a hand written table.
+
+The FNA backend compiles a D3D9 effect with fxc into Shaders/FNA/nnstd/*.fxb. The MonoGame backend
+compiles MGFX with mgfxc into Shaders/MonoGame/nnstd/*.mgfxo, because MonoGame's Effect ctor will
+not take a D3D9 blob. Same keys, same defines, same shader source.
 
 The default key list is every distinct name in the retail NNSTDSHADER/SHADER.AMB, 285 of them.
 That takes a few minutes, which is why this is a script and not part of the normal build.
 
 .EXAMPLE
 ./Build-Permutations.ps1
+./Build-Permutations.ps1 -Backend MonoGame
 ./Build-Permutations.ps1 -Keys 0000000000000RDMQC0000M1C4 -Verbose
 #>
 [CmdletBinding()]
 param(
+    [ValidateSet('FNA', 'MonoGame')]
+    [string] $Backend = 'FNA',
     # explicit keys, or a file of them one per line; defaults to the committed retail key list
     [string[]] $Keys,
     [string] $KeyFile = "$PSScriptRoot\..\..\Sonic4Episode1.Tests\Fixtures\nnstdshader-keys.txt",
-    [string] $OutDir = "$PSScriptRoot\..\FNA\nnstd",
+    [string] $OutDir = "$PSScriptRoot\..\$Backend\nnstd",
     [string] $Fxc,
+    [string] $Mgfxc = "$PSScriptRoot\..\mgfx\tool\mgfxc.exe",
     [int] $Jobs = [Environment]::ProcessorCount,
     [switch] $Force
 )
 
 $ErrorActionPreference = 'Stop'
 
-if (-not $Fxc) {
-    $Fxc = (Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\fxc.exe" -ErrorAction SilentlyContinue |
-        Select-Object -Last 1).FullName
+$Extension = if ($Backend -eq 'MonoGame') { '.mgfxo' } else { '.fxb' }
+
+if ($Backend -eq 'FNA') {
+    if (-not $Fxc) {
+        $Fxc = (Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\fxc.exe" -ErrorAction SilentlyContinue |
+            Select-Object -Last 1).FullName
+    }
+    if (-not $Fxc -or -not (Test-Path $Fxc)) { throw "fxc.exe not found; install the Windows SDK or pass -Fxc" }
 }
-if (-not $Fxc -or -not (Test-Path $Fxc)) { throw "fxc.exe not found; install the Windows SDK or pass -Fxc" }
+else {
+    # a stock mgfxc cannot compile nnstdshader at all, its MojoShader rejects struct uniforms,
+    # see docs/monogame-mojoshader-ctab.md
+    if (-not (Test-Path $Mgfxc)) {
+        throw "patched mgfxc not found at $Mgfxc; run Shaders\mgfx\Build-Mgfxc.ps1"
+    }
+    $Mgfxc = (Resolve-Path $Mgfxc).Path
+}
 
 if (-not $Keys) { $Keys = Get-Content $KeyFile | Where-Object { $_.Trim() } }
 
@@ -174,6 +194,8 @@ $ProfileDefines = @{
     NND_PROF_MAX_PARALLEL_LIGHT = 1
     NND_PROF_MAX_POINT_LIGHT = 0
     NND_PROF_MAX_SPOT_LIGHT = 0
+    NND_PROF_VTX_SPECULAR = 0
+    NND_PROF_CALC_VTX_BINORMAL = 0
 }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
@@ -181,16 +203,27 @@ $fx = Join-Path $PSScriptRoot 'nnstdshader.fx'
 $include = $PSScriptRoot
 
 $work = foreach ($key in $Keys) {
-    $out = Join-Path $OutDir "$key.fxb"
+    $out = Join-Path $OutDir "$key$Extension"
     if (-not $Force -and (Test-Path $out) -and (Get-Item $out).LastWriteTime -gt (Get-Item $fx).LastWriteTime) {
         continue
     }
 
     $defines = ConvertTo-Defines (ConvertFrom-ShaderKey $key)
-    $args = @('/nologo', '/T', 'fx_2_0', '/I', $include)
-    foreach ($kv in $ProfileDefines.GetEnumerator()) { $args += '/D'; $args += "$($kv.Key)=$($kv.Value)" }
-    foreach ($kv in $defines.GetEnumerator()) { $args += '/D'; $args += "$($kv.Key)=$($kv.Value)" }
-    $args += @('/Fo', $out, $fx)
+
+    if ($Backend -eq 'FNA') {
+        $args = @('/nologo', '/T', 'fx_2_0', '/I', $include)
+        foreach ($kv in $ProfileDefines.GetEnumerator()) { $args += '/D'; $args += "$($kv.Key)=$($kv.Value)" }
+        foreach ($kv in $defines.GetEnumerator()) { $args += '/D'; $args += "$($kv.Key)=$($kv.Value)" }
+        $args += @('/Fo', $out, $fx)
+    }
+    else {
+        # mgfxc takes one semicolon separated /Defines and resolves #include against the source
+        # file's own directory, so there is no /I to pass
+        $pairs = @()
+        foreach ($kv in $ProfileDefines.GetEnumerator()) { $pairs += "$($kv.Key)=$($kv.Value)" }
+        foreach ($kv in $defines.GetEnumerator()) { $pairs += "$($kv.Key)=$($kv.Value)" }
+        $args = @($fx, $out, '/Profile:OpenGL', "/Defines:$($pairs -join ';')")
+    }
 
     [pscustomobject]@{ key = $key; args = $args; out = $out }
 }
@@ -201,9 +234,10 @@ Write-Host "compiling $($work.Count) of $($Keys.Count) permutation(s) with $Jobs
 
 $results = $work | ForEach-Object -ThrottleLimit $Jobs -Parallel {
     $item = $_
+    $exe = if ($using:Backend -eq 'MonoGame') { $using:Mgfxc } else { $using:Fxc }
     # X1519 is the pixel half re-running the TEXCOORD cascade, X3206 is NN's own mul(float3,
     # float4x4) UV transform, X4717 is fxc grumbling that effects are deprecated. All expected.
-    $text = & $using:Fxc @($item.args) 2>&1 | Where-Object { $_ -notmatch 'X1519|X3206|X4717|^\s*$|compilation object save succeeded' }
+    $text = & $exe @($item.args) 2>&1 | Where-Object { $_ -notmatch 'X1519|X3206|X4717|^\s*$|compilation object save succeeded' }
     [pscustomobject]@{ key = $item.key; ok = ($LASTEXITCODE -eq 0); log = ($text -join "`n") }
 }
 
@@ -217,7 +251,7 @@ foreach ($f in $failed) { Write-Warning "$($f.key)`n$($f.log)" }
 
 # fxc writes nothing on failure, so drop any stale blob left over from a previous build
 foreach ($stale in @($failed) + @($expected)) {
-    $out = Join-Path $OutDir "$($stale.key).fxb"
+    $out = Join-Path $OutDir "$($stale.key)$Extension"
     if (Test-Path $out) { Remove-Item $out; Write-Verbose "removed stale $out" }
 }
 

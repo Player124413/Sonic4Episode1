@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 
@@ -23,20 +24,43 @@ internal partial class AppMain
     {
         if (GMM_MAIN_GET_ZONE_TYPE() == 5)
             return;
-        gm_map_reg_obj3d_num = 1;
-        gmMapBuildDrawMapTvxTexScroll();
-        gm_map_tex_load_init = true;
+
+        if (gm_map_variant.blocks_as_model)
+        {
+            gm_map_obj3d = new OBS_ACTION3D_NN_WORK[GMD_MAP_OBJECT_NUM];
+            for (int index = 0; index < GMD_MAP_OBJECT_NUM; ++index)
+                gm_map_obj3d[index] = new OBS_ACTION3D_NN_WORK();
+        }
+
+        gm_map_reg_obj3d_num = GMD_MAP_OBJECT_START;
+
+        if (gm_map_variant.blocks_as_model)
+        {
+            gm_map_use_fall_shader = false;
+        }
+        else
+        {
+            gmMapBuildDrawMapTvxTexScroll();
+            gm_map_tex_load_init = true;
+        }
     }
 
     private static bool GmMapBuildDataLoop()
     {
-        if (GMM_MAIN_GET_ZONE_TYPE() == 5)
+        return gm_map_variant.blocks_as_model
+            ? gmMapBuildDataLoopModel()
+            : gmMapBuildDataLoopTvx();
+    }
+
+    private static bool gmMapBuildDataLoopTvx()
+    {
+        if (GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_SS)
             return true;
-        if (_am_displaylist_manager.regist_num >= 192)
+        if (_am_displaylist_manager.regist_num >= gm_map_variant.registlist_num - 64)
             return false;
         if (gm_map_tex_load_init)
         {
-            AoTexBuild(gm_map_texture, (AMS_AMB_HEADER)g_gm_gamedat_map[2]);
+            AoTexBuild(gm_map_texture, (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_TEX]);
             AoTexLoad(gm_map_texture);
             gm_map_tex_load_init = false;
         }
@@ -46,11 +70,249 @@ internal partial class AppMain
         return true;
     }
 
-    private static DF_HEADER readDFFile(AmbChunk data)
+    // registration is resumable and budgeted: 259 models cannot register in one frame, and the
+    // console list is half the size of the mobile one
+    private static bool gmMapBuildDataLoopModel()
+    {
+        uint use_light_flag_and = uint.MaxValue;
+        uint use_light_flag_or = 0U;
+        uint use_ex_light_flag_and = uint.MaxValue;
+        uint use_ex_light_flag_or = 0U;
+
+        if (GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_1
+            || GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_4)
+        {
+            use_light_flag_and = ~OBD_LIGHT_USE_FLAG_0;
+            use_light_flag_or = OBD_LIGHT_USE_FLAG_5;
+            use_ex_light_flag_and = ~OBD_LIGHT_USE_FLAG_0;
+            use_ex_light_flag_or = OBD_LIGHT_USE_FLAG_5;
+        }
+
+        AMS_AMB_HEADER model_amb = (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_MODEL];
+        AMS_AMB_HEADER tex_amb = (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_TEX];
+
+        if (gm_map_reg_obj3d_num < model_amb.file_num)
+        {
+            if (GsMainSysGetDisplayListRegistNum() >= gm_map_variant.registlist_num - 64)
+                return false;
+
+            for (int index = gm_map_reg_obj3d_num; index < model_amb.file_num; ++index)
+            {
+                OBS_ACTION3D_NN_WORK obj_3d = gm_map_obj3d[index];
+                uint user0 = (uint)model_amb.user0[index];
+
+                ObjAction3dNNModelLoad(obj_3d, null, null, index, model_amb, null, tex_amb, 0U);
+
+                // MATCTRL bits are the high half of NNF_DRAWOBJ, which this port keeps separately
+                if ((user0 & GMD_MAP_MODEL_USER_FLAG0_WATER) != 0U)
+                {
+                    obj_3d.drawflag_ex |= NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1;
+                    gm_map_use_fall_shader = true;
+                }
+
+                if ((user0 & GMD_MAP_MODEL_USER_FLAG0_EX_LIGHT) != 0U)
+                {
+                    obj_3d.use_light_flag &= use_ex_light_flag_and;
+                    obj_3d.use_light_flag |= use_ex_light_flag_or;
+                }
+                else
+                {
+                    obj_3d.use_light_flag &= use_light_flag_and;
+                    obj_3d.use_light_flag |= use_light_flag_or;
+                }
+
+                obj_3d.drawflag |= NND_DRAWOBJ_DOUBLESIDE;
+
+                ++gm_map_reg_obj3d_num;
+
+                if (GsMainSysGetDisplayListRegistNum() >= gm_map_variant.registlist_num - 64)
+                    break;
+            }
+        }
+
+        if (gm_map_reg_obj3d_num < model_amb.file_num)
+            return false;
+
+        AMS_AMB_HEADER mtn_amb = (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_MTN];
+        AMS_AMB_HEADER mmtn_amb = (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_MMTN];
+
+        for (int index = GMD_MAP_OBJECT_START; index < gm_map_reg_obj3d_num; ++index)
+        {
+            OBS_ACTION3D_NN_WORK obj_3d = gm_map_obj3d[index];
+            if (!ObjAction3dNNModelLoadCheck(obj_3d))
+                return false;
+
+            if (obj_3d.mtn[0] != null || obj_3d.mat_mtn[0] != null)
+                continue;
+
+            if (mtn_amb != null && index < mtn_amb.file_num
+                && amBindGet(mtn_amb, index, out string _) != null)
+            {
+                ObjAction3dNNMotionLoad(obj_3d, 0, false, null, null, index, mtn_amb, 1, 1);
+                ObjDrawAction3dActionSet3DNN(obj_3d, 0, 0);
+            }
+
+            if (mmtn_amb != null && index < mmtn_amb.file_num
+                && amBindGet(mmtn_amb, index, out string _) != null)
+            {
+                ObjAction3dNNMaterialMotionLoad(obj_3d, 0, null, null, index, mmtn_amb, 1, 1);
+                ObjDrawAction3dActionSet3DNNMaterial(obj_3d, 0);
+            }
+        }
+
+        if (gm_map_use_fall_shader)
+        {
+            if (GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_2)
+                gm_map_fall_rander_command_state = OBD_DRAW_CMD_STATE_WATER_BACK;
+            else if (GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_FINAL)
+                gm_map_fall_rander_command_state = OBD_DRAW_CMD_STATE_WATER_MAPMID;
+            else
+                gm_map_use_fall_shader = false;
+        }
+
+        return true;
+    }
+
+    private static ushort gmMapReadU16(byte[] data, int offset, bool big_endian)
+    {
+        return big_endian
+            ? BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(offset))
+            : BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(offset));
+    }
+
+    private static uint gmMapReadU32(byte[] data, int offset, bool big_endian)
+    {
+        return big_endian
+            ? BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(offset))
+            : BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(offset));
+    }
+
+    // .mp and .md open with map_w and map_h, and the cells that follow have to fill the member
+    // exactly. read the wrong way round 280x32 becomes 6145x8192, which does not. the container is
+    // only consulted when both readings fit or neither does, same as amAmaIsBigEndian
+    private static bool gmMapGridIsBigEndian(AmbChunk data, int cell_size)
+    {
+        if (data.length < 4)
+            return data.amb.big_endian;
+
+        var little = gmMapGridFits(data, cell_size, big_endian: false);
+        var big = gmMapGridFits(data, cell_size, big_endian: true);
+
+        return little == big ? data.amb.big_endian : big;
+    }
+
+    private static bool gmMapGridFits(AmbChunk data, int cell_size, bool big_endian)
+    {
+        long w = gmMapReadU16(data.array, data.offset, big_endian);
+        long h = gmMapReadU16(data.array, data.offset + 2, big_endian);
+
+        return 4 + w * h * cell_size == data.length;
+    }
+
+    // .ev, .rg and .dc are one format with three payloads: a header in 256x256 cells rather than the
+    // map's 64x64 blocks, then a u32 offset per cell, then {count, info[count]} wherever the offset
+    // is non-zero. map_file_format.h. Measured: the walk lands exactly on the end of the member in
+    // every build, so it is the same length identity the grids have.
+    private static bool gmMapCellsFit(AmbChunk data, int record_size, bool big_endian)
+    {
+        if (data.length < 4)
+            return false;
+
+        int map_w = gmMapReadU16(data.array, data.offset, big_endian);
+        int map_h = gmMapReadU16(data.array, data.offset + 2, big_endian);
+        long table = 4 + (long)map_w * map_h * 4;
+
+        if (map_w == 0 || map_h == 0 || table > data.length)
+            return false;
+
+        long span = table;
+        for (int i = 0; i < map_w * map_h; i++)
+        {
+            long ofst = gmMapReadU32(data.array, data.offset + 4 + i * 4, big_endian);
+            if (ofst == 0)
+                continue;
+            if (ofst + 2 > data.length)
+                return false;
+
+            long num = gmMapReadU16(data.array, data.offset + (int)ofst, big_endian);
+            long end = ofst + 2 + num * record_size;
+            if (end > data.length)
+                return false;
+
+            span = Math.Max(span, end);
+        }
+
+        return span == data.length;
+    }
+
+    private static bool gmMapCellsAreBigEndian(AmbChunk data, int record_size)
+    {
+        var little = gmMapCellsFit(data, record_size, big_endian: false);
+        var big = gmMapCellsFit(data, record_size, big_endian: true);
+
+        return little == big ? data.amb.big_endian : big;
+    }
+
+    // one cell per 256 world units each way, so a record's x and y are a byte apiece
+    private static T[][] gmMapReadCells<T>(
+      AmbChunk data,
+      int record_size,
+      out ushort map_w,
+      out ushort map_h,
+      Func<BinaryReader, T> read)
+    {
+        bool bigEndian = gmMapCellsAreBigEndian(data, record_size);
+
+        using (MemoryStream stream = new MemoryStream(data.array, data.offset, data.length))
+        using (BinaryReader reader = bigEndian
+            ? new EndianBinaryReader(stream, bigEndian: true)
+            : new BinaryReader(stream))
+        {
+            map_w = reader.ReadUInt16();
+            map_h = reader.ReadUInt16();
+
+            int count = map_w * map_h;
+            uint[] offsets = new uint[count];
+            for (int i = 0; i < count; ++i)
+                offsets[i] = reader.ReadUInt32();
+
+            T[][] cells = new T[count][];
+            for (int i = 0; i < count; ++i)
+            {
+                if (offsets[i] == 0)
+                {
+                    cells[i] = Array.Empty<T>();
+                    continue;
+                }
+
+                stream.Position = offsets[i];
+                int num = reader.ReadUInt16();
+                cells[i] = new T[num];
+                for (int j = 0; j < num; ++j)
+                    cells[i][j] = read(reader);
+            }
+
+            return cells;
+        }
+    }
+
+    // .at, .df and .di open with block_num and are fixed size per block, so the same trick works
+    private static bool gmMapBlockIsBigEndian(AmbChunk data, int block_size)
+    {
+        if (data.length < 4)
+            return data.amb.big_endian;
+
+        var little = 4 + (long)gmMapReadU32(data.array, data.offset, false) * block_size == data.length;
+        var big = 4 + (long)gmMapReadU32(data.array, data.offset, true) * block_size == data.length;
+
+        return little == big ? data.amb.big_endian : big;
+    }
+
+    internal static DF_HEADER readDFFile(AmbChunk data)
     {
         DF_HEADER dfHeader = new DF_HEADER()
         {
-            block_num = BitConverter.ToUInt32(data.array, data.offset)
+            block_num = gmMapReadU32(data.array, data.offset, gmMapBlockIsBigEndian(data, 8 * 8 * 8))
         };
         dfHeader.blocks = new DF_BLOCK[(int)dfHeader.block_num];
         int num = data.offset + 4;
@@ -71,12 +333,15 @@ internal partial class AppMain
         return dfHeader;
     }
 
-    private static DI_HEADER readDIFile(AmbChunk data)
+    internal static DI_HEADER readDIFile(AmbChunk data)
     {
         DI_HEADER diHeader = new DI_HEADER();
+        bool bigEndian = gmMapBlockIsBigEndian(data, 8 * 8);
         using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
         {
-            using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+            using (BinaryReader binaryReader = bigEndian
+                ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                : new BinaryReader(memoryStream))
             {
                 diHeader.block_num = binaryReader.ReadUInt32();
                 diHeader.blocks = new DI_BLOCK[(int)diHeader.block_num];
@@ -91,12 +356,15 @@ internal partial class AppMain
         return diHeader;
     }
 
-    private static AT_HEADER readATFile(AmbChunk data)
+    internal static AT_HEADER readATFile(AmbChunk data)
     {
         AT_HEADER atHeader = new AT_HEADER();
+        bool bigEndian = gmMapBlockIsBigEndian(data, 8 * 8);
         using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
         {
-            using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+            using (BinaryReader binaryReader = bigEndian
+                ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                : new BinaryReader(memoryStream))
             {
                 atHeader.block_num = binaryReader.ReadUInt32();
                 atHeader.blocks = new AT_BLOCK[(int)atHeader.block_num];
@@ -111,14 +379,17 @@ internal partial class AppMain
         return atHeader;
     }
 
-    private static MP_HEADER readMPFile(AmbChunk data)
+    internal static MP_HEADER readMPFile(AmbChunk data)
     {
         if (data.length == 0)
             return null;
         MP_HEADER mpHeader = new MP_HEADER();
+        bool bigEndian = gmMapGridIsBigEndian(data, 2);
         using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
         {
-            using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+            using (BinaryReader binaryReader = bigEndian
+                ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                : new BinaryReader(memoryStream))
             {
                 mpHeader.map_w = binaryReader.ReadUInt16();
                 mpHeader.map_h = binaryReader.ReadUInt16();
@@ -131,21 +402,30 @@ internal partial class AppMain
         return mpHeader;
     }
 
-    private static DC_HEADER readDCFile(byte[] data)
+    internal static DC_HEADER readDCFile(AmbChunk data)
     {
         DC_HEADER dcHeader = new DC_HEADER();
-        mppAssertNotImpl();
+        dcHeader.cells = gmMapReadCells(data, 4, out dcHeader.map_w, out dcHeader.map_h, reader =>
+            new DC_INFO
+            {
+                x = reader.ReadByte(),
+                y = reader.ReadByte(),
+                id = reader.ReadUInt16(),
+            });
         return dcHeader;
     }
 
-    private static MD_HEADER readMDFile(AmbChunk data)
+    internal static MD_HEADER readMDFile(AmbChunk data)
     {
         if (data.length == 0)
             return null;
         MD_HEADER mdHeader = new MD_HEADER();
+        bool bigEndian = gmMapGridIsBigEndian(data, 1);
         using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
         {
-            using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+            using (BinaryReader binaryReader = bigEndian
+                ? new EndianBinaryReader(memoryStream, bigEndian: true)
+                : new BinaryReader(memoryStream))
             {
                 mdHeader.map_w = binaryReader.ReadUInt16();
                 mdHeader.map_h = binaryReader.ReadUInt16();
@@ -158,17 +438,34 @@ internal partial class AppMain
         return mdHeader;
     }
 
-    private static RG_HEADER readRGFile(byte[] data)
+    internal static RG_HEADER readRGFile(AmbChunk data)
     {
         RG_HEADER rgHeader = new RG_HEADER();
-        mppAssertNotImpl();
+        rgHeader.cells = gmMapReadCells(data, 2, out rgHeader.map_w, out rgHeader.map_h, reader =>
+            new RG_INFO
+            {
+                x = reader.ReadByte(),
+                y = reader.ReadByte(),
+            });
         return rgHeader;
     }
 
-    private static EV_HEADER readEVFile(byte[] data)
+    internal static EV_HEADER readEVFile(AmbChunk data)
     {
         EV_HEADER evHeader = new EV_HEADER();
-        mppAssertNotImpl();
+        evHeader.cells = gmMapReadCells(data, 12, out evHeader.map_w, out evHeader.map_h, reader =>
+            new EV_INFO
+            {
+                x = reader.ReadByte(),
+                y = reader.ReadByte(),
+                id = reader.ReadUInt16(),
+                flag = reader.ReadUInt16(),
+                rect_x = reader.ReadSByte(),
+                rect_y = reader.ReadSByte(),
+                rect_w = reader.ReadByte(),
+                rect_h = reader.ReadByte(),
+                user = reader.ReadUInt16(),
+            });
         return evHeader;
     }
 
@@ -210,8 +507,11 @@ internal partial class AppMain
 
     private static void GmMapFlushData()
     {
-        gm_map_release_obj3d_num = 1;
-        if (GMM_MAIN_GET_ZONE_TYPE() == 5)
+        gm_map_release_obj3d_num = GMD_MAP_OBJECT_START;
+        if (gm_map_variant.blocks_as_model)
+            return;
+
+        if (GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_SS)
             return;
         AoTexRelease(gm_map_texture);
         gmMapFlushDrawMapTvxTexScroll();
@@ -219,7 +519,48 @@ internal partial class AppMain
 
     private static bool GmMapFlushDataLoop()
     {
-        return GMM_MAIN_GET_ZONE_TYPE() == 5 || AoTexIsReleased(gm_map_texture);
+        return gm_map_variant.blocks_as_model
+            ? gmMapFlushDataLoopModel()
+            : GMM_MAIN_GET_ZONE_TYPE() == GSD_MAIN_ZONE_TYPE_SS || AoTexIsReleased(gm_map_texture);
+    }
+
+    private static bool gmMapFlushDataLoopModel()
+    {
+        if (gm_map_obj3d == null)
+            return true;
+
+        if (gm_map_release_obj3d_num < gm_map_reg_obj3d_num)
+        {
+            if (GsMainSysGetDisplayListRegistNum() >= gm_map_variant.registlist_num - 64)
+                return false;
+
+            for (int index = gm_map_release_obj3d_num; index < gm_map_reg_obj3d_num; ++index)
+            {
+                OBS_ACTION3D_NN_WORK obj_3d = gm_map_obj3d[index];
+                if (obj_3d.motion != null)
+                    ObjAction3dNNMotionRelease(obj_3d);
+
+                ObjAction3dNNModelRelease(obj_3d);
+
+                ++gm_map_release_obj3d_num;
+
+                if (GsMainSysGetDisplayListRegistNum() >= gm_map_variant.registlist_num - 64)
+                    break;
+            }
+        }
+
+        if (gm_map_release_obj3d_num < gm_map_reg_obj3d_num)
+            return false;
+
+        for (int index = GMD_MAP_OBJECT_START; index < gm_map_reg_obj3d_num; ++index)
+        {
+            if (!ObjAction3dNNModelReleaseCheck(gm_map_obj3d[index]))
+                return false;
+        }
+
+        gm_map_obj3d = null;
+        gm_map_reg_obj3d_num = 0;
+        return true;
     }
 
     private static void GmMapFlushColData()
@@ -228,53 +569,37 @@ internal partial class AppMain
 
     private static void GmMapRelease()
     {
-        for (int index = 0; index < 4; ++index)
+        for (int index = 0; index < GMD_GAMEDAT_MAP_MAX; ++index)
             g_gm_gamedat_map[index] = null;
     }
 
     private static void GmMapInit()
     {
         ObjSetDiffCollision(g_gm_main_system.map_fcol);
-        gmMapTransX = g_gs_main_sys_info.stage_id < 0 || g_gs_main_sys_info.stage_id > 2 ? 0.0f : 1f;
+        gm_map_z32_share_frame = 0.0f;
+        // port-original, no C++ origin: it shifts the TVX map one unit in x and makes
+        // ObjDraw3DNNModel scale every NN model by 1.005 to close seams between batched quads.
+        // console draws blocks as models and passes trans_x 0, so it has no business on that arm
+        gmMapTransX = gm_map_variant.blocks_as_model || g_gs_main_sys_info.stage_id > 2 ? 0.0f : 1f;
         gm_map_tcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(gmMapMain), new GSF_TASK_PROCEDURE(gmMapDest), 0U, 0, 12288U, 5, () => new GMS_MAP_SYS_WORK(), "GM_MAP_MAIN");
         GMS_MAP_SYS_WORK gmsMapSysWork = new GMS_MAP_SYS_WORK();
         gm_map_tcb.work = gmsMapSysWork;
         gm_map_draw_command_state = 0U;
         gm_map_draw_margin_adjust = 0U;
-        uint stageId = g_gs_main_sys_info.stage_id;
-        GmMapSetMapDrawSize(1);
-        gmsMapSysWork.auto_resize = true;
-        switch (stageId)
-        {
-            case 0:
-            case 1:
-            case 2:
-            case 4:
-            case 6:
-                GmMapSetMapDrawSize(0);
-                gmsMapSysWork.auto_resize = false;
-                break;
-            case 3:
-            case 7:
-            case 11:
-            case 15:
-            case 16:
-                gmsMapSysWork.auto_resize = false;
-                break;
-        }
-        gmMapCreateUsePrimMatrix();
-        uint num = 3772834047;
-        if (stageId == 0U || stageId == 1U)
-            num = uint.MaxValue;
-        if (stageId == 2U || stageId == 3U)
-            num = 3767175935U;
-        else if (stageId == 14U)
-            num = 1616929023U;
-        gm_map_prim_draw_tvx_color = num;
-        gm_map_prim_draw_tvx_alpha_set = null;
-        if (stageId == 4U || stageId == 5U || (stageId == 6U || stageId == 7U))
-            gm_map_prim_draw_tvx_alpha_set = gm_map_prim_draw_tvx_alpha_set_z2;
+
+        // shared rather than TVX only, because both arms of gmMapMain still drive the iPhone
+        // deferred-BGM handshake. see the note there
         gm_map_draw_bgm_timer = GMD_MAP_DRAW_BGM_TIMER;
+
+        uint stageId = g_gs_main_sys_info.stage_id;
+        if (gm_map_variant.blocks_as_model)
+        {
+            gm_map_draw_size[0] = GMD_MAP_DRAW_WIDTH_DEF;
+            gm_map_draw_size[1] = GMD_MAP_DRAW_HEIGHT_DEF;
+        }
+        else
+            gmMapInitTvx(gmsMapSysWork, stageId);
+
         GMS_MAP_OTHER_MAP_STATE[] mapState = gmsMapSysWork.map_state;
         for (int index = 0; index < 5; ++index)
         {
@@ -307,6 +632,44 @@ internal partial class AppMain
         }
     }
 
+    // the draw-size and auto-resize rules, the prim matrices, the per-stage tint and the deferred
+    // BGM timer are all iPhone only; console keeps a flat 6 by 6 window
+    private static void gmMapInitTvx(GMS_MAP_SYS_WORK gmsMapSysWork, uint stageId)
+    {
+        GmMapSetMapDrawSize(1);
+        gmsMapSysWork.auto_resize = true;
+        switch (stageId)
+        {
+            case 0:
+            case 1:
+            case 2:
+            case 4:
+            case 6:
+                GmMapSetMapDrawSize(0);
+                gmsMapSysWork.auto_resize = false;
+                break;
+            case 3:
+            case 7:
+            case 11:
+            case 15:
+            case 16:
+                gmsMapSysWork.auto_resize = false;
+                break;
+        }
+        gmMapCreateUsePrimMatrix();
+        uint num = 3772834047;
+        if (stageId == 0U || stageId == 1U)
+            num = uint.MaxValue;
+        if (stageId == 2U || stageId == 3U)
+            num = 3767175935U;
+        else if (stageId == 14U)
+            num = 1616929023U;
+        gm_map_prim_draw_tvx_color = num;
+        gm_map_prim_draw_tvx_alpha_set = null;
+        if (stageId == 4U || stageId == 5U || (stageId == 6U || stageId == 7U))
+            gm_map_prim_draw_tvx_alpha_set = gm_map_prim_draw_tvx_alpha_set_z2;
+    }
+
     private static void GmMapExit()
     {
         if (gm_map_tcb == null)
@@ -330,7 +693,7 @@ internal partial class AppMain
     }
 
     private static void GmMapDrawMap(
-      OBS_ACTION3D_NN_WORK obj3d_tbl,
+      OBS_ACTION3D_NN_WORK[] obj3d_tbl,
       MP_HEADER mp_header,
       MD_HEADER md_header,
       float pos_x,
@@ -417,7 +780,7 @@ internal partial class AppMain
     }
 
     private static void gmMapDrawMapRange(
-      OBS_ACTION3D_NN_WORK obj3d_tbl,
+      OBS_ACTION3D_NN_WORK[] obj3d_tbl,
       MP_HEADER mp_header,
       MD_HEADER md_header,
       float trans_x,
@@ -428,7 +791,91 @@ internal partial class AppMain
       int block_top,
       int block_bottom)
     {
-        mppAssertNotImpl();
+        for (int index1 = 0; index1 < GMD_MAP_DRAW_CHECK_WIDTH; ++index1)
+        {
+            for (int index2 = 0; index2 < GMD_MAP_DRAW_CHECK_HEIGHT; ++index2)
+                gm_map_block_check[index1, index2] = -1;
+        }
+
+        VecFx32 pos = new VecFx32(0, 0, 0);
+        VecU16 dir = new VecU16();
+        VecFx32 scale = new VecFx32(FX32_ONE, FX32_ONE, FX32_ONE);
+
+        for (int x_cnt = block_left; x_cnt <= block_right; ++x_cnt)
+        {
+            for (int y_cnt = block_top; y_cnt <= block_bottom; ++y_cnt)
+            {
+                int block_no = y_cnt * mp_header.map_w + x_cnt;
+                MP_BLOCK mp_block = mp_header.blocks[block_no];
+                float dx = x_cnt;
+                float dy = y_cnt;
+                int obj_id = mp_block.id;
+
+                if (obj_id == 0)
+                {
+                    MD_BLOCK md_block = md_header.blocks[block_no];
+                    int ofst_x = md_block.ofst_x;
+                    int ofst_y = md_block.ofst_y;
+                    if ((ofst_x | ofst_y) == 0)
+                        continue;
+
+                    block_no += mp_header.map_w * ofst_y + ofst_x;
+                    mp_block = mp_header.blocks[block_no];
+                    obj_id = mp_block.id;
+                    dx += ofst_x;
+                    dy += ofst_y;
+                }
+
+                // feeding mobile .mp data against console models overruns the registration cursor
+                if (obj_id == 0 || obj_id >= gm_map_reg_obj3d_num)
+                    continue;
+
+                int check_x = GMD_MAP_DRAW_DF_SIZE + (int)dx - block_left;
+                int check_y = GMD_MAP_DRAW_DF_SIZE + (int)dy - block_top;
+                if (gm_map_block_check[check_x, check_y] != -1)
+                    continue;
+
+                gm_map_block_check[check_x, check_y] = (short)obj_id;
+
+                OBS_ACTION3D_NN_WORK obj_3d = obj3d_tbl[obj_id];
+                obj_3d.command_state = gm_map_draw_command_state;
+
+                nnMakeUnitMatrix(obj_3d.user_obj_mtx);
+                nnTranslateMatrix(
+                    obj_3d.user_obj_mtx,
+                    obj_3d.user_obj_mtx,
+                    trans_x + (dx + 0.5f) * GMD_MAP_BLOCK_SIZE,
+                    -trans_y + (-dy - 0.5f) * GMD_MAP_BLOCK_SIZE,
+                    trans_z);
+                nnRotateZMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, mp_block.rot * 0x4000);
+
+                float scale_x = mp_block.flip_h != 0 ? -GMD_OBJ_DRAW_SCALE : GMD_OBJ_DRAW_SCALE;
+                float scale_y = mp_block.flip_v != 0 ? -GMD_OBJ_DRAW_SCALE : GMD_OBJ_DRAW_SCALE;
+                nnScaleMatrix(obj_3d.user_obj_mtx, obj_3d.user_obj_mtx, scale_x, scale_y, GMD_OBJ_DRAW_SCALE);
+
+                // nnTranslateMatrix post-multiplies, so this runs in the block's pre-scale local
+                // space where -10 is -32 world after the 3.2
+                NNS_VECTOR node = obj_3d._object.pNodeList[0].Translation;
+                nnTranslateMatrix(
+                    obj_3d.user_obj_mtx,
+                    obj_3d.user_obj_mtx,
+                    -node.x - GMD_MAP_BLOCK_LOCAL_SIZE * 0.5f,
+                    -node.y - GMD_MAP_BLOCK_LOCAL_SIZE * 0.5f,
+                    -node.z);
+
+                uint disp_flag = OBD_DISP_NOPOS | OBD_DISP_NOSCALE | OBD_DISP_NODRAWSCALE
+                    | OBD_DISP_NODIR | OBD_DISP_NODIRFLIP | OBD_DISP_USERMTX | OBD_DISP_NOUPDATE;
+
+                if ((obj_3d.drawflag_ex & NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1) != 0U)
+                {
+                    ObjDraw3DNNUserFunc(
+                        gmMapDrawFallShaderPrioPreMidMapUserFunc, null, 0, obj_3d.command_state);
+                    gm_map_fall_shader_drawn = true;
+                }
+
+                ObjDrawAction3DNN(obj_3d, pos, dir, scale, ref disp_flag);
+            }
+        }
     }
 
     private static void GmMapSetAddMapXLoop()
@@ -753,6 +1200,182 @@ internal partial class AppMain
 
     private static void gmMapMain(MTS_TASK_TCB tcb)
     {
+        if (gm_map_variant.blocks_as_model)
+            gmMapMainModel(tcb);
+        else
+            gmMapMainTvx(tcb);
+    }
+
+    // the zone 2-2 near layer registers one of these before its camera, and it does nothing beyond
+    // sitting in the command list
+    private static void gmMapMainNearLayerUserFunc(object data)
+    {
+    }
+
+    // blocks draw with OBD_DISP_NOUPDATE because one model is submitted many times a frame, so the
+    // motion has to be advanced here instead, exactly once per model
+    private static void gmMapMainModel(MTS_TASK_TCB tcb)
+    {
+        GMS_MAP_SYS_WORK work = (GMS_MAP_SYS_WORK)tcb.work;
+        if ((work.flag & GMD_MAP_FLAG_DISP_OFF) != 0U)
+            return;
+
+        // TODO(port): console has no BGM timer here, it starts the music in gmMainGameStart
+        // instead. our GmMain is still the iPhone one and waits on this handshake, so dropping it
+        // leaves the stage silent. remove once GmMain's console arm lands
+        if ((g_gm_main_system.game_flag & GMD_GAME_FLAG_BGM_PLAY_WAIT) != 0U
+            && --gm_map_draw_bgm_timer <= 0)
+        {
+            g_gm_main_system.game_flag |= GMD_GAME_FLAG_BGM_PLAY_ENABLE;
+            g_gm_main_system.game_flag &= ~GMD_GAME_FLAG_BGM_PLAY_WAIT;
+        }
+
+        if (ObjObjectPauseCheck(0U) == 0U)
+            gmMapMainUpdateMotion();
+
+        OBS_CAMERA main_camera = ObjCameraGet(g_obj.glb_camera_id);
+        ObjDraw3DNNSetCameraEx(g_obj.glb_camera_id, g_obj.glb_camera_type, main_camera.command_state);
+
+        if (gm_map_use_fall_shader)
+        {
+            ObjDraw3DNNUserFunc(
+                gmMapFallShaderSettingPrioPreMidMapUserFunc, null, 0, gm_map_fall_rander_command_state);
+        }
+        gm_map_fall_shader_drawn = false;
+
+        float pos_x = main_camera.disp_pos.x;
+        float pos_y = -main_camera.disp_pos.y;
+
+        GMS_MAP_OTHER_MAP_STATE[] map_state = work.map_state;
+
+        void DrawAPlane()
+        {
+            MP_HEADER a_mp = (MP_HEADER)g_gm_gamedat_map_set[GMD_GAMEDAT_MAPSET_A_MP];
+            MD_HEADER a_md = (MD_HEADER)g_gm_gamedat_map_set[GMD_GAMEDAT_MAPSET_A_MD];
+            GmMapDrawMap(gm_map_obj3d, a_mp, a_md, pos_x, pos_y, 0.0f, 0.0f, GMD_MAP_A_POS_Z, false);
+        }
+
+        void DrawBPlane()
+        {
+            if ((work.flag & GMD_MAP_FLAG_DISP_OFF_B) != 0U)
+                return;
+
+            MP_HEADER b_mp = (MP_HEADER)g_gm_gamedat_map_set[GMD_GAMEDAT_MAPSET_B_MP];
+            MD_HEADER b_md = (MD_HEADER)g_gm_gamedat_map_set[GMD_GAMEDAT_MAPSET_B_MD];
+
+            // TODO(port): zone 3 passes the A plane as a check map here and drops any block the two
+            // agree on. gmMapDrawMapRangeChk is in neither the leak nor our tree, so zone 3's B
+            // plane currently draws without that dedupe
+            GmMapDrawMap(gm_map_obj3d, b_mp, b_md, pos_x, pos_y, 0.0f, 0.0f, GMD_MAP_B_POS_Z, false);
+        }
+
+        void DrawAddLayer(int index)
+        {
+            if ((work.flag & GMD_MAP_FLAG_ADD_MAP_1 << index) == 0U)
+                return;
+
+            bool loop_h = index != 1 && (work.flag & GMD_MAP_FLAG_ADD_MAP_LOOP_X) != 0U;
+
+            if (g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_2_2)
+            {
+                int draw_size = GMD_MAP_DRAW_WIDTH_DEF;
+                int projection = NNE_PROJECTION_TYPE_ORTHO;
+                if (index == 0)
+                {
+                    ObjDraw3DNNUserFunc(
+                        gmMapMainNearLayerUserFunc, null, 0, map_state[0].command_state);
+                    projection = NNE_PROJECTION_TYPE_PERSPECTIVE;
+                    draw_size = GMD_MAP_DRAW_WIDTH_MAX;
+                }
+
+                ObjDraw3DNNSetCameraEx(
+                    gm_map_addmap_camera_tbl[index], projection, map_state[index].command_state);
+                gm_map_draw_size[0] = (uint)draw_size;
+                gm_map_draw_size[1] = (uint)draw_size;
+            }
+            else
+            {
+                ObjDraw3DNNSetCameraEx(
+                    gm_map_addmap_camera_tbl[index],
+                    NNE_PROJECTION_TYPE_ORTHO,
+                    map_state[index].command_state);
+            }
+
+            OBS_CAMERA camera = ObjCameraGet(gm_map_addmap_camera_tbl[index]);
+            GmMapSetDrawState(map_state[index].command_state);
+
+            MP_HEADER mp_header = (MP_HEADER)g_gm_gamedat_map_set_add[index * 2];
+            MD_HEADER md_header = (MD_HEADER)g_gm_gamedat_map_set_add[1 + index * 2];
+            GmMapDrawMap(
+                gm_map_obj3d,
+                mp_header,
+                md_header,
+                camera.disp_pos.x,
+                -camera.disp_pos.y,
+                0.0f,
+                0.0f,
+                map_state[index].pos_z,
+                loop_h);
+        }
+
+        // front to back, recovered from the retail binary at 0x4CFD90. Safe because every
+        // transparent subobject is deferred to the sorted pass, see objDraw3DNNRegistSortDraw
+        DrawAPlane();
+        DrawBPlane();
+        for (int index = 0; index < GME_MAP_ADD_MAP_MAX; ++index)
+            DrawAddLayer(index);
+
+        // leaves the state where the next frame's A and B planes want it, which is why neither of
+        // them sets it
+        GmMapSetDrawState(OBD_DRAW_CMD_STATE_3DNN);
+        OBS_CAMERA restore_camera = ObjCameraGet(g_obj.glb_camera_id);
+        ObjDraw3DNNSetCameraEx(
+            g_obj.glb_camera_id, g_obj.glb_camera_type, restore_camera.command_state);
+    }
+
+    private static void gmMapMainUpdateMotion()
+    {
+        AMS_AMB_HEADER model_amb = (AMS_AMB_HEADER)g_gm_gamedat_map[GMD_GAMEDAT_MAP_MODEL];
+        if (model_amb == null || gm_map_obj3d == null)
+            return;
+
+        for (int index = GMD_MAP_OBJECT_START; index < model_amb.file_num; ++index)
+        {
+            OBS_ACTION3D_NN_WORK obj_3d = gm_map_obj3d[index];
+            if (obj_3d.motion == null)
+                continue;
+
+            uint disp_flag = OBD_DISP_REPEAT;
+
+            if (obj_3d.mtn[0] != null)
+            {
+                ObjDrawAction3DNNMotionUpdate(obj_3d, ref disp_flag);
+
+                if (g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_3_2
+                    && obj_3d.command_state == OBD_DRAW_CMD_STATE_NEAR_MAP)
+                {
+                    // TODO(port): the three nn frame accessors this uses were not recovered from the
+                    // binary; obj_3d.frame[0] against the action's end frame is the natural mapping
+                    float end_frame = amMotionGetEndFrame(obj_3d.motion, obj_3d.act_id[0]);
+                    if (gm_map_z32_share_frame < end_frame)
+                    {
+                        if (obj_3d.frame[0] >= gm_map_z32_share_frame)
+                            gm_map_z32_share_frame = obj_3d.frame[0];
+                    }
+                    else
+                        gm_map_z32_share_frame = end_frame;
+
+                    obj_3d.frame[0] = gm_map_z32_share_frame;
+                }
+            }
+
+            if (obj_3d.mat_mtn[0] != null)
+                ObjDrawAction3DNNMaterialUpdate(obj_3d, ref disp_flag);
+        }
+    }
+
+    private static void gmMapMainTvx(MTS_TASK_TCB tcb)
+    {
         int zoneType = GMM_MAIN_GET_ZONE_TYPE();
         if (zoneType == 5)
         {
@@ -985,9 +1608,9 @@ internal partial class AppMain
       MP_BLOCK _mp_block,
       MD_BLOCK _md_block)
     {
-        for (int index1 = 0; index1 < 24; ++index1)
+        for (int index1 = 0; index1 < GMD_MAP_DRAW_CHECK_WIDTH; ++index1)
         {
-            for (int index2 = 0; index2 < 24; ++index2)
+            for (int index2 = 0; index2 < GMD_MAP_DRAW_CHECK_HEIGHT; ++index2)
                 gm_map_block_check[index1, index2] = -1;
         }
         int gmdMapDrawWidth = (int)GMD_MAP_DRAW_WIDTH;
@@ -1018,9 +1641,9 @@ internal partial class AppMain
                     else
                         continue;
                 }
-                if (id != 0 && gm_map_block_check[8 + (int)num1 - block_left, 8 + (int)num2 - block_top] == -1)
+                if (id != 0 && gm_map_block_check[GMD_MAP_DRAW_DF_SIZE + (int)num1 - block_left, GMD_MAP_DRAW_DF_SIZE + (int)num2 - block_top] == -1)
                 {
-                    gm_map_block_check[8 + (int)num1 - block_left, 8 + (int)num2 - block_top] = (short)id;
+                    gm_map_block_check[GMD_MAP_DRAW_DF_SIZE + (int)num1 - block_left, GMD_MAP_DRAW_DF_SIZE + (int)num2 - block_top] = (short)id;
                     int index4 = id - 1;
                     TVX_FILE file = tvxamb[index4];
                     uint textureNum = AoTvxGetTextureNum(file);
@@ -1339,6 +1962,9 @@ internal partial class AppMain
 
     private static void gmMapFallShaderSettingPrioPreMidMapUserFunc(object data)
     {
+        if (!gm_map_fall_shader_drawn)
+            return;
+
         NNS_RGBA_U8 color = new NNS_RGBA_U8(0, 0, 0, byte.MaxValue);
         AMS_RENDER_TARGET target = _am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target;
         if (target.width == 0)
@@ -1348,9 +1974,37 @@ internal partial class AppMain
 
     private static void gmMapDrawFallShaderPrioPreMidMapUserFunc(object data)
     {
-        if ((_am_render_manager.targetp != _gm_mapFar_render_work ? _gm_mapFar_render_work : _am_draw_target).width == 0)
+        AMS_RENDER_TARGET render_target = _am_render_manager.targetp != _gm_mapFar_render_work
+            ? _gm_mapFar_render_work
+            : _am_draw_target;
+        if (render_target.width == 0)
             return;
-        amDrawGetProjectionMatrix();
+
+        mppBindFallShaderUserSampler(render_target);
+    }
+
+    // gmMap.cpp:3232-3260, and the same block verbatim in gmMapFar, gmDeco, dmTitleOp and
+    // gmEneMereon
+    internal static void mppBindFallShaderUserSampler(AMS_RENDER_TARGET render_target)
+    {
+        NNS_MATRIX projection = amDrawGetProjectionMatrix();
+        if (projection == null)
+            return;
+
+        uint[] state = new uint[NNE_SAMPLERSTATETYPE_MAX];
+        nnInitMaterialControlUserSamplerDXG20();
+        nnGetMaterialControlUserSamplerDefaultStateDXG20(state);
+        state[NNE_SAMPLERSTATETYPE_ADDRESSU] = D3DTADDRESS_CLAMP;
+        state[NNE_SAMPLERSTATETYPE_ADDRESSV] = D3DTADDRESS_CLAMP;
+        state[NNE_SAMPLERSTATETYPE_ADDRESSW] = D3DTADDRESS_CLAMP;
+        state[NNE_SAMPLERSTATETYPE_MAGFILTER] = D3DTEXF_LINEAR;
+        state[NNE_SAMPLERSTATETYPE_MINFILTER] = D3DTEXF_LINEAR;
+        state[NNE_SAMPLERSTATETYPE_MIPFILTER] = D3DTEXF_NONE;
+
+        nnSetMaterialControlUserSamplerDXG20(
+            NNE_USER_SAMPLER.NNE_USER_SAMPLER_2D_1, render_target.target, state);
+
+        mppSetProjectionUserUniforms();
     }
 
 }

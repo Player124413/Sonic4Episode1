@@ -67,8 +67,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnDrawObjectStdShader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnMaterialCoreStdShader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderBind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnXenonEnums.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderName.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderProfile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnMaterialControlUserSampler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Nn\NnStdShaderSampler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive2DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive3DCore.cs" />
@@ -531,6 +533,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_PRIM_DRAW_TVX_UV_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_PRIM_DRAW_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_SYS_WORK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_FAR_VARIANT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_VARIANT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_OBJECT_WORK_ATK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_PAD_VIB_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_PAUSE_WORK.cs" />
@@ -846,6 +850,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleOp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleOpTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleOpTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleOpVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleProcs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleSave.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\Title\TitleTables.cs" />
@@ -978,6 +983,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)gm\Cockpit\Cockpit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDeco.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoGlare.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoVariant.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGmkVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffectBossCommon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffectCommon.cs" />
@@ -1061,6 +1068,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMapFar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMapFarVariant.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMapVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmObj.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmPad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmPause.cs" />
@@ -1088,6 +1097,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsMainSys.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsOther.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSound.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSoundBgmSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSoundBgmStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSoundBgmVoice.MediaPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSoundBgmVoice.Stream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gs\GsSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\HgTrophy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\IzFade.cs" />

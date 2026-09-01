@@ -53,8 +53,13 @@ internal partial class AppMain
         if ((drawFlag & NND_DRAWOBJ_IGNORETEXTURE) == 0)
             texCount = mppStdShaderSetupTextures(profile, material);
 
-        if ((matPtr.fType & NND_MATTYPE_USERPROFILE) != 0)
-            mppAssertNotImpl();
+        // nnlshaderdxg20.h:215, "material user profile", which picks a user profile shader rather
+        // than a stock one. Zone 2's refraction materials are the only users in the corpus.
+        if ((matPtr.fType & NND_MATTYPE_USERPROFILE) != 0
+            && material is NNS_MATERIAL_STDSHADER_DESC_USER_PROFILE userProfile)
+        {
+            profile.UserProfile = (int)(userProfile.UserProfile & NND_MAX_USER_PROFILE);
+        }
 
         mppStdShaderSetupSamplers(profile, drawFlag, drawFlagEx, texCount);
         profile.UserProfileDrawobj = (int)((drawFlagEx >> 2) & 0xFF);

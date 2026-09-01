@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
+using Android.Hardware;
 using Android.Views;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -150,42 +151,170 @@ namespace Microsoft.Xna.Framework.GamerServices
             return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
         }
 
+        // callers want the index into `buttons`, and EndShowMessageBox casts the IAsyncResult back
+        // to Task<int?>, so the task handed to both the callback and the caller has to be the
+        // typed one. Don't return the ContinueWith, that's a plain Task and the cast throws
         public static IAsyncResult BeginShowMessageBox(PlayerIndex player, string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
         {
             var tcs = new TaskCompletionSource<int?>();
-            var task = tcs.Task.ContinueWith(t =>
+            _ = tcs.Task.ContinueWith(t =>
             {
                 IsVisible = false;
                 callback?.Invoke(t);
             });
 
-            var btns = buttons.ToArray();
-            void Handler(object sender, DialogClickEventArgs dialog)
+            var labels = buttons?.ToArray() ?? Array.Empty<string>();
+            var activity = Sonic4Episode1.Android.Sonic4Activity.Current;
+            if (activity == null)
             {
-                tcs.SetResult(dialog.Which);
+                tcs.TrySetResult(null);
+                return tcs.Task;
             }
 
-            var builder = new AlertDialog.Builder(Sonic4Ep1.pInstance.Services.GetService<View>().Context)
+            IsVisible = true;
+
+            // the game loop is not the UI thread, and AlertDialog.Show throws off it
+            activity.RunOnUiThread(() => ShowMessageBox(activity, title, text, labels, icon, tcs));
+
+            return tcs.Task;
+        }
+
+        private static void ShowMessageBox(Activity activity, string title, string text,
+            string[] labels, MessageBoxIcon icon, TaskCompletionSource<int?> tcs)
+        {
+            var builder = new AlertDialog.Builder(activity)
                 .SetTitle(title)
-                .SetMessage(text);
+                .SetMessage(text)
+                .SetCancelable(false)
+                .SetIcon(IconResource(icon));
 
-            System.Diagnostics.Debug.Assert(btns.Length == 2);
-            for (int i = 0; i < btns.Length; i++)
+            // AlertDialog has three button slots and reports which slot was hit, not which entry of
+            // ours it was, so each handler closes over its own index. More than three cannot be
+            // expressed as buttons at all and becomes a list, where Which is the index already
+            if (labels.Length > 3)
             {
-                if (i == focusButton)
-                    builder.SetPositiveButton(btns[i], Handler);
-                else
-                    builder.SetNeutralButton(btns[i], Handler);
+                builder.SetItems(labels, (sender, e) => tcs.TrySetResult(e.Which));
+            }
+            else
+            {
+                for (int i = 0; i < labels.Length; i++)
+                {
+                    int index = i;
+                    void OnClick(object sender, DialogClickEventArgs e) => tcs.TrySetResult(index);
+
+                    switch (i)
+                    {
+                        case 0: builder.SetPositiveButton(labels[i], OnClick); break;
+                        case 1: builder.SetNegativeButton(labels[i], OnClick); break;
+                        default: builder.SetNeutralButton(labels[i], OnClick); break;
+                    }
+                }
             }
 
-            var dialog = builder.Show();
+            // a button result lands first and wins the race, so this only fires when the dialog
+            // went away without one. Without it the task never completes and EndShowMessageBox,
+            // which blocks on .Result, hangs the caller forever
+            builder.SetOnDismissListener(new DismissListener(() => tcs.TrySetResult(null)));
 
-            return task;
+            builder.Show();
+        }
+
+        private static int IconResource(MessageBoxIcon icon)
+        {
+            switch (icon)
+            {
+                case MessageBoxIcon.Alert:
+                case MessageBoxIcon.Warning:
+                case MessageBoxIcon.Error:
+                    return global::Android.Resource.Drawable.IcDialogAlert;
+                default:
+                    return 0;
+            }
+        }
+
+        private sealed class DismissListener(Action onDismiss)
+            : Java.Lang.Object, IDialogInterfaceOnDismissListener
+        {
+            public void OnDismiss(IDialogInterface dialog) => onDismiss();
         }
 
         public static int? EndShowMessageBox(IAsyncResult result)
         {
             return ((Task<int?>)result).Result;
         }
+    }
+}
+
+namespace Microsoft.Devices.Sensors
+{
+    // amIPhoneAccelerate was written against the iPhone convention, which is g and points the
+    // opposite way to Android's. SensorManager reports m/s^2 in the natural device frame, and does
+    // not rotate with the display, so the frame itself already matches
+    public partial class Accelerometer : Java.Lang.Object, ISensorEventListener
+    {
+        private readonly SensorManager _manager;
+        private readonly Sensor _sensor;
+
+        public Accelerometer()
+        {
+            _manager = (SensorManager)Sonic4Episode1.Android.Sonic4Activity.Current
+                ?.GetSystemService(Context.SensorService);
+            _sensor = _manager?.GetDefaultSensor(SensorType.Accelerometer);
+
+            if (_sensor == null)
+                throw new AccelerometerFailedException();
+        }
+
+        public TimeSpan TimeBetweenUpdates { get; set; } = TimeSpan.FromSeconds(1.0 / 30.0);
+        public event EventHandler<SensorReadingEventArgs<AccelerometerReading>> CurrentValueChanged;
+
+        public void Start()
+        {
+            // the SensorDelay overload also takes a raw microsecond period, which is the only way
+            // to honour TimeBetweenUpdates rather than snapping to one of the four named rates
+            var microseconds = (int)(TimeBetweenUpdates.TotalMilliseconds * 1000);
+            _manager.RegisterListener(this, _sensor, (SensorDelay)microseconds);
+        }
+
+        public void Stop()
+        {
+            _manager.UnregisterListener(this, _sensor);
+        }
+
+        public void OnAccuracyChanged(Sensor sensor, SensorStatus accuracy)
+        {
+        }
+
+        public void OnSensorChanged(SensorEvent e)
+        {
+            if (e.Values == null || e.Values.Count < 3)
+                return;
+
+            const float scale = -1f / 9.80665f;
+            var acceleration = new Vector3(e.Values[0] * scale, e.Values[1] * scale, e.Values[2] * scale);
+
+            CurrentValueChanged?.Invoke(this,
+                new SensorReadingEventArgs<AccelerometerReading>(
+                    new AccelerometerReading { Acceleration = acceleration }));
+        }
+    }
+
+    public struct AccelerometerReading
+    {
+        public Vector3 Acceleration;
+    }
+
+    public class SensorReadingEventArgs<T> : EventArgs
+    {
+        public readonly T SensorReading;
+
+        internal SensorReadingEventArgs(T reading)
+        {
+            SensorReading = reading;
+        }
+    }
+
+    public class AccelerometerFailedException : Exception
+    {
     }
 }

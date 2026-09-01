@@ -9,7 +9,10 @@ internal sealed class DXVertexArrays
     public Vector3[] Positions;
     public Vector3[] Normals;
     public Vector2[] TexCoords;
+    public Vector2[] TexCoords2;
+    public Vector2[] TexCoords3;
     public Color[] Colors;
+    public Color[] Colors2;
     public Vector4[] BlendWeights;
     public byte[][] BlendIndices;
 
@@ -42,7 +45,7 @@ internal sealed class DXVertexArrays
 
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_BLENDFMT_I8) != 0u)
         {
-            arrays.BlendIndices = ReadBlendIndices(data, offset, stride, count);
+            arrays.BlendIndices = ReadBlendIndices(data, offset, stride, count, bigEndian);
             offset += 4;
         }
 
@@ -59,14 +62,19 @@ internal sealed class DXVertexArrays
         }
 
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_COL2_U32) != 0u)
+        {
+            arrays.Colors2 = ReadColors(data, offset, stride, count);
             offset += 4;
+        }
 
         int texCount = (int)((desc.Format & AppMain.NND_VTXMEMBER_DX_TEXNUM_MASK) >> AppMain.NND_VTXMEMBER_DX_TEXNUM_SHIFT);
         if (texCount > 0)
-        {
             arrays.TexCoords = ReadVector2(data, offset, stride, count, bigEndian);
-            offset += texCount * 8;
-        }
+        if (texCount > 1)
+            arrays.TexCoords2 = ReadVector2(data, offset + 8, stride, count, bigEndian);
+        if (texCount > 2)
+            arrays.TexCoords3 = ReadVector2(data, offset + 16, stride, count, bigEndian);
+        offset += texCount * 8;
 
         if (offset != stride)
             throw new InvalidOperationException($"decoded {offset} bytes per vertex but Stride is {stride}");
@@ -166,13 +174,20 @@ internal sealed class DXVertexArrays
         return values;
     }
 
-    private static byte[][] ReadBlendIndices(byte[] data, int offset, int stride, int count)
+    // BLENDFMT_I8 is one packed u32, not four independent bytes, so the quad reverses with the
+    // rest of the file. Measured on GMK_T_ROPE_MDL, which ships in both byte orders: PC reads
+    // [0,1,0,0] against XBLA's [0,0,1,0] for the same vertex. Left unswapped, both of that
+    // vertex's weights land on bone 0, every vertex goes rigid to a single bone, and the model
+    // draws correctly and never deforms. See docs/console-gimmicks.md.
+    private static byte[][] ReadBlendIndices(byte[] data, int offset, int stride, int count, bool bigEndian)
     {
         var values = new byte[count][];
         for (int i = 0; i < count; ++i)
         {
             int at = i * stride + offset;
-            values[i] = new byte[4] { data[at], data[at + 1], data[at + 2], data[at + 3] };
+            values[i] = bigEndian
+                ? new byte[4] { data[at + 3], data[at + 2], data[at + 1], data[at] }
+                : new byte[4] { data[at], data[at + 1], data[at + 2], data[at + 3] };
         }
         return values;
     }

@@ -21,8 +21,7 @@ internal sealed class ViewerGame : Game
     private bool _playing = true;
 
     private BasicEffect _effect;
-    private readonly Dictionary<string, NnStdShaderEffect> _shaders =
-        new Dictionary<string, NnStdShaderEffect>(StringComparer.OrdinalIgnoreCase);
+    private NnShaderCache _shaders;
     private LoadedModel _model;
     private string _error;
 
@@ -65,6 +64,7 @@ internal sealed class ViewerGame : Game
 
     protected override void LoadContent()
     {
+        _shaders = new NnShaderCache(GraphicsDevice);
         _effect = new BasicEffect(GraphicsDevice)
         {
             LightingEnabled = true,
@@ -76,64 +76,7 @@ internal sealed class ViewerGame : Game
         Reload();
     }
 
-    private NnStdShaderEffect Shader(string permutation)
-    {
-        if (permutation == null)
-            return null;
-
-        NnStdShaderEffect shader;
-        if (_shaders.TryGetValue(permutation, out shader))
-            return shader;
-
-        shader = LoadUberShader(permutation);
-        _shaders[permutation] = shader;
-        return shader;
-    }
-
-    // read straight out of the repo rather than copied to the output, it's 284 files and a tool
-    private static string _shaderDir;
-
-    private NnStdShaderEffect LoadUberShader(string permutation)
-    {
-        _shaderDir ??= FindRepoDirectory("Shaders/FNA/nnstd");
-        if (_shaderDir == null)
-        {
-            Console.Error.WriteLine("could not find Shaders/FNA/nnstd; run Shaders/nn/Build-Permutations.ps1");
-            return null;
-        }
-
-        string path = Path.Combine(_shaderDir, permutation + ".fxb");
-        if (!File.Exists(path))
-        {
-            Console.Error.WriteLine($"no shader built for key {permutation}");
-            return null;
-        }
-
-        try
-        {
-            var effect = new NnStdShaderEffect(GraphicsDevice, File.ReadAllBytes(path));
-            Console.WriteLine($"ubershader {permutation}: {effect.Parameters.Count} parameter(s)");
-            return effect;
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"ubershader {permutation} failed to load: " + ex);
-            return null;
-        }
-    }
-
-    private static string FindRepoDirectory(string relative)
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir != null)
-        {
-            string candidate = Path.Combine(dir.FullName, relative);
-            if (Directory.Exists(candidate))
-                return candidate;
-            dir = dir.Parent;
-        }
-        return null;
-    }
+    private NnStdShaderEffect Shader(string permutation) => _shaders.Get(permutation);
 
     private void Reload()
     {
@@ -354,28 +297,6 @@ internal sealed class ViewerGame : Game
         }
     }
 
-    private static Matrix MatrixFor(LoadedObject loaded, int paletteIndex, Matrix modelView)
-    {
-        var palette = loaded.Palette;
-        if (paletteIndex < 0 || paletteIndex >= palette.Length)
-            return modelView;
-
-        return palette[paletteIndex] * modelView;
-    }
-
-    // palette holds the pose in model space, camera folds in here rather than in the node walk
-    private static Matrix[] GatherBones(LoadedObject loaded, LoadedMesh mesh, Matrix modelView)
-    {
-        int[] indices = mesh.BoneMatrixIndices;
-        if (indices == null)
-            return mesh.BoneMatrices;
-
-        for (int i = 0; i < indices.Length; ++i)
-            mesh.BoneMatrices[i] = MatrixFor(loaded, indices[i], modelView);
-
-        return mesh.BoneMatrices;
-    }
-
     private void DrawWithUberShader(Matrix world, Matrix view, Matrix projection)
     {
         Vector3 lightView = Vector3.TransformNormal(LightDirection, view);
@@ -395,12 +316,12 @@ internal sealed class ViewerGame : Game
             // rigid takes its model view straight from the palette, pliable carries it in the bones
             if (mesh.VtxTfmMode == 0)
             {
-                uber.SetTransforms(MatrixFor(loaded, mesh.MatrixIndex, modelView), projection);
+                uber.SetTransforms(loaded.ModelView(mesh.MatrixIndex, modelView), projection);
             }
             else
             {
                 uber.SetTransforms(modelView, projection);
-                uber.SetBoneMatrices(GatherBones(loaded, mesh, modelView));
+                uber.SetBoneMatrices(loaded.GatherBones(mesh, modelView));
             }
 
             uber.SetParallelLight(0, lightView, LightDiffuse, LightSpecular);

@@ -43,6 +43,8 @@ obj/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
+Sonic4Episode1.Wasm/wwwroot/js/
+
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
@@ -361,3 +363,9 @@ MigrationBackup/
 *.7z
 *.gz
 /Shaders/FNA
+/Shaders/mgfx/build
+/Shaders/mgfx/tool
+Shaders/mgfx/mojoshader-cmake4.patch
+/Shaders/mgfx
+/Shaders/MonoGame
+/Shaders

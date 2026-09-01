@@ -29,8 +29,16 @@ internal partial class AppMain
             desc.Blend = reader.ReadSingle();
             desc.Offset = new NNS_TEXCOORD(reader.ReadSingle(), reader.ReadSingle());
             desc.Scale = new NNS_TEXCOORD(reader.ReadSingle(), reader.ReadSingle());
+            bool xenon = reader is EndianBinaryReader endian && endian.IsBigEndian;
+
             desc.WrapS = reader.ReadUInt16();
             desc.WrapT = reader.ReadUInt16();
+
+            if (xenon)
+            {
+                desc.WrapS = mppXenonTextureAddress((ushort)desc.WrapS);
+                desc.WrapT = mppXenonTextureAddress((ushort)desc.WrapT);
+            }
 
             uint borderColor = reader.ReadUInt32();
             desc.pBorderColor = new NNS_RGBA(

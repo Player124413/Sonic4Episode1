@@ -144,8 +144,10 @@ namespace mpp
         private static int m_matrixIndexArrayStride = 0;
         private static GLVertexData m_matrixIndexArray = null;
         private static bool m_secondaryColorArrayEnabled = false;
-        private static readonly Matrix PROJECTION_CORRECTION = 
-            Matrix.CreateRotationZ(1.570796f) * Matrix.CreateScale(1f, 1.12f, 0.5f) * Matrix.CreateTranslation(0.0f, 0.0f, 0.5f);
+        // no z remap: every projection here comes from nnMake*Matrix, which is D3DX and already
+        // hands back 0..1. halving it as if it were GL cost us half the depth buffer
+        private static readonly Matrix PROJECTION_CORRECTION =
+            Matrix.CreateRotationZ(1.570796f) * Matrix.CreateScale(1f, 1.12f, 1f);
         private static VertexPosTexColNorm[][] m_vertices = new VertexPosTexColNorm[2][]
         {
             new VertexPosTexColNorm[32768],

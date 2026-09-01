@@ -6,15 +6,23 @@
        iterates against whatever is already in the output directory -->
 
   <PropertyGroup>
-    <ContentProfile Condition="'$(ContentProfile)' == ''">mobile-hd</ContentProfile>
+    <ContentProfile Condition="'$(ContentProfile)' == ''">mobile-hd-dxt</ContentProfile>
     <ContentBuildRoot Condition="'$(ContentBuildRoot)' == ''">$(MSBuildThisFileDirectory)Content.Build\</ContentBuildRoot>
     <ContentDir>$(ContentBuildRoot)$(ContentProfile)\</ContentDir>
     <ContentItemType Condition="'$(ContentItemType)' == ''">Content</ContentItemType>
+    <ContentAssetPack Condition="'$(ContentAssetPack)' == ''">content</ContentAssetPack>
+    <ContentAssetPackDelivery Condition="'$(ContentAssetPackDelivery)' == ''">FastFollow</ContentAssetPackDelivery>
   </PropertyGroup>
 
   <Target Name="VerifyContentProfile" BeforeTargets="BeforeBuild" Condition="'$(SkipContentCopy)' != 'true'">
     <Error Condition="!Exists('$(ContentDir)')"
            Text="Content profile '$(ContentProfile)' has not been built. Run: dotnet run --project Sonic4Episode1.Content -- build $(ContentProfile)&#xA;Expected at $(ContentDir)" />
+
+    <!-- `build` drops .notshipped in the tree of any profile with ship = false, since MSBuild
+         cannot read content-sources.toml. That is the diagnostic passthrough tree, and it is the
+         only one that may carry PVR -->
+    <Error Condition="'$(Configuration)' == 'Release' AND Exists('$(ContentDir).notshipped')"
+           Text="Content profile '$(ContentProfile)' is marked ship = false in content-sources.toml and must not go into a Release build." />
   </Target>
 
   <!-- copying never removes, so a hand-assembled output directory ends up a union of the profile
@@ -28,17 +36,33 @@
   </Target>
 
   <!-- globbed inside a target, same reason as Shaders.targets: a plain ItemGroup would silently
-       bind to nothing on a clean checkout and stay bound -->
+       bind to nothing on a clean checkout and stay bound.
+
+       every head lands here rather than writing its own ItemGroup, because the `Content\` in the
+       link is not decoration. AmFs opens `"Content\\" + name` and Content.RootDirectory is
+       "Content", so a tree laid at the root of the output is a tree nothing can find. Android's
+       `Assets\` is that head's own prefix for the apk assets/ directory and sits outside it -->
   <Target Name="CollectContent"
           DependsOnTargets="VerifyContentProfile"
           BeforeTargets="AssignTargetPaths"
-          Condition="'$(SkipContentCopy)' != 'true' AND '$(ContentItemType)' == 'Content'">
+          Condition="'$(SkipContentCopy)' != 'true'">
     <ItemGroup>
       <ContentFile Include="$(ContentDir)**\*.*" />
-      <Content Include="@(ContentFile)"
+
+      <Content Condition="'$(ContentItemType)' == 'Content'"
+               Include="@(ContentFile)"
                Link="Content\%(ContentFile.RecursiveDir)%(ContentFile.Filename)%(ContentFile.Extension)"
                CopyToOutputDirectory="PreserveNewest" />
+
+      <AndroidAsset Condition="'$(ContentItemType)' == 'AndroidAsset'"
+                    Include="@(ContentFile)"
+                    Link="Assets\Content\%(ContentFile.RecursiveDir)%(ContentFile.Filename)%(ContentFile.Extension)"
+                    AssetPack="$(ContentAssetPack)"
+                    DeliveryType="$(ContentAssetPackDelivery)" />
     </ItemGroup>
+
+    <Error Condition="'$(ContentItemType)' != 'Content' AND '$(ContentItemType)' != 'AndroidAsset'"
+           Text="ContentItemType '$(ContentItemType)' is not one this file knows how to emit; use Content or AndroidAsset." />
   </Target>
 
 </Project>

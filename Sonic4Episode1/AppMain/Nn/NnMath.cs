@@ -5275,7 +5275,7 @@ internal partial class AppMain
         mtx.M13 = 0.0f;
         mtx.M20 = 0.0f;
         mtx.M21 = 0.0f;
-        mtx.M22 = (float)(-znear / (zfar - (double)znear));
+        mtx.M22 = (float)(-zfar / (zfar - (double)znear));
         mtx.M23 = (float)(-(zfar * (double)znear) / (zfar - (double)znear));
         mtx.M30 = 0.0f;
         mtx.M31 = 0.0f;
@@ -5302,7 +5302,7 @@ internal partial class AppMain
         mtx.M13 = 0.0f;
         mtx.M20 = 0.0f;
         mtx.M21 = 0.0f;
-        mtx.M22 = (float)(-znear / (zfar - (double)znear));
+        mtx.M22 = (float)(-zfar / (zfar - (double)znear));
         mtx.M23 = (float)(-(zfar * (double)znear) / (zfar - (double)znear));
         mtx.M30 = 0.0f;
         mtx.M31 = 0.0f;
@@ -5330,7 +5330,7 @@ internal partial class AppMain
         mtx.M20 = 0.0f;
         mtx.M21 = 0.0f;
         mtx.M22 = (float)(-1.0 / (zfar - (double)znear));
-        mtx.M23 = (float)(-zfar / (zfar - (double)znear));
+        mtx.M23 = (float)(-znear / (zfar - (double)znear));
         mtx.M30 = 0.0f;
         mtx.M31 = 0.0f;
         mtx.M32 = 0.0f;
@@ -7646,9 +7646,10 @@ internal partial class AppMain
       NNS_MATRIX[] mtxpal,
       uint[] nodestatlist,
       uint subobjtype,
-      uint flag)
+      uint flag,
+      uint drawFlagEx = 0)
     {
-        nnDrawObject(mmobj, mtxpal, nodestatlist, subobjtype, flag, 0U);
+        nnDrawObject(mmobj, mtxpal, nodestatlist, subobjtype, flag, 0U, drawFlagEx);
     }
 
     private static uint nnCalcClipBoxNode(NNS_NODE node, NNS_MATRIX mtx)

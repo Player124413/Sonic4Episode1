@@ -148,6 +148,13 @@ internal sealed class NnStdShaderEffect : Effect
         }
     }
 
+    // what the clip in the pixel shader is currently being told to do
+    public string AlphaTestValue()
+    {
+        var parameter = Parameters["u_AlphaTest"];
+        return parameter == null ? "no parameter" : parameter.GetValueVector4().ToString();
+    }
+
     public bool SetAlphaTestAlways()
     {
         return SetAlphaTest(0f, 0f, -1f);
@@ -190,6 +197,27 @@ internal sealed class NnStdShaderEffect : Effect
         matrix.M31 = desc.Offset.u;
         matrix.M32 = desc.Offset.v;
         return matrix;
+    }
+
+    // u_UserUniform[4]. gmMap.cpp:3249-3259 pushes all four, and NNM_MTX(m, row, col) is
+    // m[col][row] (nns.h:788), so uniform k is m[k][0..3]: four consecutive floats, which is row k
+    // of the storage either way round. NN is column-vector and XNA row-vector, and that transpose
+    // is exactly what makes the same four floats mean the same thing in both.
+    // the refraction body lives in the pixel half, so ps_u_UserUniform is the copy that matters
+    public void SetUserUniforms(Vector4[] uniforms)
+    {
+        SetShared("u_UserUniform", parameter => parameter.SetValue(uniforms));
+    }
+
+    internal static Vector4[] ProjectionUserUniforms(Matrix projection)
+    {
+        return new[]
+        {
+            new Vector4(projection.M11, projection.M12, projection.M13, projection.M14),
+            new Vector4(projection.M21, projection.M22, projection.M23, projection.M24),
+            new Vector4(projection.M31, projection.M32, projection.M33, projection.M34),
+            new Vector4(projection.M41, projection.M42, projection.M43, projection.M44),
+        };
     }
 
     public void SetMapBlend(AppMain.NNS_MATERIAL_STDSHADER_DESC material)

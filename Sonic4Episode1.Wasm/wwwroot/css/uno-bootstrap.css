@@ -441,4 +441,5 @@ body {
 
 #tap-to-play.visible {
     display: block;
+    z-index:100;
 }

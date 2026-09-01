@@ -86,7 +86,7 @@ internal partial class AppMain
     {
         for (int index = 0; index < header.file_num; ++index)
         {
-            string name = System.IO.Path.GetFileNameWithoutExtension(header.files[index]);
+            string name = mppAmbMemberBaseName(header.files[index]);
             if (string.Compare(name, basename, StringComparison.OrdinalIgnoreCase) == 0)
                 return index;
         }

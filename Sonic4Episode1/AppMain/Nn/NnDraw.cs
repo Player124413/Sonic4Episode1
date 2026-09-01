@@ -419,10 +419,11 @@ internal partial class AppMain
         uint[] nodestatlist,
         uint subobjtype,
         uint flag,
-        uint alternativeLighting)
+        uint alternativeLighting,
+        uint drawFlagEx = 0)
     {
         if (obj.nVtxList > 0 && obj.pVtxListPtrList[0].pVtxList is NNS_VTXLIST_DX_DESC)
-            nnDrawObjectStdShader(obj, mtxpal, nodestatlist, subobjtype, flag);
+            nnDrawObjectStdShader(obj, mtxpal, nodestatlist, subobjtype, flag, drawFlagEx, alternativeLighting);
         else
             nnDrawObjectGL(obj, mtxpal, nodestatlist, subobjtype, flag, alternativeLighting);
     }

@@ -21,5 +21,10 @@ internal partial class AppMain
         GMD_MAP_FAR_OBJ_INDEX_ZONE_1_ROCKC = 4,
         GMD_MAP_FAR_OBJ_INDEX_ZONE_1_2DBG = 5,
         GMD_MAP_FAR_OBJ_INDEX_ZONE_1_MAX = 6,
+
+        // console only; mobile's final zone is one flat backdrop
+        GMD_MAP_FAR_OBJ_INDEX_ZONE_FINAL_EARTH = 1,
+        GMD_MAP_FAR_OBJ_INDEX_ZONE_FINAL_CLOUD = 2,
+        GMD_MAP_FAR_OBJ_INDEX_ZONE_FINAL_FILM = 3,
     }
 }

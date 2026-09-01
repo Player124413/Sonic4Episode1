@@ -289,9 +289,15 @@
             obj_work.flag |= 2U;
             work.falltimer = obj_work.spd.y >= 0 ? (short)120 : (short)90;
             obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkBreakLandParts_Main);
-            obj_work.obj_3d.use_light_flag &= 4294967294U;
-            obj_work.obj_3d.use_light_flag |= 2U;
-            obj_work.obj_3d.use_light_flag |= 65536U;
+
+            // gmGmkBreakWall.cpp:1191, _IPHONE only and unconditional there. Console leaves the
+            // broken parts on whatever light the wall they came off was using.
+            if (!gm_gmk_as_console)
+            {
+                obj_work.obj_3d.use_light_flag &= 4294967294U;
+                obj_work.obj_3d.use_light_flag |= 2U;
+                obj_work.obj_3d.use_light_flag |= 65536U;
+            }
         }
     }
 

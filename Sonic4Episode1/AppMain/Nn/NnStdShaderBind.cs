@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
@@ -97,6 +97,9 @@ internal partial class AppMain
                     : new Byte4(bones[0], bones[1], bones[2], bones[3]),
                 Normal = arrays.Normals != null ? arrays.Normals[i] : Vector3.Up,
                 TexCoord = arrays.TexCoords != null ? arrays.TexCoords[i] : Vector2.Zero,
+                TexCoord2 = arrays.TexCoords2 != null ? arrays.TexCoords2[i] : Vector2.Zero,
+                TexCoord3 = arrays.TexCoords3 != null ? arrays.TexCoords3[i] : Vector2.Zero,
+                Color = arrays.Colors != null ? arrays.Colors[i] : Color.White,
             };
         }
 
@@ -118,7 +121,7 @@ internal partial class AppMain
         uint drawFlag = val.DrawFlag | NND_DRAWOBJ_FRAGPARALIGHT1;
 
         var profile = new NNS_STDSHADER_PROFILE();
-        if (nnSetupShaderProfile(profile, val.pMaterial, drawFlag, 0U, subobj.fType, desc.Format) < 0)
+        if (nnSetupShaderProfile(profile, val.pMaterial, drawFlag, val.DrawFlagEx, subobj.fType, desc.Format) < 0)
             return;
 
         NnStdShaderEffect effect = mppLoadStdShader(nnGetStdShaderName(profile).ToString());
@@ -147,27 +150,65 @@ internal partial class AppMain
         effect.SetTextureMatrices(material);
         effect.SetMapBlend(material);
 
-        // XNA has no alpha test render state, so it goes to the shader instead
-        if (nngShaderRenderState[D3DRS_ALPHATESTENABLE] != 0)
-        {
-            float reference = (nngShaderRenderState[D3DRS_ALPHAREF] & 0xFF) / 255f;
-            if (!effect.SetAlphaTest((int)nngShaderRenderState[D3DRS_ALPHAFUNC], reference))
-                NNM_ASSERT(false, "unsupported alpha compare function\n");
-        }
-        else
-        {
-            effect.SetAlphaTestAlways();
-        }
+        mppSetStdShaderAlphaTest(effect);
 
-        // permutation always computes fog, so "off" means moving it past the far plane
-        OpenGL.mppglGetFog(out bool fogEnabled, out Vector3 fogColor, out float fogStart, out float fogEnd);
-        if (fogEnabled && (material.fFlag & NND_MATFLAG_DISABLE_FOGGING) == 0)
-            effect.SetFog(fogColor, fogStart, fogEnd);
+        // The switch and the range live in NN's own globals and only reach the wrapper through
+        // nnPutFogSwitchGL, which the fixed function material path calls (NnDraw.cs:713) and this
+        // one never does. Only the colour gets there, via glFogfv. Same test as that call site.
+        //
+        // The permutation always computes fog, so "off" means moving it past the far plane.
+        OpenGL.mppglGetFog(out _, out Vector3 fogColor, out _, out _);
+        if (nngFogSwitch && (material.fFlag & NND_MATFLAG_DISABLE_FOGGING) == 0)
+            effect.SetFog(fogColor, nngFogStart, nngFogEnd);
         else
             effect.SetFog(Vector3.Zero, 1e9f, 2e9f);
 
         mppBindStdShaderTextures(material);
+        mppBindStdShaderUserSamplers(effect, material, profile);
         effect.CurrentTechnique.Passes[0].Apply();
+    }
+
+    // the user samplers sit behind the material's own maps and the shadow maps, and the uniforms
+    // are NN's global bank, so both come from state the draw call never carries
+    private static void mppBindStdShaderUserSamplers(
+        NnStdShaderEffect effect, NNS_MATERIAL_STDSHADER_DESC material, NNS_STDSHADER_PROFILE profile)
+    {
+        for (var idx = NNE_USER_SAMPLER.NNE_USER_SAMPLER_2D_1;
+             idx < NNE_USER_SAMPLER.NNE_USER_SAMPLER_MAX;
+             ++idx)
+        {
+            if (profile.GetUserSampler(idx) == 0)
+                continue;
+
+            mppPutMaterialTextureUserSampler(
+                mppStdShaderUserSamplerSlot(material.fTexType, profile.nShadowMap, idx), idx);
+        }
+
+        effect.SetUserUniforms(mppStdShaderUserUniforms());
+    }
+
+    // XNA has no alpha test render state, so it goes to the shader instead. Every permutation
+    // compiles the clip, and u_AlphaTest defaults to never clipping, so a caller that skips this
+    // gets no cutouts at all rather than an error.
+    // for diagnostics: what the last material asked the clip to do
+    public static string mppStdShaderAlphaTestState()
+    {
+        return nngShaderRenderState[D3DRS_ALPHATESTENABLE] == 0
+            ? "off"
+            : $"func {nngShaderRenderState[D3DRS_ALPHAFUNC]} ref {nngShaderRenderState[D3DRS_ALPHAREF] & 0xFF}";
+    }
+
+    public static void mppSetStdShaderAlphaTest(NnStdShaderEffect effect)
+    {
+        if (nngShaderRenderState[D3DRS_ALPHATESTENABLE] == 0)
+        {
+            effect.SetAlphaTestAlways();
+            return;
+        }
+
+        float reference = (nngShaderRenderState[D3DRS_ALPHAREF] & 0xFF) / 255f;
+        if (!effect.SetAlphaTest((int)nngShaderRenderState[D3DRS_ALPHAFUNC], reference))
+            NNM_ASSERT(false, "unsupported alpha compare function\n");
     }
 
     private static void mppBindStdShaderTextures(NNS_MATERIAL_STDSHADER_DESC material)
@@ -206,6 +247,14 @@ internal partial class AppMain
         }
     }
 
+    // fxc emits a D3D9 effect that MojoShader reads; mgfxc emits MGFX. Shaders.targets builds
+    // whichever the backend needs, so the extension follows the backend
+#if MONOGAME
+    private const string MPP_SHADER_EXTENSION = ".mgfxo";
+#else
+    private const string MPP_SHADER_EXTENSION = ".fxb";
+#endif
+
     private static NnStdShaderEffect mppLoadStdShader(string permutation)
     {
         if (nngStdShaderCache.TryGetValue(permutation, out NnStdShaderEffect cached))
@@ -214,7 +263,8 @@ internal partial class AppMain
         NnStdShaderEffect effect = null;
         try
         {
-            using (Stream stream = TitleContainer.OpenStream("Content\\Shaders\\nnstd\\" + permutation + ".fxb"))
+            using (Stream stream = TitleContainer.OpenStream(
+                "Content\\Shaders\\nnstd\\" + permutation + MPP_SHADER_EXTENSION))
             {
                 var code = new byte[stream.Length];
                 stream.ReadExactly(code, 0, code.Length);

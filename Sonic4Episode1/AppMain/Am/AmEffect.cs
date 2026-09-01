@@ -152,9 +152,9 @@ internal partial class AppMain
         }
         _am_work_alloc = 0;
         _am_work_free = 0;
-        _am_work_buf = new AMS_AME_RUNTIME_WORK[1024];
-        _am_work_ref = new AMS_AME_RUNTIME_WORK[1024];
-        for (int index = 0; index < 1024; ++index)
+        _am_work_buf = new AMS_AME_RUNTIME_WORK[AMD_AME_WORK_SIZE];
+        _am_work_ref = new AMS_AME_RUNTIME_WORK[AMD_AME_WORK_SIZE];
+        for (int index = 0; index < AMD_AME_WORK_SIZE; ++index)
         {
             _am_work_buf[index] = new AMS_AME_RUNTIME_WORK();
             _am_work_ref[index] = _am_work_buf[index];
@@ -764,7 +764,7 @@ internal partial class AppMain
     {
         _am_work_ref[_am_work_free] = work;
         ++_am_work_free;
-        if (_am_work_free < 1024)
+        if (_am_work_free < AMD_AME_WORK_SIZE)
             return;
         _am_work_free = 0;
     }

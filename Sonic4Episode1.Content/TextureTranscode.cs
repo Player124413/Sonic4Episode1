@@ -15,7 +15,8 @@ internal static class TextureTranscode
         var extension = Path.GetExtension(name);
         return extension.Equals(".PNG", StringComparison.OrdinalIgnoreCase)
             || extension.Equals(".DDS", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".PVR", StringComparison.OrdinalIgnoreCase);
+            || extension.Equals(".PVR", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".AST", StringComparison.OrdinalIgnoreCase);
     }
 
     // BC1's one-bit alpha covers opaque and hard-edged cutouts at half BC3's size; only genuinely
@@ -104,6 +105,14 @@ internal static class TextureTranscode
             return loaded;
         }
 
+        if (TextureFormats.IsAstc(info.Format))
+        {
+            loaded = LoadPng(AstcTool.Decode(data, TextureFormats.Token(info.Format)));
+            return loaded.GetMetadata().Format == DXGI_FORMAT.R8G8B8A8_UNORM
+                ? loaded
+                : loaded.Convert(DXGI_FORMAT.R8G8B8A8_UNORM, TEX_FILTER_FLAGS.DEFAULT, 0.5f);
+        }
+
         var handle = System.Runtime.InteropServices.GCHandle.Alloc(
             data, System.Runtime.InteropServices.GCHandleType.Pinned);
         try
@@ -128,6 +137,28 @@ internal static class TextureTranscode
             return loaded;
 
         return loaded.Convert(DXGI_FORMAT.R8G8B8A8_UNORM, TEX_FILTER_FLAGS.DEFAULT, 0.5f);
+    }
+
+    private static ScratchImage LoadPng(byte[] png)
+    {
+        var handle = System.Runtime.InteropServices.GCHandle.Alloc(
+            png, System.Runtime.InteropServices.GCHandleType.Pinned);
+        try
+        {
+            return TexHelper.Instance.LoadFromWICMemory(
+                handle.AddrOfPinnedObject(), png.Length, WIC_FLAGS.IGNORE_SRGB);
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
+    private static byte[] SavePng(ScratchImage rgba)
+    {
+        using var png = rgba.SaveToWICMemory(
+            0, WIC_FLAGS.IGNORE_SRGB, TexHelper.Instance.GetWICCodec(WICCodecs.PNG));
+        return Drain(png);
     }
 
     private static unsafe ScratchImage FromRgba(byte[] rgba, int width, int height)
@@ -277,6 +308,15 @@ internal static class TextureTranscode
                     return Drain(png);
                 }
 
+                // astcenc emits the same container WrapAstc writes, so it goes straight out
+                if (TextureFormats.IsAstc(target))
+                    return AstcTool.Encode(SavePng(rgba), target, name);
+
+                // a flip re-encodes even when the format is unchanged, so the passthrough profile
+                // reaches here asking for the uncompressed format it started in
+                if (!TextureFormats.IsBlockCompressed(target))
+                    return SaveUncompressed(target, name);
+
                 // alphaRef is the cutoff BC1 uses to decide a texel is transparent; it only matters
                 // on the cutout path, where the alpha is already 0 or 255
                 using var encoded = rgba.Compress(DxgiOf(target), TEX_COMPRESS_FLAGS.PARALLEL, 0.5f);
@@ -286,6 +326,32 @@ internal static class TextureTranscode
             catch (Exception ex)
             {
                 throw new InvalidDataException($"{name}: {ex.Message}", ex);
+            }
+        }
+
+        private byte[] SaveUncompressed(TextureFormat target, string name)
+        {
+            var dxgi = target switch
+            {
+                TextureFormat.Bgra32 => DXGI_FORMAT.B8G8R8A8_UNORM,
+                TextureFormat.Rgba32 => DXGI_FORMAT.R8G8B8A8_UNORM,
+                _ => throw new NotSupportedException(
+                    $"cannot encode to {TextureFormats.Token(target)}"),
+            };
+
+            ScratchImage converted = null;
+            try
+            {
+                var source = rgba.GetMetadata().Format == dxgi
+                    ? rgba
+                    : converted = rgba.Convert(dxgi, TEX_FILTER_FLAGS.DEFAULT, 0.5f);
+
+                using var dds = source.SaveToDDSMemory(DDS_FLAGS.NONE);
+                return Drain(dds);
+            }
+            finally
+            {
+                converted?.Dispose();
             }
         }
 
@@ -332,6 +398,24 @@ internal static class TextureTranscode
     {
         using var decoded = Decode(data, info, flip);
         return decoded.Save(target, name);
+    }
+
+    // asked before a build starts, so a profile naming a format nothing can produce is refused
+    // whole rather than emitting a tree with every member left in its source format
+    public static bool CanEncode(TextureFormat target)
+    {
+        switch (target)
+        {
+            case TextureFormat.Png:
+            case TextureFormat.Bc1:
+            case TextureFormat.Bc2:
+            case TextureFormat.Bc3:
+            case TextureFormat.Astc4x4:
+            case TextureFormat.Astc6x6:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static DXGI_FORMAT DxgiOf(TextureFormat target)

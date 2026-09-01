@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using static SDL2.SDL;
-using static SDL2.SDL.SDL_MessageBoxFlags;
-using static SDL2.SDL.SDL_MessageBoxButtonFlags;
+using CoreFoundation;
+using CoreMotion;
+using Foundation;
+using Microsoft.Xna.Framework;
+using UIKit;
 
 namespace Sonic4ep1
 {
@@ -85,9 +87,9 @@ namespace Microsoft.Xna.Framework.GamerServices
 {
     public enum MessageBoxIcon : uint
     {
-        Alert = SDL_MESSAGEBOX_INFORMATION,
-        Warning = SDL_MESSAGEBOX_WARNING,
-        Error = SDL_MESSAGEBOX_ERROR,
+        Alert = 1,
+        Warning = 2,
+        Error = 3,
         None = 0
     }
 
@@ -101,52 +103,145 @@ namespace Microsoft.Xna.Framework.GamerServices
             return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
         }
 
+        // callers want the index into `buttons`, and EndShowMessageBox casts the IAsyncResult back
+        // to Task<int?>, so the task handed to both the callback and the caller has to be the
+        // typed one. Don't return the ContinueWith, that's a plain Task and the cast throws
         public static IAsyncResult BeginShowMessageBox(PlayerIndex player, string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
         {
             var tcs = new TaskCompletionSource<int?>();
-            var task = tcs.Task.ContinueWith(t =>
+            _ = tcs.Task.ContinueWith(t =>
             {
                 IsVisible = false;
                 callback?.Invoke(t);
             });
 
-            var btns = buttons.ToArray();
-            var data = new SDL_MessageBoxData
-            {
-                title = title,
-                message = text,
-                numbuttons = btns.Length,
-                buttons = new SDL_MessageBoxButtonData[btns.Length]
-            };
-
-            for (int i = 0; i < btns.Length; i++)
-            {
-                data.buttons[i].text = btns[i];
-                data.buttons[i].buttonid = i;
-                if (i == focusButton)
-                    data.buttons[i].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
-            }
-
-            data.window = IntPtr.Zero;
-            data.flags = (SDL_MessageBoxFlags)icon;
+            var labels = buttons?.ToArray() ?? Array.Empty<string>();
 
             IsVisible = true;
 
-            if (SDL_ShowMessageBox(ref data, out int button) == 0)
+            // presenting has to happen on the main thread, and the game loop is already on it, so
+            // this cannot run inline: it has to go back out to the run loop first
+            DispatchQueue.MainQueue.DispatchAsync(() => ShowMessageBox(title, text, labels, focusButton, tcs));
+
+            return tcs.Task;
+        }
+
+        private static void ShowMessageBox(string title, string text, string[] labels,
+            int focusButton, TaskCompletionSource<int?> tcs)
+        {
+            var presenter = RootViewController();
+            if (presenter == null)
             {
-                tcs.SetResult(button);
-            }
-            else
-            {
-                tcs.SetResult(null);
+                tcs.TrySetResult(null);
+                return;
             }
 
-            return task;
+            var alert = UIAlertController.Create(title, text, UIAlertControllerStyle.Alert);
+
+            for (int i = 0; i < labels.Length; i++)
+            {
+                int index = i;
+                var style = i == focusButton
+                    ? UIAlertActionStyle.Default
+                    : UIAlertActionStyle.Cancel;
+
+                alert.AddAction(UIAlertAction.Create(labels[i], style, _ => tcs.TrySetResult(index)));
+            }
+
+            // nothing dismisses this but a button, so a zero button box would hang the caller
+            // forever on EndShowMessageBox, which blocks on .Result
+            if (labels.Length == 0)
+            {
+                tcs.TrySetResult(null);
+                return;
+            }
+
+            presenter.PresentViewController(alert, true, null);
+        }
+
+        // SDL creates its own UIWindow and root controller, and that is what has to present
+        private static UIViewController RootViewController()
+        {
+            var window = UIApplication.SharedApplication.ConnectedScenes
+                .OfType<UIWindowScene>()
+                .SelectMany(scene => scene.Windows)
+                .FirstOrDefault(w => w.IsKeyWindow);
+
+            var root = window?.RootViewController ?? UIApplication.SharedApplication.KeyWindow?.RootViewController;
+
+            while (root?.PresentedViewController != null)
+                root = root.PresentedViewController;
+
+            return root;
         }
 
         public static int? EndShowMessageBox(IAsyncResult result)
         {
             return ((Task<int?>)result).Result;
         }
+    }
+}
+
+namespace Microsoft.Devices.Sensors
+{
+    // CoreMotion already reports g in the frame amIPhoneAccelerate was written against, so unlike
+    // the Android shim there is nothing to convert
+    public partial class Accelerometer
+    {
+        private readonly CMMotionManager _motion = new CMMotionManager();
+
+        public Accelerometer()
+        {
+            if (!_motion.AccelerometerAvailable)
+                throw new AccelerometerFailedException();
+        }
+
+        public TimeSpan TimeBetweenUpdates { get; set; } = TimeSpan.FromSeconds(1.0 / 30.0);
+        public event EventHandler<SensorReadingEventArgs<AccelerometerReading>> CurrentValueChanged;
+
+        public void Start()
+        {
+            _motion.AccelerometerUpdateInterval = TimeBetweenUpdates.TotalSeconds;
+            _motion.StartAccelerometerUpdates(NSOperationQueue.CurrentQueue ?? NSOperationQueue.MainQueue, Handle);
+        }
+
+        public void Stop()
+        {
+            _motion.StopAccelerometerUpdates();
+        }
+
+        private void Handle(CMAccelerometerData data, NSError error)
+        {
+            if (data == null || error != null)
+                return;
+
+            var acceleration = new Vector3(
+                (float)data.Acceleration.X,
+                (float)data.Acceleration.Y,
+                (float)data.Acceleration.Z);
+
+            CurrentValueChanged?.Invoke(this,
+                new SensorReadingEventArgs<AccelerometerReading>(
+                    new AccelerometerReading { Acceleration = acceleration }));
+        }
+    }
+
+    public struct AccelerometerReading
+    {
+        public Vector3 Acceleration;
+    }
+
+    public class SensorReadingEventArgs<T> : EventArgs
+    {
+        public readonly T SensorReading;
+
+        internal SensorReadingEventArgs(T reading)
+        {
+            SensorReading = reading;
+        }
+    }
+
+    public class AccelerometerFailedException : Exception
+    {
     }
 }

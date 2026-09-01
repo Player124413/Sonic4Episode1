@@ -9,6 +9,7 @@ internal partial class AppMain
         public AMS_AMB_HEADER mdl_amb;
         public AMS_AMB_HEADER tex_amb;
         public uint draw_flag;
+        public uint draw_flag_ex;
         public TXB_HEADER txb;
 
         public void Clear()
@@ -18,6 +19,7 @@ internal partial class AppMain
             this.num = this.reg_num = 0;
             this.mdl_amb = this.tex_amb = null;
             this.draw_flag = 0U;
+            this.draw_flag_ex = 0U;
             this.txb = null;
         }
     }
