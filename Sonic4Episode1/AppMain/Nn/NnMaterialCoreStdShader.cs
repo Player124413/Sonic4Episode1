@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using mpp;
 
@@ -58,50 +59,100 @@ internal partial class AppMain
         device.RasterizerState = nngShaderRasterState;
     }
 
+    // a material change dirties the state, so these are built once per distinct combination rather
+    // than once per draw
+    private static readonly Dictionary<ulong, BlendState> nngShaderBlendStates = new Dictionary<ulong, BlendState>();
+    private static readonly Dictionary<int, DepthStencilState> nngShaderDepthStates = new Dictionary<int, DepthStencilState>();
+    private static readonly Dictionary<int, RasterizerState> nngShaderRasterStates = new Dictionary<int, RasterizerState>();
+
     private static BlendState mppBuildBlendState()
     {
         bool separate = nngShaderRenderState[D3DRS_SEPARATEALPHABLENDENABLE] != 0;
-        var state = new BlendState
-        {
-            ColorSourceBlend = mppD3DBlend(nngShaderRenderState[D3DRS_SRCBLEND]),
-            ColorDestinationBlend = mppD3DBlend(nngShaderRenderState[D3DRS_DESTBLEND]),
-            ColorBlendFunction = mppD3DBlendOp(nngShaderRenderState[D3DRS_BLENDOP]),
-            AlphaSourceBlend = mppD3DBlend(nngShaderRenderState[separate ? D3DRS_SRCBLENDALPHA : D3DRS_SRCBLEND]),
-            AlphaDestinationBlend = mppD3DBlend(nngShaderRenderState[separate ? D3DRS_DESTBLENDALPHA : D3DRS_DESTBLEND]),
-            AlphaBlendFunction = mppD3DBlendOp(nngShaderRenderState[separate ? D3DRS_BLENDOPALPHA : D3DRS_BLENDOP]),
-            ColorWriteChannels = mppD3DColorWrite(nngShaderRenderState[D3DRS_COLORWRITEENABLE]),
-            BlendFactor = mppD3DColor(nngShaderRenderState[D3DRS_BLENDFACTOR]),
-        };
+        Blend colorSource = mppD3DBlend(nngShaderRenderState[D3DRS_SRCBLEND]);
+        Blend colorDestination = mppD3DBlend(nngShaderRenderState[D3DRS_DESTBLEND]);
+        BlendFunction colorFunction = mppD3DBlendOp(nngShaderRenderState[D3DRS_BLENDOP]);
+        Blend alphaSource = mppD3DBlend(nngShaderRenderState[separate ? D3DRS_SRCBLENDALPHA : D3DRS_SRCBLEND]);
+        Blend alphaDestination = mppD3DBlend(nngShaderRenderState[separate ? D3DRS_DESTBLENDALPHA : D3DRS_DESTBLEND]);
+        BlendFunction alphaFunction = mppD3DBlendOp(nngShaderRenderState[separate ? D3DRS_BLENDOPALPHA : D3DRS_BLENDOP]);
 
         // D3DRS_ALPHABLENDENABLE off is the same surface as blending with ONE / ZERO
         if (nngShaderRenderState[D3DRS_ALPHABLENDENABLE] == 0)
         {
-            state.ColorSourceBlend = state.AlphaSourceBlend = Blend.One;
-            state.ColorDestinationBlend = state.AlphaDestinationBlend = Blend.Zero;
-            state.ColorBlendFunction = state.AlphaBlendFunction = BlendFunction.Add;
+            colorSource = alphaSource = Blend.One;
+            colorDestination = alphaDestination = Blend.Zero;
+            colorFunction = alphaFunction = BlendFunction.Add;
         }
 
+        ColorWriteChannels channels = mppD3DColorWrite(nngShaderRenderState[D3DRS_COLORWRITEENABLE]);
+        uint factor = nngShaderRenderState[D3DRS_BLENDFACTOR];
+
+        ulong key = factor
+            | ((ulong)colorSource << 32)
+            | ((ulong)colorDestination << 36)
+            | ((ulong)colorFunction << 40)
+            | ((ulong)alphaSource << 44)
+            | ((ulong)alphaDestination << 48)
+            | ((ulong)alphaFunction << 52)
+            | ((ulong)channels << 56);
+
+        if (nngShaderBlendStates.TryGetValue(key, out BlendState cached))
+            return cached;
+
+        var state = new BlendState
+        {
+            ColorSourceBlend = colorSource,
+            ColorDestinationBlend = colorDestination,
+            ColorBlendFunction = colorFunction,
+            AlphaSourceBlend = alphaSource,
+            AlphaDestinationBlend = alphaDestination,
+            AlphaBlendFunction = alphaFunction,
+            ColorWriteChannels = channels,
+            BlendFactor = mppD3DColor(factor),
+        };
+
+        nngShaderBlendStates[key] = state;
         return state;
     }
 
     private static DepthStencilState mppBuildDepthState()
     {
-        return new DepthStencilState
+        bool enable = nngShaderRenderState[D3DRS_ZENABLE] != 0;
+        bool write = nngShaderRenderState[D3DRS_ZWRITEENABLE] != 0;
+        CompareFunction function = mppD3DCmpFunc(nngShaderRenderState[D3DRS_ZFUNC]);
+
+        int key = (enable ? 1 : 0) | (write ? 2 : 0) | ((int)function << 2);
+        if (nngShaderDepthStates.TryGetValue(key, out DepthStencilState cached))
+            return cached;
+
+        var state = new DepthStencilState
         {
-            DepthBufferEnable = nngShaderRenderState[D3DRS_ZENABLE] != 0,
-            DepthBufferWriteEnable = nngShaderRenderState[D3DRS_ZWRITEENABLE] != 0,
-            DepthBufferFunction = mppD3DCmpFunc(nngShaderRenderState[D3DRS_ZFUNC]),
+            DepthBufferEnable = enable,
+            DepthBufferWriteEnable = write,
+            DepthBufferFunction = function,
         };
+
+        nngShaderDepthStates[key] = state;
+        return state;
     }
 
     private static RasterizerState mppBuildRasterState()
     {
-        return new RasterizerState
+        CullMode cull = mppD3DCull(nngShaderRenderState[D3DRS_CULLMODE]);
+        FillMode fill = nngShaderRenderState[D3DRS_FILLMODE] == 2 ? FillMode.WireFrame : FillMode.Solid;
+
+        int key = (int)cull | ((int)fill << 2);
+        if (nngShaderRasterStates.TryGetValue(key, out RasterizerState cached))
+            return cached;
+
+        var state = new RasterizerState
         {
-            CullMode = mppD3DCull(nngShaderRenderState[D3DRS_CULLMODE]),
-            FillMode = nngShaderRenderState[D3DRS_FILLMODE] == 2 ? FillMode.WireFrame : FillMode.Solid,
+            CullMode = cull,
+            FillMode = fill,
             ScissorTestEnable = true,
         };
+
+        nngShaderRasterStates[key] = state;
+        return state;
     }
 
     // D3DCOLOR is 0xAARRGGBB

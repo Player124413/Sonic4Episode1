@@ -153,6 +153,10 @@ public class Sonic4Ep1 : Game
         this.Window.Title = "SONIC THE HEDGEHOG 4: Episode I";
         this.Window.AllowUserResizing = true;
         this.Window.ClientSizeChanged += OnClientSizeChanged;
+
+#if NET40
+        this.Components.Add(new GamerServicesComponent(this));
+#endif
     }
 
 #if IOS
@@ -312,6 +316,9 @@ public class Sonic4Ep1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        if (AppMain.mppIsPillarboxed)
+            mpp.OpenGL.mppglClearBackBuffer(Color.Black);
+
 #if SPLIT_LOOP
         this.appMain.AppMainDraw();
 #else

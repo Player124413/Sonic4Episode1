@@ -202,6 +202,7 @@ Global
 		SolutionGuid = {54427269-D7E5-4634-B9DC-FD798DC18031}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Sonic4Episode1.projitems*{00c5c69d-0eb0-4bc6-b3cd-de00b86836e9}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{07b5fe71-88a1-4c97-b9f4-6f5a3d47f588}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{2bd24b24-8f74-4df7-a5f1-89eae8013c52}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{2cb33c8c-7b27-411b-858e-8ef6df340c1f}*SharedItemsImports = 5

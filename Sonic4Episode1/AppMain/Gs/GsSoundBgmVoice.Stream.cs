@@ -1,6 +1,7 @@
 #if BGM_STREAM
 using System;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
 
 internal partial class AppMain
 {
@@ -16,6 +17,7 @@ internal partial class AppMain
         private CriAuBgmStream m_stream;
         private DynamicSoundEffectInstance m_output;
         private float[] m_scratch;
+        private byte[] m_scratchBytes;
         private int m_bufferSamples;
         private int m_channels;
         private long m_decodedSamples;
@@ -88,6 +90,7 @@ internal partial class AppMain
             m_channels = m_stream.Channels;
             m_bufferSamples = m_stream.SampleRate * BufferMilliseconds / 1000;
             m_scratch = new float[m_bufferSamples * m_channels];
+            m_scratchBytes = new byte[m_scratch.Length * 2];
             m_output = new DynamicSoundEffectInstance(m_stream.SampleRate, (AudioChannels)m_channels);
             m_output.Volume = m_volume;
             return true;
@@ -195,7 +198,20 @@ internal partial class AppMain
                 return false;
             }
 
+#if FNA || MONOGAME
             m_output.SubmitFloatBufferEXT(m_scratch, 0, read);
+#else
+            var buffer = m_scratchBytes;
+            var floatBuffer = m_scratch;
+            for (int i = 0; i < read; i++)
+            {
+                short sValue = (short)(short.MaxValue * floatBuffer[i]);
+                buffer[i * 2] = (byte)(sValue & 0xff);
+                buffer[i * 2 + 1] = (byte)((sValue >> 8) & 0xff);
+            }
+
+            m_output.SubmitBuffer(buffer, 0, read * 2);
+#endif
             m_decodedSamples += read / m_channels;
             return true;
         }

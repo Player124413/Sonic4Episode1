@@ -159,7 +159,7 @@ internal static partial class GmOver
     // hardware back button is a WP7 addition
     private static bool gmOverIsSkipKeyOn()
     {
-        if ((AoPad.AoPadDirect() & ControllerConsts.CONFIRM) == 0 && !isBackKeyPressed())
+        if ((AoPad.AoPadDirect() & BUTTON.CONFIRM) == 0 && !isBackKeyPressed())
             return false;
 
         setBackKeyRequest(false);

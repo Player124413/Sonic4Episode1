@@ -33,18 +33,30 @@ internal partial class AppMain
     // amBind.h:49
     public const byte AMD_AMB_FLAG0_ENDIAN_BIG = 0x01;
 
+#if NET40
+    internal static byte[] writeAmbArchive(IList<AmbEntry> entries, bool bigEndian)
+#else
     internal static byte[] writeAmbArchive(IReadOnlyList<AmbEntry> entries, bool bigEndian)
+#endif
     {
         var stream = new MemoryStream();
         writeAmbArchive(stream, entries, bigEndian);
         return stream.ToArray();
     }
 
+#if NET40
+    internal static void writeAmbArchive(Stream output, IList<AmbEntry> entries, bool bigEndian)
+#else
     internal static void writeAmbArchive(Stream output, IReadOnlyList<AmbEntry> entries, bool bigEndian)
+#endif
     {
         var writer = bigEndian
             ? new EndianBinaryWriter(output, bigEndian: true)
+#if NET40
+            : new BinaryWriter(output, Encoding.ASCII);
+#else
             : new BinaryWriter(output, Encoding.ASCII, leaveOpen: true);
+#endif
 
         var count = entries.Count;
         var entryTable = AMB_HEADER_SIZE;

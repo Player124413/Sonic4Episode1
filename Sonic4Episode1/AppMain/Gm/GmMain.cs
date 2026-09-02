@@ -757,10 +757,10 @@ internal partial class AppMain
             SaveState.resumeMapData();
         }
         amIPhoneTouchCanceled();
-        CPadVirtualPad.CreateInstance().Create(new float[4] { -120f, 134f, 232f, 286f });
+        CPadVirtualPad.CreateInstance().Create(new float[4] { -120f, 166f, 232f, 340f });
         CPadPolarHandle instance = CPadPolarHandle.CreateInstance();
         if (g_gs_main_sys_info.stage_id == 9)
-            instance.Create(0.0f, 0.0f, (float)(AMD_SCREEN_2D_WIDTH * 4.0 / 5.0), AMD_SCREEN_2D_HEIGHT);
+            instance.Create(0.0f, 0.0f, AOD_ACT_SCREEN_WIDTH * 4f / 5f, AOD_ACT_SCREEN_HEIGHT);
         else
             instance.Create();
         instance.SetValue(0.0f);
@@ -1060,7 +1060,7 @@ internal partial class AppMain
             // start is the console pause button (gmMain.cpp:3253); the touch check and the back key
             // are the mobile and WP7 arms. Select reaching this at all is the WP7 hardware back key
             // being wired to the pad's Back button in Sonic4Ep1.cs.
-            if ((GmMainKeyCheckPauseKeyPush() != -1 || gmMainIsSuspendedPause() || (isBackKeyPressed() || !isForeground) || g_ao_sys_global.is_show_ui || (AoPad.AoPadStand() & ControllerConsts.START) != 0) && GmPauseCheckExecutable())
+            if ((GmMainKeyCheckPauseKeyPush() != -1 || gmMainIsSuspendedPause() || (isBackKeyPressed() || !isForeground) || g_ao_sys_global.is_show_ui || (AoPad.AoPadStand() & BUTTON.START) != 0) && GmPauseCheckExecutable())
             {
                 setBackKeyRequest(false);
                 GmMainClearSuspendedPause();

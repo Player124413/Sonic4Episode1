@@ -319,14 +319,14 @@ internal static partial class GmClearDemo
     // carries it dead.
     private static void gmClearDemoSetRetryInputPad(GMS_CLRDM_MAIN_WORK main_work)
     {
-        if ((AoPad.AoPadStand() & ControllerConsts.CANCEL) != 0)
+        if ((AoPad.AoPadStand() & BUTTON.CANCEL) != 0)
         {
             main_work.flag |= GMD_CLRDM_FLAG_CANCEL;
             GmSoundPlaySE("Cancel");
             return;
         }
 
-        if ((AoPad.AoPadStand() & ControllerConsts.CONFIRM) != 0)
+        if ((AoPad.AoPadStand() & BUTTON.CONFIRM) != 0)
         {
             main_work.flag |= main_work.cur_retry_slct == 0
                 ? GMD_CLRDM_FLAG_SKIP
@@ -336,7 +336,7 @@ internal static partial class GmClearDemo
             return;
         }
 
-        if ((AoPad.AoPadMStand() & ControllerConsts.UP) != 0)
+        if ((AoPad.AoPadMStand() & BUTTON.UP) != 0)
         {
             if (main_work.cur_retry_slct != 0)
                 GmSoundPlaySE("Cursol");
@@ -345,7 +345,7 @@ internal static partial class GmClearDemo
             main_work.tex_retry_act.obj_2d.frame = 1.0f;
             main_work.tex_back_slct_act.obj_2d.frame = 0.0f;
         }
-        else if ((AoPad.AoPadMStand() & ControllerConsts.DOWN) != 0)
+        else if ((AoPad.AoPadMStand() & BUTTON.DOWN) != 0)
         {
             if (main_work.cur_retry_slct != 1)
                 GmSoundPlaySE("Cursol");
@@ -721,7 +721,7 @@ internal static partial class GmClearDemo
     private static void gmClearDemoProcSpeTimeDispEffect(GMS_CLRDM_MAIN_WORK main_work)
     {
         main_work.timer += main_work.count;
-        if ((AoPad.AoPadStand() & ControllerConsts.CONFIRM) != 0)
+        if ((AoPad.AoPadStand() & BUTTON.CONFIRM) != 0)
             main_work.flag |= 4U;
         if (main_work.timer > (double) main_work.idle_time || ((int) main_work.flag & 4) != 0)
         {

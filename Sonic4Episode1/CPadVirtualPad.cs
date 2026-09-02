@@ -21,8 +21,8 @@ internal class CPadVirtualPad
     {
         this.m_area.left = 0.0f;
         this.m_area.top = 0.0f;
-        this.m_area.right = AppMain.AMD_SCREEN_2D_WIDTH;
-        this.m_area.bottom = 320f;
+        this.m_area.right = AppMain.AOD_ACT_SCREEN_WIDTH;
+        this.m_area.bottom = AppMain.AOD_ACT_SCREEN_HEIGHT;
         return this.create();
     }
 
@@ -125,9 +125,6 @@ internal class CPadVirtualPad
             // no touchy
             return false;
         }
-
-        this.m_area.left += ((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f;
-        this.m_area.right += ((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f; 
 
         this.Release();
         this.m_flag[0] = true;

@@ -8,18 +8,45 @@ using mpp;
 
 internal partial class AppMain
 {
+    // widest the game will render before pillarboxing. 2560x1080 is 2.370 and 3440x1440 is 2.389,
+    // so both stay native and only 32:9 gets bars
+    public static float mppAspectCap = 2.40f;
+
+    // the part of the back buffer the game draws into. everything aspect-dependent comes off this
+    // rather than the back buffer, so the cap propagates by construction
+    public static Rectangle mppViewport;
+
+    public static Rectangle mppCalcViewport(int bbWidth, int bbHeight)
+    {
+        if (bbWidth <= 0 || bbHeight <= 0)
+            return new Rectangle(0, 0, bbWidth, bbHeight);
+
+        if (bbWidth <= bbHeight * mppAspectCap)
+            return new Rectangle(0, 0, bbWidth, bbHeight);
+
+        int width = (int)(bbHeight * mppAspectCap);
+        return new Rectangle((bbWidth - width) / 2, 0, width, bbHeight);
+    }
+
+    public static bool mppIsPillarboxed => mppViewport.Width > 0
+        && mppViewport != new Rectangle(0, 0,
+            m_game.GraphicsDevice.PresentationParameters.BackBufferWidth,
+            m_game.GraphicsDevice.PresentationParameters.BackBufferHeight);
+
     public void amIPhoneInitNN(PresentationParameters parameters) =>
         amIPhoneInitNN(parameters.BackBufferWidth, parameters.BackBufferHeight);
 
     public void amIPhoneInitNN(int bbWidth, int bbHeight)
     {
         OpenGL.init(m_game, m_graphicsDevice);
-        OpenGL.glViewport(0, 0, bbWidth, bbHeight);
 
-        float width = bbWidth;
-        float height = bbHeight;
-        amRenderInit(bbWidth, bbHeight);
-        amRenderCreateWork(bbWidth, bbHeight);
+        mppViewport = mppCalcViewport(bbWidth, bbHeight);
+        OpenGL.glViewport(mppViewport.X, mppViewport.Y, mppViewport.Width, mppViewport.Height);
+
+        float width = mppViewport.Width;
+        float height = mppViewport.Height;
+        amRenderInit(mppViewport.Width, mppViewport.Height);
+        amRenderCreateWork(mppViewport.Width, mppViewport.Height);
         NNS_MATRIX mtx = GlobalPool<NNS_MATRIX>.Alloc();
         NNS_VECTOR nnsVector = new NNS_VECTOR(0.0f, 0.0f, -1f);
         NNS_RGBA nnsRgba = new NNS_RGBA(1f, 1f, 1f, 1f);
@@ -34,10 +61,10 @@ internal partial class AppMain
         nnSetProjection(mtx, 0);
 
         _am_draw_video.draw_aspect = aspect;
-        _am_draw_video.draw_width = bbWidth;
-        _am_draw_video.draw_height = bbHeight;
-        _am_draw_video.disp_width = bbWidth;
-        _am_draw_video.disp_height = bbHeight;
+        _am_draw_video.draw_width = mppViewport.Width;
+        _am_draw_video.draw_height = mppViewport.Height;
+        _am_draw_video.disp_width = mppViewport.Width;
+        _am_draw_video.disp_height = mppViewport.Height;
 
         g_ao_act_wide_w = _am_draw_video.width_2d = 720.0f * aspect;
         g_ao_act_wide_h = _am_draw_video.height_2d = 720.0f;
@@ -52,18 +79,6 @@ internal partial class AppMain
 
         _am_draw_video.wide_screen = true;
         _am_draw_video.refresh_rate = 60f;
-
-        //for (int i = 0; i < gm_player_push_jump_key_rect2.Length; i++)
-        //{
-        //    gm_player_push_jump_key_rect[i] = new ushort[gm_player_push_jump_key_rect2[i].Length];
-        //    for (int j = 0; j < gm_player_push_jump_key_rect2[i].Length; j++)
-        //    {
-        //        gm_player_push_jump_key_rect[i][j] = (ushort)gm_player_push_jump_key_rect2[i][j];
-        //        if (j % 2 == 0)
-        //            gm_player_push_jump_key_rect[i][j] -= (ushort)(((AppMain.AMD_SCREEN_2D_WIDTH - 1280.0f) / 2.0f) * 0.375f);
-        //    }
-        //}
-
 
         GlobalPool<NNS_MATRIX>.Release(mtx);
 
@@ -96,15 +111,17 @@ internal partial class AppMain
     // must agree, and ortho height must not move when the window aspect does
     private static string mppDiagOrtho(int bbWidth, int bbHeight)
     {
-        if (bbWidth <= 0 || bbHeight <= 0 || g_obj.disp_height <= 0f)
+        if (mppViewport.Width <= 0 || mppViewport.Height <= 0 || g_obj.disp_height <= 0f)
             return "ortho=n/a";
 
-        ObjCameraGetOrthoExtent(GMD_CAMERA_SCALE, bbWidth / (float)bbHeight, out float dx, out float dy);
+        ObjCameraGetOrthoExtent(GMD_CAMERA_SCALE, AMD_SCREEN_ASPECT, out float dx, out float dy);
         float world_w = dx * 2f;
         float world_h = dy * 2f;
 
-        return $"ortho={world_w:F3}x{world_h:F3}"
-            + $" px/unit={bbWidth / world_w:F4},{bbHeight / world_h:F4}"
+        return $"vp={mppViewport.X},{mppViewport.Y},{mppViewport.Width}x{mppViewport.Height}"
+            + $" cap={mppAspectCap} bars={mppIsPillarboxed}"
+            + $" ortho={world_w:F3}x{world_h:F3}"
+            + $" px/unit={mppViewport.Width / world_w:F4},{mppViewport.Height / world_h:F4}"
             + $" lcd={GMD_OBJ_LCD_X}x{GMD_OBJ_LCD_Y}";
     }
 
@@ -248,25 +265,33 @@ internal partial class AppMain
     private static void screen2real(ref float X, ref float Y)
     {
 #if WINDOWSPHONE7_5
+        var originX = 0;
+        var originY = 0;
         var width = 800;
         var height = 480;
 #else
         // TouchPanel scales a finger by DisplayWidth/Height, which FNA sets from the back buffer,
         // so that is the space these coordinates are already in. ClientBounds is points rather than
         // pixels once high DPI is on, and dividing by it loses the display scale
-        var width = m_game.GraphicsDevice.PresentationParameters.BackBufferWidth;
-        var height = m_game.GraphicsDevice.PresentationParameters.BackBufferHeight;
+        var originX = mppViewport.X;
+        var originY = mppViewport.Y;
+        var width = mppViewport.Width;
+        var height = mppViewport.Height;
 #endif
 
-        if (width <= 0 || height <= 0)
+        if (width <= 0 || height <= 0 || g_ao_act_wide_w <= 0f)
             return;
 
-        // nominal 480 x 320, the space every hit rect in the game is written in
-        X /= width;
-        X *= 480;
+        // Every hit rect in the game is written in a 480x320 space, and they were authored against
+        // a 1080-wide 2D box, which is 3:2 at 720 tall: the iPhone. The art they sit on is
+        // CORW_CENTER, so it moves with the window while a fixed screen fraction does not. Undo the
+        // centring and re-express in the authoring frame, and the rects hold at any aspect.
+        float wide_x = (X - originX) / width * g_ao_act_wide_w;
+        float base_x = wide_x - (g_ao_act_wide_w - g_ao_act_base_w) * 0.5f;
 
-        Y /= height;
-        Y *= 320;
+        X = (base_x + (AOD_ACT_AUTHORED_WIDE_W - g_ao_act_base_w) * 0.5f)
+                * AOD_ACT_SCREEN_WIDTH / AOD_ACT_AUTHORED_WIDE_W;
+        Y = (Y - originY) / height * AOD_ACT_SCREEN_HEIGHT;
     }
 
     private static int amFindTouchIndex(int id)

@@ -46,32 +46,32 @@ class MonoGameController : Controller
         reading.ary = (short)(state.ThumbSticks.Right.Y * short.MaxValue);
 
         if (state.Buttons.A == ButtonState.Pressed)
-            reading.direction |= (ControllerConsts.A);
+            reading.direction |= (BUTTON.A);
         if (state.Buttons.B == ButtonState.Pressed)
-            reading.direction |= (ControllerConsts.B);
+            reading.direction |= (BUTTON.B);
 
         if (state.Buttons.Y == ButtonState.Pressed)
-            reading.direction |= (ControllerConsts.Y);
+            reading.direction |= (BUTTON.Y);
         if (state.Buttons.X == ButtonState.Pressed)
-            reading.direction |= (ControllerConsts.X);
+            reading.direction |= (BUTTON.X);
 
         if (state.Buttons.LeftShoulder == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.L;
+            reading.direction |= BUTTON.L;
 
         if (state.Buttons.RightShoulder == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.R;
+            reading.direction |= BUTTON.R;
 
         if (state.Buttons.Start == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.START;
+            reading.direction |= BUTTON.START;
 
         if (state.DPad.Left == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.LEFT;
+            reading.direction |= BUTTON.LEFT;
         if (state.DPad.Up == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.UP;
+            reading.direction |= BUTTON.UP;
         if (state.DPad.Down == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.DOWN;
+            reading.direction |= BUTTON.DOWN;
         if (state.DPad.Right == ButtonState.Pressed)
-            reading.direction |= ControllerConsts.RIGHT;
+            reading.direction |= BUTTON.RIGHT;
     }
 }
 

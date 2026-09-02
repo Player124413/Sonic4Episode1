@@ -2100,6 +2100,18 @@ namespace mpp
             m_viewportSet = false;
         }
 
+        // the pillarbox bars sit outside m_viewport, so the wrapper's own clear never reaches them.
+        // widens to the whole target, clears, then invalidates so the next draw rebinds m_viewport
+        public static void mppglClearBackBuffer(Color color)
+        {
+            flushDrawArrays();
+            PresentationParameters pp = m_graphicsDevice.PresentationParameters;
+            m_graphicsDevice.Viewport = new Viewport(0, 0, pp.BackBufferWidth, pp.BackBufferHeight);
+            m_graphicsDevice.ScissorRectangle = new Rectangle(0, 0, pp.BackBufferWidth, pp.BackBufferHeight);
+            m_graphicsDevice.Clear(color);
+            m_viewportSet = false;
+        }
+
         public static void mppglBlit(Texture2D src, int width, int height)
         {
             flushDrawArrays();

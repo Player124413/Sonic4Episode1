@@ -969,11 +969,14 @@ internal partial class AppMain
         y = num2;
     }
 
+    // screen2real already hands us the 1080-wide authoring frame, so this only has to undo that
+    // frame's own centring. The original stretched 480 across the whole of base instead, which
+    // ignores that a 3:2 screen shows base -60..1020, and was off by 60 at the edges even on iPhone.
     public static void AoActCorReverse(ref float x, ref float y)
     {
-        x *= g_ao_act_wide_w / 480.0f;
-        y *= g_ao_act_base_h / 320.0f;
-        x *= g_ao_act_base_w / g_ao_act_wide_w;
+        x = x * (AOD_ACT_AUTHORED_WIDE_W / AOD_ACT_SCREEN_WIDTH)
+                - (AOD_ACT_AUTHORED_WIDE_W - g_ao_act_base_w) * 0.5f;
+        y *= g_ao_act_base_h / AOD_ACT_SCREEN_HEIGHT;
     }
 
     public static AOS_ACTION AoActUtilGetChild(AOS_ACTION act)

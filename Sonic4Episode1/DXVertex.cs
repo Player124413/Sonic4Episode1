@@ -2,11 +2,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 
-// nnstdshader's VS_INPUT layout, at the widest any retail permutation asks for. Every element has
-// to be here whether or not a given mesh uses it: D3D11's CreateInputLayout rejects a declaration
-// that is missing anything the shader declares, where GL just leaves the attribute disabled.
-// A permutation that does not read one leaves it unread, so one declaration serves every mesh.
-// See docs/nn-stdshader-ubershader.md.
 internal struct DXVertex : IVertexType
 {
     public Vector3 Position;

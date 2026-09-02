@@ -70,12 +70,16 @@ internal partial class AppMain
         state[NNE_SAMPLERSTATETYPE_DMAPOFFSET] = 0;
     }
 
+    private static readonly uint[] nngUserSamplerDefaultState = new uint[NNE_SAMPLERSTATETYPE_MAX];
+
     public static void nnInitMaterialControlUserSamplerDXG20()
     {
+        nnGetMaterialControlUserSamplerDefaultStateDXG20(nngUserSamplerDefaultState);
+
         foreach (NNS_MATCTRL_USERSAMPLER sampler in nngMatCtrlUserSampler)
         {
             sampler.texmap = null;
-            nnGetMaterialControlUserSamplerDefaultStateDXG20(sampler.state);
+            mppStoreUserSamplerState(sampler, nngUserSamplerDefaultState);
         }
     }
 
@@ -86,7 +90,25 @@ internal partial class AppMain
     {
         NNS_MATCTRL_USERSAMPLER sampler = nngMatCtrlUserSampler[(int)idx];
         sampler.texmap = texmap;
-        System.Array.Copy(state, sampler.state, NNE_SAMPLERSTATETYPE_MAX);
+        mppStoreUserSamplerState(sampler, state);
+    }
+
+    // the callers reset and rewrite the same state every frame, so the XNA state object only gets
+    // rebuilt when a value actually moves
+    private static void mppStoreUserSamplerState(NNS_MATCTRL_USERSAMPLER sampler, uint[] state)
+    {
+        bool changed = sampler.sampler == null;
+        for (int i = 0; i < NNE_SAMPLERSTATETYPE_MAX; ++i)
+        {
+            if (sampler.state[i] == state[i])
+                continue;
+
+            sampler.state[i] = state[i];
+            changed = true;
+        }
+
+        if (changed)
+            sampler.sampler = mppSamplerStateFrom(sampler.state);
     }
 
     public static void nnSetUserUniformDXG20(int idx, float x, float y, float z, float w)
@@ -97,14 +119,19 @@ internal partial class AppMain
         nngUserUniform[idx] = new Vector4(x, y, z, w);
     }
 
+    private static readonly Vector4[] nngProjectionUserUniforms = new Vector4[4];
+
     // the four calls every user-sampler site makes, gmMap.cpp:3248-3259 and four others.
     // the shader projects a view position with this to find where on screen it is, so it has to be
     // the matrix actually bound at draw time, not the NN copy
     public static void mppSetProjectionUserUniforms()
     {
-        Vector4[] rows = NnStdShaderEffect.ProjectionUserUniforms(OpenGL.mppglGetProjection());
-        for (int k = 0; k < rows.Length; ++k)
-            nnSetUserUniformDXG20(k, rows[k].X, rows[k].Y, rows[k].Z, rows[k].W);
+        NnStdShaderEffect.ProjectionUserUniforms(OpenGL.mppglGetProjection(), nngProjectionUserUniforms);
+        for (int k = 0; k < nngProjectionUserUniforms.Length; ++k)
+        {
+            Vector4 row = nngProjectionUserUniforms[k];
+            nnSetUserUniformDXG20(k, row.X, row.Y, row.Z, row.W);
+        }
     }
 
     // nnPutMaterialTextureUserSampler, nnmaterialcorestdshader.obj. NN sets the tex matrix here too,
@@ -117,7 +144,7 @@ internal partial class AppMain
 
         GraphicsDevice device = OpenGL.mppglGetDevice();
         device.Textures[slot] = sampler.texmap;
-        device.SamplerStates[slot] = mppSamplerStateFrom(sampler.state);
+        device.SamplerStates[slot] = sampler.sampler;
     }
 
     private static SamplerState mppSamplerStateFrom(uint[] state)

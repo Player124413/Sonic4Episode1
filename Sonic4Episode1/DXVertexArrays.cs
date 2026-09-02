@@ -117,9 +117,15 @@ internal sealed class DXVertexArrays
     private static float ReadSingle(byte[] data, int at, bool bigEndian)
     {
         var span = data.AsSpan(at, 4);
+#if NET40
+        return bigEndian
+            ? BinaryPrimitivesEx.ReadSingleBigEndian(span)
+            : BinaryPrimitivesEx.ReadSingleLittleEndian(span);
+#else
         return bigEndian
             ? BinaryPrimitives.ReadSingleBigEndian(span)
             : BinaryPrimitives.ReadSingleLittleEndian(span);
+#endif
     }
 
     private static Vector3[] ReadVector3(byte[] data, int offset, int stride, int count, bool bigEndian)

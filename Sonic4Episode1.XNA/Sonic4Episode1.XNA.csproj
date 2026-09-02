@@ -4,11 +4,17 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net40</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<LangVersion>9</LangVersion>
-		<DefineConstants>USE_THREADS;BGM_MEDIAPLAYER;</DefineConstants>
+		<LangVersion>12</LangVersion>
+		<DefineConstants>USE_THREADS;BGM_STREAM;</DefineConstants>
 		<Prefer32Bit>True</Prefer32Bit>
 		<Platforms>x86</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="NetFx.System.Buffers" Version="4.0.0" />
+	  <PackageReference Include="NetFx.System.Memory" Version="4.0.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Microsoft.Xna.Framework">
@@ -30,6 +36,9 @@
 		<Reference Include="Microsoft.Xna.Framework.Input.Touch">
 			<HintPath>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Input.Touch.dll</HintPath>
 			<Private>false</Private>
+		</Reference>
+		<Reference Include="NVorbis">
+		  <HintPath>NVorbis.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

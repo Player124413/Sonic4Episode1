@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if HAS_PVR
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -134,3 +135,4 @@ internal class PVRTextureLoader
 #endif
     }
 }
+#endif

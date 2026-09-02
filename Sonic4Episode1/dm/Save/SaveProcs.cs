@@ -367,14 +367,14 @@ internal static partial class DmSave
     {
         if (AoAccountGetCurrentId() < 0)
         {
-            if (AoPad.AoPadSomeoneStand(ControllerConsts.CONFIRM) < 0)
+            if (AoPad.AoPadSomeoneStand(BUTTON.CONFIRM) < 0)
                 return;
 
             main_work.flag |= DMD_SAVE_FLAG_DECIDE;
         }
         else
         {
-            if ((AoPad.AoPadStand() & ControllerConsts.CONFIRM) == 0)
+            if ((AoPad.AoPadStand() & BUTTON.CONFIRM) == 0)
                 return;
 
             main_work.flag |= DMD_SAVE_FLAG_DECIDE;

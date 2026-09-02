@@ -52,7 +52,7 @@ internal static partial class StgSlct
             trg_act_lr[0].Create(act[(int)ACT_ICON_L_ARROW]);
             trg_act_lr[1].Create(act[(int)ACT_ICON_R_ARROW]);
 
-            trg_act_move.Create(50, 90, (int)AMD_SCREEN_2D_WIDTH - 100, 258);
+            trg_act_move.Create(50, 90, AOD_ACT_SCREEN_WIDTH - 100, 258);
             trg_act_move.SetMoveThreshold(4);
 
             trg_mode[0].Create(act[(int)ACT_TAB_STATE_C]);

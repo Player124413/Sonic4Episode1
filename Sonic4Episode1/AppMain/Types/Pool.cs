@@ -5,8 +5,8 @@ internal partial class AppMain
 {
     internal class Pool<T> where T : class, new()
     {
-        private T[] freeObjects_ = new T[1024];
-        private T[] usedObjects_ = new T[1024];
+        private T[] freeObjects_ = new T[2048];
+        private T[] usedObjects_ = new T[2048];
         private int freeObjectsCount_;
         private int usedObjectsCount_;
 

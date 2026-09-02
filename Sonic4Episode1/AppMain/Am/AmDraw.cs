@@ -2032,7 +2032,13 @@ internal partial class AppMain
         OpenGL.mppglSetRenderTarget(target.target);
         manager.targetp = target;
         manager.target_now = target;
-        OpenGL.glViewport(0, 0, target.width, target.height);
+
+        // an offscreen target is exactly the size we draw into, but the back buffer may be wider
+        // than the viewport when pillarboxed, and that origin has to come back
+        if (target == _am_render_default)
+            OpenGL.glViewport(mppViewport.X, mppViewport.Y, mppViewport.Width, mppViewport.Height);
+        else
+            OpenGL.glViewport(0, 0, target.width, target.height);
 
         amRenderClear(flag, color, z);
 

@@ -12,7 +12,7 @@ internal static partial class DmTitle
 {
     private static void dmTitleInputProcTitle(DMS_TITLE_MAIN_WORK main_work)
     {
-        var stand = AoPad.AoPadSomeoneMStand(ControllerConsts.START | ControllerConsts.CONFIRM);
+        var stand = AoPad.AoPadSomeoneMStand(BUTTON.START | BUTTON.CONFIRM);
         if (amTpIsTouchPush(0) || stand != -1)
         {
             AoAccountSetCurrentIdStart(stand != -1 ? (uint)stand : 0);
@@ -49,7 +49,7 @@ internal static partial class DmTitle
             }
 
             // キャンセル処理
-            if (AoPad.AoPadMStand().HasFlag(ControllerConsts.CANCEL))
+            if (AoPad.AoPadMStand().HasFlag(BUTTON.CANCEL))
             {
                 main_work.flag |= DMD_TITLE_FLAG_CANCEL;
 
@@ -57,7 +57,7 @@ internal static partial class DmTitle
             }
 
             // 決定処理
-            if (AoPad.AoPadMStand().HasFlag(ControllerConsts.CONFIRM) || AoPad.AoPadMStand().HasFlag(ControllerConsts.START))
+            if (AoPad.AoPadMStand().HasFlag(BUTTON.CONFIRM) || AoPad.AoPadMStand().HasFlag(BUTTON.START))
             {
                 main_work.flag |= DMD_TITLE_FLAG_DECIDE;
 
@@ -79,18 +79,18 @@ internal static partial class DmTitle
             }
 
             // 十字キー操作
-            if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.UP))
+            if (AoPad.AoPadMRepeat().HasFlag(BUTTON.UP))
             {
-                if (AoPad.AoPadMStand().HasFlag(ControllerConsts.UP)
+                if (AoPad.AoPadMStand().HasFlag(BUTTON.UP)
                     || main_work.cur_slct_menu != cur_edge_menu_top)
                 {
                     // 選択ZONE切り替え
                     main_work.flag |= DMD_TITLE_FLAG_MENU_UP_INPUT;
                 }
             }
-            else if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.DOWN))
+            else if (AoPad.AoPadMRepeat().HasFlag(BUTTON.DOWN))
             {
-                if (AoPad.AoPadMStand().HasFlag(ControllerConsts.DOWN)
+                if (AoPad.AoPadMStand().HasFlag(BUTTON.DOWN)
                     || main_work.cur_slct_menu != cur_edge_menu_bottom)
                 {
                     // 選択ZONE切り替え
@@ -111,7 +111,7 @@ internal static partial class DmTitle
 
             CTrgAoAction trgReturn = main_work.trg_return;
             if (trgReturn.GetState(0U)[10] && trgReturn.GetState(0U)[1] || isBackKeyPressed() ||
-                AoPad.AoPadMStand().HasFlag(ControllerConsts.B))
+                AoPad.AoPadMStand().HasFlag(BUTTON.B))
             {
                 setBackKeyRequest(false);
                 //if (LiveFeature.isInterrupted())
@@ -122,7 +122,7 @@ internal static partial class DmTitle
 
 
             CTrgAoAction trgGame = main_work.trg_game;
-            if (trgGame.GetState(0U)[10] && trgGame.GetState(0U)[1] || AoPad.AoPadMStand().HasFlag(ControllerConsts.Y))
+            if (trgGame.GetState(0U)[10] && trgGame.GetState(0U)[1] || AoPad.AoPadMStand().HasFlag(BUTTON.Y))
             {
                 string url = GsEnvGetLanguage() != 0 ? c_url : "http://sega.jp/kt/microsoft/smart/";
                 DmSoundPlaySE("Ok");
@@ -135,13 +135,13 @@ internal static partial class DmTitle
     {
         var pad = AoPad.AoPadMStand();
 
-        if (pad.HasFlag(ControllerConsts.CANCEL))
+        if (pad.HasFlag(BUTTON.CANCEL))
             main_work.flag |= DMD_TITLE_FLAG_CANCEL;
 
-        if (pad.HasFlag(ControllerConsts.CONFIRM))
+        if (pad.HasFlag(BUTTON.CONFIRM))
             main_work.flag |= DMD_TITLE_FLAG_DECIDE;
 
-        if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.LEFT))
+        if (AoPad.AoPadMRepeat().HasFlag(BUTTON.LEFT))
         {
             if (main_work.win_cur_slct != 0)
             {
@@ -149,7 +149,7 @@ internal static partial class DmTitle
                 DmSoundPlaySE("Cursol");
             }
         }
-        else if (AoPad.AoPadMRepeat().HasFlag(ControllerConsts.RIGHT))
+        else if (AoPad.AoPadMRepeat().HasFlag(BUTTON.RIGHT))
         {
             if (main_work.win_cur_slct != 1)
             {

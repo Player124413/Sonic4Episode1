@@ -9,26 +9,26 @@ internal class KeyboardController : Controller
     {
         var state = Keyboard.GetState();
         if (state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.I))
-            reading.direction |= ControllerConsts.UP;
+            reading.direction |= BUTTON.UP;
         if (state.IsKeyDown(Keys.Down) || state.IsKeyDown(Keys.K))
-            reading.direction |= ControllerConsts.DOWN;
+            reading.direction |= BUTTON.DOWN;
         if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.J))
-            reading.direction |= ControllerConsts.LEFT;
+            reading.direction |= BUTTON.LEFT;
         if (state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.L))
-            reading.direction |= ControllerConsts.RIGHT;
+            reading.direction |= BUTTON.RIGHT;
         if (state.IsKeyDown(Keys.A))
-            reading.direction |= ControllerConsts.A;
+            reading.direction |= BUTTON.A;
         if (state.IsKeyDown(Keys.S))
-            reading.direction |= ControllerConsts.B;
+            reading.direction |= BUTTON.B;
         if (state.IsKeyDown(Keys.D))
-            reading.direction |= ControllerConsts.X;
+            reading.direction |= BUTTON.X;
         if (state.IsKeyDown(Keys.Q))
-            reading.direction |= ControllerConsts.L;
+            reading.direction |= BUTTON.L;
         if (state.IsKeyDown(Keys.W))
-            reading.direction |= ControllerConsts.Y;
+            reading.direction |= BUTTON.Y;
         if (state.IsKeyDown(Keys.E))
-            reading.direction |= ControllerConsts.R;
+            reading.direction |= BUTTON.R;
         if (state.IsKeyDown(Keys.Escape) || state.IsKeyDown(Keys.Enter))
-            reading.direction |= ControllerConsts.START;
+            reading.direction |= BUTTON.START;
     }
 }

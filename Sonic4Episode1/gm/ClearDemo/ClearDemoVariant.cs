@@ -52,14 +52,14 @@ internal static partial class GmClearDemo
 
     private static bool gmClearDemoIsSkipPressedPad()
     {
-        return (AoPad.AoPadStand() & (ControllerConsts.CONFIRM
-                                      | ControllerConsts.CANCEL
-                                      | ControllerConsts.START)) != 0;
+        return (AoPad.AoPadStand() & (BUTTON.CONFIRM
+                                      | BUTTON.CANCEL
+                                      | BUTTON.START)) != 0;
     }
 
     private static bool gmClearDemoIsTimeSkipPressedPad()
     {
-        return (AoPad.AoPadStand() & ControllerConsts.CONFIRM) != 0;
+        return (AoPad.AoPadStand() & BUTTON.CONFIRM) != 0;
     }
 
     // the WP7 back key rides along with the touch check on this branch, which the C++ does not have

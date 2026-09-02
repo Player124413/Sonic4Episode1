@@ -393,17 +393,17 @@ internal static partial class GmPauseMenu
 
     // ---- pad
 
-    private static ControllerConsts gmPmPadStand()
+    private static BUTTON gmPmPadStand()
     {
         return AoPadStand();
     }
 
-    private static ControllerConsts gmPmPadMStand()
+    private static BUTTON gmPmPadMStand()
     {
         return AoPadMStand();
     }
 
-    private static ControllerConsts gmPmPadMRepeat()
+    private static BUTTON gmPmPadMRepeat()
     {
         return AoPadMRepeat();
     }

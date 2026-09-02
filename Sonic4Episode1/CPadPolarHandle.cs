@@ -27,10 +27,10 @@ internal partial class AppMain
         {
             this.m_area.left = 0.0f;
             this.m_area.top = 0.0f;
-            this.m_area.right = AMD_SCREEN_2D_WIDTH;
-            this.m_area.bottom = 320f;
-            this.m_center.x = AMD_SCREEN_2D_WIDTH * 0.5f;
-            this.m_center.y = 144f;
+            this.m_area.right = AOD_ACT_SCREEN_WIDTH;
+            this.m_area.bottom = AOD_ACT_SCREEN_HEIGHT;
+            this.m_center.x = AOD_ACT_SCREEN_WIDTH * 0.5f;
+            this.m_center.y = AOD_ACT_SCREEN_HEIGHT * 0.5f;
             return this.create();
         }
 
@@ -68,8 +68,8 @@ internal partial class AppMain
         {
             this.m_area.left = 0.0f;
             this.m_area.top = 0.0f;
-            this.m_area.right = AMD_SCREEN_2D_WIDTH;
-            this.m_area.bottom = 320f;
+            this.m_area.right = AOD_ACT_SCREEN_WIDTH;
+            this.m_area.bottom = AOD_ACT_SCREEN_HEIGHT;
             this.m_center = center;
             return this.create();
         }
@@ -78,8 +78,8 @@ internal partial class AppMain
         {
             this.m_area.left = 0.0f;
             this.m_area.top = 0.0f;
-            this.m_area.right = AMD_SCREEN_2D_WIDTH;
-            this.m_area.bottom = 320f;
+            this.m_area.right = AOD_ACT_SCREEN_WIDTH;
+            this.m_area.bottom = AOD_ACT_SCREEN_HEIGHT;
             this.m_center.x = center_x;
             this.m_center.y = center_y;
             return this.create();

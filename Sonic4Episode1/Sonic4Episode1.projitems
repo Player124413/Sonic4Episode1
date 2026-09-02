@@ -898,14 +898,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTouch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)dm\StgSlct\StgSlctTypes.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV2.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRContainerV3.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRGlobal.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRHeaderV2.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRHeaderV3.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRMetadataElementV3.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PVRMetadataV3.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)External\PvrtcDecoder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GmPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gs\SBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gs\SDebug.cs" />

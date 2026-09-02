@@ -20,10 +20,12 @@
 #error NND_FLAT_LIGHT_SOURCE only covers one light
 #endif
 
-float4 u_FrontMaterialRegs[5];
-float4 u_FogRegs[5];
-float4 u_FrontLightModelProductRegs;
-float4 u_LightSourceRegs[12];
+float4 u_FrontMaterialReg0, u_FrontMaterialReg1, u_FrontMaterialReg2, u_FrontMaterialReg3, u_FrontMaterialReg4;
+float4 u_FogReg0, u_FogReg1, u_FogReg2, u_FogReg3, u_FogReg4;
+float4 u_FrontLightModelProductReg0;
+float4 u_LightSourceReg0,  u_LightSourceReg1,  u_LightSourceReg2,  u_LightSourceReg3;
+float4 u_LightSourceReg4,  u_LightSourceReg5,  u_LightSourceReg6,  u_LightSourceReg7;
+float4 u_LightSourceReg8,  u_LightSourceReg9,  u_LightSourceReg10, u_LightSourceReg11;
 
 #include "nnstd-flat-uniforms.fxh"
 #endif

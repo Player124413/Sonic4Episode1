@@ -4939,6 +4939,10 @@ internal partial class AppMain
     public const uint AOD_ACT_ACM_FLAG_IGNORE_ALL = 56;
     public const int AOD_ACT_SCREEN_WIDTH = 480;
     public const int AOD_ACT_SCREEN_HEIGHT = 320;
+
+    // g_ao_act_wide_w on iPhone, and the 2D box every hit rect in the game was authored against.
+    // 3:2 at 720 tall. see docs/camera-view-extent.md
+    public const float AOD_ACT_AUTHORED_WIDE_W = 1080f;
     public const int A2D_AMA_USR_FLAG_USR_LOOP = 1;
     public const int A2D_AMA_HIT_FLAG_HIT_LOOP = 1;
     public const uint AOD_ACT_FLAG_UPDATE = 1;

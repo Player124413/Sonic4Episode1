@@ -73,28 +73,28 @@ internal static partial class GmPauseMenu
     {
         var is_select = false;
 
-        if (gmPmPadMRepeat().HasFlag(ControllerConsts.UP))
+        if (gmPmPadMRepeat().HasFlag(BUTTON.UP))
         {
             if (work.select > 0)
             {
                 work.select -= 1;
                 is_select = true;
             }
-            else if (gmPmPadMStand().HasFlag(ControllerConsts.UP))
+            else if (gmPmPadMStand().HasFlag(BUTTON.UP))
             {
                 work.select = GMD_PMENU_SEL_NUM - 1;
                 is_select = true;
             }
         }
 
-        if (gmPmPadMRepeat().HasFlag(ControllerConsts.DOWN))
+        if (gmPmPadMRepeat().HasFlag(BUTTON.DOWN))
         {
             if (work.select < GMD_PMENU_SEL_NUM - 1)
             {
                 work.select += 1;
                 is_select = true;
             }
-            else if (gmPmPadMStand().HasFlag(ControllerConsts.DOWN))
+            else if (gmPmPadMStand().HasFlag(BUTTON.DOWN))
             {
                 work.select = 0;
                 is_select = true;
@@ -106,7 +106,7 @@ internal static partial class GmPauseMenu
 
         gmPmDrawSelect(work, work.select);
 
-        if (gmPmPadStand().HasFlag(ControllerConsts.CONFIRM))
+        if (gmPmPadStand().HasFlag(BUTTON.CONFIRM))
         {
             work.result = gm_pm_sel_result_tbl[work.select];
 
@@ -121,8 +121,8 @@ internal static partial class GmPauseMenu
                 gmPmSndPlaySe(GMD_PMENU_SE_DECIDE);
             }
         }
-        else if (gmPmPadStand().HasFlag(ControllerConsts.CANCEL)
-                 || gmPmPadStand().HasFlag(ControllerConsts.START))
+        else if (gmPmPadStand().HasFlag(BUTTON.CANCEL)
+                 || gmPmPadStand().HasFlag(BUTTON.START))
         {
             work.result = GME_PMENU_RESULT_CANCEL;
             gmPmSetProc(gmPmProcEfctOut);
@@ -180,13 +180,13 @@ internal static partial class GmPauseMenu
     {
         var is_select = false;
 
-        if (gmPmPadMStand().HasFlag(ControllerConsts.LEFT))
+        if (gmPmPadMStand().HasFlag(BUTTON.LEFT))
         {
             work.select_sub = 0;
             is_select = true;
         }
 
-        if (gmPmPadMStand().HasFlag(ControllerConsts.RIGHT))
+        if (gmPmPadMStand().HasFlag(BUTTON.RIGHT))
         {
             work.select_sub = 1;
             is_select = true;
@@ -197,7 +197,7 @@ internal static partial class GmPauseMenu
 
         gmPmDrawWindowMessage(work, message, work.select_sub);
 
-        if (gmPmPadStand().HasFlag(ControllerConsts.CONFIRM))
+        if (gmPmPadStand().HasFlag(BUTTON.CONFIRM))
         {
             if (work.select_sub != 0)
                 work.result = GME_PMENU_RESULT_NONE;
@@ -205,7 +205,7 @@ internal static partial class GmPauseMenu
             gmPmSetProc(decide);
             gmPmSndPlaySe(GMD_PMENU_SE_DECIDE);
         }
-        else if (gmPmPadStand().HasFlag(ControllerConsts.CANCEL))
+        else if (gmPmPadStand().HasFlag(BUTTON.CANCEL))
         {
             work.result = GME_PMENU_RESULT_NONE;
             gmPmSetProc(out_proc);

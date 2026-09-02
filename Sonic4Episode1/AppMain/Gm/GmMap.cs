@@ -281,7 +281,7 @@ internal partial class AppMain
             {
                 if (offsets[i] == 0)
                 {
-                    cells[i] = Array.Empty<T>();
+                    cells[i] = [];
                     continue;
                 }
 
@@ -1983,6 +1983,8 @@ internal partial class AppMain
         mppBindFallShaderUserSampler(render_target);
     }
 
+    private static readonly uint[] mppFallShaderUserSamplerState = new uint[NNE_SAMPLERSTATETYPE_MAX];
+
     // gmMap.cpp:3232-3260, and the same block verbatim in gmMapFar, gmDeco, dmTitleOp and
     // gmEneMereon
     internal static void mppBindFallShaderUserSampler(AMS_RENDER_TARGET render_target)
@@ -1991,7 +1993,7 @@ internal partial class AppMain
         if (projection == null)
             return;
 
-        uint[] state = new uint[NNE_SAMPLERSTATETYPE_MAX];
+        uint[] state = mppFallShaderUserSamplerState;
         nnInitMaterialControlUserSamplerDXG20();
         nnGetMaterialControlUserSamplerDefaultStateDXG20(state);
         state[NNE_SAMPLERSTATETYPE_ADDRESSU] = D3DTADDRESS_CLAMP;

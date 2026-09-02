@@ -376,7 +376,7 @@ internal partial class AppMain
         }
         else
         {
-            if (!amTpIsTouchOn(0) && AoPad.AoPadDirect() == (ControllerConsts)0)
+            if (!amTpIsTouchOn(0) && AoPad.AoPadDirect() == (BUTTON)0)
                 return;
             for (int index = 0; index < gm_start_msg_ama_act_num_tbl[mgr_work.msg_type]; ++index)
                 mgr_work.ama_2d_work[index].obj_work.disp_flag |= 32U;

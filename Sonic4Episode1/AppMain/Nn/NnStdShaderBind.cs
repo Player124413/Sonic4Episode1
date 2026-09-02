@@ -8,13 +8,20 @@ using mpp;
 
 internal partial class AppMain
 {
-    private static readonly Dictionary<string, NnStdShaderEffect> nngStdShaderCache =
-        new Dictionary<string, NnStdShaderEffect>();
+    // the name packs the whole profile, so it keys the cache directly and the 26 digit string only
+    // gets built on a miss, to name the file
+    private static readonly Dictionary<NNS_STDSHADER_NAME, NnStdShaderEffect> nngStdShaderCache =
+        new Dictionary<NNS_STDSHADER_NAME, NnStdShaderEffect>();
+
+    // nnBindStdShader runs once per meshset, so everything it needs is kept rather than made
+    private static readonly NNS_STDSHADER_PROFILE nngStdShaderProfile = new NNS_STDSHADER_PROFILE();
+
+    private const int mppMaxBoneMatrices = 16;
 
     private static NNS_MATRIX[] nngWorldMatrixPalette;
     private static Matrix nngStdShaderView = Matrix.Identity;
     private static Matrix nngStdShaderModelView = Matrix.Identity;
-    private static Matrix[] nngStdShaderBones = Array.Empty<Matrix>();
+    private static readonly Matrix[] nngStdShaderBones = new Matrix[mppMaxBoneMatrices];
     private static int nngStdShaderBoneCount;
 
     public static void nnSetWorldMatrixPalette(NNS_MATRIX[] mtxpal)
@@ -46,7 +53,7 @@ internal partial class AppMain
             || nngWorldMatrixPalette == null)
             return;
 
-        NNM_ASSERT(desc.nBoneMtx <= 16, "Matrix palette Overflow\n");
+        NNM_ASSERT(desc.nBoneMtx <= mppMaxBoneMatrices, "Matrix palette Overflow\n");
 
         // shader always reads four matrices in this mode, pad the tail with identity
         int count = desc.nBoneMtx;
@@ -54,8 +61,8 @@ internal partial class AppMain
             && (desc.Format & NND_VTXMEMBER_DX_BLENDFMT_I8) == 0)
             count = Math.Max(count, 4);
 
-        if (nngStdShaderBones.Length < count)
-            nngStdShaderBones = new Matrix[count];
+        if (count > mppMaxBoneMatrices)
+            count = mppMaxBoneMatrices;
 
         for (int i = 0; i < count; ++i)
         {
@@ -120,22 +127,18 @@ internal partial class AppMain
         // zero asks for a permutation retail never built, so force the one every lit key carries
         uint drawFlag = val.DrawFlag | NND_DRAWOBJ_FRAGPARALIGHT1;
 
-        var profile = new NNS_STDSHADER_PROFILE();
+        NNS_STDSHADER_PROFILE profile = nngStdShaderProfile;
         if (nnSetupShaderProfile(profile, val.pMaterial, drawFlag, val.DrawFlagEx, subobj.fType, desc.Format) < 0)
             return;
 
-        NnStdShaderEffect effect = mppLoadStdShader(nnGetStdShaderName(profile).ToString());
+        NnStdShaderEffect effect = mppLoadStdShader(nnGetStdShaderName(profile));
         if (effect == null)
             return;
 
         Matrix projection = OpenGL.mppglGetProjection();
         effect.SetTransforms(nngStdShaderModelView, projection);
         if (nngStdShaderBoneCount > 0)
-        {
-            var bones = new Matrix[nngStdShaderBoneCount];
-            Array.Copy(nngStdShaderBones, bones, nngStdShaderBoneCount);
-            effect.SetBoneMatrices(bones);
-        }
+            effect.SetBoneMatrices(nngStdShaderBones, nngStdShaderBoneCount);
 
         // nnstdshader wants the direction toward the light, in view space; GL stores the direction
         // the light travels, and _am_draw_world_view_matrix already folds in the view
@@ -226,13 +229,30 @@ internal partial class AppMain
 
             device.Textures[slot] = OpenGL.mppglGetTexture(
                 nngCurrentTextureList.pTexInfoList[texDesc.iTexIdx].TexName);
-            device.SamplerStates[slot] = new SamplerState
+            device.SamplerStates[slot] = mppStdShaderLinearSampler(
+                mppStdShaderAddressMode(texDesc.WrapS), mppStdShaderAddressMode(texDesc.WrapT));
+        }
+    }
+
+    // material maps are always linear, so the only thing that varies is the pair of address modes
+    private static readonly SamplerState[] nngStdShaderLinearSamplers = new SamplerState[16];
+
+    private static SamplerState mppStdShaderLinearSampler(TextureAddressMode u, TextureAddressMode v)
+    {
+        int index = (int)u * 4 + (int)v;
+        SamplerState sampler = nngStdShaderLinearSamplers[index];
+        if (sampler == null)
+        {
+            sampler = new SamplerState
             {
                 Filter = TextureFilter.Linear,
-                AddressU = mppStdShaderAddressMode(texDesc.WrapS),
-                AddressV = mppStdShaderAddressMode(texDesc.WrapT),
+                AddressU = u,
+                AddressV = v,
             };
+            nngStdShaderLinearSamplers[index] = sampler;
         }
+
+        return sampler;
     }
 
     // D3DTEXTUREADDRESS, which is what WrapS/WrapT carry. XNA has no border mode.
@@ -255,11 +275,12 @@ internal partial class AppMain
     private const string MPP_SHADER_EXTENSION = ".fxb";
 #endif
 
-    private static NnStdShaderEffect mppLoadStdShader(string permutation)
+    private static NnStdShaderEffect mppLoadStdShader(NNS_STDSHADER_NAME name)
     {
-        if (nngStdShaderCache.TryGetValue(permutation, out NnStdShaderEffect cached))
+        if (nngStdShaderCache.TryGetValue(name, out NnStdShaderEffect cached))
             return cached;
 
+        string permutation = name.ToString();
         NnStdShaderEffect effect = null;
         try
         {
@@ -267,7 +288,7 @@ internal partial class AppMain
                 "Content\\Shaders\\nnstd\\" + permutation + MPP_SHADER_EXTENSION))
             {
                 var code = new byte[stream.Length];
-                stream.ReadExactly(code, 0, code.Length);
+                stream.Read(code, 0, code.Length);
                 effect = new NnStdShaderEffect(OpenGL.mppglGetDevice(), code);
             }
         }
@@ -276,7 +297,7 @@ internal partial class AppMain
             System.Diagnostics.Debug.WriteLine($"nnstdshader {permutation}: {ex.Message}");
         }
 
-        nngStdShaderCache[permutation] = effect;
+        nngStdShaderCache[name] = effect;
         return effect;
     }
 

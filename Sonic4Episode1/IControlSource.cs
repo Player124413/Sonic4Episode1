@@ -1,7 +1,7 @@
 ﻿using System;
 
 [Flags]
-internal enum ControllerConsts : ushort
+public enum BUTTON : ushort
 {
     UP = 1,
     DOWN = 2,
@@ -33,7 +33,7 @@ internal struct ControllerReading
     public bool connected;
     public bool allow_vibrate;
 
-    public ControllerConsts direction;
+    public BUTTON direction;
 
     public ushort direct;
     public ushort stand;
@@ -89,39 +89,39 @@ internal abstract class Controller
         switch (reading.alx)
         {
             case < -16384:
-                reading.direction |= ControllerConsts.LEFT;
+                reading.direction |= BUTTON.LEFT;
                 break;
             case > 16384:
-                reading.direction |= ControllerConsts.RIGHT;
+                reading.direction |= BUTTON.RIGHT;
                 break;
         }
 
         switch (reading.aly)
         {
             case < -16384:
-                reading.direction |= ControllerConsts.DOWN;
+                reading.direction |= BUTTON.DOWN;
                 break;
             case > 16384:
-                reading.direction |= ControllerConsts.UP;
+                reading.direction |= BUTTON.UP;
                 break;
         }
 
         switch (reading.arx)
         {
             case < -16384:
-                reading.direction |= ControllerConsts.ALT_LEFT;
+                reading.direction |= BUTTON.ALT_LEFT;
                 break;
             case > 16384:
-                reading.direction |= ControllerConsts.ALT_RIGHT;
+                reading.direction |= BUTTON.ALT_RIGHT;
                 break;
         }
         switch (reading.ary)
         {
             case < -16384:
-                reading.direction |= ControllerConsts.ALT_DOWN;
+                reading.direction |= BUTTON.ALT_DOWN;
                 break;
             case > 16384:
-                reading.direction |= ControllerConsts.ALT_UP;
+                reading.direction |= BUTTON.ALT_UP;
                 break;
         }
 

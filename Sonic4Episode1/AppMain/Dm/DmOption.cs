@@ -989,7 +989,7 @@ internal partial class AppMain
         }
         else
         {
-            if ((AoPad.AoPadStand() & ControllerConsts.CONFIRM) <= 0)
+            if ((AoPad.AoPadStand() & BUTTON.CONFIRM) <= 0)
                 return;
             main_work.flag |= 4U;
         }

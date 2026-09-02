@@ -57,7 +57,7 @@ internal static partial class StgSlct
 
         DmSoundPlaySE("Cursol");
 
-        var shoulder = diff < 0 ? ControllerConsts.L : ControllerConsts.R;
+        var shoulder = diff < 0 ? BUTTON.L : BUTTON.R;
 
         if (AoPadMRepeat().HasFlag(shoulder) || AoPadMStand().HasFlag(shoulder))
         {
@@ -95,13 +95,13 @@ internal static partial class StgSlct
 
     private static bool dmStgSlctInputCancelDecide(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (AoPadStand().HasFlag(ControllerConsts.CANCEL))
+        if (AoPadStand().HasFlag(BUTTON.CANCEL))
         {
             main_work.flag |= DMD_STGSLCT_FLAG_CANCEL;
             return true;
         }
 
-        if (AoPadStand().HasFlag(ControllerConsts.DECIDE))
+        if (AoPadStand().HasFlag(BUTTON.DECIDE))
         {
             main_work.flag |= DMD_STGSLCT_FLAG_DECIDE;
             return true;
@@ -112,7 +112,7 @@ internal static partial class StgSlct
 
     private static bool dmStgSlctInputToggleGameMode(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (!AoPadStand().HasFlag(ControllerConsts.X))
+        if (!AoPadStand().HasFlag(BUTTON.X))
             return false;
 
         main_work.cur_game_mode ^= (uint)DME_STGSLCT_PLAY_MODE_TIME_ATK;
@@ -148,10 +148,10 @@ internal static partial class StgSlct
         {
             var key = dir switch
             {
-                0 => ControllerConsts.UP,
-                1 => ControllerConsts.DOWN,
-                2 => ControllerConsts.LEFT,
-                _ => ControllerConsts.RIGHT,
+                0 => BUTTON.UP,
+                1 => BUTTON.DOWN,
+                2 => BUTTON.LEFT,
+                _ => BUTTON.RIGHT,
             };
 
             if (!AoPadMStand().HasFlag(key))
@@ -230,17 +230,17 @@ internal static partial class StgSlct
 
         dmStgSlctInputChangeEvtRanking(main_work);
 
-        if (AoPadMRepeat().HasFlag(ControllerConsts.UP))
+        if (AoPadMRepeat().HasFlag(BUTTON.UP))
         {
-            if (AoPadMStand().HasFlag(ControllerConsts.UP) || main_work.cur_stage != bounds.src)
+            if (AoPadMStand().HasFlag(BUTTON.UP) || main_work.cur_stage != bounds.src)
                 dmStgSlctMoveCursorVertical(main_work, bounds, up: true);
 
             return;
         }
 
-        if (AoPadMRepeat().HasFlag(ControllerConsts.DOWN))
+        if (AoPadMRepeat().HasFlag(BUTTON.DOWN))
         {
-            if (AoPadMStand().HasFlag(ControllerConsts.DOWN) || main_work.cur_stage != bounds.dst - 1)
+            if (AoPadMStand().HasFlag(BUTTON.DOWN) || main_work.cur_stage != bounds.dst - 1)
                 dmStgSlctMoveCursorVertical(main_work, bounds, up: false);
 
             return;
@@ -255,8 +255,8 @@ internal static partial class StgSlct
     private static bool dmStgSlctInputZoneRepeat(
         DMS_STGSLCT_MAIN_WORK main_work, DMS_STGSLCT_BOUNDS bounds, bool left)
     {
-        var dpad = left ? ControllerConsts.LEFT : ControllerConsts.RIGHT;
-        var shoulder = left ? ControllerConsts.L : ControllerConsts.R;
+        var dpad = left ? BUTTON.LEFT : BUTTON.RIGHT;
+        var shoulder = left ? BUTTON.L : BUTTON.R;
 
         if (!AoPadMRepeat().HasFlag(dpad) && !AoPadMRepeat().HasFlag(shoulder))
             return false;
@@ -349,17 +349,17 @@ internal static partial class StgSlct
 
         dmStgSlctInputChangeEvtRanking(main_work);
 
-        if (AoPadMRepeat().HasFlag(ControllerConsts.UP))
+        if (AoPadMRepeat().HasFlag(BUTTON.UP))
         {
-            if (AoPadMStand().HasFlag(ControllerConsts.UP) || main_work.cur_stage != bounds.src)
+            if (AoPadMStand().HasFlag(BUTTON.UP) || main_work.cur_stage != bounds.src)
                 dmStgSlctMoveCursorVertical(main_work, bounds, up: true);
 
             return;
         }
 
-        if (AoPadMRepeat().HasFlag(ControllerConsts.DOWN))
+        if (AoPadMRepeat().HasFlag(BUTTON.DOWN))
         {
-            if (AoPadMStand().HasFlag(ControllerConsts.DOWN) || main_work.cur_stage != bounds.dst - 1)
+            if (AoPadMStand().HasFlag(BUTTON.DOWN) || main_work.cur_stage != bounds.dst - 1)
                 dmStgSlctMoveCursorVertical(main_work, bounds, up: false);
         }
     }
@@ -368,13 +368,13 @@ internal static partial class StgSlct
 
     private static void dmStgSlctInputProcWinDispIdlePc(DMS_STGSLCT_MAIN_WORK main_work)
     {
-        if (AoPadStand().HasFlag(ControllerConsts.CANCEL))
+        if (AoPadStand().HasFlag(BUTTON.CANCEL))
         {
             main_work.flag |= DMD_STGSLCT_FLAG_CANCEL;
             return;
         }
 
-        if (AoPadStand().HasFlag(ControllerConsts.DECIDE))
+        if (AoPadStand().HasFlag(BUTTON.DECIDE))
         {
             main_work.flag |= (uint)(main_work.win_cur_slct == 0
                 || main_work.win_mode == (int)DME_STGSLCT_WIN_MENU
@@ -386,16 +386,16 @@ internal static partial class StgSlct
 
         if (main_work.win_mode == (int)DME_STGSLCT_WIN_MENU)
         {
-            dmStgSlctWindowPick(main_work, ControllerConsts.UP, ControllerConsts.DOWN);
+            dmStgSlctWindowPick(main_work, BUTTON.UP, BUTTON.DOWN);
         }
         else if (main_work.win_mode == (int)DME_STGSLCT_WIN_STG_SLCT)
         {
-            dmStgSlctWindowPick(main_work, ControllerConsts.LEFT, ControllerConsts.RIGHT);
+            dmStgSlctWindowPick(main_work, BUTTON.LEFT, BUTTON.RIGHT);
         }
     }
 
     private static void dmStgSlctWindowPick(
-        DMS_STGSLCT_MAIN_WORK main_work, ControllerConsts to_first, ControllerConsts to_second)
+        DMS_STGSLCT_MAIN_WORK main_work, BUTTON to_first, BUTTON to_second)
     {
         if (AoPadMStand().HasFlag(to_first))
         {

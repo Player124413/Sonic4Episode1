@@ -24,6 +24,7 @@ internal partial class AppMain
         public sbyte stat;
         public string file_name;
         public Stream stream;
+        public byte[] read_buf;
         public Task readTask;
         public FsBackgroundReadComplete callback;
         public AMS_AMB_HEADER amb_header;
@@ -561,38 +562,75 @@ internal partial class AppMain
         return key.Substring(0, dot) + "." + variant + key.Substring(dot);
     }
 
-    // true once the whole file is in value.stream; false means the async copy is still running and
-    // the caller should come back next frame
+    // true once the whole file is in value.read_buf, with value.stream positioned at 0 over it.
+    // false means the read is still running and the caller should come back next frame
     private static bool amFsCopyInto(AMS_FS value, string resolved)
     {
-        if (value.stream == null)
-        {
-            var stream = TitleContainer.OpenStream("Content\\" + resolved);
+        if (value.stream != null)
+            return true;
 
-            value.stream = new MemoryStream();
+        if (value.read_buf == null && value.readTask == null)
+        {
+            var source = TitleContainer.OpenStream("Content\\" + resolved);
 #if ASYNC_IO
 #if ASYNC_TARGETING_PACK
-            value.readTask = Task.Factory.StartNew(() => stream.CopyTo(value.stream));
+            value.readTask = Task.Factory.StartNew(() => value.read_buf = amFsReadAll(source));
 #else
-            value.readTask = stream.CopyToAsync(value.stream);
+            value.readTask = Task.Run(() => value.read_buf = amFsReadAll(source));
 #endif
 #else
-            stream.CopyTo(value.stream);
+            value.read_buf = amFsReadAll(source);
 #endif
         }
 
-        if (value.readTask != null && !value.readTask.IsCompleted)
-            return false;
+        if (value.readTask != null)
+        {
+            if (!value.readTask.IsCompleted)
+                return false;
 
-        value.stream.Seek(0, SeekOrigin.Begin);
-        value.readTask = null;
+            var completed = value.readTask;
+            value.readTask = null;
+            completed.GetAwaiter().GetResult();
+        }
+
+        value.stream = new MemoryStream(value.read_buf, false);
         return true;
+    }
+
+    private static byte[] amFsReadAll(Stream source)
+    {
+        using (source)
+        {
+            if (!source.CanSeek)
+            {
+                using (var grow = new MemoryStream())
+                {
+                    source.CopyTo(grow);
+                    return grow.ToArray();
+                }
+            }
+
+            var buffer = new byte[source.Length];
+            var read = 0;
+            while (read < buffer.Length)
+            {
+                var got = source.Read(buffer, read, buffer.Length - read);
+                if (got <= 0)
+                    throw new EndOfStreamException(
+                        $"wanted {buffer.Length} bytes, stream ended {buffer.Length - read} short");
+
+                read += got;
+            }
+
+            return buffer;
+        }
     }
 
     private static void amFsFinishCopy(AMS_FS value)
     {
         value.stream?.Dispose();
         value.stream = null;
+        value.read_buf = null;
     }
 
     public static void amFsExecuteBackgroundRead()
@@ -611,7 +649,7 @@ internal partial class AppMain
             if (!amFsCopyInto(value, resolved))
                 return;
 
-            value.data = (value.stream as MemoryStream).ToArray();
+            value.data = value.read_buf;
 
             AMS_AMB_HEADER parsed = new AMS_AMB_HEADER();
             readAmbHeader(value.stream, ref parsed);
@@ -643,9 +681,8 @@ internal partial class AppMain
                 return;
 
             var sibling = new AMS_AMB_HEADER();
-            var bytes = (value.stream as MemoryStream).ToArray();
             readAmbHeader(value.stream, ref sibling);
-            sibling.data = bytes;
+            sibling.data = value.read_buf;
             sibling.dir = sibling_path;
             sibling.buf = new object[sibling.file_num];
             amPreLoadAmbItems(sibling);

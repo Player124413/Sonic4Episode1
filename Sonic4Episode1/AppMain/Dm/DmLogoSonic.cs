@@ -124,7 +124,7 @@
 
     private static bool dmLogoSonicIsSkipPressedPad()
     {
-        return AoPad.AoPadSomeoneStand(ControllerConsts.CONFIRM) >= 0;
+        return AoPad.AoPadSomeoneStand(BUTTON.CONFIRM) >= 0;
     }
 
     private static bool dmLogoSonicIsSkipPressedTouch()

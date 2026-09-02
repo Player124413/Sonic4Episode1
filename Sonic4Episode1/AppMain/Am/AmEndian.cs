@@ -2,93 +2,123 @@
 
 internal partial class AppMain
 {
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static uint _amConvertEndian32(uint data)
+#endif
+    public static uint _amConvertEndian32(uint data)
     {
         return (uint)((int)((data & 0xFF000000U) >> 24) | (int)((data & 16711680U) >> 8) | ((int)data & 65280) << 8 | ((int)data & byte.MaxValue) << 24);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ushort _amConvertEndian16(ushort data)
+#endif
+    public static ushort _amConvertEndian16(ushort data)
     {
         return (ushort)(data >> 8 & byte.MaxValue | data << 8);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong _amConvertEndian64(ulong data)
+#endif
+    public static ulong _amConvertEndian64(ulong data)
     {
         return (ulong)((long)(data >> 56) & byte.MaxValue | ((long)(data >> 48) & byte.MaxValue) << 8 | ((long)(data >> 40) & byte.MaxValue) << 16 | ((long)(data >> 32) & byte.MaxValue) << 24 | ((long)(data >> 24) & byte.MaxValue) << 32 | ((long)(data >> 16) & byte.MaxValue) << 40 | ((long)(data >> 8) & byte.MaxValue) << 48 | ((long)data & byte.MaxValue) << 56);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static uint _amConvertEndian(uint data)
+#endif
+    public static uint _amConvertEndian(uint data)
     {
         return _amConvertEndian32(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int _amConvertEndian(int data)
+#endif
+    public static int _amConvertEndian(int data)
     {
         return (int)_amConvertEndian32((uint)data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ushort _amConvertEndian(ushort data)
+#endif
+    public static ushort _amConvertEndian(ushort data)
     {
         return _amConvertEndian16(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static short _amConvertEndian(short data)
+#endif
+    public static short _amConvertEndian(short data)
     {
         mppAssertNotImpl();
         return (short)_amConvertEndian16((ushort)data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong _amConvertEndian(ulong data)
+#endif
+    public static ulong _amConvertEndian(ulong data)
     {
         return _amConvertEndian64(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static long _amConvertEndian(long data)
+#endif
+    public static long _amConvertEndian(long data)
     {
         return (long)_amConvertEndian64((ulong)data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref uint data)
+#endif
+    public static void _amConvertEndian(ref uint data)
     {
         data = _amConvertEndian32(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref int data)
+#endif
+    public static void _amConvertEndian(ref int data)
     {
         data = (int)_amConvertEndian32((uint)data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref ushort data)
+#endif
+    public static void _amConvertEndian(ref ushort data)
     {
         data = _amConvertEndian16(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref short data)
+#endif
+    public static void _amConvertEndian(ref short data)
     {
         data = (short)_amConvertEndian16((ushort)data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref ulong data)
+#endif
+    public static void _amConvertEndian(ref ulong data)
     {
         data = _amConvertEndian64(data);
     }
 
+#if NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void _amConvertEndian(ref long data)
+#endif
+    public static void _amConvertEndian(ref long data)
     {
         data = (long)_amConvertEndian64((ulong)data);
     }

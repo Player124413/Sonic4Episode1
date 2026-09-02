@@ -2239,12 +2239,12 @@ internal partial class AppMain
         if (analog > 2 || analog < -2)
             return analog;
 
-        if ((AoPad.AoPadMDirect() & ControllerConsts.LEFT) != 0)
+        if ((AoPad.AoPadMDirect() & BUTTON.LEFT) != 0)
         {
             return -128;
         }
 
-        if ((AoPad.AoPadMDirect() & ControllerConsts.RIGHT) != 0)
+        if ((AoPad.AoPadMDirect() & BUTTON.RIGHT) != 0)
         {
             return 128;
         }
@@ -2459,7 +2459,7 @@ internal partial class AppMain
 
     private static bool gmPlayerIsInputDPadJumpKey(GMS_PLAYER_WORK ply_work, int ignore_key)
     {
-        if ((AoPad.AoPadMDirect() & ControllerConsts.JUMP) != 0)
+        if ((AoPad.AoPadMDirect() & BUTTON.JUMP) != 0)
             return true;
 
         if (ply_work.control_type == 2)
@@ -2491,7 +2491,7 @@ internal partial class AppMain
 
     private static bool gmPlayerIsInputDPadSSonicKey(GMS_PLAYER_WORK ply_work, int ignore_key)
     {
-        if ((AoPad.AoPadMDirect() & ControllerConsts.SUPER_SONIC) != 0)
+        if ((AoPad.AoPadMDirect() & BUTTON.SUPER_SONIC) != 0)
             return true;
 
         if (ply_work.control_type == 2)

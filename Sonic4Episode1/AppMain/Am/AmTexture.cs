@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
-using CSharp_PVR;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+#if HAS_PVR
+using CSharp_PVR;
 using Pvrtc;
+#endif
 
 internal partial class AppMain
 {
@@ -195,7 +198,7 @@ internal partial class AppMain
 
         if (ext.Equals(".pvr", StringComparison.InvariantCultureIgnoreCase))
         {
-#if DEBUG
+#if DEBUG && HAS_PVR
             return PVRTextureLoader.LoadTexture(m_game.GraphicsDevice, memoryStream);
 #else
             throw new InvalidOperationException("PVR textures are not supported on this platform.");

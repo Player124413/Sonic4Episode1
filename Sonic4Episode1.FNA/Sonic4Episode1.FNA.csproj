@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net10.0</TargetFrameworks>
+		<TargetFrameworks>net10.0;</TargetFrameworks>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<!-- BGM_STREAM or BGM_MEDIAPLAYER; override to A/B the two backends -->

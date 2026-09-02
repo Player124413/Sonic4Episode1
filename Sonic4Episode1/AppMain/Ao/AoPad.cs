@@ -10,7 +10,7 @@ internal class AoPad
         controllerSource.Update();
     }
 
-    public static ControllerConsts AoPadDirect()
+    public static BUTTON AoPadDirect()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -19,16 +19,16 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadStand()
+    public static BUTTON AoPadStand()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return (ControllerConsts)PAD_MSTAND(AppMain.AoAccountGetCurrentId());
+            return (BUTTON)PAD_MSTAND(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }
 
-    public static ControllerConsts AoPadRepeat()
+    public static BUTTON AoPadRepeat()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -37,7 +37,7 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadRelease()
+    public static BUTTON AoPadRelease()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -46,7 +46,7 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadADirect()
+    public static BUTTON AoPadADirect()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -55,7 +55,7 @@ internal class AoPad
         return 0;
     }
 
-    public static bool AoPadADirect(ControllerConsts key)
+    public static bool AoPadADirect(BUTTON key)
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -64,7 +64,7 @@ internal class AoPad
         return false;
     }
 
-    public static ControllerConsts AoPadAStand()
+    public static BUTTON AoPadAStand()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -73,7 +73,7 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadARepeat()
+    public static BUTTON AoPadARepeat()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -82,7 +82,7 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadARelease()
+    public static BUTTON AoPadARelease()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
@@ -91,38 +91,38 @@ internal class AoPad
         return 0;
     }
 
-    public static ControllerConsts AoPadMDirect()
+    public static BUTTON AoPadMDirect()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return (ControllerConsts)PAD_MDIRECT(AppMain.AoAccountGetCurrentId());
+            return (BUTTON)PAD_MDIRECT(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }
 
-    public static ControllerConsts AoPadMStand()
+    public static BUTTON AoPadMStand()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return (ControllerConsts)PAD_MSTAND(AppMain.AoAccountGetCurrentId());
+            return (BUTTON)PAD_MSTAND(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }
 
-    public static ControllerConsts AoPadMRepeat()
+    public static BUTTON AoPadMRepeat()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return (ControllerConsts)PAD_MREPEAT(AppMain.AoAccountGetCurrentId());
+            return (BUTTON)PAD_MREPEAT(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }
 
-    public static ControllerConsts AoPadMRelease()
+    public static BUTTON AoPadMRelease()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))
         {
-            return (ControllerConsts)PAD_MRELEASE(AppMain.AoAccountGetCurrentId());
+            return (BUTTON)PAD_MRELEASE(AppMain.AoAccountGetCurrentId());
         }
         return 0;
     }
@@ -163,7 +163,7 @@ internal class AoPad
         return 0;
     }
     
-    public static int AoPadSomeoneDirect(ControllerConsts key)
+    public static int AoPadSomeoneDirect(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -175,7 +175,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneStand(ControllerConsts key)
+    public static int AoPadSomeoneStand(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -187,7 +187,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneRepeat(ControllerConsts key)
+    public static int AoPadSomeoneRepeat(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -199,7 +199,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneRelease(ControllerConsts key)
+    public static int AoPadSomeoneRelease(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -211,7 +211,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneADirect(ControllerConsts key)
+    public static int AoPadSomeoneADirect(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -223,7 +223,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneAStand(ControllerConsts key)
+    public static int AoPadSomeoneAStand(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -235,7 +235,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneARepeat(ControllerConsts key)
+    public static int AoPadSomeoneARepeat(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -247,7 +247,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneARelease(ControllerConsts key)
+    public static int AoPadSomeoneARelease(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -271,7 +271,7 @@ internal class AoPad
         return -1;
     }
 
-    public static int AoPadSomeoneMStand(ControllerConsts key)
+    public static int AoPadSomeoneMStand(BUTTON key)
     {
         for (int i = 0; i < (controllerSource?.Count ?? 0); i++)
         {
@@ -307,64 +307,64 @@ internal class AoPad
         return -1;
     }
 
-    public static ControllerConsts AoPadPortDirect(uint port)
+    public static BUTTON AoPadPortDirect(uint port)
     {
         return PAD_DIRECT((int)port);
     }
 
-    public static ControllerConsts AoPadPortStand(uint port)
+    public static BUTTON AoPadPortStand(uint port)
     {
         return PAD_STAND((int)port);
     }
 
-    public static ControllerConsts AoPadPortRepeat(uint port)
+    public static BUTTON AoPadPortRepeat(uint port)
     {
         return PAD_REPEAT((int)port);
     }
 
-    public static ControllerConsts AoPadPortRelease(uint port)
+    public static BUTTON AoPadPortRelease(uint port)
     {
         return PAD_RELEASE((int)port);
     }
 
-    public static ControllerConsts AoPadPortADirect(uint port)
+    public static BUTTON AoPadPortADirect(uint port)
     {
         return PAD_ADIRECT((int)port);
     }
 
-    public static ControllerConsts AoPadPortAStand(uint port)
+    public static BUTTON AoPadPortAStand(uint port)
     {
         return PAD_ASTAND((int)port);
     }
 
-    public static ControllerConsts AoPadPortARepeat(uint port)
+    public static BUTTON AoPadPortARepeat(uint port)
     {
         return PAD_AREPEAT((int)port);
     }
 
-    public static ControllerConsts AoPadPortARelease(uint port)
+    public static BUTTON AoPadPortARelease(uint port)
     {
         return PAD_ARELEASE((int)port);
     }
 
-    public static ControllerConsts AoPadPortMDirect(uint port)
+    public static BUTTON AoPadPortMDirect(uint port)
     {
-        return (ControllerConsts)PAD_MDIRECT((int)port);
+        return (BUTTON)PAD_MDIRECT((int)port);
     }
 
-    public static ControllerConsts AoPadPortMStand(uint port)
+    public static BUTTON AoPadPortMStand(uint port)
     {
-        return (ControllerConsts)PAD_MSTAND((int)port);
+        return (BUTTON)PAD_MSTAND((int)port);
     }
 
-    public static ControllerConsts AoPadPortMRepeat(uint port)
+    public static BUTTON AoPadPortMRepeat(uint port)
     {
-        return (ControllerConsts)PAD_MREPEAT((int)port);
+        return (BUTTON)PAD_MREPEAT((int)port);
     }
 
-    public static ControllerConsts AoPadPortMRelease(uint port)
+    public static BUTTON AoPadPortMRelease(uint port)
     {
-        return (ControllerConsts)PAD_MRELEASE((int)port);
+        return (BUTTON)PAD_MRELEASE((int)port);
     }
 
     public static short AoPadPortAnalogLX(uint port)
@@ -416,47 +416,47 @@ internal class AoPad
         return controllerSource[_port] != null ? 1 : 0;
     }
 
-    public static ControllerConsts PAD_DIRECT(int _port)
+    public static BUTTON PAD_DIRECT(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.direct;
+        return (BUTTON)controllerSource[_port].reading.direct;
     }
 
-    public static ControllerConsts PAD_STAND(int _port)
+    public static BUTTON PAD_STAND(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.stand;
+        return (BUTTON)controllerSource[_port].reading.stand;
     }
 
-    public static ControllerConsts PAD_REPEAT(int _port)
+    public static BUTTON PAD_REPEAT(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.repeat;
+        return (BUTTON)controllerSource[_port].reading.repeat;
     }
 
-    public static ControllerConsts PAD_RELEASE(int _port)
+    public static BUTTON PAD_RELEASE(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.release;
+        return (BUTTON)controllerSource[_port].reading.release;
     }
 
-    public static ControllerConsts PAD_ADIRECT(int _port)
+    public static BUTTON PAD_ADIRECT(int _port)
     {
         if ((controllerSource?.Count ?? 0) == 0)
             return 0;
 
-        return (ControllerConsts)controllerSource[_port].reading.adirect;
+        return (BUTTON)controllerSource[_port].reading.adirect;
     }
 
-    public static ControllerConsts PAD_ASTAND(int _port)
+    public static BUTTON PAD_ASTAND(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.astand;
+        return (BUTTON)controllerSource[_port].reading.astand;
     }
 
-    public static ControllerConsts PAD_AREPEAT(int _port)
+    public static BUTTON PAD_AREPEAT(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.arepeat;
+        return (BUTTON)controllerSource[_port].reading.arepeat;
     }
 
-    public static ControllerConsts PAD_ARELEASE(int _port)
+    public static BUTTON PAD_ARELEASE(int _port)
     {
-        return (ControllerConsts)controllerSource[_port].reading.arelease;
+        return (BUTTON)controllerSource[_port].reading.arelease;
     }
 
     public static int PAD_MDIRECT(int _port)
