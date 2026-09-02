@@ -164,31 +164,18 @@ internal partial class AppMain
 
     internal static AMS_AMB_HEADER readAMBFile(AmbChunk buf)
     {
-        byte[] array = buf.array;
-        int offset = buf.offset;
         AMS_AMB_HEADER amsAmbHeader = searchPreloadedAmb(buf.amb, buf.offset);
         if (amsAmbHeader != null)
             return amsAmbHeader;
         AMS_AMB_HEADER amb = new AMS_AMB_HEADER();
-        using (Stream input = new MemoryStream(array, offset, buf.length))
+        using (Stream input = new MemoryStream(buf.array, buf.offset, buf.length))
         {
-            // Console.WriteLine($"{offset}-{offset + buf.length}");
-            if (offset == 0)
-            {
-                amb.data = new byte[input.Length];
-                input.Read(amb.data, 0, amb.data.Length);
-            }
-            else if (buf.amb.is_real_amb)
-            {
-                amb.data = new byte[buf.length];
-                input.Read(amb.data, 0, amb.data.Length);
-            }
-            else
-            {
-                amb.data = array;
-            }
+            amb.data = buf.array;
 
-            input.Position = 0L;
+            // the legacy layout's offsets already reach across the whole parent, only #AMB numbers
+            // its members from its own start
+            amb.data_base = buf.amb.is_real_amb ? buf.offset : 0;
+
             readAmbHeader(input, ref amb);
 
             amb.parent = buf.amb;
@@ -323,7 +310,7 @@ internal partial class AppMain
     {
         for (int index = 0; index < amb.file_num; ++index)
         {
-            if (amb.offsets[index] == offset && amb.buf[index] != null)
+            if (amb.data_base + amb.offsets[index] == offset && amb.buf[index] != null)
                 return (AMS_AMB_HEADER) amb.buf[index];
         }
 
@@ -515,6 +502,11 @@ internal partial class AppMain
     // shared archive, and falls back wholesale if any of them is missing
     public static bool amFsAllMemberVariant(string variant, string path, params int[] indices)
     {
+        // an archive that moved wholesale supplies every member, so it answers this question too.
+        // a screen must not care which way the manifest happens to declare its assets
+        if (amFsAllVariant(variant, path))
+            return true;
+
         var declared = amFsMemberVariantIndices(path, variant);
         if (declared == null)
             return false;

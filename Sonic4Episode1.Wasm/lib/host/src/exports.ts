@@ -1,5 +1,8 @@
 
 export type Exports = {
+    Program: {
+        SetViewSize: (width: number, height: number) => void;
+    };
     Microsoft: {
         Xna: {
             Framework: {

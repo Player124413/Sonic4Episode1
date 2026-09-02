@@ -16,7 +16,7 @@ internal partial class AppMain
 
         public GMS_EVE_DATA_RG_HEADER(AmbChunk data)
         {
-            using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+            using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
             {
                 using (BinaryReader binaryReader = gmMapCellsAreBigEndian(data, 2)
                     ? new EndianBinaryReader(memoryStream, bigEndian: true)

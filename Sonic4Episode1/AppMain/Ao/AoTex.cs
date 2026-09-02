@@ -8,7 +8,7 @@
         aoTexInitTex(tex);
         tex.amb = amb;
         AmbChunk ambChunk = amBindSearchEx(amb, ".txb");
-        tex.txb = readTXBfile(ambChunk.array, ambChunk.offset, amb.dir);
+        tex.txb = readTXBfile(ambChunk.array, ambChunk.offset, ambChunk.length, amb.dir);
         TXB_HEADER txb = tex.txb;
     }
 

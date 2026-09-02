@@ -5,20 +5,20 @@ internal partial class AppMain
     public static TXB_HEADER readTXBfile(object data)
     {
         AmbChunk ambChunk = (AmbChunk)data;
-        return readTXBfile(ambChunk.array, ambChunk.offset);
+        return readTXBfile(ambChunk.array, ambChunk.offset, ambChunk.length);
     }
 
-    public static TXB_HEADER readTXBfile(byte[] data, int offset)
+    public static TXB_HEADER readTXBfile(byte[] data, int offset, int length)
     {
-        return readTXBfile(data, offset, null);
+        return readTXBfile(data, offset, length, null);
     }
 
-    public static TXB_HEADER readTXBfile(byte[] data, int offset, string sPath)
+    public static TXB_HEADER readTXBfile(byte[] data, int offset, int length, string sPath)
     {
         TXB_HEADER txbHeader = null;
         if (data != null)
         {
-            using (MemoryStream memoryStream = new MemoryStream(data, offset, data.Length - offset))
+            using (MemoryStream memoryStream = new MemoryStream(data, offset, length))
             {
                 using (BinaryReader br = new BinaryReader(memoryStream))
                     txbHeader = readTXBfile(br, sPath);

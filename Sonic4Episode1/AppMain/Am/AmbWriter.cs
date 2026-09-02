@@ -131,7 +131,7 @@ internal partial class AppMain
         for (int i = 0; i < amb.file_num; i++)
         {
             var data = new byte[amb.lengths[i]];
-            Buffer.BlockCopy(amb.data, amb.offsets[i], data, 0, amb.lengths[i]);
+            Buffer.BlockCopy(amb.data, amb.data_base + amb.offsets[i], data, 0, amb.lengths[i]);
 
             entries.Add(new AmbEntry
             {

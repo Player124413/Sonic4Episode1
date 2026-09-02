@@ -14,14 +14,61 @@ const status = document.querySelector('#status')! as HTMLSpanElement;
 const canvas = document.querySelector('#canvas')! as HTMLCanvasElement;
 
 
-const resize = () => {
+// the game is Hor+ and pillarboxes itself past its own aspect cap (AppMain.mppAspectCap, 2.40), so
+// the canvas can just take the whole window on the wide side. nothing caps the narrow side, and a
+// tall window crops the level horizontally rather than showing more of it, so letterbox below 3:2
+const MIN_ASPECT = 3 / 2;
+
+// past this the render is upscaled into the box instead of following the display. the game is
+// authored for 720p and this is a WebGL build with 4x MSAA, so full resolution on a 4K panel is not
+// a fight worth picking
+const MAX_RENDER_HEIGHT = 1080;
+
+let ready = false;
+let viewWidth = 0;
+let viewHeight = 0;
+let boxWidth = '';
+let boxHeight = '';
+let boxMargin = '';
+
+// SDL can put its own CSS size on the canvas when the game resizes the window, so the page's box
+// gets reasserted each frame rather than set once
+const applyBox = () => {
+    if (canvas.style.width !== boxWidth)
+        canvas.style.width = boxWidth;
+    if (canvas.style.height !== boxHeight)
+        canvas.style.height = boxHeight;
+    if (canvas.style.marginTop !== boxMargin)
+        canvas.style.marginTop = boxMargin;
+}
+
+const layout = () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const scale = Math.min(width / 800, height / 480);
-    canvas.style.width = `${800 * scale}px`;
-    canvas.style.height = `${480 * scale}px`;
-    canvas.style.marginTop = `${(height - 480 * scale) / 2}px`;
+    const boxH = Math.min(height, Math.round(width / MIN_ASPECT));
+    boxWidth = `${width}px`;
+    boxHeight = `${boxH}px`;
+    boxMargin = `${(height - boxH) / 2}px`;
+    applyBox();
+
+    if (!ready)
+        return;
+
+    const scale = Math.min(window.devicePixelRatio || 1, MAX_RENDER_HEIGHT / boxH);
+    const renderWidth = Math.max(1, Math.round(width * scale));
+    const renderHeight = Math.max(1, Math.round(boxH * scale));
+
+    if (renderWidth === viewWidth && renderHeight === viewHeight)
+        return;
+
+    viewWidth = renderWidth;
+    viewHeight = renderHeight;
+
+    canvas.width = renderWidth;
+    canvas.height = renderHeight;
+
+    S4E1.Program.SetViewSize(renderWidth, renderHeight);
 }
 
 const onInstall = () => {
@@ -30,7 +77,7 @@ const onInstall = () => {
     }
 }
 
-window.onresize = resize;
+window.onresize = layout;
 window.addEventListener('appinstalled', onInstall);
 
 // blocks until the player presses Go, so the runtime starts with a content set already decided and
@@ -52,12 +99,17 @@ setModuleImports('main.js', {
     // setMainLoop: (cb: any) => dotnet.instance.Module.setMainLoop(cb),
     go: (cb: any) => {
         loader.style.display = "none";
-        resize();
+
+        // before the first frame, so the device is created at the size the page wants rather than
+        // being made once at the default and reset immediately
+        ready = true;
+        layout();
 
         canvas.focus();
 
         function loop() {
             cb()
+            applyBox()
             requestAnimationFrame(loop)
         }
         requestAnimationFrame(loop);
