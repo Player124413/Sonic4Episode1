@@ -125,6 +125,17 @@ public class Sonic4Ep1 : Game
             pp.BackBufferHeight = bbHeight;
 #endif
 
+#if WASM
+            // same story as iOS: the page owns the canvas, so the size it asked for has to survive
+            // FNA re-pinning the back buffer to whatever SDL made the window
+            if (viewWidth > 0 && viewHeight > 0)
+            {
+                var pp = e.GraphicsDeviceInformation.PresentationParameters;
+                pp.BackBufferWidth = viewWidth;
+                pp.BackBufferHeight = viewHeight;
+            }
+#endif
+
 #if ANDROID
             var largestSupported = e.GraphicsDeviceInformation.Adapter.SupportedDisplayModes
                 .OrderByDescending(m => m.Width * m.Height)
@@ -183,6 +194,25 @@ public class Sonic4Ep1 : Game
     {
         resizedFlag = true;
     }
+
+#if WASM
+    private int viewWidth = 0, viewHeight = 0;
+
+    public void SetViewSize(int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+            return;
+
+        viewWidth = newWidth = width;
+        viewHeight = newHeight = height;
+        resizedFlag = true;
+
+        // the first call lands before the device exists, and this is all it takes to have it come
+        // up at the right size
+        graphics.PreferredBackBufferWidth = width;
+        graphics.PreferredBackBufferHeight = height;
+    }
+#endif
 
     protected override void Initialize()
     {
@@ -275,16 +305,21 @@ public class Sonic4Ep1 : Game
     {
         if (resizedFlag)
         {
-            graphics.PreferredBackBufferWidth = graphics.GraphicsDevice.Viewport.Width;
-            graphics.PreferredBackBufferHeight = graphics.GraphicsDevice.Viewport.Height;
-            graphics.ApplyChanges();
+            resizedFlag = false;
 
-            if (appMain != null)
+            var width = newWidth > 0 ? newWidth : graphics.GraphicsDevice.Viewport.Width;
+            var height = newHeight > 0 ? newHeight : graphics.GraphicsDevice.Viewport.Height;
+            newWidth = newHeight = 0;
+
+            var current = graphics.GraphicsDevice.PresentationParameters;
+            if (width != current.BackBufferWidth || height != current.BackBufferHeight)
             {
-                appMain.amIPhoneInitNN(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+                graphics.PreferredBackBufferWidth = width;
+                graphics.PreferredBackBufferHeight = height;
+                graphics.ApplyChanges();
             }
 
-            resizedFlag = false;
+            appMain?.amIPhoneInitNN(graphics.GraphicsDevice.PresentationParameters);
         }
 
         AppMain.lastGameTime = gameTime;

@@ -232,6 +232,9 @@ public static partial class Program
         await SyncFS();
     }
 
+    [JSExport]
+    internal static void SetViewSize(int width, int height) => _game?.SetViewSize(width, height);
+
     private static void MainLoop()
     {
         try

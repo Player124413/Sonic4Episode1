@@ -341,7 +341,12 @@ internal partial class AppMain
 
             System.Diagnostics.Debug.Assert(!bgMusic);
 
-            var effect = Sonic4Ep1.pInstance.Content.Load<SoundEffect>("SOUND\\" + fileName);
+            // ContentManager hands back a SoundEffect carrying whatever loop points its xnb holds,
+            // and every one of ours says "the whole buffer". The authored region is in the .inf, so
+            // a looping cue gets rebuilt from the same xnb with that applied
+            var effect = loop && loopEnd > loopStart
+                ? LoadLoopingSoundEffect(fileName, loopStart, loopEnd)
+                : Sonic4Ep1.pInstance.Content.Load<SoundEffect>("SOUND\\" + fileName);
             cacheFxSounds.Add(fileName, effect);
 
             //using (Stream stream = TitleContainer.OpenStream("Content\\SOUND\\" + fileName + ".xnb"))
@@ -385,6 +390,38 @@ internal partial class AppMain
             //}
 
             return num1;
+        }
+
+        // the .inf stores the loop region as byte offsets into the PCM; SoundEffect wants samples
+        private static SoundEffect LoadLoopingSoundEffect(string fileName, int loopStart, int loopEnd)
+        {
+            using (Stream stream = TitleContainer.OpenStream("Content\\SOUND\\" + fileName + ".xnb"))
+            {
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    // "XNBd", version, flags, file size, then one type reader and the object header
+                    reader.ReadBytes(10);
+                    reader.ReadByte();
+                    reader.ReadString();
+                    reader.ReadInt32();
+                    reader.ReadByte();
+                    reader.ReadByte();
+
+                    int formatSize = reader.ReadInt32();
+                    reader.ReadInt16();
+                    int channels = reader.ReadInt16();
+                    int sampleRate = reader.ReadInt32();
+                    reader.ReadInt32();
+                    int blockAlign = reader.ReadInt16();
+                    reader.ReadInt16();
+                    reader.ReadBytes(formatSize - 16);
+
+                    byte[] data = reader.ReadBytes(reader.ReadInt32());
+
+                    return new SoundEffect(data, 0, data.Length, sampleRate, (AudioChannels)channels,
+                        loopStart / blockAlign, (loopEnd - loopStart) / blockAlign);
+                }
+            }
         }
 
         internal void SetCue(string se_name)
