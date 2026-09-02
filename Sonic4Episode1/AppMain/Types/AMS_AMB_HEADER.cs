@@ -21,6 +21,10 @@ internal partial class AppMain
         public int[] offsets;
         public int[] lengths;
         public byte[] data;
+
+        // members are addressed from here, not from data[0]: a nested archive shares its parent's
+        // array rather than being copied out of it
+        public int data_base;
         public AMS_AMB_HEADER parent;
         public bool is_real_amb = false;
         public bool big_endian = false;

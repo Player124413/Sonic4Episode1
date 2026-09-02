@@ -176,7 +176,7 @@ internal partial class AppMain
     public static void amMotionSetup(out NNS_MOTION motion, AmbChunk buf)
     {
         motion = null;
-        using (MemoryStream memoryStream = new MemoryStream(buf.array, buf.offset, buf.array.Length - buf.offset))
+        using (MemoryStream memoryStream = new MemoryStream(buf.array, buf.offset, buf.length))
         {
             BinaryReader reader = mppOpenNnChunk(memoryStream);
             NNS_BINCNK_FILEHEADER bincnkFileheader = NNS_BINCNK_FILEHEADER.Read(reader);
@@ -217,7 +217,7 @@ internal partial class AppMain
     public static int amMotionSetup(ArrayPointer<NNS_MOTION> motion, object _buf)
     {
         AmbChunk ambChunk = (AmbChunk)_buf;
-        using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.array.Length - ambChunk.offset))
+        using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.length))
         {
             BinaryReader reader = mppOpenNnChunk(memoryStream);
             ArrayPointer<NNS_MOTION> arrayPointer = motion;

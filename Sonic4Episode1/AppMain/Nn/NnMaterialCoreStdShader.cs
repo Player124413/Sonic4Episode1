@@ -366,32 +366,6 @@ internal partial class AppMain
         if (pMatDesc.pLogic != nnmaterialcore.nngpPreMatLogic && pMatDesc.pLogic != null)
             nnPutMaterialLogicStdShader(val, pMatDesc.pLogic);
 
-        mppLogMaterialState(pMatDesc);
         return 1;
-    }
-
-    // TODO(wam): temporary. Both the game and the editor come through here, so their output is
-    // directly comparable; the editor renders the haloed geometry correctly and the game does not.
-    private static readonly System.Collections.Generic.HashSet<string> mppMaterialStateSeen = new();
-
-    private static void mppLogMaterialState(NNS_MATERIAL_STDSHADER_DESC desc)
-    {
-        if (mppMaterialStateSeen.Count >= 40)
-            return;
-
-        string line =
-            $"fFlag {desc.fFlag:X4} logic {(desc.pLogic == null ? "ABSENT" : "present")}"
-            + $" texType {desc.fTexType:X6}"
-            + $" | blend {nngShaderRenderState[D3DRS_ALPHABLENDENABLE]}"
-            + $" {nngShaderRenderState[D3DRS_SRCBLEND]}/{nngShaderRenderState[D3DRS_DESTBLEND]}"
-            + $" op {nngShaderRenderState[D3DRS_BLENDOP]}"
-            + $" write {nngShaderRenderState[D3DRS_COLORWRITEENABLE]}"
-            + $" | atest {nngShaderRenderState[D3DRS_ALPHATESTENABLE]}"
-            + $" func {nngShaderRenderState[D3DRS_ALPHAFUNC]} ref {nngShaderRenderState[D3DRS_ALPHAREF] & 0xFF}"
-            + $" | z {nngShaderRenderState[D3DRS_ZENABLE]}/{nngShaderRenderState[D3DRS_ZFUNC]}"
-            + $" zw {nngShaderRenderState[D3DRS_ZWRITEENABLE]} cull {nngShaderRenderState[D3DRS_CULLMODE]}";
-
-        if (mppMaterialStateSeen.Add(line))
-            System.Diagnostics.Debug.WriteLine("[matstate] " + line);
     }
 }

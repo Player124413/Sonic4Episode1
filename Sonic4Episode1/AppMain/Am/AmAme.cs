@@ -16,7 +16,7 @@ internal partial class AppMain
 
     public static AMS_AME_HEADER readAMEfile(AmbChunk data)
     {
-        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
             using (BinaryReader br = new BinaryReader(memoryStream))
                 return readAMEfile(br);

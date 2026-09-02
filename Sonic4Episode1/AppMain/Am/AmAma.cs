@@ -60,7 +60,7 @@ internal partial class AppMain
     {
         bigEndian = amAmaIsBigEndian(data, offset, length, bigEndian);
 
-        using (MemoryStream memoryStream = new MemoryStream(data, offset, data.Length - offset))
+        using (MemoryStream memoryStream = new MemoryStream(data, offset, length))
         {
             using (BinaryReader br = bigEndian
                 ? new EndianBinaryReader(memoryStream, bigEndian: true)

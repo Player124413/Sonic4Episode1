@@ -57,7 +57,7 @@
         gm_ene_harisenbo_obj_3d_list = GmGameDBuildRegBuildModel(readAMBFile(GmGameDatGetEnemyData(658)), readAMBFile(GmGameDatGetEnemyData(659)), 0U);
         AMS_AMB_HEADER header = readAMBFile(GmGameDatGetEnemyData(659));
         AmbChunk ambChunk = amBindGet(header, header.file_num - 1, out header.dir);
-        gm_ene_harisenbo_r_obj_3d_list = GmGameDBuildRegBuildModel(readAMBFile(GmGameDatGetEnemyData(658)), readAMBFile(GmGameDatGetEnemyData(659)), 0U, readTXBfile(ambChunk.array, ambChunk.offset));
+        gm_ene_harisenbo_r_obj_3d_list = GmGameDBuildRegBuildModel(readAMBFile(GmGameDatGetEnemyData(658)), readAMBFile(GmGameDatGetEnemyData(659)), 0U, readTXBfile(ambChunk.array, ambChunk.offset, ambChunk.length));
     }
 
     public static void GmEneHariSenboFlush()

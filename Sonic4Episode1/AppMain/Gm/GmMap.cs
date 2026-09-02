@@ -337,7 +337,7 @@ internal partial class AppMain
     {
         DI_HEADER diHeader = new DI_HEADER();
         bool bigEndian = gmMapBlockIsBigEndian(data, 8 * 8);
-        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
             using (BinaryReader binaryReader = bigEndian
                 ? new EndianBinaryReader(memoryStream, bigEndian: true)
@@ -360,7 +360,7 @@ internal partial class AppMain
     {
         AT_HEADER atHeader = new AT_HEADER();
         bool bigEndian = gmMapBlockIsBigEndian(data, 8 * 8);
-        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
             using (BinaryReader binaryReader = bigEndian
                 ? new EndianBinaryReader(memoryStream, bigEndian: true)
@@ -385,7 +385,7 @@ internal partial class AppMain
             return null;
         MP_HEADER mpHeader = new MP_HEADER();
         bool bigEndian = gmMapGridIsBigEndian(data, 2);
-        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
             using (BinaryReader binaryReader = bigEndian
                 ? new EndianBinaryReader(memoryStream, bigEndian: true)
@@ -421,7 +421,7 @@ internal partial class AppMain
             return null;
         MD_HEADER mdHeader = new MD_HEADER();
         bool bigEndian = gmMapGridIsBigEndian(data, 1);
-        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.array.Length - data.offset))
+        using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
             using (BinaryReader binaryReader = bigEndian
                 ? new EndianBinaryReader(memoryStream, bigEndian: true)

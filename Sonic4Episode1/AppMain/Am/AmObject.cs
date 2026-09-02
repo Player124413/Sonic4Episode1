@@ -9,7 +9,7 @@ internal partial class AppMain
       object _buf)
     {
         AmbChunk ambChunk = (AmbChunk)_buf;
-        using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.array.Length - ambChunk.offset))
+        using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.length))
             amObjectSetup(out _object, out texfilelist, mppOpenNnChunk(memoryStream));
     }
 

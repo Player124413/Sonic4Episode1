@@ -65,6 +65,17 @@ public class MemberVariantTests
         Assert.False(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, "G_COM/CPIT/OTHER.AMB", 44));
     }
 
+    // moving an archive from `members` to `archives` must not change what a screen sees, or the
+    // screen picks mobile action ids to run against console art
+    [Fact]
+    public void TheGateTakesAWholeArchiveLineToo()
+    {
+        Load(Cpit + " console");
+
+        Assert.True(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, Cpit, 0, 44, 57));
+        Assert.False(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, "G_COM/CPIT/OTHER.AMB", 0));
+    }
+
     private static AppMain.AMS_AMB_HEADER Archive(
         bool bigEndian, params (string Name, byte[] Data)[] members)
     {

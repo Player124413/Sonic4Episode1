@@ -26,7 +26,8 @@ internal partial class AppMain
                 return amBindChunk(sibling, k);
         }
 
-        return new AmbChunk(header.data, header.offsets[index], header.lengths[index], header);
+        return new AmbChunk(
+            header.data, header.data_base + header.offsets[index], header.lengths[index], header);
     }
 
     public static AmbChunk amBindGet(
