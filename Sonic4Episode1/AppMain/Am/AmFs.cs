@@ -407,8 +407,15 @@ internal partial class AppMain
 
     private static Dictionary<string, int[]> am_fs_member_variants;
 
-    // names the asset mode, not the dump it came from: console is assembled from more than one
+    // console-grade assets from the xbla dump. Note this tier still carries MOBILE-ERA LEVELS:
+    // xbla's ZONE22 is the pinball minigame, cell for cell identical to mobile's. Console-grade
+    // asset mode, not a statement about which levels you get
     public const string AMD_FS_VARIANT_CONSOLE = "console";
+
+    // console-grade assets from the retail PC dump, AND the PC-era levels that go with them, which
+    // are a different thing from the mobile ones on some stages (ZONE22 is the card stage, not the
+    // minigame). Preferred over console where present; see am_fs_variant_order
+    public const string AMD_FS_VARIANT_PC = "pc";
 
     // what a screen asks for when its act tables only describe the base archives. a screen that
     // has not been ported to console yet has to pin this, or a globally flipped shared archive
@@ -416,6 +423,19 @@ internal partial class AppMain
     public const string AMD_FS_VARIANT_BASE = "";
 
     public static string am_fs_variant = AMD_FS_VARIANT_CONSOLE;
+
+    // resolution order, best first: an archive present as .pc takes it, else .console, else base.
+    // This is what lets PC stages come in a few at a time the way console ones did, rather than
+    // all or nothing across the whole game
+    public static string[] am_fs_variant_order = { AMD_FS_VARIANT_PC, AMD_FS_VARIANT_CONSOLE };
+
+    // both console-grade tiers. Asks "are these assets the NN/DDS console kind", which is what
+    // drives the engine arm (block models, registlist size); it says nothing about level vintage
+    public static bool amFsIsConsoleGrade(string variant)
+    {
+        return string.Equals(variant, AMD_FS_VARIANT_CONSOLE, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(variant, AMD_FS_VARIANT_PC, StringComparison.OrdinalIgnoreCase);
+    }
 
     private static Dictionary<string, string> amFsGetVariants()
     {
@@ -512,7 +532,31 @@ internal partial class AppMain
     // the request is identical either way, only the payload differs
     public static string amFsResolvedVariant(string path)
     {
-        return amFsVariantFor(path, am_fs_variant);
+        // walk the tiers best first, so an archive that exists as .pc takes it and one that only
+        // exists as .console still resolves. The build declares one tier per archive, so this is a
+        // ranked accept rather than a search; if an archive is ever emitted into two tiers at once
+        // the manifest loader has to keep both, not just the last line
+        foreach (var variant in am_fs_variant_order)
+        {
+            var declared = amFsVariantFor(path, variant);
+            if (declared != null)
+                return declared;
+        }
+
+        return null;
+    }
+
+    // "at least console-grade", for the gates that are really asking about the asset kind rather
+    // than about which levels shipped. amFsAllVariant stays an exact match, for callers that mean it
+    public static bool amFsAllConsoleGrade(params string[] paths)
+    {
+        foreach (var path in paths)
+        {
+            if (!amFsIsConsoleGrade(amFsResolvedVariant(path)))
+                return false;
+        }
+
+        return true;
     }
 
     private static string amFsVariantFor(string path, string variant)
@@ -540,9 +584,15 @@ internal partial class AppMain
         return true;
     }
 
+    // must use the same tier order as amFsResolvedVariant. If this pinned a single variant while
+    // the gates walked the chain, a stage would take the console arm (NN block models) and then be
+    // handed the base archive, which is #TVX - the model loader rejects it as a bad NN header
     public static string amFsResolve(string path)
     {
-        return amFsResolveAs(path, am_fs_variant);
+        var key = path.Replace('\\', '/');
+        var declared = amFsResolvedVariant(key);
+
+        return declared == null ? key : amFsVariantPath(key, declared);
     }
 
     public static string amFsResolveAs(string path, string variant)

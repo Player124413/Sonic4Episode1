@@ -767,32 +767,38 @@ internal partial class AppMain
         AMS_AMB_HEADER amsAmbHeader = null;
         switch (id)
         {
-            case 7:
-            case 8:
-            case 9:
-            case 11:
-            case 12:
-            case 13:
-                amsAmbHeader = (AMS_AMB_HEADER)ObjDataGet(834).pData;
+            case GMD_DECORATE_ID_WATER_SLIDER_L_J30:
+            case GMD_DECORATE_ID_WATER_SLIDER_L_J45:
+            case GMD_DECORATE_ID_WATER_SLIDER_L_J60:
+            case GMD_DECORATE_ID_WATER_SLIDER_R_J30:
+            case GMD_DECORATE_ID_WATER_SLIDER_R_J45:
+            case GMD_DECORATE_ID_WATER_SLIDER_R_J60:
+                amsAmbHeader = (AMS_AMB_HEADER)ObjDataGet(GMD_DWORK_NO_GMK_WATER_SLIDER_MTN).pData;
                 break;
-            case 17:
-            case 26:
-            case 111:
-            case 114:
-            case 170:
-            case 171:
-            case 172:
-            case 174:
-            case 175:
-            case 176:
-            case 178:
-            case 179:
-            case 183:
+            case GMD_DECORATE_ID_SUNFLOWER:
+            case GMD_DECORATE_ID_ZONE1_WOOD_A:
+            case GMD_DECORATE_ID_SUNFLOWER_ENDING:
+            case GMD_DECORATE_ID_ZONE1_WOOD_A_ENDING:
+            case GMD_DECORATE_ID_SHUTTER_3_MOVE_CLOSE:
+            case GMD_DECORATE_ID_SHUTTER_3_OPEN_MOVE:
+            case GMD_DECORATE_ID_SHUTTER_3_MOVE_MOVE:
+            case GMD_DECORATE_ID_SHUTTER_3_OPEN_OPEN:
+            case GMD_DECORATE_ID_SHUTTER_3_OPEN_CLOSE:
+            case GMD_DECORATE_ID_SHUTTER_5_MOVE_MOVE:
+            case GMD_DECORATE_ID_SHUTTER_5_OPEN_OPEN:
+            case GMD_DECORATE_ID_SHUTTER_5_OPEN_CLOSE:
+            case GMD_DECORATE_ID_SHUTTER_LOOP:
+            case GMD_DECORATE_ID_Z2_DICE_A:
+            case GMD_DECORATE_ID_Z2_DICE_B:
+            case GMD_DECORATE_ID_Z2_DICE_C:
+            case GMD_DECORATE_ID_Z2_DICE_A_TURN:
+            case GMD_DECORATE_ID_Z2_DICE_B_TURN:
+            case GMD_DECORATE_ID_Z2_DICE_C_TURN:
                 AMS_AMB_HEADER ambHeader = gmDecoDataGetAmbHeader();
                 if (gmDeco_motionHeader == null)
                 {
                     string sPath;
-                    gmDeco_motionHeader = readAMBFile(amBindGet(ambHeader, 2, out sPath));
+                    gmDeco_motionHeader = readAMBFile(amBindGet(ambHeader, GMD_DECO_DATA_INDEX_AMB_MTN, out sPath));
                     gmDeco_motionHeader.dir = sPath;
                 }
                 amsAmbHeader = gmDeco_motionHeader;
@@ -1660,6 +1666,12 @@ internal partial class AppMain
             {
                 gmDecoLoadModel(deco_work, obj3Dlist[index2]);
                 deco_work.obj_3d.command_state = gmDecoCommandState(id);
+
+                // authored quarter turn about Z. Only the PC-era decoration ids set this bit, which
+                // is why nothing needed it before: it is what stands half of the card stage's dice
+                // and cards on their side
+                if (((int)g_gm_deco_user_flag[id] & 0x800) != 0)
+                    deco_work.obj_work.dir.z = 0x4000;
             }
             if (index1 != -1)
             {

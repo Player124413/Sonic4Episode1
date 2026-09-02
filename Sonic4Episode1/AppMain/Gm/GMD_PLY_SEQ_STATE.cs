@@ -70,5 +70,10 @@
     private const int GME_PLY_SEQ_STATE_GMK_TRUCK_DANGER = 64;
     private const int GME_PLY_SEQ_STATE_GMK_TRUCK_DANGER_RET = 65;
     private const int GME_PLY_SEQ_STATE_GMK_SPIN_FALL = 66;
-    private const int GME_PLY_SEQ_STATE_MAX = 67;
+
+    // PC appended the card-road ride here, at the value our own list happened to end on, so it
+    // needs no remapping the way the event ids did. PC's list runs to 71; the other three are
+    // states no stage we load enters
+    internal const int GME_PLY_SEQ_STATE_GMK_TRUMP_ROAD = 67;
+    internal const int GME_PLY_SEQ_STATE_MAX = 68;
 }

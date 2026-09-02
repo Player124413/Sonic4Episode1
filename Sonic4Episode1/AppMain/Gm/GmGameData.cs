@@ -143,7 +143,7 @@ internal partial class AppMain
         }
         if (g_gs_main_sys_info.stage_id != 16)
         {
-            GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo2 = gm_gamedat_tbl_enemy_info_tbl[stage_id];
+            GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo2 = gmGameDatEnemyInfoFor(stage_id);
             int index2 = 0;
             while (index2 < gmsGamedatLoadInfo2.num)
             {
@@ -166,7 +166,7 @@ internal partial class AppMain
             ++arrayPointer;
             ++work.context_num;
         }
-        GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo6 = gm_gamedat_tbl_gimmick_info_tbl[stage_id];
+        GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo6 = gmGameDatGimmickInfoFor(stage_id);
         int index7 = 0;
         while (index7 < gmsGamedatLoadInfo6.num)
         {
@@ -245,7 +245,7 @@ internal partial class AppMain
         }
         if (g_gm_gamedat_enemy_arc != null)
             g_gm_gamedat_enemy_arc = null;
-        for (int index = 0; index < 204; ++index)
+        for (int index = 0; index < g_gm_gamedat_gimmick.Length; ++index)
         {
             if (g_gm_gamedat_gimmick[index] != null)
                 g_gm_gamedat_gimmick[index] = null;
@@ -578,11 +578,11 @@ internal partial class AppMain
                 pWork.num |= 32768;
             }
         }
-        for (int index = 0; index < 204; ++index)
+        for (int index = 0; index < g_gm_gamedat_gimmick.Length; ++index)
         {
             if (g_gm_gamedat_gimmick[index] != null)
             {
-                OBS_DATA_WORK pWork = ObjDataGet(789 + index);
+                OBS_DATA_WORK pWork = ObjDataGet(GMD_DWORK_NO_GMK_START + index);
                 ObjDataSet(pWork, g_gm_gamedat_gimmick[index]);
                 pWork.num |= 32768;
             }
@@ -899,8 +899,41 @@ internal partial class AppMain
         GmEfctZoneBuildDataInit(1);
     }
 
+    // Only zone 2 act 2 diverges between the mobile-era levels and the PC-era ones today: mobile's
+    // and xbla's is the pinball minigame, PC's is the card stage, and the card stage places enemies
+    // and gimmicks the minigame never loaded. gmMapSelectVariant has already run by the time these
+    // are called, so the tier is known. Everything else falls through to the shared table
+    private static GMS_GAMEDAT_LOAD_INFO gmGameDatEnemyInfoFor(int stage_id)
+    {
+        if (stage_id == 5 && gmStageIsPcLevel())
+            return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_enemy02_02_pc, gm_gamedat_tbl_enemy02_02_pc.Length);
+
+        return gm_gamedat_tbl_enemy_info_tbl[stage_id];
+    }
+
+    private static GMS_GAMEDAT_LOAD_INFO gmGameDatGimmickInfoFor(int stage_id)
+    {
+        if (stage_id == 5 && gmStageIsPcLevel())
+            return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_gimmick02_02_pc, gm_gamedat_tbl_gimmick02_02_pc.Length);
+
+        return gm_gamedat_tbl_gimmick_info_tbl[stage_id];
+    }
+
     private static void gmGameDatBuildStage22()
     {
+        // the PC-era act 2 places enemies (0/7/10), land (81/83) and break objects (130); the
+        // pinball minigame does not, and its tables do not load these archives, so building them
+        // there would read a null head
+        if (gmStageIsPcLevel())
+        {
+            GmEneGardonBuild();
+            GmEneHaroBuild();
+            GmGmkLandBuild();
+            GmGmkBreakObjBuild();
+            GmGmkBreakWallBuild();
+            GmGmkTrumpRoadBuild();
+        }
+
         GmGmkBumperBuild();
         GmGmkEnBmprBuild();
         GmGmkBobbinBuild();
@@ -1240,6 +1273,16 @@ internal partial class AppMain
 
     private static void gmGameDatFlushStage22()
     {
+        if (gmStageIsPcLevel())
+        {
+            GmEneGardonFlush();
+            GmEneHaroFlush();
+            GmGmkLandFlush();
+            GmGmkBreakObjFlush();
+            GmGmkBreakWallFlush();
+            GmGmkTrumpRoadFlush();
+        }
+
         GmGmkBumperFlush();
         GmGmkEnBmprFlush();
         GmGmkBobbinFlush();

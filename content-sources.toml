@@ -41,7 +41,6 @@ archives = [
   "G_COM/ENE/ENE_HARI_MTN.AMB",
   "G_COM/ENE/ENE_HARI_TEX.AMB",
   "G_ZONE1/DECO/DECO_ZONE1.AMB",
-  "G_ZONE2/MAP/ZONE22_MAP.AMB",
   "G_ZONE3/MAP/ZONE31_MAP.AMB",
   "G_ZONE3/MAP/ZONE32_MAP.AMB",
   "G_ZONE3/MAP/ZONE33_MAP.AMB",
@@ -99,12 +98,6 @@ archives = [
   "G_ZONE1/ENE/ENE_STING_MDL.AMB",
   "G_ZONE1/ENE/ENE_STING_MTN.AMB",
   "G_ZONE1/ENE/ENE_STING_TEX.AMB",
-  "G_ZONE2/MAP/ZONE23_MAP.AMB",
-  "G_ZONE2/MAP/ZONE2BOSS_MAP.AMB",
-  "G_ZONE2/MAP/ZONE2_M.AMB",
-  "G_ZONE2/MAP/ZONE2_T.AMB",
-  "G_ZONE2/MAP/ZONE2_ATTR.AMB",
-  "G_ZONE2/MAPFAR/ZONE2_MAPFAR.AMB",
   "G_ZONE4/MAP/ZONE41_MAP.AMB",
   "G_ZONE4/MAP/ZONE42_MAP.AMB",
   "G_ZONE4/MAP/ZONE43_MAP.AMB",
@@ -116,9 +109,61 @@ archives = [
 
 [group.console-stages-pc]
 source = "pc"
-name = "console"
+# "pc" is its own tier, not a second source for "console". Three tiers, resolved as a fallback
+# chain .pc -> .console -> base:
+#   base     mobile assets, mobile-era levels
+#   console  console-grade assets from xbla, but still mobile-era LEVELS (its ZONE22 is the pinball
+#            minigame, cell for cell identical to mobile's - measured, 0 differing cells)
+#   pc       console-grade assets AND the PC-era levels (ZONE22 is the 500x50 card stage)
+# So the two console-grade tiers differ in level vintage, not asset quality, and a stage must take
+# every archive from one tier or it mixes a PC layout with xbla block models.
+name = "pc"
+# Zone 2 is PC as a whole set, deliberately. PC's ZONE22 is a different stage from mobile/XBLA's
+# (the card stage, see docs/z2a2-card-gimmicks.md) and its layers index PC's ZONE2_M, which is 270
+# members against XBLA's 284 with a different id space. ZONE2_M/_T/_ATTR are shared by all four
+# zone 2 acts, so one act cannot take PC blocks while another takes XBLA's - the whole zone moves
+# or none of it does. Acts 1, 3 and boss therefore come from PC too; act 1 already did, which had
+# left it pairing a PC layout with XBLA models.
 archives = [
   "G_ZONE2/MAP/ZONE21_MAP.AMB",
+  "G_ZONE2/MAP/ZONE22_MAP.AMB",
+  "G_ZONE2/MAP/ZONE23_MAP.AMB",
+  "G_ZONE2/MAP/ZONE2BOSS_MAP.AMB",
+  "G_ZONE2/MAP/ZONE2_M.AMB",
+  "G_ZONE2/MAP/ZONE2_T.AMB",
+  "G_ZONE2/MAP/ZONE2_ATTR.AMB",
+  "G_ZONE2/MAPFAR/ZONE2_MAPFAR.AMB",
+
+  # map node and material motion. PC-only: mobile compiled these out
+  # (GMD_GAMEDAT_NO_CREATE_MAP_MOTION), so they have no base counterpart. Nothing loads them yet -
+  # the four zone 2 map tables need two more rows first, see docs/z2a2-port-plan.md M8.
+  "G_ZONE2/MAP/ZONE2_M_M.AMB",
+  "G_ZONE2/MAP/ZONE2_M_V.AMB",
+
+  # decoration ids 184-199 index this archive's MDL, which is 11 members on PC against mobile's 2,
+  # so it moves with the tier rather than being left behind
+  "G_ZONE2/DECO/DECO_ZONE2.AMB",
+
+  # the card gimmicks, all PC-only. No code dispatches these yet (M2-M5); they are here so the
+  # pipeline carries them and the stage's archive set is complete.
+  "G_ZONE2/GMK/GMK_TP_TURN_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TP_TURN_TEX.AMB",
+  "G_ZONE2/GMK/GMK_TP_TURN_MAT.AMB",
+  "G_ZONE2/GMK/GMK_TP_TURN_8_MAT.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPROAD_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPROAD_TEX.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPROAD_MTN.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_C_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_C9_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_D_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_D10_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_H_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_H7_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_S_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_S5_MDL.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_MAT.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_MTN.AMB",
+  "G_ZONE2/GMK/GMK_TRUMPSTAGE_TEX.AMB",
 ]
 
 [group.console-menus]

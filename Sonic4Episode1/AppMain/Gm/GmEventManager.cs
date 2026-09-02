@@ -86,7 +86,7 @@ internal partial class AppMain
                 if (((int)flag & 1) == 0 || num5 >= r_on[0] - num8 && num5 <= r_on[2] + num8 && (num6 >= r_on[1] - num8 && num6 <= r_on[3] + num8))
                 {
                     int num9 = num7 + 16;
-                    if ((((int)flag & 2) == 0 || num5 <= r_off[0] - num9 || (num5 >= r_off[2] + num9 || num6 <= r_off[1] - num9) || num6 >= r_off[3] + num9) && (arrayPointer[0].id < 346 && g_gm_event_tbl[arrayPointer[0].id] != null))
+                    if ((((int)flag & 2) == 0 || num5 <= r_off[0] - num9 || (num5 >= r_off[2] + num9 || num6 <= r_off[1] - num9) || num6 >= r_off[3] + num9) && (arrayPointer[0].id < GMD_EVENT_ID_MAX_PC && g_gm_event_tbl[arrayPointer[0].id] != null))
                     {
                         if ((arrayPointer[0].flag & 4096 << (ushort)GsGetGameLevel()) != 0)
                         {
@@ -206,7 +206,7 @@ internal partial class AppMain
                 if (((int)flag & 1) == 0 || num5 >= r_on[0] - num8 && num5 <= r_on[2] + num8 && (num6 >= r_on[1] - num8 && num6 <= r_on[3] + num8))
                 {
                     int num9 = num7 + 16;
-                    if ((((int)flag & 2) == 0 || num5 <= r_off[0] - num9 || (num5 >= r_off[2] + num9 || num6 <= r_off[1] - num9) || num6 >= r_off[3] + num9) && (arrayPointer[0].id < 184 && g_gm_decorate_tbl[arrayPointer[0].id] != null))
+                    if ((((int)flag & 2) == 0 || num5 <= r_off[0] - num9 || (num5 >= r_off[2] + num9 || num6 <= r_off[1] - num9) || num6 >= r_off[3] + num9) && (arrayPointer[0].id < GMD_DECORATE_ID_MAX_PC && g_gm_decorate_tbl[arrayPointer[0].id] != null))
                     {
                         OBS_OBJECT_WORK obsObjectWork = g_gm_decorate_tbl[arrayPointer[0].id](arrayPointer, num5 << 12, num6 << 12, 0);
                     }
@@ -223,6 +223,9 @@ internal partial class AppMain
         gm_eve_data = new GMS_EVE_DATA_EV_HEADER((AmbChunk)amBindGet(gGmGamedat, 6));
         gm_ring_data = new GMS_EVE_DATA_RG_HEADER((AmbChunk)amBindGet(gGmGamedat, 8));
         gm_deco_data = new GMS_EVE_DATA_DC_HEADER((AmbChunk)amBindGet(gGmGamedat, 7));
+
+        if (gmStageIsPcLevel())
+            gmEventRemapPcEventIds(gm_eve_data);
     }
 
     private static void GmEventDataFlush()

@@ -439,8 +439,13 @@
     public const int GMD_DWORK_NO_GMK_SS_OBLONG_TVX = 990;
     public const int GMD_DWORK_NO_GMK_START_EXP_MSG = 991;
     public const int GMD_DWORK_NO_GMK_START_EXP_WIN = 992;
-    public const int GMD_DWORK_NO_GMK_END = 993;
-    public const int GMD_DWORK_NO_DEC_START = 993;
-    public const int GMD_DWORK_NO_DEC_END = 994;
-    public const int GMD_DWORK_NO_MAX = 994;
+    // PC-only, appended past mobile's tail. PC's own ordinals for these are 1055-1057 and do not
+    // transfer: the iPhone fork's #if removed enumerators, which shifted the whole space
+    public const int GMD_DWORK_NO_GMK_TRUMPROAD_MDL = 993;
+    public const int GMD_DWORK_NO_GMK_TRUMPROAD_TEX = 994;
+    public const int GMD_DWORK_NO_GMK_TRUMPROAD_MTN = 995;
+    public const int GMD_DWORK_NO_GMK_END = 996;
+    public const int GMD_DWORK_NO_DEC_START = 996;
+    public const int GMD_DWORK_NO_DEC_END = 997;
+    public const int GMD_DWORK_NO_MAX = 997;
 }

@@ -153,7 +153,9 @@ internal partial class AppMain
             switch (mainSysInfo.stage_id)
             {
                 case 5:
-                    flag = !GsMainSysIsStageClear(5);
+                    // the minigame's "score 100,000 points" brief. PC's act 2 is an ordinary stage
+                    // with no such objective, so it gets no start message at all
+                    flag = !gmStageIsPcLevel() && !GsMainSysIsStageClear(5);
                     break;
                 case 9:
                     if (!GsMainSysIsStageClear(9))

@@ -975,6 +975,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)gm\Cockpit\Cockpit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDeco.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoGlare.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoPcTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGmkVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffect.cs" />
@@ -999,6 +1000,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Enemy\GmEneUniuni.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Enemy\GmEneUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmEventManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmEventPcIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmPlySeqTrumpRoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTrumpRoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_GMK_TRUMPROAD_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmFade.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGameData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGameDBuild.cs" />

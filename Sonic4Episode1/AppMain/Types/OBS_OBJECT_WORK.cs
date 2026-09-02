@@ -140,6 +140,11 @@ internal partial class AppMain
             return (GMS_GMK_UPBUMPER_WORK)(GMS_ENEMY_3D_WORK)p;
         }
 
+        public static explicit operator GMS_GMK_TRUMPROAD_WORK(OBS_OBJECT_WORK p)
+        {
+            return (GMS_GMK_TRUMPROAD_WORK)(GMS_ENEMY_3D_WORK)p;
+        }
+
         public static explicit operator GMS_GMK_STEAMP_WORK(OBS_OBJECT_WORK p)
         {
             return (GMS_GMK_STEAMP_WORK)(GMS_ENEMY_3D_WORK)p;

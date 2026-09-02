@@ -22,6 +22,11 @@ internal partial class AppMain
             return (GMS_GMK_GEAR_WORK)p.holder;
         }
 
+        public static explicit operator GMS_GMK_TRUMPROAD_WORK(GMS_ENEMY_3D_WORK p)
+        {
+            return (GMS_GMK_TRUMPROAD_WORK)p.holder;
+        }
+
         public static explicit operator GMS_GMK_WATER_SLIDER_WORK(
           GMS_ENEMY_3D_WORK p)
         {

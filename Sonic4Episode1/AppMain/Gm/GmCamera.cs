@@ -67,6 +67,34 @@ internal partial class AppMain
         obsCamera4.command_state = 9U;
         obsCamera4.scale = GMD_CAMERA_SCALE;
         obsCamera4.ofst.z = 1000f;
+
+        // Camera 7, values read out of PC's camera init at 0x4C7780. It follows the gameplay
+        // camera and differs only in projection: an 11.8 degree lens against camera 0's ortho,
+        // which is what gives the card road its depth without the stage visibly warping. PC builds
+        // it for every stage and so does this; index 7 is the last slot the camera array has
+        ObjCameraInit(GME_CAMERA_NO_TRUMPROAD, new NNS_VECTOR(cam_pos.x, cam_pos.y, cam_pos.z), 4, 0, 8192);
+        ObjCamera3dInit(GME_CAMERA_NO_TRUMPROAD);
+        ObjCameraSetUserFunc(GME_CAMERA_NO_TRUMPROAD, new OBJF_CAMERA_USER_FUNC(gmCameraFuncTrumpRoad));
+        OBS_CAMERA obsCamera5 = ObjCameraGet(GME_CAMERA_NO_TRUMPROAD);
+        obsCamera5.command_state = OBD_DRAW_CMD_STATE_TRUMPROAD;
+        obsCamera5.scale = GMD_CAMERA_SCALE;
+        obsCamera5.ofst.z = 1000f;
+        obsCamera5.fovy = GMD_CAMERA_TRUMPROAD_FOVY;
+        obsCamera5.znear = 512f;
+        obsCamera5.zfar = 65535f;
+    }
+
+    // 2144 in binary angle, 11.8 degrees
+    private const ushort GMD_CAMERA_TRUMPROAD_FOVY = 2144;
+
+    internal const int GME_CAMERA_NO_TRUMPROAD = 7;
+
+    private static void gmCameraFuncTrumpRoad(OBS_CAMERA obj_camera)
+    {
+        OBS_CAMERA obsCamera = ObjCameraGet(GME_CAMERA_NO_MAIN);
+        nnCopyVector(obj_camera.pos, obsCamera.pos);
+        nnCopyVector(obj_camera.target_pos, obsCamera.target_pos);
+        nnCopyVector(obj_camera.disp_pos, obsCamera.disp_pos);
     }
 
     private static void GmCameraExit()

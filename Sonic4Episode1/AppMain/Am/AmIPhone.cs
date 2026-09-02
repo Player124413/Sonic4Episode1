@@ -185,22 +185,6 @@ internal partial class AppMain
             state.AddRange(TouchPanel.GetState());
         }
 
-        // TODO(wam): remove, iOS blank screen diagnostics
-        if (state.Count != _mppDiagLastTouchCount)
-        {
-            _mppDiagLastTouchCount = state.Count;
-            var b = m_game.Window.ClientBounds;
-            foreach (var t in state)
-            {
-                float rx = t.Position.X, ry = t.Position.Y;
-                screen2real(ref rx, ref ry);
-                Console.WriteLine($"[s4diag] touch id={t.Id} {t.State}"
-                    + $" raw={t.Position.X},{t.Position.Y} real={rx},{ry} client={b.Width}x{b.Height}");
-            }
-
-            if (state.Count == 0)
-                Console.WriteLine("[s4diag] touch none");
-        }
 
         var mouseState = Mouse.GetState();
         if (wasPressed)

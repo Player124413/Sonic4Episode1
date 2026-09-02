@@ -1,3 +1,5 @@
+using System;
+
 internal partial class AppMain
 {
     // these two must stay above gm_map_variant: static field initialisers run in textual order
@@ -20,12 +22,34 @@ internal partial class AppMain
         fs_variant = AMD_FS_VARIANT_CONSOLE,
     };
 
+    // identical to console in every engine respect - the pc tier is console-grade art and takes the
+    // same block-model arm. It exists only to pin the stage's loads to the pc tier, because
+    // GmGameData.cs:374 loads map archives as gm_map_variant.fs_variant. Pinning "console" for a
+    // stage whose archives are declared pc silently falls back to the base archive, and the base is
+    // #TVX, which the NN model loader rejects as a bad header
+    internal static readonly GMS_MAP_VARIANT gm_map_variant_pc = new GMS_MAP_VARIANT
+    {
+        blocks_as_model = true,
+
+        registlist_num = 128,
+
+        fs_variant = AMD_FS_VARIANT_PC,
+    };
+
     // resolved once per stage in GmGameDatLoadInit, never per frame
     private static GMS_MAP_VARIANT gm_map_variant = gm_map_variant_mobile;
 
     internal static GMS_MAP_VARIANT MapVariantForTest(bool console)
     {
         return console ? gm_map_variant_console : gm_map_variant_mobile;
+    }
+
+    // resolved once per stage by gmMapSelectVariant. True when this stage's levels are the PC-era
+    // ones rather than the mobile-era layouts both mobile and xbla ship, which is what decides the
+    // things that differ per LEVEL rather than per asset kind
+    internal static bool gmStageIsPcLevel()
+    {
+        return gm_map_variant == gm_map_variant_pc;
     }
 
     // zone 4 loads zone 1's map far archive, so following the global variant would hand it a console
@@ -37,8 +61,26 @@ internal partial class AppMain
     }
 
     // every map and map far archive the stage loads, named off the load table rather than spelled
-    // out, so a stage cannot end up with console blocks against a mobile background
+    // out, so a stage cannot end up with console blocks against a mobile background.
+    // Console-grade rather than exactly "console": the pc tier is console-grade too, and this gate
+    // only decides the engine arm (block models vs TVX), which both tiers share
     internal static bool gmMapIsConsoleDataComplete(int stage_id)
+    {
+        return gmMapAllMapArchives(stage_id, amFsIsConsoleGrade);
+    }
+
+    // the narrower question: is every one of this stage's map archives the PC tier, meaning we have
+    // the PC-era LEVEL and not just console-grade art. Drives the things that differ per level
+    // rather than per asset kind - Z2A2's card gimmicks, its loadout, no pinball, no start message.
+    // All-or-none for the same reason as above: a PC layout against xbla block models is silently
+    // the wrong blocks, not an error
+    internal static bool gmMapIsPcLevelDataComplete(int stage_id)
+    {
+        return gmMapAllMapArchives(stage_id,
+            v => string.Equals(v, AMD_FS_VARIANT_PC, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool gmMapAllMapArchives(int stage_id, Func<string, bool> accept)
     {
         var info = gm_gamedat_tbl_map_info_tbl[stage_id];
         var found = false;
@@ -50,7 +92,7 @@ internal partial class AppMain
                 continue;
 
             found = true;
-            if (amFsResolvedVariant(load_data.path) != AMD_FS_VARIANT_CONSOLE)
+            if (!accept(amFsResolvedVariant(load_data.path)))
                 return false;
         }
 
@@ -60,9 +102,13 @@ internal partial class AppMain
     // map and map far are one group, so they move together
     private static void gmMapSelectVariant(int stage_id)
     {
+        // three tiers, best first. pc before console: where both exist the PC-era level wins
         bool console = gmMapIsConsoleDataComplete(stage_id);
 
-        gm_map_variant = console ? gm_map_variant_console : gm_map_variant_mobile;
+        gm_map_variant = gmMapIsPcLevelDataComplete(stage_id) ? gm_map_variant_pc
+            : console ? gm_map_variant_console
+            : gm_map_variant_mobile;
+
         gm_map_far_variant = console ? gmMapFarVariantConsole() : gmMapFarVariantMobile();
     }
 }

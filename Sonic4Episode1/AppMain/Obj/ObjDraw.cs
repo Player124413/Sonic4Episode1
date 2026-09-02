@@ -185,7 +185,7 @@
 
     public static void ObjDrawClearNNCommandStateTbl()
     {
-        for (int index = 0; index < 18; ++index)
+        for (int index = 0; index < OBD_DRAW_CMD_STATE_MAX; ++index)
         {
             obj_draw_3dnn_command_state_tbl[index] = uint.MaxValue;
             obj_draw_3dnn_command_state_exe_end_scene_tbl[index] = false;
@@ -1375,10 +1375,20 @@
         }
 
         nnPutLightSettings();
-        for (int index = 0; index < 18; ++index)
+        for (int index = 0; index < OBD_DRAW_CMD_STATE_MAX; ++index)
         {
             if (obj_draw_3dnn_command_state_tbl[index] != uint.MaxValue)
             {
+                // The card road is the one pass drawn under a perspective projection while the
+                // rest of the stage is ortho, so its depths are not comparable with what is
+                // already in the buffer and it loses the test against scenery it should be in
+                // front of. It draws over everything by design, so give it a clean buffer
+                if (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_TRUMPROAD)
+                {
+                    mpp.OpenGL.glClearDepthf(1f);
+                    mpp.OpenGL.glClear(256U);
+                }
+
                 amDrawExecCommand(obj_draw_3dnn_command_state_tbl[index], g_obj.drawflag);
                 if (obj_draw_3dnn_command_state_exe_end_scene_tbl[index])
                     amDrawEndScene();

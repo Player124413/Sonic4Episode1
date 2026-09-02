@@ -889,7 +889,13 @@ internal partial class AppMain
     public const uint OBD_DRAW_CMD_STATE_3DNN_POST = 16;
     public const uint OBD_DRAW_CMD_STATE_3DNN_WS = 17;
     public const uint OBD_DRAW_SET_NN_CMD_STATE_TBL_MSG_START = 16;
-    public const uint OBD_DRAW_CMD_STATE_MAX = 18;
+
+    // The card road and its rider draw here, under a perspective projection, instead of in the
+    // ordinary 3DNN pass. PC calls this 13, which is the next free value after the console set's
+    // 0-12; ours is 18 because 13-17 are already taken by the message windows and the three
+    // iPhone-only passes. Same move mobile made when it appended 3DNN_WS for the water slider
+    public const uint OBD_DRAW_CMD_STATE_TRUMPROAD = 18;
+    public const uint OBD_DRAW_CMD_STATE_MAX = 19;
 
     public const byte GMD_TASK_PAUSELEVEL_DEF = 0;
     public const byte GMD_TASK_GAME_PAUSE_LEVEL = 2;
@@ -3935,7 +3941,7 @@ internal partial class AppMain
     private const int GMD_EVENT_ID_GMK_DECO_FRAME_MGR_WAY = 293;
     private const int GMD_EVENT_ID_GMK_DECO_FRAME_MGR_BOSS = 294;
     private const int GMD_EVENT_ID_GMK_END = 299;
-    private const int GMD_EVENT_ID_NOSET_START = 300;
+    internal const int GMD_EVENT_ID_NOSET_START = 300;
     private const int GMD_EVENT_ID_NOSET_ENEMY_START = 300;
     private const int GMD_EVENT_ID_NOSET_GIMMICK_START = 300;
     private const int GMD_EVENT_ID_NOSET_ROCK_FALL = 300;
@@ -13816,22 +13822,24 @@ internal partial class AppMain
     private static OBS_ACTION3D_NN_WORK[] gm_ene_harisenbo_r_obj_3d_list;
     private static NNS_MATRIX gmEneHariMotionCallback_node_mtx;
     private static NNS_MATRIX gmEneHariMotionCallback_base_mtx;
-    internal static readonly int[][] g_gm_deco_model_index;
-    internal static readonly uint[] g_gm_deco_disp_flag;
-    internal static readonly int[][] g_gm_deco_node_motion_index;
-    private static readonly int[][] g_gm_deco_mat_motion_index;
-    private static uint[] g_gm_deco_user_work;
-    private static int[] g_gm_deco_user_timer;
+    // not readonly: gmDecoExtendTablesForPcLevels resizes every one of these to 200 for the PC-era
+    // decoration ids. The decompiler marked some of them readonly and not others, arbitrarily
+    internal static int[][] g_gm_deco_model_index;
+    internal static uint[] g_gm_deco_disp_flag;
+    internal static int[][] g_gm_deco_node_motion_index;
+    internal static int[][] g_gm_deco_mat_motion_index;
+    internal static uint[] g_gm_deco_user_work;
+    internal static int[] g_gm_deco_user_timer;
     public static uint[] g_gm_deco_command_state;
     public static OBS_RECT_WORK_Delegate1[] g_gm_deco_func_rect;
-    public static readonly short[][] g_gm_deco_rect_size;
-    private static uint[] g_gm_deco_user_flag;
-    internal static readonly ushort[] g_gm_deco_rot_z;
-    private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_main;
-    internal static readonly int[][] g_gm_deco_pos;
-    private static readonly GSF_TASK_PROCEDURE[] g_gm_deco_func_dest;
-    private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_move;
-    private static readonly MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_out;
+    public static short[][] g_gm_deco_rect_size;
+    internal static uint[] g_gm_deco_user_flag;
+    internal static ushort[] g_gm_deco_rot_z;
+    internal static MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_main;
+    internal static int[][] g_gm_deco_pos;
+    internal static GSF_TASK_PROCEDURE[] g_gm_deco_func_dest;
+    internal static MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_move;
+    internal static MPP_VOID_OBS_OBJECT_WORK[] g_gm_deco_func_out;
     private static GMS_DECO_FALL_MANAGER[] g_deco_fall_manager;
     private static GMS_DECO_PRIM_DRAW_WORK[] g_deco_tvx_work;
     private static NNS_RGBA_U8 g_deco_rendaer_target_color;
@@ -14118,6 +14126,8 @@ internal partial class AppMain
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy01_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy02_01;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy02_02;
+    // the pc tier's act 2 loadout; see the cctor for why it differs
+    public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy02_02_pc;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy02_03;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy02_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_enemy03_01;
@@ -14144,6 +14154,8 @@ internal partial class AppMain
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick01_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_01;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_02;
+    // the pc tier's act 2 loadout; see the cctor for why it differs
+    public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_02_pc;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_03;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_01;
@@ -14982,6 +14994,7 @@ internal partial class AppMain
     private static AMS_AMB_HEADER g_gm_gmk_boss3_pillar_obj_tvx_list;
     private static AMS_AMB_HEADER g_gm_gmk_boss3_wall_obj_tvx_list;
     private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_bobbin_obj_3d_list;
+    private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_trumproad_obj_3d_list;
     public static TaskWorkFactoryDelegate _GmEffectCreateWork_Delegate;
     private static GSF_TASK_PROCEDURE _GmEffectDefaultExit;
     private static MPP_VOID_OBS_OBJECT_WORK _ObjDrawActionSummaryDelegate;

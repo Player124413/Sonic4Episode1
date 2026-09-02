@@ -8,6 +8,8 @@ internal sealed class DXVertexArrays
 {
     public Vector3[] Positions;
     public Vector3[] Normals;
+    public Vector3[] Tangents;
+    public Vector3[] Binormals;
     public Vector2[] TexCoords;
     public Vector2[] TexCoords2;
     public Vector2[] TexCoords3;
@@ -55,6 +57,7 @@ internal sealed class DXVertexArrays
             offset += 12;
         }
 
+
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_COL_U32) != 0u)
         {
             arrays.Colors = ReadColors(data, offset, stride, count);
@@ -76,6 +79,31 @@ internal sealed class DXVertexArrays
             arrays.TexCoords3 = ReadVector2(data, offset + 16, stride, count, bigEndian);
         offset += texCount * 8;
 
+        // Tangent then binormal, float3 each (NND_VTXSTRIDE_DX_TAN_F32 / _BNRM_F32), and they sit
+        // AFTER the texture coordinates. That ordering is not a guess: the NN DXG20 declaration
+        // builder in the retail PC binary (0x413CB0) fills D3DVERTEXELEMENT9s with a single running
+        // offset in the order position, blend, normal, colour, colour2, texcoords, tangent
+        // (usage 6), binormal (usage 7).
+        //
+        // These are read rather than skipped: PC's zone 2 dice are tangent-space normal mapped
+        // (Z2_DICE_A_NRM.DDS, permutation ...RDMJC0000MHC4) so the shader needs a real tangent
+        // frame, and DXVertex has had Tangent and Binormal slots all along.
+        //
+        // Worth knowing why putting these directly after the normal is a trap: for the one format
+        // that uses them here, 0x00010143, both orderings total 56, so the stride check below still
+        // passes and the texture coordinates get silently read out of the binormal instead
+        if ((desc.Format & AppMain.NND_VTXMEMBER_DX_TAN_F32) != 0u)
+        {
+            arrays.Tangents = ReadVector3(data, offset, stride, count, bigEndian);
+            offset += 12;
+        }
+
+        if ((desc.Format & AppMain.NND_VTXMEMBER_DX_BNRM_F32) != 0u)
+        {
+            arrays.Binormals = ReadVector3(data, offset, stride, count, bigEndian);
+            offset += 12;
+        }
+
         if (offset != stride)
             throw new InvalidOperationException($"decoded {offset} bytes per vertex but Stride is {stride}");
 
@@ -84,11 +112,11 @@ internal sealed class DXVertexArrays
 
     private static void RejectUnsupported(uint format)
     {
+        // TAN_F32 and BNRM_F32 come out of this set: they are skipped in Decode above. The packed
+        // 10:10:10 forms stay unsupported, since nothing has produced one
         const uint unsupported =
             AppMain.NND_VTXMEMBER_DX_NRM_U32 |
-            AppMain.NND_VTXMEMBER_DX_TAN_F32 |
             AppMain.NND_VTXMEMBER_DX_TAN_U32 |
-            AppMain.NND_VTXMEMBER_DX_BNRM_F32 |
             AppMain.NND_VTXMEMBER_DX_BNRM_U32 |
             AppMain.NND_VTXMEMBER_DX_BLENDFMT_U32;
 

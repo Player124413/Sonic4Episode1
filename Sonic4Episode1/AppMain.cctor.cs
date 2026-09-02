@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
@@ -14685,9 +14686,10 @@ internal partial class AppMain
         uint.MaxValue,
         0U,
         0U,
-        0U
+        0U,
+        uint.MaxValue
         };
-        bool[] array210 = new bool[18];
+        bool[] array210 = new bool[OBD_DRAW_CMD_STATE_MAX];
         array210[0] = true;
         obj_draw_3dnn_command_state_exe_end_scene_tbl = array210;
         obj_draw_material_cb_func = null;
@@ -16058,7 +16060,7 @@ internal partial class AppMain
         g_gm_gamedat_map_attr_set = new object[3];
         g_gm_gamedat_enemy_arc = null;
         g_gm_gamedat_ring = new object[3];
-        g_gm_gamedat_gimmick = new AMS_AMB_HEADER[204];
+        g_gm_gamedat_gimmick = new AMS_AMB_HEADER[GMD_DWORK_NO_GMK_END - GMD_DWORK_NO_GMK_START];
         g_gm_gamedat_enemy = new object[44];
         g_gm_gamedat_effect = new object[11];
         g_gm_gamedat_cockpit_main_arc = null;
@@ -17055,6 +17057,19 @@ internal partial class AppMain
         new GMS_GAMEDAT_LOAD_DATA("G_COM/ENE/ENE_HARI_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 659),
         new GMS_GAMEDAT_LOAD_DATA("G_COM/ENE/ENE_HARI_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 660)
         };
+        // PC's zone 2 act 2 is a full stage where mobile's and xbla's is the pinball minigame, so it
+        // places 25 enemies (event ids 0, 7, 10) that act 2 never loaded. Zone 2's own pair, at the
+        // slots acts 1 and 3 already use. Picked by gmGameDatEnemyInfoFor when the stage resolved to
+        // the pc tier; built off the mobile list so the shared part cannot drift out of step
+        gm_gamedat_tbl_enemy02_02_pc = gm_gamedat_tbl_enemy02_02.Concat(new GMS_GAMEDAT_LOAD_DATA[]
+        {
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_GARDON_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 677),
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_GARDON_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 678),
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_GARDON_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 679),
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_HARO_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 687),
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_HARO_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 688),
+        new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/ENE/ENE_HARO_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 689)
+        }).ToArray();
         gm_gamedat_tbl_enemy02_03 = new GMS_GAMEDAT_LOAD_DATA[]
         {
         new GMS_GAMEDAT_LOAD_DATA("G_COM/ENE/ENE_HARI_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostEnemy, 658),
@@ -17423,6 +17438,24 @@ internal partial class AppMain
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/MSG/G_MSG_Z2.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 991),
             new GMS_GAMEDAT_LOAD_DATA(DMD_MANUAL_CMN_DATA_FILENAME, gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 992)
         };
+        // PC's act 2 also places land (event ids 81, 83) and break objects (130), which the pinball
+        // minigame never had. Slots as per zone 2 acts 1 and 3. PC's own table additionally drops
+        // STOPPER and SLOT here; we keep them, so this is a superset - loading two archives the PC
+        // layout does not place is wasteful but harmless, where dropping one it does place is not
+        gm_gamedat_tbl_gimmick02_02_pc = gm_gamedat_tbl_gimmick02_02.Concat(new GMS_GAMEDAT_LOAD_DATA[]
+        {
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_LAND_2_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 803),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_LAND_2_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 804),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_LAND_2_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 805),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_LAND_2_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 806),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_B_OBJ_2_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 799),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_B_OBJ_2_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 800),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_B_WALL2_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 797),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_B_WALL2_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 798),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_MTN)
+        }).ToArray();
         gm_gamedat_tbl_gimmick02_03 = new GMS_GAMEDAT_LOAD_DATA[]
         {
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_LAND_2_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 803),
@@ -25570,6 +25603,10 @@ internal partial class AppMain
         64,
         256
         };
+        gmDecoExtendTablesForPcLevels();
+        gmEventExtendTablesForPcLevels();
+        gmPlySeqExtendStateDataForPcLevels();
+        g_gm_gmk_trumproad_obj_3d_list = null;
         gm_ending_tcb = null;
         gm_ending_obj_3d_list = null;
         gm_ending_obj_offset = new int[]

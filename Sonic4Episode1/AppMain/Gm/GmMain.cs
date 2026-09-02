@@ -93,7 +93,7 @@ internal partial class AppMain
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, (short)(GMD_OBJ_LCD_X * 1.42), (short)(GMD_OBJ_LCD_X * 1.42), GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
         else
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
-        ObjDataAlloc(994);
+        ObjDataAlloc(GMD_DWORK_NO_MAX);
         ObjDrawESEffectSystemInit(0, 20480U, 5U);
         amTrailEFInitialize();
         // the bucket table forks, and this runs before gmMainLoad reaches GmGameDatLoadInit, so the
@@ -131,8 +131,10 @@ internal partial class AppMain
             ObjDrawSetNNCommandStateTbl(9U, OBD_DRAW_CMD_STATE_POST_WATER, true);
             ObjDrawSetNNCommandStateTbl(10U, OBD_DRAW_CMD_STATE_NEAR_MAP, true);
             ObjDrawSetNNCommandStateTbl(11U, OBD_DRAW_CMD_STATE_3DFIX, true);
-            ObjDrawSetNNCommandStateTbl(12U, OBD_DRAW_CMD_STATE_2DAMA, true);
-            for (uint slot = 13U; slot < OBD_DRAW_CMD_STATE_MAX; ++slot)
+            // the card road and its rider, above every other 3D pass and below the 2D layer
+            ObjDrawSetNNCommandStateTbl(12U, OBD_DRAW_CMD_STATE_TRUMPROAD, true);
+            ObjDrawSetNNCommandStateTbl(13U, OBD_DRAW_CMD_STATE_2DAMA, true);
+            for (uint slot = 14U; slot < OBD_DRAW_CMD_STATE_MAX; ++slot)
                 ObjDrawSetNNCommandStateTbl(slot, OBD_DRAW_CMD_STATE_INVALID, false);
             return;
         }

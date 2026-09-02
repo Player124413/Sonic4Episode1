@@ -221,7 +221,7 @@
         bmcb_mgr.bmcb_tail.prev = bmcb_link;
     }
 
-    private static void GmBsCmnCreateSNMWork(
+    internal static void GmBsCmnCreateSNMWork(
       GMS_BS_CMN_SNM_WORK snm_work,
       NNS_OBJECT _object,
       ushort reg_max)
@@ -233,7 +233,7 @@
         snm_work.node_info_list = New<GMS_BS_CMN_SNM_NODE_INFO>(reg_max);
     }
 
-    private static void GmBsCmnDeleteSNMWork(GMS_BS_CMN_SNM_WORK snm_work)
+    internal static void GmBsCmnDeleteSNMWork(GMS_BS_CMN_SNM_WORK snm_work)
     {
         gmBsCmnClearBossMotionCBLink(snm_work.bmcb_link);
         snm_work.reg_node_cnt = 0;
@@ -243,7 +243,7 @@
         snm_work.node_info_list = null;
     }
 
-    private static int GmBsCmnRegisterSNMNode(GMS_BS_CMN_SNM_WORK snm_work, int node_index)
+    internal static int GmBsCmnRegisterSNMNode(GMS_BS_CMN_SNM_WORK snm_work, int node_index)
     {
         snm_work.node_info_list[snm_work.reg_node_cnt].node_index = node_index;
         int regNodeCnt = snm_work.reg_node_cnt;
@@ -251,14 +251,14 @@
         return regNodeCnt;
     }
 
-    private static NNS_MATRIX GmBsCmnGetSNMMtx(
+    internal static NNS_MATRIX GmBsCmnGetSNMMtx(
       GMS_BS_CMN_SNM_WORK snm_work,
       int snm_reg_id)
     {
         return snm_work.node_info_list[snm_reg_id].node_w_mtx;
     }
 
-    private static void GmBsCmnUpdateObjectGeneralStuckWithNode(
+    internal static void GmBsCmnUpdateObjectGeneralStuckWithNode(
       OBS_OBJECT_WORK obj_work,
       GMS_BS_CMN_SNM_WORK snm_work,
       int snm_reg_id,
@@ -295,7 +295,7 @@
         VEC_Set(ref obj_work.pos, obj_work.pos.x - pivot_prev_pos.x + pivot_cur_pos.x, obj_work.pos.y - pivot_prev_pos.y + pivot_cur_pos.y, obj_work.pos.z - pivot_prev_pos.z + pivot_cur_pos.z);
     }
 
-    private static void GmBsCmnUpdateObject3DNNStuckWithNode(
+    internal static void GmBsCmnUpdateObject3DNNStuckWithNode(
       OBS_OBJECT_WORK obj_work,
       GMS_BS_CMN_SNM_WORK snm_work,
       int snm_reg_id,
@@ -304,7 +304,7 @@
         GmBsCmnUpdateObject3DNNStuckWithNode(obj_work, snm_work, snm_reg_id, b_rotation, null);
     }
 
-    private static void GmBsCmnUpdateObject3DNNStuckWithNode(
+    internal static void GmBsCmnUpdateObject3DNNStuckWithNode(
       OBS_OBJECT_WORK obj_work,
       GMS_BS_CMN_SNM_WORK snm_work,
       int snm_reg_id,

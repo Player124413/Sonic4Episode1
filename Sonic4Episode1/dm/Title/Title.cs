@@ -165,7 +165,7 @@ internal static partial class DmTitle
                     evt_case1 = 0;
                     dmTitleSetFirstPlayData(main_work);
                     nextDemoLevel = 0;
-                    g_gs_main_sys_info.stage_id = 0;
+                    g_gs_main_sys_info.stage_id = 5; // TEMP(z2a2-test): boot straight to Zone 2 Act 2, revert before merge
                     g_gs_main_sys_info.char_id[0] = 0;
                     g_gs_main_sys_info.game_mode = 0;
                     if (GsTrialIsTrial())

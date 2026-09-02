@@ -290,10 +290,12 @@ internal static partial class GmFix
         return GsGetMainSysInfo().game_mode == GSD_GAME_MODE_TIME_ATTACK;
     }
 
-    // named for the act, not the stage id: act 2-2 is stage 5
+    // Named for the act, not the stage id: act 2-2 is stage 5. What it really selects is the
+    // pinball minigame's HUD, the score-target readout and its time attack parts, so PC's act 2 is
+    // excluded - that one is an ordinary stage and wants the ordinary HUD
     private static bool gmFixIsStage22()
     {
-        return GsGetMainSysInfo().stage_id == 5;
+        return GsGetMainSysInfo().stage_id == 5 && !gmStageIsPcLevel();
     }
 
     private static bool gmFixIsStageTruck()

@@ -21,7 +21,9 @@ internal partial class AppMain
                 continue;
 
             found = true;
-            if (amFsResolvedVariant(load_data.path) != AMD_FS_VARIANT_CONSOLE)
+            // console-grade, not exactly "console": the pc tier is console-grade too and this only
+            // decides the model-vs-TVX arm
+            if (!amFsIsConsoleGrade(amFsResolvedVariant(load_data.path)))
                 return false;
         }
 

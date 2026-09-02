@@ -405,7 +405,9 @@ internal partial class AppMain
             ply_work.obj_work.pos.y = g_gm_main_system.resume_pos_y;
         }
 
-        if (g_gs_main_sys_info.stage_id == 5)
+        // stage 5 is the pinball minigame on mobile and xbla, where the player is a ball. PC's act
+        // 2 is the card stage and wants an ordinary Sonic
+        if (g_gs_main_sys_info.stage_id == 5 && !gmStageIsPcLevel())
             GmPlayerSetPinballSonic(ply_work);
         else if (GSM_MAIN_STAGE_IS_SPSTAGE())
             GmPlayerSetSplStgSonic(ply_work);
@@ -1370,22 +1372,39 @@ internal partial class AppMain
         ushort num1 = 0;
         GMS_PLAYER_WORK gmsPlayerWork = (GMS_PLAYER_WORK)obj_work;
         OBS_ACTION3D_NN_WORK obj3d = obj_work.obj_3d;
-        nnMakeUnitMatrix(obj3d.user_obj_mtx_r);
-        if (((int)gmsPlayerWork.gmk_flag & 32768) != 0)
-            nnMultiplyMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, gmsPlayerWork.ex_obj_mtx_r);
-        float num2 = 0.0f;
-        float num3 = -15f;
-        if (((int)gmsPlayerWork.player_flag & 131072) != 0 &&
-            (26 > gmsPlayerWork.act_state || gmsPlayerWork.act_state > 30) || GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY())
-            num3 = -21f;
-        else if (((int)gmsPlayerWork.player_flag & 262144) != 0 && ((int)gmsPlayerWork.gmk_flag2 & 64) == 0)
+
+        // Riding the card road, the player draws in that pass under its perspective camera and the
+        // ordinary matrix build is skipped entirely - no ex_obj_mtx_r, no standing offset. Its
+        // orientation comes from the node matrix the ride already writes. PC gates this the same
+        // way, on the flag its ride start sets (sub_4F3D20)
+        if ((gmsPlayerWork.player_flag & GMD_PLF_RESET_FALL_PARAM) != 0)
         {
-            num2 = 0.0f;
-            num3 = 0.0f;
+            obj3d.command_state = OBD_DRAW_CMD_STATE_TRUMPROAD;
+            ObjDraw3DNNSetCameraEx(
+                GME_CAMERA_NO_TRUMPROAD,
+                NNE_PROJECTION_TYPE_PERSPECTIVE,
+                OBD_DRAW_CMD_STATE_TRUMPROAD);
+        }
+        else
+        {
+            nnMakeUnitMatrix(obj3d.user_obj_mtx_r);
+            if (((int)gmsPlayerWork.gmk_flag & 32768) != 0)
+                nnMultiplyMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, gmsPlayerWork.ex_obj_mtx_r);
+            float num2 = 0.0f;
+            float num3 = -15f;
+            if (((int)gmsPlayerWork.player_flag & 131072) != 0 &&
+                (26 > gmsPlayerWork.act_state || gmsPlayerWork.act_state > 30) || GSM_MAIN_STAGE_IS_SPSTAGE_NOT_RETRY())
+                num3 = -21f;
+            else if (((int)gmsPlayerWork.player_flag & 262144) != 0 && ((int)gmsPlayerWork.gmk_flag2 & 64) == 0)
+            {
+                num2 = 0.0f;
+                num3 = 0.0f;
+            }
+
+            nnTranslateMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, 0.0f,
+                num3 / FXM_FX32_TO_FLOAT(g_obj.draw_scale.y), num2 / FXM_FX32_TO_FLOAT(g_obj.draw_scale.x));
         }
 
-        nnTranslateMatrix(obj3d.user_obj_mtx_r, obj3d.user_obj_mtx_r, 0.0f,
-            num3 / FXM_FX32_TO_FLOAT(g_obj.draw_scale.y), num2 / FXM_FX32_TO_FLOAT(g_obj.draw_scale.x));
         if (((int)gmsPlayerWork.player_flag & -2147483376) != 0)
         {
             num1 = gmsPlayerWork.obj_work.dir.y;
@@ -2069,7 +2088,9 @@ internal partial class AppMain
                         (130 != gmsEnemyComWork.eve_rec.id &&
                          (112 > gmsEnemyComWork.eve_rec.id || gmsEnemyComWork.eve_rec.id > 114) &&
                          (163 != gmsEnemyComWork.eve_rec.id && 86 != gmsEnemyComWork.eve_rec.id &&
-                          (161 != gmsEnemyComWork.eve_rec.id && 247 != gmsEnemyComWork.eve_rec.id))))
+                          (161 != gmsEnemyComWork.eve_rec.id && 247 != gmsEnemyComWork.eve_rec.id) &&
+                          // the one id PC adds here, and the reason the giant card can be homed at
+                          GMD_EVENT_ID_GMK_TRUMP_ROAD_CARD != gmsEnemyComWork.eve_rec.id)))
                         continue;
                 }
                 else if (obj_work.obj_type == 2)

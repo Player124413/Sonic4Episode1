@@ -103,6 +103,8 @@ internal partial class AppMain
                     ? new Byte4(0f, 0f, 0f, 0f)
                     : new Byte4(bones[0], bones[1], bones[2], bones[3]),
                 Normal = arrays.Normals != null ? arrays.Normals[i] : Vector3.Up,
+                Tangent = arrays.Tangents != null ? arrays.Tangents[i] : Vector3.Zero,
+                Binormal = arrays.Binormals != null ? arrays.Binormals[i] : Vector3.Zero,
                 TexCoord = arrays.TexCoords != null ? arrays.TexCoords[i] : Vector2.Zero,
                 TexCoord2 = arrays.TexCoords2 != null ? arrays.TexCoords2[i] : Vector2.Zero,
                 TexCoord3 = arrays.TexCoords3 != null ? arrays.TexCoords3[i] : Vector2.Zero,
