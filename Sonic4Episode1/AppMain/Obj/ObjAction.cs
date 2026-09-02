@@ -71,7 +71,7 @@ internal partial class AppMain
         obj_3d.flag &= 3221225471U;
     }
 
-    private static void ObjCopyAction3dNNModel(
+    internal static void ObjCopyAction3dNNModel(
       OBS_ACTION3D_NN_WORK src_obj_3d,
       OBS_ACTION3D_NN_WORK dest_obj_3d)
     {
@@ -447,7 +447,7 @@ internal partial class AppMain
         ObjAction3dNNMaterialMotionLoad(obj_work.obj_3d, reg_file_id, data_work, filename, index, (AMS_AMB_HEADER)archive, motion_num, mmotion_num);
     }
 
-    private static bool ObjAction3dNNModelLoadCheck(OBS_ACTION3D_NN_WORK obj_3d)
+    internal static bool ObjAction3dNNModelLoadCheck(OBS_ACTION3D_NN_WORK obj_3d)
     {
         if (((int)obj_3d.flag & int.MinValue) != 0)
         {

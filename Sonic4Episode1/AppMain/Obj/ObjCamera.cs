@@ -75,8 +75,15 @@ internal partial class AppMain
         }
         OBS_CAMERA obj_camera = obj_camera_sys.obj_camera[cam_id];
         obj_camera.flag |= 16U;
-        obj_camera.znear = 1f;
-        obj_camera.zfar = 60000f;
+
+        // PC's sub_4BDD90 branches on the stage here, and the card stage alone gets a tight depth
+        // range instead of 1..60000. It applies to every camera the init builds, not just the near
+        // layer's, which is the point: that stage draws a perspective pass into the same buffer as
+        // its ortho one, and the two are only comparable over a range this narrow
+        bool card_stage = g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_2_2;
+
+        obj_camera.znear = card_stage ? 224f : 1f;
+        obj_camera.zfar = card_stage ? 1600f : 60000f;
         obj_camera.aspect = AMD_SCREEN_ASPECT;
         obj_camera.fovy = NNM_DEGtoA32(45f);
         nnMakePerspectiveMatrix(obj_camera.prj_pers_mtx, obj_camera.fovy, obj_camera.aspect, obj_camera.znear, obj_camera.zfar);

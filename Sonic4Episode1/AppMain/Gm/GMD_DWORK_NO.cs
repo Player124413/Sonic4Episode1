@@ -444,8 +444,25 @@
     public const int GMD_DWORK_NO_GMK_TRUMPROAD_MDL = 993;
     public const int GMD_DWORK_NO_GMK_TRUMPROAD_TEX = 994;
     public const int GMD_DWORK_NO_GMK_TRUMPROAD_MTN = 995;
-    public const int GMD_DWORK_NO_GMK_END = 996;
-    public const int GMD_DWORK_NO_DEC_START = 996;
-    public const int GMD_DWORK_NO_DEC_END = 997;
-    public const int GMD_DWORK_NO_MAX = 997;
+    public const int GMD_DWORK_NO_GMK_TP_TURN_MDL = 996;
+    public const int GMD_DWORK_NO_GMK_TP_TURN_TEX = 997;
+    public const int GMD_DWORK_NO_GMK_TP_TURN_MAT = 998;
+    public const int GMD_DWORK_NO_GMK_TP_TURN_8_MAT = 999;
+    // the eight suits stay in PC's own order, so a suit index doubles as the offset from
+    // GMD_DWORK_NO_GMK_TRUMPSTAGE_S the way it does from gm_gmk_trumpstage_model_works[0]
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_S_MDL = 1000;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_H_MDL = 1001;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_D_MDL = 1002;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_C_MDL = 1003;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_S5_MDL = 1004;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_H7_MDL = 1005;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_D10_MDL = 1006;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_C9_MDL = 1007;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_TEX = 1008;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_MTN = 1009;
+    public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_MAT = 1010;
+    public const int GMD_DWORK_NO_GMK_END = 1011;
+    public const int GMD_DWORK_NO_DEC_START = 1011;
+    public const int GMD_DWORK_NO_DEC_END = 1012;
+    public const int GMD_DWORK_NO_MAX = 1012;
 }

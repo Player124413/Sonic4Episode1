@@ -248,7 +248,8 @@ internal partial class AppMain
         obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTrumpRoadRouteState);
         obj_work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTrumpRoadRouteDraw);
 
-        GmSoundPlaySE("Cards4");
+        work.se_handle = GsSoundAllocSeHandle();
+        GmSoundPlaySE("Cards4", work.se_handle);
 
         GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[0];
         if (ply_work != null)
@@ -309,6 +310,8 @@ internal partial class AppMain
 
         GMS_GMK_TRUMPROAD_WORK work = (GMS_GMK_TRUMPROAD_WORK)obj_work;
 
+        gmGmkTrumpRoadStopRideSe(work);
+
         // GOAL0x is always the member after its ROUTE. PC crossfades the two on the obj3d's second
         // channel; this hard cuts, which is a visible difference at the end of the ride
         // TODO(port): blend ROUTE's final pose into GOAL rather than cutting
@@ -329,6 +332,20 @@ internal partial class AppMain
             GmBsCmnDeleteSNMWork(work.snm_work);
         }
 
+        // PC's destructor stops the handle too, not just the route end, so a road that dies without
+        // finishing its ROUTE does not leave the cue running
+        gmGmkTrumpRoadStopRideSe(work);
+
         obj_work.flag |= OBD_OBJECT_TASKCLEAR;
+    }
+
+    private static void gmGmkTrumpRoadStopRideSe(GMS_GMK_TRUMPROAD_WORK work)
+    {
+        if (work.se_handle == null)
+            return;
+
+        GmSoundStopSE(work.se_handle);
+        GsSoundFreeSeHandle(work.se_handle);
+        work.se_handle = null;
     }
 }

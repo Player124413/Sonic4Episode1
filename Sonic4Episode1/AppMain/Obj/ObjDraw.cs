@@ -1379,11 +1379,17 @@
         {
             if (obj_draw_3dnn_command_state_tbl[index] != uint.MaxValue)
             {
-                // The card road is the one pass drawn under a perspective projection while the
-                // rest of the stage is ortho, so its depths are not comparable with what is
-                // already in the buffer and it loses the test against scenery it should be in
-                // front of. It draws over everything by design, so give it a clean buffer
-                if (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_TRUMPROAD)
+                // Two passes are drawn under a perspective projection while the rest of the stage
+                // is ortho, so their depths are not comparable with what is already in the buffer
+                // and they lose the test against scenery they should be in front of. Both draw
+                // over everything by design, so give them a clean buffer:
+                //
+                // - the card road, which is its own pass
+                // - the card stage's near map layer, which carries the neon suit signs. Only that
+                //   stage draws its near layer in perspective, which is why no other one needs it
+                if (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_TRUMPROAD
+                    || (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_NEAR_MAP
+                        && gmMapNearLayerIsPerspective()))
                 {
                     mpp.OpenGL.glClearDepthf(1f);
                     mpp.OpenGL.glClear(256U);

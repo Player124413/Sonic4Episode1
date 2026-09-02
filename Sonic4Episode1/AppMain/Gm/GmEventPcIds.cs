@@ -65,8 +65,18 @@ internal partial class AppMain
         for (int id = GMD_EVENT_ID_GMK_TP_TURN_BOARD; id <= GMD_EVENT_ID_GMK_TP_TURN_COLUMN; ++id)
             g_gm_event_size_tbl[id] = 128;
 
+        g_gm_event_tbl[GMD_EVENT_ID_GMK_TP_TURN_BOARD] = new Del__(GmGmkTpTurnInitBoard);
+        g_gm_event_tbl[GMD_EVENT_ID_GMK_TP_TURN_ROW] = new Del__(GmGmkTpTurnInitRow);
+        g_gm_event_tbl[GMD_EVENT_ID_GMK_TP_TURN_COLUMN] = new Del__(GmGmkTpTurnInitColumn);
+        g_gm_event_tbl[GMD_EVENT_ID_NOSET_TP_TURN_PICT] = new Del__(GmGmkTpTurnInitPict);
+
+        // one maker for all eight, the way PC does it. Keeping ours contiguous means the suit is
+        // just the offset, where PC has to skip the two Lost Labyrinth ids sitting in its gap
         for (int id = GMD_EVENT_ID_GMK_TRUMP_STAGE_S; id <= GMD_EVENT_ID_GMK_TRUMP_STAGE_C9; ++id)
+        {
             g_gm_event_size_tbl[id] = 96;
+            g_gm_event_tbl[id] = new Del__(GmGmkTrumpStageInit);
+        }
 
         // never read: both are born through GmEventMgrLocalEventBirth, which calls the maker direct
         g_gm_event_size_tbl[GMD_EVENT_ID_NOSET_TP_TURN_PICT] = 64;

@@ -14065,7 +14065,7 @@ internal partial class AppMain
     public static readonly GSE_MAIN_STAGE_TYPE[] g_gm_gamedat_stage_type_tbl;
     public static readonly int[] g_gm_gamedat_zone_type_tbl;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_player_sonic;
-    private static readonly GMS_GAMEDAT_LOAD_INFO[] gm_gamedat_tbl_player_info_tbl;
+    internal static readonly GMS_GAMEDAT_LOAD_INFO[] gm_gamedat_tbl_player_info_tbl;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map01_01;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map01_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map01_03;
@@ -14074,6 +14074,12 @@ internal partial class AppMain
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_03;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_BOSS;
+    // the same four with ZONE2_M_M and ZONE2_M_V spliced in. Zone 2 is the only zone whose motion
+    // sidecars we ship, and the only zone that has anything in them worth animating
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_01_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_02_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_03_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_BOSS_console;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_01;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_03;
@@ -14995,6 +15001,10 @@ internal partial class AppMain
     private static AMS_AMB_HEADER g_gm_gmk_boss3_wall_obj_tvx_list;
     private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_bobbin_obj_3d_list;
     private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_trumproad_obj_3d_list;
+    private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_tp_turn_obj_3d_list;
+    // one list per suit, because the eight faces ship as eight one-member archives rather than
+    // one archive with eight members. PC's gm_gmk_trumpstage_model_works is the same shape
+    private static OBS_ACTION3D_NN_WORK[][] g_gm_gmk_trumpstage_obj_3d_list;
     public static TaskWorkFactoryDelegate _GmEffectCreateWork_Delegate;
     private static GSF_TASK_PROCEDURE _GmEffectDefaultExit;
     private static MPP_VOID_OBS_OBJECT_WORK _ObjDrawActionSummaryDelegate;

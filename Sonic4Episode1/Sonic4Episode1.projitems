@@ -1004,6 +1004,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmPlySeqTrumpRoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTrumpRoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_GMK_TRUMPROAD_WORK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTpTurn.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTpTurnPict.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTpTurnMatch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTpTurnTables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_GMK_TP_TURN_WORK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_GMK_TP_TURN_PICT_WORK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkTrumpStage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_GMK_TRUMPSTAGE_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmFade.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGameData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGameDBuild.cs" />

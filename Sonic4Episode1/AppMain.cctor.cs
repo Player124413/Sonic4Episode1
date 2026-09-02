@@ -16572,6 +16572,10 @@ internal partial class AppMain
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/MAPFAR/ZONE2_MAPFAR.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostMapFar, -1),
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/DECO/DECO_ZONE2.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostDeco, -1)
         };
+        gm_gamedat_tbl_map02_01_console = gmMapTableWithMotion(gm_gamedat_tbl_map02_01, "G_ZONE2/MAP/ZONE2_M_M.AMB", "G_ZONE2/MAP/ZONE2_M_V.AMB");
+        gm_gamedat_tbl_map02_02_console = gmMapTableWithMotion(gm_gamedat_tbl_map02_02, "G_ZONE2/MAP/ZONE2_M_M.AMB", "G_ZONE2/MAP/ZONE2_M_V.AMB");
+        gm_gamedat_tbl_map02_03_console = gmMapTableWithMotion(gm_gamedat_tbl_map02_03, "G_ZONE2/MAP/ZONE2_M_M.AMB", "G_ZONE2/MAP/ZONE2_M_V.AMB");
+        gm_gamedat_tbl_map02_BOSS_console = gmMapTableWithMotion(gm_gamedat_tbl_map02_BOSS, "G_ZONE2/MAP/ZONE2_M_M.AMB", "G_ZONE2/MAP/ZONE2_M_V.AMB");
         gm_gamedat_tbl_map03_01 = new GMS_GAMEDAT_LOAD_DATA[]
         {
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/MAP/ZONE31_MAP.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostMap, -1),
@@ -17454,7 +17458,23 @@ internal partial class AppMain
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_B_WALL2_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 798),
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_MDL),
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_TEX),
-            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_MTN)
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPROAD_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPROAD_MTN),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TP_TURN_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TP_TURN_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TP_TURN_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TP_TURN_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TP_TURN_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TP_TURN_MAT),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TP_TURN_8_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TP_TURN_8_MAT),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_S_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_S_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_H_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_H_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_D_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_D_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_C_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_C_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_S5_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_S5_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_H7_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_H7_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_D10_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_D10_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_C9_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_C9_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_MTN),
+            // loaded and never attached, which is what PC does. docs/z2a2-trumpstage-re.md has why
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_MAT)
         }).ToArray();
         gm_gamedat_tbl_gimmick02_03 = new GMS_GAMEDAT_LOAD_DATA[]
         {
@@ -18857,7 +18877,7 @@ internal partial class AppMain
         gm_gmk_goal_panel_obj_3d_list = null;
         gm_gmk_goal_panel_effct = null;
         GMD_GAMEDAT_FILE_PATH_LENGTH_MAX = 256;
-        GMD_GAMEDAT_LOAD_CONTEXT_MAX = 96;
+        GMD_GAMEDAT_LOAD_CONTEXT_MAX = 128;
         gm_gmk_bridge_obj_3d_list = null;
         gm_gmk_breakobj_obj_3d_list = null;
         tbl_gm_gmk_bobj_col_rect = new short[][]
@@ -25607,6 +25627,8 @@ internal partial class AppMain
         gmEventExtendTablesForPcLevels();
         gmPlySeqExtendStateDataForPcLevels();
         g_gm_gmk_trumproad_obj_3d_list = null;
+        g_gm_gmk_tp_turn_obj_3d_list = null;
+        g_gm_gmk_trumpstage_obj_3d_list = null;
         gm_ending_tcb = null;
         gm_ending_obj_3d_list = null;
         gm_ending_obj_offset = new int[]

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 internal partial class AppMain
 {
@@ -50,6 +51,39 @@ internal partial class AppMain
     internal static bool gmStageIsPcLevel()
     {
         return gm_map_variant == gm_map_variant_pc;
+    }
+
+    // The two map motion sidecars are the console arm's: the leak guards their table rows with
+    // `#if !defined GMD_GAMEDAT_NO_CREATE_MAP_MOTION` and defines that macro, so the mobile build
+    // never had them. Console and pc are both console-grade art and both take them.
+    //
+    // Asked of the resolved variant rather than of the stage, because gmMapSelectVariant has
+    // already run by the time the load list is built, and because the extra rows must not feed
+    // back into the all-or-none tier check that decided it
+    internal static bool gmMapHasMotionData()
+    {
+        return gm_map_variant != gm_map_variant_mobile;
+    }
+
+    // The sidecars sit at GMD_GAMEDAT_MAP_MTN and _MMTN, which is positions 4 and 5, because
+    // gmGameDatLoadProcPostMap indexes g_gm_gamedat_map by the row's position in the table. Every
+    // row after them shifts, which is harmless: MAPFAR and DECO carry their own post procs and
+    // never look at the position
+    internal static GMS_GAMEDAT_LOAD_DATA[] gmMapTableWithMotion(
+      GMS_GAMEDAT_LOAD_DATA[] table,
+      string mtn_path,
+      string mmtn_path)
+    {
+        GMS_GAMEDAT_LOAD_DATA[] motion =
+        {
+            new GMS_GAMEDAT_LOAD_DATA(mtn_path, gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostMap, -1),
+            new GMS_GAMEDAT_LOAD_DATA(mmtn_path, gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostMap, -1),
+        };
+
+        return table.Take(GMD_GAMEDAT_MAP_MTN)
+            .Concat(motion)
+            .Concat(table.Skip(GMD_GAMEDAT_MAP_MTN))
+            .ToArray();
     }
 
     // zone 4 loads zone 1's map far archive, so following the global variant would hand it a console

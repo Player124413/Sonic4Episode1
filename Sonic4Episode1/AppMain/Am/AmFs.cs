@@ -370,7 +370,12 @@ internal partial class AppMain
     {
         for (int index = 0; index < amb.files.Length; ++index)
         {
-            AmbChunk ambChunk = amBindChunk(amb, index);
+            // an absent member is offset 0 and size 0, and has nothing to parse. ZONE2_M_M gets
+            // away with reaching here today only because its absent members have empty names too
+            AmbChunk ambChunk = amBindGet(amb, index, out string _);
+            if (ambChunk == null)
+                continue;
+
             string extension = Path.GetExtension(amb.files[index]);
             if (mppIsNnMotionMember(extension))
             {

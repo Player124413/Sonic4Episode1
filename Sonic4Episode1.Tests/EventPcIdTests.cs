@@ -55,18 +55,26 @@ public class EventPcIdTests
         Assert.Null(AppMain.g_gm_event_tbl[295]);
     }
 
-    // trumproad is written; tp_turn and trumpstage are not. A non-null slot for a family that has
-    // no module yet would dispatch into nothing
+    // all three families are written now. A remapped id landing on a null maker is silently
+    // skipped by the dispatch, so the card would simply never appear
     [Fact]
-    public void OnlyTheImplementedFamiliesHaveMakers()
+    public void EveryPortedIdHasAMaker()
     {
-        Assert.NotNull(AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_TRUMP_ROAD_CARD]);
-        Assert.NotNull(AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_NOSET_TRUMP_ROAD_ROUTE]);
+        for (int id = AppMain.GMD_EVENT_ID_PORTED_START; id < AppMain.GMD_EVENT_ID_MAX_PC; ++id)
+            Assert.NotNull(AppMain.g_gm_event_tbl[id]);
+    }
 
-        for (int id = AppMain.GMD_EVENT_ID_GMK_TP_TURN_BOARD;
-             id <= AppMain.GMD_EVENT_ID_NOSET_TP_TURN_PICT;
+    // PC dispatches all eight suits through gmGmkTrumpStageInit and picks the model off the id, so
+    // eight distinct makers here would mean the suit was being chosen twice
+    [Fact]
+    public void TheEightSuitsShareOneMaker()
+    {
+        var maker = AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_TRUMP_STAGE_S];
+
+        for (int id = AppMain.GMD_EVENT_ID_GMK_TRUMP_STAGE_S;
+             id <= AppMain.GMD_EVENT_ID_GMK_TRUMP_STAGE_C9;
              ++id)
-            Assert.Null(AppMain.g_gm_event_tbl[id]);
+            Assert.Equal(maker.Method, AppMain.g_gm_event_tbl[id].Method);
     }
 
     // read out of PC's gm_event_size_tbl at 0x5B3C38

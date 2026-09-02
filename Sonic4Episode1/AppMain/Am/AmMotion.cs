@@ -217,6 +217,9 @@ internal partial class AppMain
     public static int amMotionSetup(ArrayPointer<NNS_MOTION> motion, object _buf)
     {
         AmbChunk ambChunk = (AmbChunk)_buf;
+        if (ambChunk.length == 0)
+            return 0;
+
         using (MemoryStream memoryStream = new MemoryStream(ambChunk.array, ambChunk.offset, ambChunk.length))
         {
             BinaryReader reader = mppOpenNnChunk(memoryStream);

@@ -802,7 +802,7 @@ internal partial class AppMain
         pObj.obj_type = usType;
     }
 
-    private static void ObjObjectParentSet(
+    internal static void ObjObjectParentSet(
       OBS_OBJECT_WORK pObj,
       OBS_OBJECT_WORK pParent,
       uint ulFlag)

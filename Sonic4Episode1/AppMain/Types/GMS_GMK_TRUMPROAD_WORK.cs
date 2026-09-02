@@ -19,6 +19,10 @@ internal partial class AppMain
         public int route;
         public OBS_OBJECT_WORK card_obj;
 
+        // "Cards4" loops for the length of the ride, so it needs a handle of its own to be stopped
+        // on. PC keeps the same thing at road work +2268
+        public GSS_SND_SE_HANDLE se_handle;
+
         // PC keeps the rider's previous position in the player work, in fields its struct has and
         // ours does not. Only the x is ever read back, and only by the road, so it lives here
         public int ride_prev_pos_x;

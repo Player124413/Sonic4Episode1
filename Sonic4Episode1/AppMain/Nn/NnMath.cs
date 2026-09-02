@@ -2185,7 +2185,7 @@ internal partial class AppMain
         dst.w = 1f;
     }
 
-    private static void nnMakeRotateAxisQuaternion(
+    internal static void nnMakeRotateAxisQuaternion(
       out NNS_QUATERNION dst,
       float vx,
       float vy,
@@ -2249,7 +2249,7 @@ internal partial class AppMain
         }
     }
 
-    private static void nnMakeRotateXYZQuaternion(
+    internal static void nnMakeRotateXYZQuaternion(
       out NNS_QUATERNION dst,
       int rx,
       int ry,

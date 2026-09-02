@@ -118,7 +118,7 @@ internal partial class AppMain
                 }
             }
         }
-        GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo3 = gm_gamedat_tbl_map_info_tbl[stage_id];
+        GMS_GAMEDAT_LOAD_INFO gmsGamedatLoadInfo3 = gmGameDatMapInfoFor(stage_id);
         int index4 = 0;
         while (index4 < gmsGamedatLoadInfo3.num)
         {
@@ -903,7 +903,32 @@ internal partial class AppMain
     // and xbla's is the pinball minigame, PC's is the card stage, and the card stage places enemies
     // and gimmicks the minigame never loaded. gmMapSelectVariant has already run by the time these
     // are called, so the tier is known. Everything else falls through to the shared table
-    private static GMS_GAMEDAT_LOAD_INFO gmGameDatEnemyInfoFor(int stage_id)
+    // Zone 2 is the only zone whose map motion sidecars we ship, and they exist only as
+    // console-grade art, so the two rows are spliced in here rather than living in the tables.
+    // Keeping them out of gm_gamedat_tbl_map_info_tbl is deliberate: gmMapAllMapArchives decides
+    // the tier by requiring every map row to resolve to it, and rows that only exist above base
+    // would make that decision depend on its own outcome
+    internal static GMS_GAMEDAT_LOAD_INFO gmGameDatMapInfoFor(int stage_id)
+    {
+        if (!gmMapHasMotionData())
+            return gm_gamedat_tbl_map_info_tbl[stage_id];
+
+        switch (stage_id)
+        {
+            case 4:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_01_console, gm_gamedat_tbl_map02_01_console.Length);
+            case 5:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_02_console, gm_gamedat_tbl_map02_02_console.Length);
+            case 6:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_03_console, gm_gamedat_tbl_map02_03_console.Length);
+            case 7:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_BOSS_console, gm_gamedat_tbl_map02_BOSS_console.Length);
+            default:
+                return gm_gamedat_tbl_map_info_tbl[stage_id];
+        }
+    }
+
+    internal static GMS_GAMEDAT_LOAD_INFO gmGameDatEnemyInfoFor(int stage_id)
     {
         if (stage_id == 5 && gmStageIsPcLevel())
             return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_enemy02_02_pc, gm_gamedat_tbl_enemy02_02_pc.Length);
@@ -911,7 +936,7 @@ internal partial class AppMain
         return gm_gamedat_tbl_enemy_info_tbl[stage_id];
     }
 
-    private static GMS_GAMEDAT_LOAD_INFO gmGameDatGimmickInfoFor(int stage_id)
+    internal static GMS_GAMEDAT_LOAD_INFO gmGameDatGimmickInfoFor(int stage_id)
     {
         if (stage_id == 5 && gmStageIsPcLevel())
             return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_gimmick02_02_pc, gm_gamedat_tbl_gimmick02_02_pc.Length);
@@ -932,6 +957,8 @@ internal partial class AppMain
             GmGmkBreakObjBuild();
             GmGmkBreakWallBuild();
             GmGmkTrumpRoadBuild();
+            GmGmkTpTurnBuild();
+            GmGmkTrumpStageBuild();
         }
 
         GmGmkBumperBuild();
@@ -1281,6 +1308,8 @@ internal partial class AppMain
             GmGmkBreakObjFlush();
             GmGmkBreakWallFlush();
             GmGmkTrumpRoadFlush();
+            GmGmkTpTurnFlush();
+            GmGmkTrumpStageFlush();
         }
 
         GmGmkBumperFlush();

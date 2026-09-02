@@ -607,6 +607,14 @@ internal partial class AppMain
             {
                 gmsMapSysWork.flag |= (uint)(1 << index);
                 mapState[index].pos_z = gm_map_addmap_pos_z_tbl[index];
+
+                // The card stage pulls its near layer 500 forward, to 756. With the camera 1000
+                // back that leaves it 244 away, just past that stage's own znear of 224, and it is
+                // why the layer is worth drawing in perspective at all. At the table's 256 it sits
+                // three times too far and comes out three times too small
+                if (index == 0 && gmMapNearLayerIsPerspective())
+                    mapState[index].pos_z += 500f;
+
                 MP_HEADER mpHeader = (MP_HEADER)g_gm_gamedat_map_set_add[index * 2];
                 mapState[index].map_block_num[0] = mpHeader.map_w;
                 mapState[index].map_block_num[1] = mpHeader.map_h;
@@ -1208,6 +1216,17 @@ internal partial class AppMain
 
     // the zone 2-2 near layer registers one of these before its camera, and it does nothing beyond
     // sitting in the command list
+    // PC's gmMapMain passes the projection to sub_4B71F0 in ecx: the card stage alone passes 0
+    // (perspective) for add layer 0 and 1 (ortho) for the rest, where every other stage passes a
+    // literal 1 for all five. So the near layer is a perspective pass over an ortho stage, and only
+    // here. ObjDraw's bucket loop needs that fact as much as the draw does
+    internal static bool gmMapNearLayerIsPerspective()
+    {
+        return g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_2_2;
+    }
+
+    // PC submits one of these into the near layer's bucket and it is nullsub_31 there too, so the
+    // empty body is the port rather than a gap
     private static void gmMapMainNearLayerUserFunc(object data)
     {
     }
@@ -1276,7 +1295,7 @@ internal partial class AppMain
 
             bool loop_h = index != 1 && (work.flag & GMD_MAP_FLAG_ADD_MAP_LOOP_X) != 0U;
 
-            if (g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_2_2)
+            if (gmMapNearLayerIsPerspective())
             {
                 int draw_size = GMD_MAP_DRAW_WIDTH_DEF;
                 int projection = NNE_PROJECTION_TYPE_ORTHO;
