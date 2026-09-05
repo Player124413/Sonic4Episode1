@@ -7,7 +7,7 @@ internal partial class AppMain
 {
     public const float GMD_CAMERA_SCALE = 0.2997259375f;    // gmMain.h:65, the !_IPHONE arm
 
-    // gmMain.h:72-78, an iPhone-only feature with no console value. see docs/camera-view-extent.md
+    // gmMain.h:72-78, an iPhone-only feature with no console value
     public const float GMD_CAMERA_UP_SCALE_ADD = 0.01f * (320f / 720f);
     public const float GMD_CAMERA_UP_SCALE_MAX = GMD_CAMERA_SCALE / 2f;
 
@@ -82,7 +82,7 @@ internal partial class AppMain
     private void GmMainInit(object arg)
     {
         GsFontRelease();
-        //AppMain.CPadEmu.CreateInstance().Create(AppMain.CPadEmu.EMode.Game);
+        gmMainApplyNextStage();
         if (GsTrialIsTrial())
             g_gs_main_sys_info.stage_id = (ushort)nextDemoLevel;
         if (SaveState.shouldResume())
@@ -102,14 +102,13 @@ internal partial class AppMain
         gmMapSelectVariant(g_gs_main_sys_info.stage_id);
         gmDecoSelectVariant(g_gs_main_sys_info.stage_id);
         gmGmkSelectVariant(g_gs_main_sys_info.stage_id);
+        gmMainSelectLightVariant(g_gs_main_sys_info.stage_id);
         gmMainSetNNCommandStateTbl();
         AoActSysClearPeak();
         if (((int)g_gs_main_sys_info.game_flag & 16) == 0)
             gmMainLoad(0);
         else
             gmMainRebuild();
-
-        //AoPresenceSet((AOE_PRESENCE)GsGetMainSysInfo().stage_id, false);
     }
 
     // console has 13 buckets against iPhone's 16: 3DNN_PRE, 3DNN_POST and 3DNN_WS do not exist
@@ -528,9 +527,6 @@ internal partial class AppMain
         GmGameDatBuildStandard();
         GmGameDatBuildArea();
         mtTaskChangeTcbProcedure(tcb, new GSF_TASK_PROCEDURE(gmMainDataBuildWait));
-        // GC.Collect();
-        // GC.WaitForPendingFinalizers();
-        // GC.Collect();
 
 #if NET9_0_OR_GREATER
         GC.Collect(2, GCCollectionMode.Aggressive, true, true);
@@ -857,7 +853,7 @@ internal partial class AppMain
             GmStartDemo.GmStartDemoStart();
     }
 
-    private static void gmMainInitLight()
+    internal static void gmMainInitLight()
     {
         NNS_RGBA col = new NNS_RGBA(1f, 1f, 1f, 1f);
         NNS_VECTOR nnsVector = GlobalPool<NNS_VECTOR>.Alloc();
@@ -892,28 +888,20 @@ internal partial class AppMain
             nnsVector.z = -1f;
         }
         else
-        {
-            nnsVector.x = 0.0f;
-            nnsVector.y = 0.0f;
-            nnsVector.z = -1f;
-        }
+            nnsVector.Assign(gm_main_light_variant.default_light_vec);
         nnNormalizeVector(nnsVector, nnsVector);
         float intensity1 = g_gs_main_sys_info.stage_id != 14 ? 1f : 0.8f;
         ObjDrawSetParallelLight(NNE_LIGHT_0, ref col, intensity1, nnsVector);
         g_gm_main_system.def_light_vec.Assign(nnsVector);
         g_gm_main_system.def_light_col = col;
-        float intensity2 = g_gs_main_sys_info.stage_id != 14 ? 1.5f : 1f;
-        if (GMM_MAIN_GET_ZONE_TYPE() == 3)
+        float intensity2 = g_gs_main_sys_info.stage_id != 14
+            ? gm_main_light_variant.player_intensity
+            : 1f;
+        if (!gm_main_light_variant.player_light_follows_default)
         {
-            nnsVector.x = 0.05f;
-            nnsVector.y = 0.15f;
-            nnsVector.z = -0.05f;
-        }
-        else
-        {
-            nnsVector.x = -0.5f;
-            nnsVector.y = -0.4f;
-            nnsVector.z = -0.25f;
+            nnsVector.Assign(GMM_MAIN_GET_ZONE_TYPE() == 3
+                ? gm_main_light_variant.player_light_vec_zone_4
+                : gm_main_light_variant.player_light_vec);
         }
         nnNormalizeVector(nnsVector, nnsVector);
         ObjDrawSetParallelLight(NNE_LIGHT_6, ref col, intensity2, nnsVector);
@@ -987,7 +975,6 @@ internal partial class AppMain
 
     private static void gmMainPost(MTS_TASK_TCB tcb)
     {
-        //AppMain.CPadEmu.CreateInstance();
         if ((g_gm_main_system.ply_work[0].player_flag & GMD_PLF_DIE) != 0 && g_gm_main_system.die_event_wait_time < 491520 && ((int)g_gm_main_system.game_flag & 64) == 0)
         {
             g_gm_main_system.die_event_wait_time = ObjTimeCountUp(g_gm_main_system.die_event_wait_time);
@@ -1118,8 +1105,115 @@ internal partial class AppMain
             evt_case = ((int)g_gm_main_system.game_flag & 2) == 0 ? (!GsMainSysIsStageClear(0) ? (short)4 : (short)0) : (short)1;
         }
         else
-            evt_case = ((int)g_gm_main_system.game_flag & 4) == 0 ? (((int)g_gm_main_system.game_flag & 2) == 0 ? (!GsMainSysIsStageClear(0) ? (short)4 : (short)0) : (short)1) : (((int)g_gm_main_system.game_flag & 16384) == 0 ? (g_gs_main_sys_info.stage_id != 16 ? (short)0 : (short)2) : (short)3);
+            evt_case = ((int)g_gm_main_system.game_flag & 4) == 0 ? (((int)g_gm_main_system.game_flag & 2) == 0 ? (!GsMainSysIsStageClear(0) ? (short)4 : (short)0) : (short)1) : (((int)g_gm_main_system.game_flag & 16384) == 0 ? (g_gs_main_sys_info.stage_id != 16 ? gmMainDecideClearNextEvtCase() : (short)2) : (short)3);
         SyDecideEvtCase(evt_case);
+    }
+
+    // the results screen sets GMD_GAME_FLAG_NEXT_STAGE from its NEXT prompt. PC answers it with
+    // the DM_NEXT_STAGE_MAIN screen, which we do not have, so its exit work is done here and case
+    // 7 re-enters the main game.
+    private static short gmMainDecideClearNextEvtCase()
+    {
+        if ((g_gm_main_system.game_flag & GMD_GAME_FLAG_NEXT_STAGE) == 0)
+            return 0;
+
+        g_gm_main_system.game_flag &= ~GMD_GAME_FLAG_NEXT_STAGE;
+
+        var next = gmMainNextStageId();
+        // PC runs its own unlock sequence at this moment; ours is the map showing the zone open
+        if (next == GSD_MAIN_STAGE_ID_FINAL_1 && gmMainIsFinalJustOpened())
+            return 0;
+
+        // applied at the next GmMainInit: the exit flush that runs between here and there picks
+        // its routine by stage id, so the id has to stay this stage's until the data is gone
+        gm_main_next_stage_id = next;
+        gm_main_next_stage_from = g_gs_main_sys_info.stage_id;
+        return 7;
+    }
+
+    private static ushort gm_main_next_stage_id = ushort.MaxValue;
+    private static ushort gm_main_next_stage_from = ushort.MaxValue;
+
+    // only the act this was decided from may consume it. Any screen that picks a stage of its own,
+    // the map above all, has already moved stage_id on, and then the pending one is stale
+    private static void gmMainApplyNextStage()
+    {
+        if (gm_main_next_stage_id == ushort.MaxValue)
+            return;
+
+        var pending = gm_main_next_stage_id;
+        var from = gm_main_next_stage_from;
+        gm_main_next_stage_id = ushort.MaxValue;
+        gm_main_next_stage_from = ushort.MaxValue;
+
+        if (g_gs_main_sys_info.stage_id != from)
+            return;
+
+        gmMainSetNextStage(pending);
+    }
+
+    private static bool gmMainIsFinalJustOpened()
+    {
+        var stage_id = g_gs_main_sys_info.stage_id;
+        var is_zone_boss = stage_id < GSD_MAIN_STAGE_ID_FINAL_1 && (stage_id & 3) == 3;
+        return is_zone_boss
+            && g_gs_main_sys_info.is_first_play
+            && !GsMainSysIsStageClear(GSD_MAIN_STAGE_ID_FINAL_1);
+    }
+
+    // DM_NEXT_STAGE_MAIN's rule. Until E.G.G. Station has been cleared it is the first uncleared
+    // act, this zone first; after that the acts in order. PC ends that second route in a stage 29
+    // tour that does not exist here, so it just wraps
+    private static ushort gmMainNextStageId()
+    {
+        var from = gmMainNextStageFrom();
+        if (!GsMainSysIsStageClear(GSD_MAIN_STAGE_ID_FINAL_1))
+            return gmMainFirstUnclearedStage(from, GsMainSysIsStageClear);
+
+        var next = from + 1;
+        return (ushort)(next >= GSD_MAIN_STAGE_ID_FINAL_1 ? 0 : next);
+    }
+
+    private static int gmMainNextStageFrom()
+    {
+        int from;
+        if ((g_gs_main_sys_info.game_flag & GSD_MAINSYS_GAME_FLAG_SPECIAL_STAGE) == 0)
+            from = g_gs_main_sys_info.stage_id;
+        else if (g_gs_main_sys_info.prev_stage_id == ushort.MaxValue)
+            from = 0;
+        else
+            from = g_gs_main_sys_info.prev_stage_id;
+
+        return from > GSD_MAIN_STAGE_ID_FINAL_1 ? GSD_MAIN_STAGE_ID_FINAL_1 : from;
+    }
+
+    internal static ushort gmMainFirstUnclearedStage(int from, System.Func<int, bool> is_stage_clear)
+    {
+        var zone_start = from < GSD_MAIN_STAGE_ID_FINAL_1 ? from & ~3 : GSD_MAIN_STAGE_ID_FINAL_1;
+        for (int stage_id = zone_start; stage_id < zone_start + 4; stage_id++)
+        {
+            if (!is_stage_clear(stage_id))
+                return (ushort)stage_id;
+        }
+
+        for (int stage_id = 0; stage_id < GSD_MAIN_STAGE_ID_FINAL_1; stage_id++)
+        {
+            if (!is_stage_clear(stage_id))
+                return (ushort)stage_id;
+        }
+
+        return GSD_MAIN_STAGE_ID_FINAL_1;
+    }
+
+    // what dmStgSlctSetNextEvt does before launching an act
+    private static void gmMainSetNextStage(ushort stage_id)
+    {
+        g_gs_main_sys_info.stage_id = stage_id;
+        g_gs_main_sys_info.prev_stage_id = ushort.MaxValue;
+        g_gs_main_sys_info.char_id[0] = GSD_CHAR_ID_SONIC;
+        g_gs_main_sys_info.game_mode = (int)GSD_GAME_MODE_STORY;
+        g_gs_main_sys_info.game_flag &= ~GSD_MAINSYS_GAME_FLAG_SPECIAL_STAGE;
+        GmMainGSInit();
     }
 
     private static bool gmMainCheckExeSyncTimerCount()

@@ -55,7 +55,6 @@ public class TexturePlanTests
         Assert.Equal(expected, plan.Target);
     }
 
-    // A block compressed source only ever matches itself, so nothing is ever decoded and re-encoded.
     [Theory]
     [InlineData(TextureFormat.Bc1)]
     [InlineData(TextureFormat.Bc3)]
@@ -181,7 +180,7 @@ public class TexturePlanTests
     }
 
     // the ASTC set pairs footprint to the BC rule it stands in for: 6x6 where BC1 would apply,
-    // 4x4 where BC3 would. docs/webgl-texture-capabilities.md
+    // 4x4 where BC3 would
     [Theory]
     [InlineData(AlphaShape.Opaque, TextureFormat.Astc6x6)]
     [InlineData(AlphaShape.PunchThrough, TextureFormat.Astc6x6)]
@@ -223,7 +222,6 @@ public class TexturePlanTests
         Assert.Equal(TextureFormat.Astc4x4, plan.Target);
     }
 
-    // but a footprint must never churn into the other one
     [Fact]
     public void AstcIsNeverReEncodedIntoTheOtherFootprint()
     {

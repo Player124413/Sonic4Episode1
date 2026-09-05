@@ -6908,6 +6908,7 @@ internal partial class AppMain
         amDraw_NNS_TRS_Pool = new Pool<NNS_TRS>();
         amDraw_AOS_ACT_DRAW_Pool = new Pool<AOS_ACT_DRAW>();
         amDraw_NNS_OBJECT_Pool = new Pool<NNS_OBJECT>();
+        amDraw_AMS_SORT_DRAW_OBJECT_WORK_Pool = new Pool<AMS_SORT_DRAW_OBJECT_WORK>();
         NNS_PRIM3D_PCT_ALLOC_CNT = 0;
         _amDrawSortPrimitive3D_base_mtx = new NNS_MATRIX();
         _amDrawSortPrimitive2D_mtx = new NNS_MATRIX();
@@ -17473,7 +17474,7 @@ internal partial class AppMain
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_C9_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_C9_MDL),
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_TEX),
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_MTN.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_MTN),
-            // loaded and never attached, which is what PC does. docs/z2a2-trumpstage-re.md has why
+            // loaded and never attached, which is what PC does
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE2/GMK/GMK_TRUMPSTAGE_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TRUMPSTAGE_MAT)
         }).ToArray();
         gm_gamedat_tbl_gimmick02_03 = new GMS_GAMEDAT_LOAD_DATA[]
@@ -20632,7 +20633,6 @@ internal partial class AppMain
         _am_tlist_cline = 0;
         _am_tlist_dline = 0;
         ams_fsList = new LinkedList<AMS_FS>();
-        FsReadSpeedBytesPerFrame = 32768;
         lastReadAMS_FS = null;
         GMD_SMSG_FLAG_WIN_DISP = 1U;
         GMD_SMSG_FLAG_OK_DISP = 2U;
@@ -31726,10 +31726,23 @@ internal partial class AppMain
         new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(16, 0U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
         new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(17, 1U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1)
         };
+        gm_efct_zone02_pc_create_param_tbl = new GMS_EFCT_ZONE_CREATE_PARAM[]
+        {
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(0, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(1, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(2, 2U, 1U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(3, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(4, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(5, 1U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(6, 1U, 1U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(7, 1U, 1U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1)
+        };
+        gm_efct_zone02_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone02_create_param_tbl, 2);
+        gm_efct_zone02_pc_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone02_pc_create_param_tbl, 8);
         gm_efct_zone_create_info = new GMS_EFCT_ZONE_CREATE_INFO[]
         {
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone01_create_param_tbl, 9),
-        new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone02_create_param_tbl, 2),
+        gm_efct_zone02_create_info,
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone03_create_param_tbl, 36),
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone04_create_param_tbl, 4),
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone_final_create_param_tbl, 1),

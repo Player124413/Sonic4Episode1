@@ -320,8 +320,16 @@ internal partial class AppMain
         new GMS_EFCT_CMN_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(96, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1)
     };
 
+    private const string GMD_EFCT_CMN_FILENAME = "G_COM/EFF/EFF_CMN.AMB";
+
+    // EFF_CMN is the only archive in the game whose effects carry model nodes, G_ZONE*/EFF have
+    // none, so this one flag covers every AME model object. It decides which draw command state
+    // they register in: see ObjAction3dESDrawState.
+    internal static bool gm_efct_cmn_as_console;
+
     private static void GmEfctCmnBuildDataInit()
     {
+        gm_efct_cmn_as_console = amFsAllConsoleGrade(GMD_EFCT_CMN_FILENAME);
         gm_efct_cmn_proc_state = GME_EFCT_CMN_PROCESS_STATE_WAIT_START;
     }
 
@@ -641,8 +649,6 @@ internal partial class AppMain
       int ofst_y,
       int ofst_z)
     {
-        //if (g_gs_main_sys_info.stage_id != 9)
-        //    return;
         GMS_EFFECT_3DES_WORK efct_work = GmEfctCmnEsCreate(obj_work, 77);
         GmComEfctSetDispOffset(efct_work, ofst_x, ofst_y, 65536 + ofst_z);
         efct_work.obj_3des.ecb.drawObjState = 0U;

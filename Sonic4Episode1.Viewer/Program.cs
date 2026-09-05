@@ -16,6 +16,18 @@ if (args.Length > 0 && args[0] == "--survey-motion")
     return MotionSurvey.Run(args[1]);
 }
 
+// --survey-ame <dir> parses every .AME under it and reports node types, byte order and failures
+if (args.Length > 0 && args[0] == "--survey-ame")
+{
+    if (args.Length < 2)
+    {
+        Console.Error.WriteLine("usage: viewer --survey-ame <directory>");
+        return 1;
+    }
+
+    return AmeSurvey.Run(args[1]);
+}
+
 // --check-motion <dir|file.amb> runs every motion through evaluation and reports what breaks
 if (args.Length > 0 && args[0] == "--check-motion")
 {

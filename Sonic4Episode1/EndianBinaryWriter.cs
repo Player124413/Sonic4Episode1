@@ -51,10 +51,10 @@ internal sealed class EndianBinaryWriter : BinaryWriter
             base.Write(value);
             return;
         }
-#if NET40
-        base.Write(BinaryPrimitives.ReverseEndianness(BitConverterEx.SingleToUInt32Bits(value)));
-#else
+#if NETCOREAPP3_0_OR_GREATER
         base.Write(BinaryPrimitives.ReverseEndianness(BitConverter.SingleToUInt32Bits(value)));
+#else
+        base.Write(BinaryPrimitives.ReverseEndianness(BitConverterEx.SingleToUInt32Bits(value)));
 #endif
     }
 
@@ -65,10 +65,10 @@ internal sealed class EndianBinaryWriter : BinaryWriter
             base.Write(value);
             return;
         }
-#if NET40
-        base.Write(BinaryPrimitives.ReverseEndianness(BitConverterEx.DoubleToUInt64Bits(value)));
-#else
+#if NETCOREAPP3_0_OR_GREATER
         base.Write(BinaryPrimitives.ReverseEndianness(BitConverter.DoubleToUInt64Bits(value)));
+#else
+        base.Write(BinaryPrimitives.ReverseEndianness(BitConverterEx.DoubleToUInt64Bits(value)));
 #endif
     }
 }

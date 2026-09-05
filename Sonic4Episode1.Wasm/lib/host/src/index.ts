@@ -3,8 +3,8 @@
 
 import Accelerometer from './accelerometer.js';
 import Guide from './guide.js';
-import WasmMediaPlayer from './mediaplayer.js';
 import { choose, profileFor } from './content.js';
+import { install, readBegin, readTake, report } from './store.js';
 // @ts-ignore
 import { dotnet } from '../_framework/dotnet.js';
 
@@ -80,20 +80,21 @@ const onInstall = () => {
 window.onresize = layout;
 window.addEventListener('appinstalled', onInstall);
 
+// what to paste back after a playthrough
+(window as any).contentReport = () => console.log(report());
+
 // blocks until the player presses Go, so the runtime starts with a content set already decided and
 // with the gesture WebAudio wants already spent
 const contentProfile = profileFor(await choose());
 
 const { setModuleImports, getAssemblyExports, getConfig } = await dotnet
     .withDiagnosticTracing(false)
-    .withApplicationArguments(window.location.href, contentProfile)
+    .withApplicationArguments(contentProfile)
     .create();
 
 const FS = dotnet.instance.Module.FS;
-const IDBFS = dotnet.instance.Module.IDBFS;
 
 const S4E1 = await getAssemblyExports("Sonic4Episode1.Wasm.dll")
-const mediaPlayer = new WasmMediaPlayer(S4E1);
 
 setModuleImports('main.js', {
     // setMainLoop: (cb: any) => dotnet.instance.Module.setMainLoop(cb),
@@ -115,31 +116,15 @@ setModuleImports('main.js', {
         requestAnimationFrame(loop);
     },
 
-    // resolving on error too would hide a failed write to IndexedDB, and the only symptom of that
-    // is content silently not surviving a refresh
-    syncFS: () => new Promise<void>((res, rej) => {
-        FS.syncfs(false, (err: any) => {
-            if (err) {
-                console.error('syncfs failed, content will not persist', err);
-                rej(err);
-                return;
-            }
-
-            res();
-        });
-    }),
-
-    reportProgress: (str: string, prog: number) => {
+    contentInstall: (profile: string) => install(FS, profile, (str, prog) => {
         status.textContent = str;
         progress.value = prog;
-    },
+    }),
+    contentReadBegin: readBegin,
+    contentReadTake: readTake,
 
-    MediaPlayer_GetVolume: mediaPlayer.getVolume.bind(mediaPlayer),
-    MediaPlayer_SetVolume: mediaPlayer.setVolume.bind(mediaPlayer),
-    MediaPlayer_Play: (song: string) => mediaPlayer.play(song),
-    MediaPlayer_PlayLooped: (song: string, loop: number) => mediaPlayer.play(song, loop),
-    MediaPlayer_LoadSong: (song: string) => mediaPlayer.preload(song),
-    MediaPlayer_Stop: mediaPlayer.stop.bind(mediaPlayer),
+    // a content read failed past recovering; the bundles are cached, so starting over is cheap
+    reloadPage: () => window.location.reload(),
 
     XmlStorage_GetSaveFile: () => localStorage.getItem('saveData'),
     XmlStorage_SetSaveFile: (data: string) => localStorage.setItem('saveData', data),
@@ -154,10 +139,5 @@ setModuleImports('main.js', {
     WebBrowserTask_Open: (url: string) => window.open(url, '_blank'),
 });
 
-FS.mkdir('/content');
-FS.mount(IDBFS, {}, '/content');
-
-FS.syncfs(true, async () => {
-    dotnet.instance.Module.canvas = canvas;
-    await dotnet.run();
-});
+dotnet.instance.Module.canvas = canvas;
+await dotnet.run();

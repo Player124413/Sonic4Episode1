@@ -7,9 +7,6 @@ using static GmPauseMenu.GME_PMENU_RESULT;
 using static GmPauseMenu.GME_PMENU_SE;
 using static GmPauseMenu.GME_PMENU_STATE;
 
-// the console pause menu, gmPauseMenu.cpp, which is wrapped entirely in #if !_IPHONE and was never
-// decompiled. AppMain/Gm/GmPauseMenu.cs routes between this and the touch menu the WP7 build had.
-// see docs/pause-action-ids.md
 internal static partial class GmPauseMenu
 {
     private static readonly GMS_PMENU_GLOBAL gm_pmenu_work = new GMS_PMENU_GLOBAL();
@@ -19,8 +16,6 @@ internal static partial class GmPauseMenu
         return gm_pmenu_work;
     }
 
-    // all of the screen's archives or none: the console and mobile builds are different screens
-    // here, not different art, and xbla ships six languages against this build's eleven
     public static bool GmPauseMenuIsConsoleDataComplete()
     {
         var lng = GsEnvGetLanguage();
@@ -65,9 +60,6 @@ internal static partial class GmPauseMenu
 
         work.state = GMD_PMENU_STATE_LOADING;
 
-        // the C++ chains nine background reads and steals fs->buf raw. amFs parses what it reads as
-        // an archive, which an .AMA is not, so the four action files come in synchronously instead.
-        // They are small and this runs behind the stage load.
         work.file_cmn_ama = readAMAFile(GMD_PMENU_FILE_CMN_AMA);
         work.file_lng_ama = readAMAFile(GMD_PMENU_FILE_LNG_AMA);
         work.file_plf_ama = readAMAFile(GMD_PMENU_FILE_PLF_AMA);
@@ -218,8 +210,6 @@ internal static partial class GmPauseMenu
         return gmPmGetGlbWork().result;
     }
 
-    // ---- resource wait tasks
-
     private static void gmPmLoadTaskWait(AMS_TCB tcb)
     {
         var work = gmPmGetGlbWork();
@@ -290,8 +280,6 @@ internal static partial class GmPauseMenu
         work.tcb = null;
     }
 
-    // ---- the execute task
-
     private static GMS_PMENU_TASK_WORK gmPmGetTaskWork()
     {
         return (GMS_PMENU_TASK_WORK)amTaskGetWork(gmPmGetGlbWork().tcb);
@@ -307,8 +295,6 @@ internal static partial class GmPauseMenu
         gmPmGetTaskWork().proc = proc;
     }
 
-    // the count resets whenever the proc changes, so a proc's first frame always sees zero. Every
-    // one of the nineteen procs relies on that.
     private static void gmPmTask00(AMS_TCB tcb)
     {
         var twork = (GMS_PMENU_TASK_WORK)amTaskGetWork(tcb);
@@ -362,8 +348,6 @@ internal static partial class GmPauseMenu
         gwork.tcb = null;
     }
 
-    // ---- util
-
     private static void gmPmUtilSetTexture(GME_PMENU_ACT act_no)
     {
         var gwork = gmPmGetGlbWork();
@@ -391,8 +375,6 @@ internal static partial class GmPauseMenu
         GmSoundPlaySE(gm_pm_se_name_tbl[(int)se], gmPmGetGlbWork().se_handle);
     }
 
-    // ---- pad
-
     private static BUTTON gmPmPadStand()
     {
         return AoPadStand();
@@ -407,8 +389,6 @@ internal static partial class GmPauseMenu
     {
         return AoPadMRepeat();
     }
-
-    // ---- what the menu asks about the game
 
     private static bool gmPmGlbIsBackEnable()
     {

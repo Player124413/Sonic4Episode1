@@ -1,8 +1,7 @@
 internal partial class AppMain
 {
-    // One placed flip card: a decorative frame built from up to ten mirrored segment models, plus
-    // four pict children spawned as local events. PC gives it a 0x3A40 work with the segments
-    // inline; see docs/z2a2-tp-turn-re.md.
+    // one placed flip card: a decorative frame built from up to ten mirrored segment models, plus
+    // four pict children spawned as local events
     internal class GMS_GMK_TP_TURN_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK gmk_work;

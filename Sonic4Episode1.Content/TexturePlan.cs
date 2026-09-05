@@ -85,7 +85,6 @@ internal static class TexturePlanner
             // ASTC pads a partial block itself, so unlike BC there is no dimension gate. The alpha
             // test is not about alpha: every ASTC footprint carries full 8-bit alpha. It is a proxy
             // for how much detail a texture has, and 6x6's 3.56bpp cannot hold the busy ones.
-            // Measured, along with what happens without it: docs/astc-encoding.md.
             // BC sources take a second lossy hop; only ASTC is refused, so a footprint never churns
             case TextureFormat.Astc6x6:
                 return !TextureFormats.IsAstc(source.Format)

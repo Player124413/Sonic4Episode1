@@ -4,8 +4,6 @@ using System.IO;
 
 namespace Sonic4Episode1.Content;
 
-// astcenc as a subprocess, PNG in and PNG out, because it is the interchange DirectXTex already
-// reads and writes here. See docs/astc-encoding.md for why this is not a managed encoder.
 internal static class AstcTool
 {
     private static readonly string Quality =
@@ -52,8 +50,6 @@ internal static class AstcTool
         return Run(astc, ".astc", ".png", "-dl", null, name);
     }
 
-    // astcenc is file in, file out, so every call costs two temp files and a process. That is
-    // still three orders of magnitude ahead of encoding in-process, measured in docs/astc-encoding.md
     private static byte[] Run(byte[] input, string inputExtension, string outputExtension,
         string mode, string block, string name)
     {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net11.0-browser</TargetFramework>
+    <TargetFrameworks>net11.0-browser</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;FNA;AOT;WASM;ASYNC_IO;RELEASE;BGM_STREAM;</DefineConstants>

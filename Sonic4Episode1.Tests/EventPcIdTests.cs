@@ -2,11 +2,7 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
-// PC's event ids mean different things to ours from 295 up, so a PC-era .EV is translated as it is
-// loaded. These pin the parts that fail silently rather than loudly: a missing remap row spawns
-// whatever our table holds at that index (PC's 308 is our Boss 1 chain), and a ported id that
-// drifted back down into PC's own range would be reachable straight from map data. See
-// docs/z2a2-port-plan.md "C scoped".
+// PC's event ids mean different things to ours from 295 up, so a PC-era .EV is translated as it is loaded
 public class EventPcIdTests
 {
     private static AppMain.GMS_EVE_DATA_EV_HEADER PlacedAt(params int[] ids)
@@ -55,8 +51,7 @@ public class EventPcIdTests
         Assert.Null(AppMain.g_gm_event_tbl[295]);
     }
 
-    // all three families are written now. A remapped id landing on a null maker is silently
-    // skipped by the dispatch, so the card would simply never appear
+    // a remapped id landing on a null maker is silently skipped by the dispatch, so the card would simply never appear
     [Fact]
     public void EveryPortedIdHasAMaker()
     {
@@ -77,7 +72,6 @@ public class EventPcIdTests
             Assert.Equal(maker.Method, AppMain.g_gm_event_tbl[id].Method);
     }
 
-    // read out of PC's gm_event_size_tbl at 0x5B3C38
     [Theory]
     [InlineData(AppMain.GMD_EVENT_ID_GMK_TRUMP_ROAD_CARD, 64)]
     [InlineData(AppMain.GMD_EVENT_ID_GMK_TP_TURN_BOARD, 128)]

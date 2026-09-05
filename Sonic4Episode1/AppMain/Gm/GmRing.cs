@@ -234,9 +234,10 @@
     {
         var betterSfx = gs.backup.SSave.CreateInstance().GetRemaster().BetterSoundEffects;
         var modernSfx = gs.backup.SSave.CreateInstance().GetRemaster().ModernSoundEffects;
-        if (((int)gm_ring_sys_work.flag & 1) != 0 && !(betterSfx || modernSfx))
+        if (((int)gm_ring_sys_work.flag & GMD_RING_SYS_FLAG_NODISP) != 0)
         {
-            gm_ring_sys_work.ring_se_cnt = 0;
+            if (!(betterSfx || modernSfx))
+                gm_ring_sys_work.ring_se_cnt = 0;
             return;
         }
 
@@ -829,16 +830,12 @@
             var j = i + 4;
 
             bool flag = true;
-            // makes sure we can only play 1 ring sound per frame
-            //if (gm_ring_sys_work.se_wait > 0)
-            //    return;
 
             if (gm_ring_sys_work != null)
             {
                 if (((int)gm_ring_sys_work.flag & 8) != 0)
                     flag = false;
                 gm_ring_sys_work.flag ^= 8U;
-                //gm_ring_sys_work.se_wait = 1;
             }
 
             gm_ring_sys_work.h_snd_ring[i].snd_ctrl_param.pan = flag ? -1.0f : 1.0f;

@@ -4,7 +4,6 @@ using static AppMain;
 
 internal static partial class GmClearDemo
 {
-    // which of the two archive pairs a slot names: the shared G_RSLT, or the language one
     public enum GME_CLRDM_DATA_TYPE
     {
         GME_CLRDM_DATA_TYPE_CMN_DATA = 0,
@@ -13,7 +12,6 @@ internal static partial class GmClearDemo
         GME_CLRDM_DATA_TYPE_MAX,
     }
 
-    // the tally runs two copies of each score: the one being counted down and the one on screen
     public enum GME_CLRDM_SCORE_TYPE
     {
         GME_CLRDM_SCORE_TYPE_CALC_DATA = 0,
@@ -61,6 +59,9 @@ internal static partial class GmClearDemo
         public GMS_COCKPIT_2D_WORK tex_total_act;
         public GMS_COCKPIT_2D_WORK sonic_icon_act;
         public GMS_COCKPIT_2D_WORK sonic_icon_act2;
+        public readonly GMS_COCKPIT_2D_WORK[] next_tbl_act = new GMS_COCKPIT_2D_WORK[3];
+        public GMS_COCKPIT_2D_WORK next_btn_act;
+        public GMS_COCKPIT_2D_WORK next_tex_act;
         public GMS_COCKPIT_2D_WORK tex_big_time_act;
         public GMS_COCKPIT_2D_WORK time_sonic_icon_act;
         public GMS_COCKPIT_2D_WORK tex_new_record_act;

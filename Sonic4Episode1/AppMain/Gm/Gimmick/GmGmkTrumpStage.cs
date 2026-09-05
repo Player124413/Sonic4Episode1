@@ -2,13 +2,10 @@ using System;
 
 internal partial class AppMain
 {
-    // The timed card platforms. PC gmGmkTrumpStageInit 0x4F9600, event ids 308-311 and 314-317,
-    // ours 384-391. Behaviour, work layout and provenance are in docs/z2a2-trumpstage-re.md.
-    //
-    // A card flips face-up to face-away and back on the global gameplay clock, staggered against
-    // its neighbours by the event's left byte, and is landable for most of the face-up half of
-    // that. Cards with flag bit 2 instead wait for the player to stand on them and then drop away
-    // once, for good.
+    // the timed card platforms. a card flips face-up to face-away and back on the global gameplay
+    // clock, staggered against its neighbours by the event's left byte, and is landable for most
+    // of the face-up half of that. cards with flag bit 2 instead wait for the player to stand on
+    // them and then drop away once, for good
 
     internal const int GMD_GMK_TRUMPSTAGE_SUIT_MAX = 8;
 

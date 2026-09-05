@@ -1,0 +1,46 @@
+<!--
+    .NET Native runtime directives.
+
+    Deliberately NOT <Assembly Name="*Application*" Dynamic="Required All" />. The shared game
+    tree is ~1200 files and 225k lines; rooting all of it reflectively makes ILC times and the
+    output binary unreasonable. Only the things resolved by name at runtime are listed.
+
+    Two of those:
+      - ContentTypeReaderManager reads reader type names out of the XNB header and does
+        Type.GetType on them, so every reader an asset can name has to survive the linker.
+      - XmlSerializer over gs.Sonic4Save. ILC pre-generates the serializer from the Serialize
+        directives below and fails the build if it cannot, which is the failure mode we want.
+
+    No SongReader: all five Content.Load<Song> sites live in GsSoundBgmVoice.MediaPlayer.cs and
+    BGM_STREAM preprocesses them out. Add it back if BgmBackend ever flips.
+    No EffectReader: effects load as raw .fxb, not through the content pipeline.
+-->
+
+<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
+  <Application>
+    <Assembly Name="FNA">
+      <Type Name="Microsoft.Xna.Framework.Content.Texture2DReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.SpriteFontReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.SoundEffectReader" Dynamic="Required All" />
+
+      <!-- SpriteFontReader pulls these in to read its glyph tables -->
+      <Type Name="Microsoft.Xna.Framework.Content.CharReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.RectangleReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.Vector3Reader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.SingleReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.Int32Reader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.StringReader" Dynamic="Required All" />
+      <Type Name="Microsoft.Xna.Framework.Content.BooleanReader" Dynamic="Required All" />
+      <TypeInstantiation Name="Microsoft.Xna.Framework.Content.ListReader"
+                         Arguments="System.Char" Dynamic="Required All" />
+      <TypeInstantiation Name="Microsoft.Xna.Framework.Content.ListReader"
+                         Arguments="Microsoft.Xna.Framework.Rectangle" Dynamic="Required All" />
+      <TypeInstantiation Name="Microsoft.Xna.Framework.Content.ListReader"
+                         Arguments="Microsoft.Xna.Framework.Vector3" Dynamic="Required All" />
+      <TypeInstantiation Name="Microsoft.Xna.Framework.Content.NullableReader"
+                         Arguments="Microsoft.Xna.Framework.Rectangle" Dynamic="Required All" />
+    </Assembly>
+
+    <Namespace Name="gs" Serialize="Required All" />
+  </Application>
+</Directives>

@@ -36,6 +36,12 @@ internal sealed class VariantSpec
     // and must not be flipped. Nothing in the archive says which, hence declaring it here.
     public bool Flip;
 
+    // nested archives inside a flipped group that keep their orientation, by member name. An effect
+    // archive is mixed: the textures its sprite nodes sample go through the GL layer and flip, the
+    // ones its NN model nodes name are drawn by the stdshader path and must not. Nothing in the
+    // archive says which, same as Flip itself
+    public List<string> NoFlip = new List<string>();
+
     public List<string> Archives = new List<string>();
 
     // `<archive>#<member>` for a shared archive where only some members may move, written to a
@@ -130,7 +136,6 @@ internal sealed class ContentProfile
 // what each head can actually hand to the GPU, so a profile can't declare a format its consumers
 // can't read. wasm lists both sets because it is the one head that meets devices with only BC and
 // devices with only ASTC; which tree it gets is a packaging choice, not a capability
-// (docs/webgl-texture-capabilities.md)
 internal static class HeadCapabilities
 {
     private static readonly TextureFormat[] Bc =
@@ -158,9 +163,8 @@ internal static class HeadCapabilities
         {
             { "fna", Bc },
             { "wasm", BcAndAstc },
-            // measured, not assumed: the Mali row in docs/webgl-texture-capabilities.md has no
-            // s3tc, and Adreno is the same. android reads DDS through DdsKtxXna, but reading it
-            // and uploading it are different questions and this table is about the second
+            // android reads DDS through DdsKtxXna, but reading it and uploading it are different
+            // questions and this table is about the second
             { "android", PngAndAstc },
             { "ios", PngAndAstc },
             { "xna", PngOnly },
@@ -270,6 +274,16 @@ internal sealed class ContentSources
         var spec = new VariantSpec { Group = group, Source = (string)source };
         spec.Name = body.TryGetValue("name", out var name) ? (string)name : spec.Source;
         spec.Flip = body.TryGetValue("flip", out var flip) && (bool)flip;
+
+        if (body.TryGetValue("no_flip", out var noFlip))
+        {
+            foreach (var nested in (TomlArray)noFlip)
+                spec.NoFlip.Add((string)nested);
+        }
+
+        if (spec.NoFlip.Count != 0 && !spec.Flip)
+            throw new InvalidDataException(
+                $"group '{group}' lists no_flip but does not flip, so the exclusions do nothing");
 
         if (body.TryGetValue("archives", out var archives))
         {

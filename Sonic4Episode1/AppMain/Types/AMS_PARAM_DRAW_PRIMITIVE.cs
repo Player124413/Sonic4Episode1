@@ -63,7 +63,7 @@ internal partial class AppMain
             this.zMask = other.zMask;
             this.zTest = other.zTest;
             this.noSort = other.noSort;
-            this.uwrap = other.vwrap;
+            this.uwrap = other.uwrap;
             this.vwrap = other.vwrap;
         }
 

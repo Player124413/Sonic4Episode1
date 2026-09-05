@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework.Media;
 
-#if WASM
-using MediaPlayer = Microsoft.Xna.Framework.Media.WasmMediaPlayer;
-#endif
-
 internal partial class AppMain
 {
     internal sealed class CriAuBgmVoice

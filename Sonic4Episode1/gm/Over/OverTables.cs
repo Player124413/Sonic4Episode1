@@ -2,8 +2,7 @@ using static AppMain;
 
 internal static partial class GmOver
 {
-    // G_OVER's ids are build-independent: the dump has file/common/ace/G_OVER*.HMA and no iPhone
-    // counterpart. see docs/per-member-variants.md
+    // G_OVER's ids are build-independent, there's no console/mobile variant here
     public const uint IDA_G_OVER_ACT_T_FADEOUT = 0;
     public const uint IDA_G_OVER_ACT_G_FADEOUT = 1;
 

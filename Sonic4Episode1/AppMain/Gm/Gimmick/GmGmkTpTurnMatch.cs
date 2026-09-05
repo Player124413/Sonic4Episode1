@@ -1,13 +1,5 @@
 internal partial class AppMain
 {
-    // The stage-wide half of the flip cards: the deck the faces are rolled from, and the manager
-    // that holds recently revealed panels until they either make three of a kind or time out.
-    // PC gmGmkTpTurnCreateManager 0x4F7B90, gmGmkTpTurnEntryMatch 0x4F8180. See
-    // docs/z2a2-tp-turn-re.md sections 3 and 4.
-    //
-    // Three of a kind revealed anywhere in the stage inside five seconds is a match: rings pay ten
-    // rings, Sonic pays a life. Eggman is a dud and is never even offered.
-
     private const int GMD_GMK_TP_TURN_DECK_MAX = 128;
 
     // two pending slots per kind, and kind 0's pair exists only so the indexing stays uniform
@@ -19,8 +11,7 @@ internal partial class AppMain
 
     internal const int GMD_GMK_TP_TURN_MATCH_RINGS = 10;
 
-    // byte per record, four 2-bit fields. PC packs both of these into one 4-byte record and
-    // leaves the other two bytes unused
+    // byte per record, four 2-bit fields (one per column)
     private static byte[] gm_gmk_tp_turn_deck_kinds;
     private static byte[] gm_gmk_tp_turn_deck_revealed;
     private static int gm_gmk_tp_turn_deck_next_id;
@@ -71,8 +62,8 @@ internal partial class AppMain
         gm_gmk_tp_turn_pending = null;
     }
 
-    // PC gmGmkTpTurnResetState 0x4F7AD0, the death and restart path. Clearing the deck is what
-    // makes every panel in the stage face down again
+    // the death and restart path; clearing the deck is what makes every panel in the stage face
+    // down again
     private static void gmGmkTpTurnResetState()
     {
         if (gm_gmk_tp_turn_pending != null)
@@ -105,8 +96,6 @@ internal partial class AppMain
         pending.ttl = -1;
     }
 
-    // PC gmGmkTpTurnMgrUpdatePending 0x4F75F0. Expiring stale reveals is the whole of the
-    // manager's per-frame job
     private static void gmGmkTpTurnMgrMain(MTS_TASK_TCB tcb)
     {
         if (gm_gmk_tp_turn_pending == null)
@@ -139,8 +128,7 @@ internal partial class AppMain
         return deck_id;
     }
 
-    // PC gmGmkTpTurnAllocDeckRecord 0x4F7960. Ids run 1..127 and wrap, never to 0, because 0 is
-    // what an unassigned record reads as
+    // ids run 1..127 and wrap, never to 0, because 0 is what an unassigned record reads as
     private static int gmGmkTpTurnAllocDeckRecord()
     {
         if (++gm_gmk_tp_turn_deck_next_id >= GMD_GMK_TP_TURN_DECK_MAX)
@@ -158,8 +146,8 @@ internal partial class AppMain
         return id;
     }
 
-    // PC gmGmkTpTurnAllocDeckRecords4 0x4F7A00. A board takes one of eight canned layouts rather
-    // than rolling sixteen faces, and consumes four consecutive record ids, one per row
+    // a board takes one of eight canned layouts rather than rolling sixteen faces, and consumes
+    // four consecutive record ids, one per row
     private static int gmGmkTpTurnAllocDeckRecords4()
     {
         int first = gm_gmk_tp_turn_deck_next_id + 1;
@@ -215,8 +203,24 @@ internal partial class AppMain
             (byte)(gm_gmk_tp_turn_deck_revealed[record] & ~(3 << shift) | 1 << shift);
     }
 
-    // PC gmGmkTpTurnEntryMatch 0x4F8180, reached when a flip animation finishes rather than when
-    // the panel is touched, so the reward lands on the reveal
+    // the burst sits in front of the panels rather than at their depth, so it reads over the whole
+    // set. Fire and forget, unlike the flip sparkle: nothing caps or counts these
+    private const int GMD_GMK_TP_TURN_MATCH_EFFECT_Z = -0x40000;
+
+    private static void gmGmkTpTurnBirthMatchEffect(VecFx32 pos)
+    {
+        OBS_OBJECT_WORK efct = (OBS_OBJECT_WORK)GmEfctZoneEsCreate(
+            null, GSD_MAIN_ZONE_TYPE_2, GMD_GMK_TP_TURN_MATCH_EFFECT_IDX);
+
+        efct.pos.x = pos.x;
+        efct.pos.y = pos.y;
+        efct.pos.z = GMD_GMK_TP_TURN_MATCH_EFFECT_Z;
+    }
+
+    private const int GMD_GMK_TP_TURN_MATCH_EFFECT_IDX = 1;
+
+    // reached when a flip animation finishes rather than when the panel is touched, so the reward
+    // lands on the reveal
     private static void gmGmkTpTurnEntryMatch(VecFx32 pos, int kind, int card_idx)
     {
         if (gm_gmk_tp_turn_pending == null)
@@ -246,6 +250,7 @@ internal partial class AppMain
         }
 
         gmGmkTpTurnLightCard(card_idx);
+        gmGmkTpTurnBirthMatchEffect(pos);
 
         for (int i = 0; i < GMD_GMK_TP_TURN_PENDING_PER_KIND; ++i)
         {
@@ -253,11 +258,9 @@ internal partial class AppMain
                 gm_gmk_tp_turn_pending[GMD_GMK_TP_TURN_PENDING_PER_KIND * kind + i];
 
             gmGmkTpTurnLightCard(slot.card_idx);
+            gmGmkTpTurnBirthMatchEffect(slot.pos);
             gmGmkTpTurnClearPending(slot);
         }
-
-        // TODO(port): PC bursts an effect at all three matched panels here, through the same
-        // id-indexed spawner the flip sparkle uses and which this tree has no counterpart for
 
         gmGmkTpTurnPayMatch(kind);
         GmSoundPlaySE("Cards2");

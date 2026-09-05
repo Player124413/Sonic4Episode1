@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmAme.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmbWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmBind.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmContentSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmCri.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmDraw.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Am\AmEndian.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_RELEASE_TEXTURE_IMAGE.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_SET_TEXOFFSET.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_SORT_DRAW_OBJECT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_SORT_DRAW_OBJECT_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_VERTEX_BUFFER_OBJECT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_CREATE_SHADER.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\AMS_PARAM_RELEASE_SHADER.cs" />
@@ -533,6 +535,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_PRIM_DRAW_TVX_UV_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_PRIM_DRAW_WORK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_SYS_WORK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAIN_LIGHT_VARIANT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_FAR_VARIANT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_MAP_VARIANT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\GMS_OBJECT_WORK_ATK.cs" />
@@ -966,6 +969,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoConsts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoDraw.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoNextPrompt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoObjects.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoProcs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)gm\ClearDemo\ClearDemoScore.cs" />
@@ -977,6 +981,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoGlare.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoPcTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoVariant.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmDecoZone1PcTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmGmkVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Effect\GmEffectBossCommon.cs" />
@@ -1071,6 +1076,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkWaterArea.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\Gimmick\GmGmkWaterSlider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMainLightVariant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMapFar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GmMapFarVariant.cs" />
@@ -1134,10 +1140,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)DoubleType`2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DXStripList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DXVertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BitConverterEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DXVertexArrays.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EndianBinaryReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EndianBinaryWriter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NnStdShaderEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ContentFailure.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgAoAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgBase`1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)er\CTrgFlick.cs" />

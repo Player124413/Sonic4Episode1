@@ -3,28 +3,19 @@
   <!--
     Compiles Shaders\*.fx and copies the result next to the game as Content\Shaders\*.
 
-    Two backends, because the two families do not read the same blob:
+    fxc emits a raw D3D9 effect. FNA's ContentManager resolves Content.Load<Effect>("Shaders\name")
+    straight to a .fxb, effectExtensions in Submodules/FNA/src/Content/ContentManager.cs:98 lists it
+    and the loader falls through to new Effect(device, data) at :362, so no .xnb wrapper is
+    involved, and mppLoadStdShader reads its own blobs as a raw stream anyway.
 
-    FNA takes a raw D3D9 effect from fxc. Its ContentManager resolves
-    Content.Load<Effect>("Shaders\name") straight to a .fxb, effectExtensions in
-    Submodules/FNA/src/Content/ContentManager.cs:98 lists it and the loader falls through to
-    new Effect(device, data) at :362, so no .xnb wrapper is involved.
-
-    MonoGame has no such fallthrough and its Effect ctor wants MGFX, so that side goes through
-    mgfxc into .mgfxo. Both are loaded as a raw stream at runtime, see mppLoadStdShader, so
-    neither needs MGCB.
-
-    Set ShaderBackend before importing. ContentItemType picks how the blobs are packaged and
-    means the same thing it does in Content.targets.
+    ContentItemType picks how the blobs are packaged and means the same thing it does in
+    Content.targets.
   -->
 
   <PropertyGroup>
     <ShadersDir>$(MSBuildThisFileDirectory)</ShadersDir>
-    <ShaderBackend Condition="'$(ShaderBackend)' == '' AND '$(ContentItemType)' == 'AndroidAsset'">MonoGame</ShaderBackend>
-    <ShaderBackend Condition="'$(ShaderBackend)' == ''">FNA</ShaderBackend>
-    <ShaderOutDir>$(ShadersDir)$(ShaderBackend)\</ShaderOutDir>
-    <ShaderExtension Condition="'$(ShaderBackend)' == 'MonoGame'">.mgfxo</ShaderExtension>
-    <ShaderExtension Condition="'$(ShaderExtension)' == ''">.fxb</ShaderExtension>
+    <ShaderOutDir>$(ShadersDir)FNA\</ShaderOutDir>
+    <ShaderExtension>.fxb</ShaderExtension>
     <!-- SM2 keeps us inside Reach; the effects are small enough to fit ps_2_0 -->
     <ShaderModel Condition="'$(ShaderModel)' == ''">SM2</ShaderModel>
   </PropertyGroup>
@@ -34,9 +25,9 @@
   </ItemGroup>
 
   <!-- the NN standard shader is not built here, run Shaders/nn/Build-Permutations.ps1
-       to produce its permutations into Shaders/$(ShaderBackend)/nnstd/ -->
+       to produce its permutations into Shaders/FNA/nnstd/ -->
 
-  <Target Name="LocateFxc" Condition="'$(ShaderBackend)' == 'FNA'">
+  <Target Name="LocateFxc">
     <ItemGroup>
       <FxcCandidate Include="$(MSBuildProgramFiles32)\Windows Kits\10\bin\*\x64\fxc.exe" />
       <FxcCandidate Include="$(ProgramFiles)\Windows Kits\10\bin\*\x64\fxc.exe" />
@@ -49,34 +40,16 @@
     <Warning Condition="'$(FxcPath)' == ''" Text="fxc.exe not found; shaders will not be rebuilt. Install the Windows SDK if you need to change them." />
   </Target>
 
-  <!-- mgfxc is a global dotnet tool, `dotnet tool install -g dotnet-mgfxc`. It is not on the
-       restore graph, so absence is a warning and stale blobs rather than a build failure, the
-       same way a missing fxc is treated -->
-  <Target Name="LocateMgfxc" Condition="'$(ShaderBackend)' == 'MonoGame'">
-    <!-- it installs as `mgfxc`, not `dotnet-mgfxc`, so `dotnet mgfxc` does not find it. Called
-         with no arguments it prints usage and exits 1, which is enough to say it is there -->
-    <Exec Command="mgfxc" IgnoreExitCode="true" StandardOutputImportance="low"
-          StandardErrorImportance="low" EchoOff="true">
-      <Output TaskParameter="ExitCode" PropertyName="MgfxcExitCode" />
-    </Exec>
-    <PropertyGroup>
-      <MgfxcPath Condition="'$(MgfxcExitCode)' == '1'">mgfxc</MgfxcPath>
-    </PropertyGroup>
-    <Warning Condition="'$(MgfxcPath)' == ''" Text="mgfxc not found; MonoGame shaders will not be rebuilt. Run: dotnet tool install -g dotnet-mgfxc" />
-  </Target>
-
   <!-- the condition belongs on the Exec, not the target: MSBuild evaluates a target's
-       Condition before running DependsOnTargets, so gating here would skip the locate steps -->
+       Condition before running DependsOnTargets, so gating here would skip the locate step -->
   <Target Name="CompileShaders"
-          DependsOnTargets="LocateFxc;LocateMgfxc"
+          DependsOnTargets="LocateFxc"
           BeforeTargets="BeforeBuild"
           Inputs="@(ShaderSource);$(ShadersDir)Macros.fxh"
           Outputs="@(ShaderSource->'$(ShaderOutDir)%(Filename)$(ShaderExtension)')">
-    <MakeDir Condition="'$(FxcPath)' != '' OR '$(MgfxcPath)' != ''" Directories="$(ShaderOutDir)" />
-    <Exec Condition="'$(ShaderBackend)' == 'FNA' AND '$(FxcPath)' != ''"
+    <MakeDir Condition="'$(FxcPath)' != ''" Directories="$(ShaderOutDir)" />
+    <Exec Condition="'$(FxcPath)' != ''"
           Command="&quot;$(FxcPath)&quot; /nologo /T fx_2_0 /D $(ShaderModel)=1 /Fo &quot;$(ShaderOutDir)%(ShaderSource.Filename).fxb&quot; &quot;%(ShaderSource.FullPath)&quot;" />
-    <Exec Condition="'$(ShaderBackend)' == 'MonoGame' AND '$(MgfxcPath)' != ''"
-          Command="&quot;$(MgfxcPath)&quot; &quot;%(ShaderSource.FullPath)&quot; &quot;$(ShaderOutDir)%(ShaderSource.Filename).mgfxo&quot; /Profile:OpenGL /Defines:$(ShaderModel)=1" />
   </Target>
 
   <!-- globbed inside a target so a shader added this build has its .fxb by the time this runs.
@@ -88,8 +61,9 @@
           BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <ShaderBlob Include="$(ShaderOutDir)*$(ShaderExtension)" />
-      <!-- own subdirectory since mppLoadStdShader opens a permutation by its shader key name -->
-      <NnStdShaderBlob Include="$(ShaderOutDir)nnstd\*$(ShaderExtension)" />
+      <!-- one archive keyed by shader name, built by Shaders/nn/Build-Permutations.ps1 alongside
+           the permutations themselves. Same path retail uses -->
+      <NnStdShaderArchive Include="$(ShaderOutDir)NNSTDSHADER\SHADER.AMB" />
 
       <!-- metadata is qualified with the item name; a bare %(Filename) here batches over every
            existing Content item and drags unrelated files into Content\Shaders -->
@@ -98,8 +72,8 @@
                Link="Content\Shaders\%(ShaderBlob.Filename)%(ShaderBlob.Extension)"
                CopyToOutputDirectory="PreserveNewest" />
       <Content Condition="'$(ContentItemType)' != 'AndroidAsset'"
-               Include="@(NnStdShaderBlob)"
-               Link="Content\Shaders\nnstd\%(NnStdShaderBlob.Filename)%(NnStdShaderBlob.Extension)"
+               Include="@(NnStdShaderArchive)"
+               Link="Content\NNSTDSHADER\SHADER.AMB"
                CopyToOutputDirectory="PreserveNewest" />
 
       <!-- same asset pack as the content tree, not the base apk: DirectoryRoot.Root points at the
@@ -111,8 +85,8 @@
                     AssetPack="$(ContentAssetPack)"
                     DeliveryType="$(ContentAssetPackDelivery)" />
       <AndroidAsset Condition="'$(ContentItemType)' == 'AndroidAsset'"
-                    Include="@(NnStdShaderBlob)"
-                    Link="Assets\Content\Shaders\nnstd\%(NnStdShaderBlob.Filename)%(NnStdShaderBlob.Extension)"
+                    Include="@(NnStdShaderArchive)"
+                    Link="Assets\Content\NNSTDSHADER\SHADER.AMB"
                     AssetPack="$(ContentAssetPack)"
                     DeliveryType="$(ContentAssetPackDelivery)" />
     </ItemGroup>

@@ -8,8 +8,7 @@ using static GmFix.GME_FIX_TIMER_SUBPART;
 internal static partial class GmFix
 {
     // G_FIX's two builds agree on 0-28 and 31-44, transpose 29 and 30, and the mobile one appends
-    // 45-63. Only the time-attack counter and the virtual pad reach any of that.
-    // see docs/gmfix-port-notes.md
+    // 45-63. only the time-attack counter and the virtual pad reach any of that.
     private static class MobileIds
     {
         public const int TA_NUM_C_A = 29;
@@ -225,8 +224,6 @@ internal static partial class GmFix
         score_stage22_act_id_tbl = gm_fix_score_stage22_act_id_tbl_console,
         challenge_act_id_tbl = gm_fix_challenge_act_id_tbl_console,
 
-        // the whole virtual pad part is #if _IPHONE, and every action it names is past the end of
-        // the console G_FIX anyway
         has_virtual_pad = false,
         timer_timeattack_x_offset = false,
         score_narrowscreen_offset = true,

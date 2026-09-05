@@ -9,9 +9,8 @@ internal static partial class GmFix
     private const int TEX_NUM = (int)GME_FIX_TEX_IDX_MAX;
     private const int PART_NUM = (int)GME_FIX_PART_TYPE_MAX;
 
-    // Everything gmFix.cpp puts behind an #ifdef, picked once in GmFixBuildDataInit. The decompile
-    // only ever carried the mobile arm, so the console side of each of these is new.
-    // see docs/gmfix-port-notes.md
+    // picked once in GmFixBuildDataInit; the console side of each of these is new, the decompile
+    // only ever carried the mobile arm
     internal sealed class GMS_FIX_VARIANT
     {
         // the transposed 29/30 pair
@@ -160,7 +159,6 @@ internal static partial class GmFix
         gm_fix_tcb = null;
     }
 
-    // console has no per-pad-part flags to set, so it sets HIDE and nothing else
     public static void GmFixSetDisp(bool enable)
     {
         if (!gm_fix_variant.has_virtual_pad)
@@ -225,7 +223,6 @@ internal static partial class GmFix
         ObjDrawActionSummary(obj_work);
     }
 
-    // the C++ has one template instantiated per flag; the decompile made four one-method classes
     private static MPP_VOID_OBS_OBJECT_WORK gmFixVirtualPadOutFunc(uint flag)
     {
         return obj_work =>
@@ -290,9 +287,8 @@ internal static partial class GmFix
         return GsGetMainSysInfo().game_mode == GSD_GAME_MODE_TIME_ATTACK;
     }
 
-    // Named for the act, not the stage id: act 2-2 is stage 5. What it really selects is the
-    // pinball minigame's HUD, the score-target readout and its time attack parts, so PC's act 2 is
-    // excluded - that one is an ordinary stage and wants the ordinary HUD
+    // named for the act (2-2), not stage_id 5; it really selects the pinball minigame's HUD, score
+    // readout and time attack parts, so PC's act 2, an ordinary stage, is excluded
     private static bool gmFixIsStage22()
     {
         return GsGetMainSysInfo().stage_id == 5 && !gmStageIsPcLevel();
@@ -303,11 +299,8 @@ internal static partial class GmFix
         return GsGetMainSysInfo().stage_id == 9;
     }
 
-    // plans 1 and 2 are the mobile layouts and both reach ids 45+, which console G_FIX does not
-    // have. INPUT_CLASSIC selects plan 2 and StgSlct sets it on console, so this cannot be left to
-    // the flags. see docs/gmfix-port-notes.md
-    // mobile-only: the console build has no GME_FIX_PLAN and no table indexed by one. Only the
-    // virtual pad reaches this, and that part does not exist on console either.
+    // mobile-only: the console build has no GME_FIX_PLAN and no table indexed by one. only the
+    // virtual pad reaches this function, and that part doesn't exist on console either.
     private static GME_FIX_PLAN gmFixGetPlan()
     {
         return GmFixPlanFor(
@@ -420,8 +413,6 @@ internal static partial class GmFix
         return true;
     }
 
-    // every subpart is built the same way: a cockpit 2D work bound to one G_FIX action, frozen on
-    // frame 0, drawn through an out-func that consults the manager's hide flags
     private static GMS_COCKPIT_2D_WORK gmFixCreateSubpart(
         string name, int act_id, MPP_VOID_OBS_OBJECT_WORK out_func,
         int ama_slot = (int)GME_FIX_TEX_IDX_FIX, int tex_slot = (int)GME_FIX_TEX_IDX_FIX)

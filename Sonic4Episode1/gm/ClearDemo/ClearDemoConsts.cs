@@ -40,4 +40,13 @@ internal static partial class GmClearDemo
     public const uint GMD_CLRDM_FLAG_BACK_CLEAR_ACT = 16384;
     public const uint GMD_CLRDM_FLAG_CHAOS_EMERALD_GET = 32768;
     public const uint GMD_CLRDM_FLAG_DISP_SONIC_ICON2 = 65536;
+    public const uint GMD_CLRDM_FLAG_NEXT_PRESSED = 131072;
+
+    // the PC G_RSLT: tbl01_l/c/r, btn_next_key, btn_next. tex_next is in the language archives
+    public const int GMD_CLRDM_NEXT_TBL_ACT_ID = 100;
+    public const int GMD_CLRDM_NEXT_BTN_KEY_ACT_ID = 103;
+    public const int GMD_CLRDM_NEXT_BTN_PAD_ACT_ID = 104;
+    public const int GMD_CLRDM_NEXT_TEX_ACT_ID = 21;
+    public const float GMD_CLRDM_NEXT_HOLD_FRAME = 290f;
+    public const float GMD_CLRDM_NEXT_SETTLED_FRAME = 307f;
 }

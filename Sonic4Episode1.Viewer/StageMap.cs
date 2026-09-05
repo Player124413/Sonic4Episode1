@@ -30,7 +30,7 @@ internal sealed class StageLayer
 }
 
 // Which model format ZONEx_M.AMB holds. Mobile ships baked TVX geometry indexed id-1; console ships
-// one NN object per block indexed by id, with member 0 blank. See docs/content-catalog.md.
+// one NN object per block indexed by id, with member 0 blank.
 internal enum StageModelFormat
 {
     Unknown,

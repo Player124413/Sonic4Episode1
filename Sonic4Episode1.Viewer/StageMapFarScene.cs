@@ -7,7 +7,7 @@ namespace Sonic4Episode1.Viewer;
 
 // The background, drawn through its own perspective camera before the block layers. StageScene is
 // the equivalent for the map itself; the two share nothing but the shader cache, because map far is
-// a separate subsystem in the game too. See docs/map-far.md.
+// a separate subsystem in the game too.
 internal sealed class StageMapFarScene : IDisposable
 {
     private readonly StageMap _map;

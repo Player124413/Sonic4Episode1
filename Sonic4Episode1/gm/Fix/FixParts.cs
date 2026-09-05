@@ -22,9 +22,6 @@ internal static partial class GmFix
             var subpart = gmFixCreateSubpart(
                 "FIX_RING", gm_fix_ringcount_act_id_tbl[i], gmFixSubpartOutFunc);
 
-            //if (i != 0)
-            //    ((OBS_OBJECT_WORK)subpart).pos.y += FX_F32_TO_FX32(5f);
-
             part.sub_parts[i] = subpart;
         }
     }
@@ -134,7 +131,6 @@ internal static partial class GmFix
 
         for (int i = 0; i < part.sub_parts.Length; i++)
         {
-            // mobile leaves subpart 0 out on act 2-2; console puts the score icon there
             if (act_id_tbl[i] < 0)
             {
                 part.sub_parts[i] = null;
@@ -371,9 +367,8 @@ internal static partial class GmFix
                 part.scale_ratio += 0.25f;
                 part.fade_ratio = MTM_MATH_CLIP(part.fade_ratio, 0.0f, 1f);
 
-                // SEGA clips fade_ratio into scale_ratio here where phase 1 clips its own, so the
-                // grow phase tracks the fade's 0.5/frame rather than its own 0.25.
-                // see docs/gmfix-port-notes.md
+                // SEGA clips fade_ratio into scale_ratio here (not scale_ratio itself, phase 1 does
+                // that), so growth tracks the fade's 0.5/frame instead of its own 0.25. not a typo.
                 part.scale_ratio = MTM_MATH_CLIP(part.fade_ratio, 0.0f, 1f);
 
                 if (part.scale_ratio >= 1.0f)
@@ -510,7 +505,6 @@ internal static partial class GmFix
 
             obj_work.disp_flag &= ~OBD_DISP_NODISP;
 
-            // the pause button moves clear of the special stage's and time attack's wider HUD
             if (i == (int)GME_FIX_VIRTUAL_PAD_SUBPART_PAUSE)
             {
                 if (gmFixIsSpecialStage())

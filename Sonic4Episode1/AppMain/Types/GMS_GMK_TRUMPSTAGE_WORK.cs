@@ -1,7 +1,6 @@
 internal partial class AppMain
 {
-    // One timed card platform. PC gives it an 0x860 work with the family fields from +2048;
-    // see docs/z2a2-trumpstage-re.md.
+    // a timed card platform
     internal class GMS_GMK_TRUMPSTAGE_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK gmk_work;

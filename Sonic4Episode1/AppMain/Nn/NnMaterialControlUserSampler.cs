@@ -83,8 +83,6 @@ internal partial class AppMain
         }
     }
 
-    // the C++ also takes an NNS_MATRIX44, which every call site fills with the identity and the
-    // stock shader declares no uniform for; see docs/map-waterfalls.md
     public static void nnSetMaterialControlUserSamplerDXG20(
         NNE_USER_SAMPLER idx, Texture texmap, uint[] state)
     {
@@ -93,8 +91,6 @@ internal partial class AppMain
         mppStoreUserSamplerState(sampler, state);
     }
 
-    // the callers reset and rewrite the same state every frame, so the XNA state object only gets
-    // rebuilt when a value actually moves
     private static void mppStoreUserSamplerState(NNS_MATCTRL_USERSAMPLER sampler, uint[] state)
     {
         bool changed = sampler.sampler == null;
@@ -121,7 +117,6 @@ internal partial class AppMain
 
     private static readonly Vector4[] nngProjectionUserUniforms = new Vector4[4];
 
-    // the four calls every user-sampler site makes, gmMap.cpp:3248-3259 and four others.
     // the shader projects a view position with this to find where on screen it is, so it has to be
     // the matrix actually bound at draw time, not the NN copy
     public static void mppSetProjectionUserUniforms()
@@ -134,8 +129,7 @@ internal partial class AppMain
         }
     }
 
-    // nnPutMaterialTextureUserSampler, nnmaterialcorestdshader.obj. NN sets the tex matrix here too,
-    // which the stock shader never reads
+    // NN also sets the tex matrix here, but the stock shader never reads it
     private static void mppPutMaterialTextureUserSampler(int slot, NNE_USER_SAMPLER idx)
     {
         NNS_MATCTRL_USERSAMPLER sampler = nngMatCtrlUserSampler[(int)idx];

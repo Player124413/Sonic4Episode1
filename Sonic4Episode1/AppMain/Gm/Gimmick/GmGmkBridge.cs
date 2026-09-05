@@ -85,12 +85,6 @@
             return;
         uint lightColor = GmMainGetLightColor();
 
-        // gmGmkBridge.cpp:349. GMD_GMK_BRIDGE_PRIM is a bare (1) with no platform expression, but
-        // it is the iPhone fork's value: the prim arm hardcodes UV 0.1..0.9 under SEGA's own
-        // "(暫定)", provisional, and console ships a 256x128 atlas holding two planks side by side,
-        // GMK_BRIDGE at u 0.546..0.963 and GMK_BRIDGE_CUT at u 0.045..0.455. Those UVs smear across
-        // both planks and the gap. The #else draws one model per plank, which is what the per-plank
-        // UVs and the otherwise unreferenced CUT model are for. See docs/console-gimmicks.md.
         if (gm_gmk_as_console)
         {
             gmGmkBridgeDrawModels(obj_work, num1, num2, denom1, denom2, v1);

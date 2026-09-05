@@ -47,13 +47,61 @@ internal static class MotionDescribe
         for (int i = 0; i < objects.Count; ++i)
         {
             var obj = objects[i];
-            Console.WriteLine($"  object {i}: {obj.nNode} node(s), {obj.nMtxPal} palette entries,"
+            Console.WriteLine($"  object {i}: fType 0x{obj.fType:X8} {obj.nNode} node(s), {obj.nMtxPal} palette entries,"
                 + $" {obj.nMaterial} material(s), {obj.nSubobj} subobject(s), {obj.nVtxList} vertex list(s)");
 
+            DescribeMaterials(obj);
             DescribeSkinning(obj);
         }
 
         return 0;
+    }
+
+    private static void DescribeMaterials(AppMain.NNS_OBJECT obj)
+    {
+        for (int m = 0; m < obj.nMaterial; m++)
+        {
+            var matPtr = obj.pMatPtrList[m];
+            if (matPtr.pMaterial is AppMain.NNS_MATERIAL_GLES11_DESC gles)
+            {
+                Console.WriteLine($"    material {m}: type 0x{matPtr.fType:X8} gles11 fFlag 0x{gles.fFlag:X8} nTex {gles.nTex}"
+                    + ((gles.fFlag & AppMain.NND_MATFLAG_DISABLE_DEPTH_WRITING) != 0 ? "  NO_ZWRITE" : "  zwrite"));
+                if (gles.pLogic != null)
+                {
+                    var l = gles.pLogic;
+                    Console.WriteLine($"      logic fFlag 0x{l.fFlag:X8} src {l.SrcFactor} dst {l.DstFactor} op {l.BlendOp}"
+                        + $" alphaFunc {l.AlphaFunc} alphaRef {l.AlphaRef} depthFunc {l.DepthFunc}");
+                }
+                continue;
+            }
+
+            if (!(matPtr.pMaterial is AppMain.NNS_MATERIAL_STDSHADER_DESC desc))
+            {
+                Console.WriteLine($"    material {m}: type 0x{matPtr.fType:X8} not a stdshader desc");
+                continue;
+            }
+
+            Console.WriteLine($"    material {m}: type 0x{matPtr.fType:X8} fFlag 0x{desc.fFlag:X8}"
+                + $" fTexType 0x{desc.fTexType:X8} nTex {desc.nTex}"
+                + ((desc.fFlag & AppMain.NND_MATFLAG_DISABLE_DEPTH_WRITING) != 0 ? "  NO_ZWRITE" : "  zwrite")
+                + ((desc.fFlag & AppMain.NND_MATFLAG_DOUBLESIDE) != 0 ? "  DOUBLESIDE" : ""));
+
+            if (desc.pLogic != null)
+            {
+                var logic = desc.pLogic;
+                Console.WriteLine($"      logic fFlag 0x{logic.fFlag:X8} src {logic.SrcFactorRGB} dst {logic.DstFactorRGB}"
+                    + $" op {logic.BlendOp} alphaFunc {logic.AlphaFunc} alphaRef {logic.AlphaRef} depthFunc {logic.DepthFunc}");
+            }
+
+            if (desc.pTexDesc != null)
+            {
+                for (int t = 0; t < desc.pTexDesc.Length; t++)
+                {
+                    var tex = desc.pTexDesc[t];
+                    Console.WriteLine($"      tex {t}: fType 0x{tex.fType:X8} iTexIdx {tex.iTexIdx} wrap {tex.WrapS}/{tex.WrapT}");
+                }
+            }
+        }
     }
 
     // Whether a mesh is skinned is not a property of the model, it is what nnSetupShaderProfile
@@ -125,6 +173,21 @@ internal static class MotionDescribe
                         v0 = Math.Min(v0, uv.Y); v1 = Math.Max(v1, uv.Y);
                     }
                     Console.WriteLine($"          uv u {u0:0.000}..{u1:0.000}  v {v0:0.000}..{v1:0.000}");
+                }
+
+                // where the mesh actually sits in model space. Two variants of one effect that are
+                // meant to mirror should come out as mirrored extents, not identical ones
+                if (arrays.Positions != null && arrays.Positions.Length != 0)
+                {
+                    var lo = arrays.Positions[0];
+                    var hi = arrays.Positions[0];
+                    foreach (var p in arrays.Positions)
+                    {
+                        lo = Microsoft.Xna.Framework.Vector3.Min(lo, p);
+                        hi = Microsoft.Xna.Framework.Vector3.Max(hi, p);
+                    }
+                    Console.WriteLine($"          pos x {lo.X:0.000}..{hi.X:0.000}"
+                        + $"  y {lo.Y:0.000}..{hi.Y:0.000}  z {lo.Z:0.000}..{hi.Z:0.000}");
                 }
 
                 for (int v = 0; v < Math.Min(3, desc.nVertex); v++)

@@ -5,11 +5,6 @@ using Microsoft.Xna.Framework;
 
 namespace Sonic4Episode1.Tests;
 
-// Map blocks and the background ship as one amFsAllVariant group, so a stage cannot draw console
-// blocks against a mobile background. See docs/console-map-blocks.md.
-//
-// amFsLoadVariants replaces a process-wide static, so everything that calls it has to run in one
-// collection or the classes race each other.
 [Collection(FsVariantCollection.Name)]
 public class MapVariantTests
 {
@@ -134,8 +129,7 @@ public class MapVariantTests
         Assert.Equal(AppMain.AMD_FS_VARIANT_CONSOLE, console.fs_variant);
     }
 
-    // gmMap.cpp:1281-1284, and the literal 0D13100h at 0x4CF768 in the retail binary. the docs long
-    // carried 0x00D12100, which drops NOUPDATE; map far's 0x00D12100 is a real but different value
+    // gmMap.cpp:1281-1284, literal 0x00D13100 at 0x4CF768 in the retail binary
     [Fact]
     public void TheBlockDispFlagMatchesTheOracle()
     {
@@ -248,7 +242,6 @@ public class MapVariantTests
         }
     }
 
-    // console lights the fog for every zone type that has a branch, the zone 1 boss included
     [Fact]
     public void ConsoleLightsTheFogEverywhereMobileDoesNot()
     {
@@ -373,8 +366,7 @@ public class MapVariantTests
     }
 
     // gmMapFarCameraGetPos clamps to the scroll width, so an arm's cull windows are only reachable
-    // if they were tuned against that arm's own scroll table. this is what shipping one column for
-    // both broke: three of console's four 2-1 windows sat past a mobile floor of -90
+    // if they were tuned against that arm's own scroll table.
     // 2-1 is the stage to measure on: every one of its windows bounds z, where 2-3 opens with a
     // bare y test that covers the whole span
     [Theory]
@@ -414,7 +406,6 @@ public class MapVariantTests
         Assert.Equal(windows, runs);
     }
 
-    // every zone resolves independently, so declaring one does not drag another across
     [Theory]
     [InlineData(0)]
     [InlineData(4)]
@@ -431,8 +422,7 @@ public class MapVariantTests
     }
 
     // gmMap.cpp:3249-3259 pushes four, and NNM_MTX(m, row, col) is m[col][row] (nns.h:788), so
-    // uniform k is the four consecutive floats m[k][0..3]. this pins both the count and the layout:
-    // the port previously filled two, with columns
+    // uniform k is the four consecutive floats m[k][0..3]
     [Fact]
     public void AllFourProjectionRowsReachTheUserUniforms()
     {

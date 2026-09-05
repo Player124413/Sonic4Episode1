@@ -1,8 +1,24 @@
 ﻿internal partial class AppMain
 {
     private static readonly int[] gm_efct_zone_texamb_index_tbl;
+
+    // first anim dwork per zone. Contiguous from 511 except zone 2, which lives past the end of
+    // the block because PC's 8 anims do not fit where mobile reserved 2. See GMD_DWORK_NO
+    private static readonly int[] gm_efct_zone_ame_base_tbl =
+    {
+        511,
+        GMD_DWORK_NO_EFFECT_ZONE2_AME_START,
+        522,
+        558,
+        562,
+        563,
+    };
+
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone01_create_param_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone02_create_param_tbl;
+    private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone02_pc_create_param_tbl;
+    private static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone02_create_info;
+    private static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone02_pc_create_info;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone03_create_param_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone04_create_param_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone_final_create_param_tbl;
@@ -24,9 +40,10 @@
     private static void GmEfctZoneBuildDataLoopInit()
     {
         object texlist_buf = null;
-        GMS_EFCT_ZONE_CREATE_INFO efctZoneCreateInfo = gm_efct_zone_create_info[gm_efct_zone_target_zone_no];
         int index1 = 0;
         AMS_AMB_HEADER amb = readAMBFile(ObjDataGetInc(ObjDataGet(6)));
+        gmEfctZoneSelectVariant(amb);
+        GMS_EFCT_ZONE_CREATE_INFO efctZoneCreateInfo = gm_efct_zone_create_info[gm_efct_zone_target_zone_no];
         gm_efct_zone_model_reg_num = 1;
         if (gm_efct_zone_model_reg_num > 0)
         {
@@ -39,7 +56,7 @@
             }
         }
         OBS_DATA_WORK data_work1 = ObjDataGet(509);
-        ObjDataLoadAmbIndex(data_work1, gm_efct_zone_texamb_index_tbl[gm_efct_zone_target_zone_no], amb);
+        ObjDataLoadAmbIndex(data_work1, gmEfctZoneTexAmbIndex(amb), amb);
         gm_efct_zone_tex_reg_id = ObjAction3dESTextureLoadToDwork(ObjDataGet(510), readAMBFile(data_work1.pData), ref texlist_buf);
         for (int index2 = 0; index2 < efctZoneCreateInfo.num; ++index2)
         {
@@ -236,12 +253,30 @@
         return GmEffect3dESCreateByParam(efctZoneCreateParam.create_param, parent_obj, ObjDataGet(6).pData, ObjDataGet(gmEfctZoneGetAmeDworkNo(zone_no, efctZoneCreateParam.create_param.ame_idx)), ambtex_dwork, texlist_dwork, model_dwork, object_dwork);
     }
 
+    // every zone effect archive is its anims plus one texture, texture last, so the anim count and
+    // the texture's member index are the same number. Taken from the archive rather than the table
+    // so a zone reads correctly whichever variant resolved
+    private static int gmEfctZoneTexAmbIndex(AMS_AMB_HEADER amb)
+    {
+        return amb.file_num - 1;
+    }
+
+    // zone 2 ships two ways round: mobile's 2 anims or PC's 8. The rest of the table is the same
+    // either way, so this only has to pick how many of it are real
+    private static void gmEfctZoneSelectVariant(AMS_AMB_HEADER amb)
+    {
+        if (gm_efct_zone_target_zone_no != GSD_MAIN_ZONE_TYPE_2)
+            return;
+
+        gm_efct_zone_create_info[GSD_MAIN_ZONE_TYPE_2] =
+            gmEfctZoneTexAmbIndex(amb) >= gm_efct_zone02_pc_create_param_tbl.Length
+                ? gm_efct_zone02_pc_create_info
+                : gm_efct_zone02_create_info;
+    }
+
     private static int gmEfctZoneGetAmeDworkNo(int zone_no, int ame_amb_idx)
     {
-        int num = 511;
-        for (int index = 0; index < zone_no; ++index)
-            num += gm_efct_zone_texamb_index_tbl[index];
-        return num + ame_amb_idx;
+        return gm_efct_zone_ame_base_tbl[zone_no] + ame_amb_idx;
     }
 
     private static int gmEfctZoneGetObjectDworkNo(int model_dwork_no)

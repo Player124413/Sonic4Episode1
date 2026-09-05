@@ -2,28 +2,24 @@ using System;
 
 internal partial class AppMain
 {
-    // Decoration ids 184-199, which only the PC-era levels place. PC's zone 2 act 2 puts 725 of them
-    // across the card stage; no mobile or xbla map references any id above 183, so widening the
-    // tables is inert for those and needs no variant gate.
+    // decoration ids 184-199, which only the PC-era levels place. PC's zone 2 act 2 puts 725 of
+    // them across the card stage; no mobile or xbla map references any id above 183, so widening
+    // the tables is inert for those and needs no variant gate.
     //
-    // These are appended rather than written into the eighteen table literals in AppMain.cctor.cs,
-    // for the reason porting-a-module.md gives for preferring a static constructor over initialisers:
-    // six of those tables are assigned from decompiler-aliased locals and `array11` is reused for
-    // three different tables, so hand-editing them in place is how one gets silently transposed.
-    // One place to read, one place to revert, and DecoPcTableTests pins every value.
+    // appended here rather than edited into the table literals in AppMain.cctor.cs: several of
+    // those tables are assigned from decompiler-aliased locals with reused array locals, so
+    // hand-editing them in place risks silently transposing values. DecoPcTableTests pins every
+    // value.
     //
-    // Values are transcribed from the retail PC binary, whose tables are 200 long where ours are
-    // 184. The layout was confirmed two ways before reading: the tables sit in the binary in exactly
-    // the declaration order gmDeco.cpp uses, and the two independently known anchors
-    // (g_gm_deco_user_flag 0x57CEC0, g_gm_deco_command_state 0x57EF90) land where that order
-    // predicts.
+    // values are transcribed from the retail PC binary, whose tables are 200 long where ours are
+    // 184
     internal const int GMD_DECORATE_ID_MAX_PC = 200;
 
     private const int GMD_DECORATE_ID_PC_START = 184;
 
-    // named after the model each one draws, from DECO_ZONE2_MDL's own string table. PC's binary is
-    // stripped so the ids themselves have no recovered names; the _TURN suffix is the 0x800
-    // user_flag, the quarter turn about Z that separates the two otherwise identical groups
+    // named after the model each one draws, from DECO_ZONE2_MDL's own string table; the _TURN
+    // suffix is the 0x800 user_flag, the quarter turn about Z that separates the two otherwise
+    // identical groups
     private const int GMD_DECORATE_ID_Z2_POLE_STAND = 184;
     private const int GMD_DECORATE_ID_Z2_POLE_TOP = 185;
     private const int GMD_DECORATE_ID_Z2_DICE_A = 186;
@@ -130,8 +126,8 @@ internal partial class AppMain
         }
     }
 
-    // model plus a touch rect and no node motion. PC has this as its own constructor (0x4E22E0) and
-    // the leak's set does not, because no mobile-era decoration needed the combination
+    // model plus a touch rect and no node motion; the leak's dispatch set has no constructor for
+    // this combination because no mobile-era decoration needed it
     private static OBS_OBJECT_WORK GmDecoInitModelTouch(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
@@ -156,8 +152,8 @@ internal partial class AppMain
         ((OBS_OBJECT_WORK)deco_work).flag &= 4294967293U;
 
         int id = dec_rec.id;
-        short width = g_gm_deco_rect_size[id][0];
-        short height = g_gm_deco_rect_size[id][1];
+        short width = gmDecoRectSize(id, 0);
+        short height = gmDecoRectSize(id, 1);
 
         gmDecoSetRect(deco_work,
             (short)(-width / 2), (short)(-height / 2), -500,
@@ -167,10 +163,10 @@ internal partial class AppMain
         return deco_work;
     }
 
-    // PC 0x4DF620. The dice twin of the card spin: the same decaying impulse, but it scrubs the
-    // node motion's frame rather than turning the object, so the die tumbles through its animation
-    // and coasts to a stop. Wrapped against the motion's own bounds, and the overflow branch really
-    // does subtract the end frame rather than the span - reproduced as written
+    // the dice twin of the card spin: the same decaying impulse, but it scrubs the node motion's
+    // frame rather than turning the object, so the die tumbles through its animation and coasts to
+    // a stop. wrapped against the motion's own bounds; the overflow branch really does subtract
+    // the end frame rather than the span - reproduced as written
     private static void gmDecoMainFuncDiceRoll(OBS_OBJECT_WORK obj_work)
     {
         int spin = obj_work.user_timer;
@@ -201,8 +197,8 @@ internal partial class AppMain
             obj_work.user_timer = spin + 1 > 0 ? 0 : spin + 1;
     }
 
-    // PC 0x4DF5A0. user_timer carries a signed spin impulse the touch callbacks set from the
-    // player's speed; it decays to zero and turns the card about Z on the way
+    // user_timer carries a signed spin impulse the touch callbacks set from the player's speed;
+    // it decays to zero and turns the card about Z on the way
     private static void gmDecoMainFuncCardSpin(OBS_OBJECT_WORK obj_work)
     {
         int spin = obj_work.user_timer;
@@ -217,10 +213,9 @@ internal partial class AppMain
             obj_work.user_timer = spin + 1 > 0 ? 0 : spin + 1;
     }
 
-    // PC 0x4E0760 and 0x4E06C0. Both turn the toucher's speed into the spin impulse, scaled by the
-    // decoration's user_work, and ring once past a threshold. They differ only in which component
-    // of the player's motion they read: the first group is driven by running past, the second by
-    // landing on it
+    // both turn the toucher's speed into the spin impulse, scaled by the decoration's user_work,
+    // and ring once past a threshold. they differ only in which component of the player's motion
+    // they read: the first group is driven by running past, the second by landing on it
     private static void gmDecoRectFuncSpinOnRun(OBS_RECT_WORK deco_rect, OBS_RECT_WORK other_rect)
     {
         OBS_OBJECT_WORK deco = deco_rect.parent_obj;
@@ -252,8 +247,8 @@ internal partial class AppMain
         int spin = (int)(speed * 0.000244140625f * deco.user_work);
         deco.user_timer = spin;
 
-        // PC additionally gates the cue on the id being 186-199, which is redundant here: these two
-        // callbacks are only ever installed on those ids
+        // an id-186-199 gate here would be redundant: these two callbacks are only ever installed
+        // on those ids
         if (MTM_MATH_ABS(spin) > 60)
             GmSoundPlaySE("Cards5");
     }

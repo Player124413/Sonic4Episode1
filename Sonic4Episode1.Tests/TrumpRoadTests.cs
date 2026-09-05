@@ -2,8 +2,7 @@ namespace Sonic4Episode1.Tests;
 
 // The card road is the one gimmick the stage cannot be finished without, and most of what it needs
 // is table data that fails quietly: a missing player state row throws on the first frame of the
-// ride, and a gamedat slot outside the widened array reads a null archive at spawn. See
-// docs/z2a2-trumproad-re.md.
+// ride, and a gamedat slot outside the widened array reads a null archive at spawn.
 public class TrumpRoadTests
 {
     // PC appended its ride at 67, which is where our own list ended, so the two agree without a
@@ -57,8 +56,8 @@ public class TrumpRoadTests
     }
 
     // Not covered by tests, because both need a started game rather than a static table: camera 7's
-    // fovy/znear/zfar (set in GmCamera, values in docs/z2a2-trumproad-re.md) and the pass's slot in
-    // the execution list (set in gmMainSetNNCommandStateTbl). Both are verified by playing.
+    // fovy/znear/zfar (set in GmCamera) and the pass's slot in the execution list (set in
+    // gmMainSetNNCommandStateTbl). Both are verified by playing.
     //
     // Nor is the homing whitelist in gmPlayerGetHomingTarget. PC adds exactly one id to
     // it (295, our card) and without it the gimmick is unreachable, since the hit callback only

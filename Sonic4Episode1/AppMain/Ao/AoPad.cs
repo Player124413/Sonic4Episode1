@@ -28,6 +28,12 @@ internal class AoPad
         return 0;
     }
 
+    public static bool AoPadIsGamePadConnected()
+    {
+        var controller = controllerSource?[AppMain.AoAccountGetCurrentId()];
+        return controller != null && controller.IsGamePadConnected;
+    }
+
     public static BUTTON AoPadRepeat()
     {
         if (AppMain.AoAccountGetCurrentId() < (controllerSource?.Count ?? 0))

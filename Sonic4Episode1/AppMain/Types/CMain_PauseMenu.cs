@@ -308,7 +308,7 @@ internal partial class AppMain
         }
 
         // pinned to the base: the console pause archives are a different screen, 6 actions against
-        // these tables' 10, so they must never resolve here. see docs/pause-action-ids.md
+        // these tables' 10, so they must never resolve here
         private void fileLoadingStart()
         {
             this.m_file[0] = readAMAFileAs("G_COM/MENU/G_PAUSE.AMA", AMD_FS_VARIANT_BASE);

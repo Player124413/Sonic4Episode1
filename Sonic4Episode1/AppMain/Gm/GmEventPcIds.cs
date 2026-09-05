@@ -5,8 +5,7 @@ using System.Diagnostics;
 internal partial class AppMain
 {
     // PC's event id space agrees with our mobile-lineage one up to 294 and diverges from 295, so a
-    // PC-era .EV has to be translated before the dispatch table sees it. What diverges and how it
-    // was recovered is in docs/z2a2-card-gimmicks.md; the design is in docs/z2a2-port-plan.md.
+    // PC-era .EV has to be translated before the dispatch table sees it.
     //
     // The ported ids sit above PC's own table rather than at our old tail, so no id a PC map can
     // hold is ever a valid index into the ported block. That is what stops the next PC stage we

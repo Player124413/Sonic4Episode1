@@ -8,8 +8,6 @@ using static StgSlct.DME_STGSLCT_ACT;
 
 internal static partial class StgSlct
 {
-    // The touch layer. Built on the mobile path only and left null on console, which has no
-    // equivalent: the C++ keeps every field and every call site here inside #if _IPHONE.
     internal sealed class StgSlctTouch
     {
         public readonly CTrgAoAction[] trg_zone = New<CTrgAoAction>(6);
@@ -25,13 +23,10 @@ internal static partial class StgSlct
         public bool is_disp_cover;
         public bool win_is_disp_cover;
 
-        // locals in the C++, fields here because the pick helpers are separate methods. Cleared at
-        // the top of every act-select input frame.
+        // cleared each frame in StgSlctInput
         public bool move_left;
         public bool move_right;
 
-        // trg_answer is not in selection order: [0] is NO and [1] is YES. The same inversion
-        // caught out the title screen, see docs/dmtitle-action-names.md
         public void Build(DMS_STGSLCT_MAIN_WORK main_work)
         {
             var act = main_work.act;
@@ -98,8 +93,7 @@ internal static partial class StgSlct
                 trg.ResetState();
         }
 
-        // The back button lights up under the finger. Frame 2 latches, so once it is reached only
-        // an explicit reset clears it.
+        // back button lights up under the finger; frame 2 latches until an explicit reset clears it
         public void UpdateBackButtonZoneSelect(DMS_STGSLCT_MAIN_WORK main_work)
         {
             var state = trg_cancel.GetState(0U);
@@ -115,7 +109,6 @@ internal static partial class StgSlct
             DrawBackButton(main_work, frame);
         }
 
-        // act select additionally drops the highlight while a drag is in flight
         public void UpdateBackButtonStageSelect(DMS_STGSLCT_MAIN_WORK main_work)
         {
             var state = trg_cancel.GetState(0U);
@@ -140,8 +133,6 @@ internal static partial class StgSlct
             DrawBackButton(main_work, frame);
         }
 
-        // the score/time tab doubles as the mode toggle on touch, where console uses a shoulder
-        // button. Frame 2 means "just released", which is what actually flips the mode.
         public void UpdateModeToggle(DMS_STGSLCT_MAIN_WORK main_work)
         {
             var mode0 = trg_mode[0].GetState(0U);
@@ -191,7 +182,6 @@ internal static partial class StgSlct
                 AoActSetFrame(main_work.act[i], frame);
         }
 
-        // returns true once a stage has been picked, which ends the input frame
         public bool PickAct(DMS_STGSLCT_MAIN_WORK main_work, int src)
         {
             var act_num = (int)dm_stgslct_zone_act_num_tbl[main_work.cur_zone][1];
@@ -224,8 +214,6 @@ internal static partial class StgSlct
             return false;
         }
 
-        // with special open but final still closed, the final tab stands in for the special zone
-        // and the special tab is skipped
         public bool PickZoneTab(DMS_STGSLCT_MAIN_WORK main_work)
         {
             var is_open = main_work.is_final_open;
@@ -294,8 +282,6 @@ internal static partial class StgSlct
             return moved;
         }
 
-        // a horizontal flick changes zone, a vertical release settles the scroll, and a plain move
-        // drags the act list under the finger
         public bool ApplyDrag(DMS_STGSLCT_MAIN_WORK main_work, int src, int dst)
         {
             var state = trg_act_move.GetState(0U);
@@ -303,8 +289,7 @@ internal static partial class StgSlct
 
             if (Math.Abs(spd.x) >= 3.0f && Math.Abs(spd.y) < Math.Abs(spd.x))
             {
-                // the flick sets move_left for a rightward swipe but then advances the zone by +1,
-                // where the left arrow advances by -1. SEGA's, see docs/stgslct-port-quirks.md
+                // move_left here still advances the zone by +1; that's SEGA's naming, not a bug
                 if (spd.x >= 0.0f)
                     move_left = true;
                 else

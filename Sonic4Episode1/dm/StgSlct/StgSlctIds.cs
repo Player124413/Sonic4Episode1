@@ -1,6 +1,5 @@
 // action ids for DEMO/STGSLCT/D_STGSLCT.AMB and its language sibling, one set per variant.
-// generated from the dump's .HMA headers and verified against the shipped archives, see
-// docs/stgslct-action-ids.md. the D_CMN_* ids these tables also use already live in AppMain.
+// the D_CMN_* ids these tables also use already live in AppMain.
 
 internal static partial class StgSlct
 {

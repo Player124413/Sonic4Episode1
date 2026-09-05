@@ -54,10 +54,10 @@ internal sealed class EndianBinaryReader : BinaryReader
     {
         if (!swap)
             return base.ReadSingle();
-#if NET40
-        return BitConverterEx.UInt32BitsToSingle(BinaryPrimitives.ReverseEndianness(base.ReadUInt32()));
-#else
+#if NETCOREAPP3_0_OR_GREATER
         return BitConverter.UInt32BitsToSingle(BinaryPrimitives.ReverseEndianness(base.ReadUInt32()));
+#else
+        return BitConverterEx.UInt32BitsToSingle(BinaryPrimitives.ReverseEndianness(base.ReadUInt32()));
 #endif
     }
 
@@ -65,10 +65,10 @@ internal sealed class EndianBinaryReader : BinaryReader
     {
         if (!swap)
             return base.ReadDouble();
-#if NET40
-        return BitConverterEx.UInt64BitsToDouble(BinaryPrimitives.ReverseEndianness(base.ReadUInt64()));
-#else
+#if NETCOREAPP3_0_OR_GREATER
         return BitConverter.UInt64BitsToDouble(BinaryPrimitives.ReverseEndianness(base.ReadUInt64()));
+#else
+        return BitConverterEx.UInt64BitsToDouble(BinaryPrimitives.ReverseEndianness(base.ReadUInt64()));
 #endif
     }
 }

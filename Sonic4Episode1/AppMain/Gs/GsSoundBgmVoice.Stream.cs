@@ -62,7 +62,7 @@ internal partial class AppMain
 
         public static bool Preload(string track, bool loop)
         {
-            return CriAuBgmSource.Prepare(track);
+            return CriAuBgmSource.Prepare(track, loop);
         }
 
         public static void ClearPreload()

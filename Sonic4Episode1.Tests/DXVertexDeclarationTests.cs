@@ -6,17 +6,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Sonic4Episode1.Tests;
 
-// D3D11's CreateInputLayout rejects a declaration missing anything the vertex shader declares, so
-// DXVertex has to cover every permutation in the retail set. GL only leaves the attribute disabled,
-// which is why this went unnoticed. See docs/nn-stdshader-ubershader.md.
 public class DXVertexDeclarationTests
 {
     private static readonly string KeyFile = Path.Combine(
         Path.GetDirectoryName(typeof(DXVertexDeclarationTests).Assembly.Location),
         "Fixtures", "nnstdshader-keys.txt");
 
-    // nnstdshader.vsh:687-720, at the NND_PROF_VTX_SPECULAR and NND_PROF_CALC_VTX_BINORMAL that
-    // Shaders/nn/Build-Permutations.ps1 compiles with
     private static IEnumerable<(VertexElementUsage, int)> DeclaredInputs(AppMain.NNS_STDSHADER_PROFILE p)
     {
         yield return (VertexElementUsage.Position, 0);
@@ -67,7 +62,6 @@ public class DXVertexDeclarationTests
         Assert.Empty(missing);
     }
 
-    // offsets have to match the struct layout or the buffer is read at the wrong stride
     [Fact]
     public void ElementOffsetsAreContiguousAndTheStrideCoversThem()
     {

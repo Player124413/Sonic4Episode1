@@ -10,7 +10,7 @@ namespace Sonic4Episode1.Viewer;
 //
 // DECO_ZONEx.AMB is six nested archives. Members 0 and 1 are the decoration models and their
 // textures, which console ships as NN objects and mobile as baked TVX. Members 4 and 5 are the
-// waterfalls, NN on both. See docs/console-map-blocks.md for the block equivalent.
+// waterfalls, NN on both.
 internal static class StageDecoSurvey
 {
     public static int Run(string stage, string root)

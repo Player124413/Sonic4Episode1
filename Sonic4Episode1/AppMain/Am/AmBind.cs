@@ -17,7 +17,7 @@ internal partial class AppMain
 
     // the one place a member's bytes are located, so a per-member console override lands for every
     // reader at once. the chunk is parented to the sibling rather than copied out of it, so it
-    // keeps the sibling's byte order and its preload cache. see docs/per-member-variants.md
+    // keeps the sibling's byte order and its preload cache
     internal static AmbChunk amBindChunk(AMS_AMB_HEADER header, int index)
     {
         var sibling = header.member_variant_amb;

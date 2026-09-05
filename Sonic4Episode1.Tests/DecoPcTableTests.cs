@@ -1,17 +1,11 @@
 namespace Sonic4Episode1.Tests;
 
-// Decoration ids 184-199 only exist on PC, where the tables are 200 long against our 184. The
-// values are transcribed from the retail binary in GmDecoPcTables.cs; these pin the ones whose
-// failure is silent. A model index that stops matching DECO_ZONE2's member order draws the wrong
-// decoration, and disp_flag bit 22 is the difference between a card facing the camera and facing
-// 90 degrees away. See docs/z2a2-card-gimmicks.md and docs/console-deco.md.
 public class DecoPcTableTests
 {
     private const int Start = 184;
     private const int End = AppMain.GMD_DECORATE_ID_MAX_PC;
 
-    // every table the dispatch indexes by id has to grow together, or the shortest one throws
-    // before the id bound is ever tested (which is how this stage first failed to load)
+    // every table the dispatch indexes by id has to grow together, or the shortest one throws before the id bound is tested
     [Fact]
     public void EveryIdIndexedTableIsWidenedTogether()
     {

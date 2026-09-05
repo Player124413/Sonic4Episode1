@@ -1,7 +1,7 @@
 internal partial class AppMain
 {
-    // Shared by the giant card (event 380) and the road it spawns (event 393); PC gives both the
-    // same 0x8E0 work and uses whichever half it needs. See docs/z2a2-trumproad-re.md.
+    // shared by the giant card (event 380) and the road it spawns (event 393); both use the same
+    // work, whichever half applies
     internal class GMS_GMK_TRUMPROAD_WORK : IOBS_OBJECT_WORK
     {
         public readonly GMS_ENEMY_3D_WORK gmk_work;
@@ -19,12 +19,11 @@ internal partial class AppMain
         public int route;
         public OBS_OBJECT_WORK card_obj;
 
-        // "Cards4" loops for the length of the ride, so it needs a handle of its own to be stopped
-        // on. PC keeps the same thing at road work +2268
+        // "Cards4" loops for the length of the ride, so it needs a handle of its own to be stopped on
         public GSS_SND_SE_HANDLE se_handle;
 
-        // PC keeps the rider's previous position in the player work, in fields its struct has and
-        // ours does not. Only the x is ever read back, and only by the road, so it lives here
+        // only the x of the rider's previous position is ever read back, and only by the road, so
+        // that's the only component kept here
         public int ride_prev_pos_x;
 
         // which of the player's rects were live when the ride started, so the ride can switch them

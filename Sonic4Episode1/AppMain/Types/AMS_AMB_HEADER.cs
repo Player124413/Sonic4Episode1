@@ -33,7 +33,6 @@ internal partial class AppMain
         // indices lives, -1 where the base member stands. members are reached through the sibling
         // header rather than copied out of it, so they keep its byte order: an xbla .AMA spliced
         // into a little-endian base has nothing of its own that says which way round it is.
-        // see docs/per-member-variants.md
         public AMS_AMB_HEADER member_variant_amb;
         public int[] member_variant_index;
     }

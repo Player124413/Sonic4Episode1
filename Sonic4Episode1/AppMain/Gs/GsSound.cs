@@ -93,6 +93,11 @@ internal partial class AppMain
         public const int STATUS_PLAYING = 2;
         public const int STATUS_PLAYEND = 3;
         public const int STATUS_ERROR = 4;
+
+        // only reached where a source cannot open a track on demand. GsSoundPrepareBGMForLevel
+        // covers the zone songs and the jingles, so anything else -- title, menus, bosses, the
+        // special stages, the staff roll -- is first asked for at the moment it should start
+        public const int STATUS_LOADING = 5;
         private const float NON_AISAC = -1000f;
         public MediaState m_stGMState;
         public float m_fBGVolume;
@@ -121,8 +126,6 @@ internal partial class AppMain
 
         public static uint GetCueId(string name)
         {
-            //return (uint)sound_fx_list[name].cue;
-
             if (sound_fx_list.TryGetValue(name, out var cue)) return (uint)cue.cue;
 
             return unchecked((uint)-1);
@@ -181,8 +184,43 @@ internal partial class AppMain
             this.oldAisacParam = -1000f;
         }
 
+        private SOUND_TABLE m_pendingBgm;
+        private bool m_playWhenLoaded;
+
+        // finishes a load SetCue could not, and starts it if Play was called in the meantime. Only
+        // runs for a track that was not preloaded, so a prepared one behaves exactly as before
+        private bool UpdatePendingBgm()
+        {
+            if (!CriAuBgmVoice.Preload(m_pendingBgm.filename[0], m_pendingBgm.loop[0]))
+                return false;
+
+            var table = m_pendingBgm;
+            m_pendingBgm = null;
+
+            if (!this.bgm.Load(this.se_name, table.filename[0], table.loop[0]))
+            {
+                this.status = STATUS_ERROR;
+                return false;
+            }
+
+            this.m_fBGVolume = -1f;
+            this.m_bLoop = table.loop[0];
+            this.status = STATUS_PREP;
+
+            if (m_playWhenLoaded)
+            {
+                m_playWhenLoaded = false;
+                Play();
+            }
+
+            return true;
+        }
+
         internal void Update()
         {
+            if (this.status == STATUS_LOADING && !UpdatePendingBgm())
+                return;
+
             bool flag = true;
             if (this.type == 0)
             {
@@ -349,46 +387,6 @@ internal partial class AppMain
                 : Sonic4Ep1.pInstance.Content.Load<SoundEffect>("SOUND\\" + fileName);
             cacheFxSounds.Add(fileName, effect);
 
-            //using (Stream stream = TitleContainer.OpenStream("Content\\SOUND\\" + fileName + ".xnb"))
-            //{
-            //    using (BinaryReader binaryReader = new BinaryReader(stream))
-            //    {
-            //        if (!bgMusic)
-            //        {
-            //            SoundEffect soundEffect = SoundEffect.FromStream(stream);
-            //            AppMain.cacheFxSounds.Add(fileName, soundEffect);
-            //        }
-            //        else
-            //        {
-            //            binaryReader.ReadInt32();
-            //            binaryReader.ReadInt32();
-            //            binaryReader.ReadInt32();
-            //            binaryReader.ReadInt32();
-            //            int num2 = binaryReader.ReadInt32();
-            //            int num3 = (int) binaryReader.ReadInt16();
-            //            channels = (int) binaryReader.ReadInt16();
-            //            sampleRate = binaryReader.ReadInt32();
-            //            binaryReader.ReadInt32();
-            //            int num4 = (int) binaryReader.ReadInt16();
-            //            int num5 = (int) binaryReader.ReadInt16();
-            //            if (num2 == 18)
-            //            {
-            //                int count = (int) binaryReader.ReadInt16();
-            //                binaryReader.ReadBytes(count);
-            //            }
-
-            //            binaryReader.ReadInt32();
-            //            int count1 = binaryReader.ReadInt32();
-            //            byteArray = binaryReader.ReadBytes(count1);
-            //            num1 = count1;
-            //            if (loop && loopEnd == 0)
-            //                loopEnd = byteArray.Length;
-            //            loopStart += loopStart % num4;
-            //            loopEnd -= loopEnd % num4;
-            //        }
-            //    }
-            //}
-
             return num1;
         }
 
@@ -434,7 +432,6 @@ internal partial class AppMain
                     {
                         this.Stop();
                         this.status = STATUS_PREP;
-                        // return;
                     }
                 }
 
@@ -459,8 +456,6 @@ internal partial class AppMain
                     this.volume = new float[this.effectscount];
                     if (this.type == 0)
                     {
-                        // play sound effect
-
                         this.activefx = 0;
                         this.status_paused = false;
                         for (int index = 0; index < this.effectscount; ++index)
@@ -494,6 +489,14 @@ internal partial class AppMain
                     else
                     {
                         this.bgm ??= new CriAuBgmVoice();
+
+                        if (!CriAuBgmVoice.Preload(soundTable.filename[0], soundTable.loop[0]))
+                        {
+                            this.m_pendingBgm = soundTable;
+                            this.status = STATUS_LOADING;
+                            return;
+                        }
+
                         if (!this.bgm.Load(se_name, soundTable.filename[0], soundTable.loop[0]))
                         {
                             this.status = STATUS_ERROR;
@@ -518,6 +521,13 @@ internal partial class AppMain
 
         internal void Play()
         {
+            // the track has not arrived yet; Update starts it as soon as it has
+            if (this.status == STATUS_LOADING)
+            {
+                m_playWhenLoaded = true;
+                return;
+            }
+
             if (this.type == 1)
             {
                 if (this.se_name != null && this.bgm != null)
@@ -550,7 +560,6 @@ internal partial class AppMain
                         if (this.sound[index] != null)
                         {
                             this.sound[index].Pitch = this.pitch;
-                            //this.sound[index].Volume = this.volume[index];
                             System.Diagnostics.Debug.WriteLine(this.sound[index].Volume);
 
                             if (this.sound[index].State == SoundState.Paused)
@@ -573,6 +582,10 @@ internal partial class AppMain
             this.aisac = null;
             this.activefx = -1;
             this.status_paused = false;
+
+            // a cue released while its track was still coming must not start when it lands
+            this.m_pendingBgm = null;
+            this.m_playWhenLoaded = false;
             if (this.type == 0)
             {
                 for (int index = 0; index < this.effectscount; ++index)
@@ -822,7 +835,6 @@ internal partial class AppMain
                     }
 
 
-                    //Console.WriteLine(soundTable.name);
                     list[soundTable.name] = soundTable;
                 }
             }

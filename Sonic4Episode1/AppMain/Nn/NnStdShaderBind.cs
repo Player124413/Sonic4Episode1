@@ -24,6 +24,15 @@ internal partial class AppMain
     private static readonly Matrix[] nngStdShaderBones = new Matrix[mppMaxBoneMatrices];
     private static int nngStdShaderBoneCount;
 
+    // NN folds the material control block into the material colours before upload, the fixed
+    // function path does it in nnPutMaterialColorGL. without this nothing fades by draw_state
+    private static readonly NNS_MATERIAL_STDSHADER_COLOR nngStdShaderMatCtrlColor =
+        new NNS_MATERIAL_STDSHADER_COLOR();
+
+    private const uint NND_DRAWOBJ_MATCTRL_COLOR_MASK =
+        NND_DRAWOBJ_MATCTRL_DIFFUSE | NND_DRAWOBJ_MATCTRL_AMBIENT
+        | NND_DRAWOBJ_MATCTRL_SPECULAR | NND_DRAWOBJ_MATCTRL_ALPHA;
+
     public static void nnSetWorldMatrixPalette(NNS_MATRIX[] mtxpal)
     {
         nngWorldMatrixPalette = mtxpal;
@@ -117,6 +126,101 @@ internal partial class AppMain
         desc.pD3DVertexBuffer.SetData(vertices);
     }
 
+    private static NNS_MATERIAL_STDSHADER_COLOR nnApplyMaterialControlColor(
+        NNS_MATERIAL_STDSHADER_COLOR pColor, uint drawFlag)
+    {
+        if (pColor == null || (drawFlag & NND_DRAWOBJ_MATCTRL_COLOR_MASK) == 0)
+            return pColor;
+
+        NNS_MATERIAL_STDSHADER_COLOR color = nngStdShaderMatCtrlColor.Assign(pColor);
+
+        if ((drawFlag & NND_DRAWOBJ_MATCTRL_AMBIENT) != 0)
+        {
+            switch (nngMatCtrlAmbient.mode)
+            {
+                case NNE_MATCTRLMODE_REPLACE:
+                    color.Ambient.r = nngMatCtrlAmbient.col.r;
+                    color.Ambient.g = nngMatCtrlAmbient.col.g;
+                    color.Ambient.b = nngMatCtrlAmbient.col.b;
+                    color.Ambient.a = 1f;
+                    break;
+                case NNE_MATCTRLMODE_ADD:
+                    color.Ambient.r += nngMatCtrlAmbient.col.r;
+                    color.Ambient.g += nngMatCtrlAmbient.col.g;
+                    color.Ambient.b += nngMatCtrlAmbient.col.b;
+                    break;
+                case NNE_MATCTRLMODE_MODULATE:
+                    color.Ambient.r *= nngMatCtrlAmbient.col.r;
+                    color.Ambient.g *= nngMatCtrlAmbient.col.g;
+                    color.Ambient.b *= nngMatCtrlAmbient.col.b;
+                    break;
+            }
+        }
+
+        if ((drawFlag & NND_DRAWOBJ_MATCTRL_DIFFUSE) != 0)
+        {
+            switch (nngMatCtrlDiffuse.mode)
+            {
+                case NNE_MATCTRLMODE_REPLACE:
+                    color.Diffuse.r = nngMatCtrlDiffuse.col.r;
+                    color.Diffuse.g = nngMatCtrlDiffuse.col.g;
+                    color.Diffuse.b = nngMatCtrlDiffuse.col.b;
+                    break;
+                case NNE_MATCTRLMODE_ADD:
+                    color.Diffuse.r += nngMatCtrlDiffuse.col.r;
+                    color.Diffuse.g += nngMatCtrlDiffuse.col.g;
+                    color.Diffuse.b += nngMatCtrlDiffuse.col.b;
+                    break;
+                case NNE_MATCTRLMODE_MODULATE:
+                    color.Diffuse.r *= nngMatCtrlDiffuse.col.r;
+                    color.Diffuse.g *= nngMatCtrlDiffuse.col.g;
+                    color.Diffuse.b *= nngMatCtrlDiffuse.col.b;
+                    break;
+            }
+        }
+
+        if ((drawFlag & NND_DRAWOBJ_MATCTRL_ALPHA) != 0)
+        {
+            switch (nngMatCtrlAlpha.mode)
+            {
+                case NNE_MATCTRLMODE_REPLACE:
+                    color.Diffuse.a = nngMatCtrlAlpha.alpha;
+                    break;
+                case NNE_MATCTRLMODE_ADD:
+                    color.Diffuse.a += nngMatCtrlAlpha.alpha;
+                    break;
+                case NNE_MATCTRLMODE_MODULATE:
+                    color.Diffuse.a *= nngMatCtrlAlpha.alpha;
+                    break;
+            }
+        }
+
+        if ((drawFlag & NND_DRAWOBJ_MATCTRL_SPECULAR) != 0)
+        {
+            switch (nngMatCtrlSpecular.mode)
+            {
+                case NNE_MATCTRLMODE_REPLACE:
+                    color.Specular.r = nngMatCtrlSpecular.col.r;
+                    color.Specular.g = nngMatCtrlSpecular.col.g;
+                    color.Specular.b = nngMatCtrlSpecular.col.b;
+                    color.Specular.a = 1f;
+                    break;
+                case NNE_MATCTRLMODE_ADD:
+                    color.Specular.r += nngMatCtrlSpecular.col.r;
+                    color.Specular.g += nngMatCtrlSpecular.col.g;
+                    color.Specular.b += nngMatCtrlSpecular.col.b;
+                    break;
+                case NNE_MATCTRLMODE_MODULATE:
+                    color.Specular.r *= nngMatCtrlSpecular.col.r;
+                    color.Specular.g *= nngMatCtrlSpecular.col.g;
+                    color.Specular.b *= nngMatCtrlSpecular.col.b;
+                    break;
+            }
+        }
+
+        return color;
+    }
+
     public static void nnBindStdShader(NNS_DRAWCALLBACK_VAL val)
     {
         NNS_SUBOBJ subobj = val.pObject.pSubobjList[val.iSubobject];
@@ -151,17 +255,14 @@ internal partial class AppMain
             diffuse = specular = Vector3.Zero;
 
         effect.SetParallelLight(0, lightDirection, diffuse, specular);
-        effect.SetMaterial(material.pColor, OpenGL.mppglGetAmbient());
+        effect.SetMaterial(nnApplyMaterialControlColor(material.pColor, val.DrawFlag), OpenGL.mppglGetAmbient());
         effect.SetTextureMatrices(material);
         effect.SetMapBlend(material);
 
         mppSetStdShaderAlphaTest(effect);
 
-        // The switch and the range live in NN's own globals and only reach the wrapper through
-        // nnPutFogSwitchGL, which the fixed function material path calls (NnDraw.cs:713) and this
-        // one never does. Only the colour gets there, via glFogfv. Same test as that call site.
-        //
-        // The permutation always computes fog, so "off" means moving it past the far plane.
+        // the permutation always computes fog and has no on/off switch, so "off" means moving it
+        // past the far plane
         OpenGL.mppglGetFog(out _, out Vector3 fogColor, out _, out _);
         if (nngFogSwitch && (material.fFlag & NND_MATFLAG_DISABLE_FOGGING) == 0)
             effect.SetFog(fogColor, nngFogStart, nngFogEnd);
@@ -192,10 +293,8 @@ internal partial class AppMain
         effect.SetUserUniforms(mppStdShaderUserUniforms());
     }
 
-    // XNA has no alpha test render state, so it goes to the shader instead. Every permutation
-    // compiles the clip, and u_AlphaTest defaults to never clipping, so a caller that skips this
-    // gets no cutouts at all rather than an error.
-    // for diagnostics: what the last material asked the clip to do
+    // XNA has no alpha test render state, so it goes to the shader instead; a caller that skips
+    // this gets no cutouts at all rather than an error
     public static string mppStdShaderAlphaTestState()
     {
         return nngShaderRenderState[D3DRS_ALPHATESTENABLE] == 0
@@ -269,13 +368,30 @@ internal partial class AppMain
         }
     }
 
-    // fxc emits a D3D9 effect that MojoShader reads; mgfxc emits MGFX. Shaders.targets builds
-    // whichever the backend needs, so the extension follows the backend
-#if MONOGAME
-    private const string MPP_SHADER_EXTENSION = ".mgfxo";
-#else
+    // fxc emits the D3D9 effect that MojoShader reads
     private const string MPP_SHADER_EXTENSION = ".fxb";
-#endif
+
+    // where the retail PC build keeps its permutation set. Ours holds one combined fx_2_0 effect
+    // per key where retail splits .VSH and .PSH, so only the path and the 26 digit key names line up
+    private const string MPP_STDSHADER_ARCHIVE = "NNSTDSHADER/SHADER.AMB";
+
+    private static AMS_AMB_HEADER nngStdShaderArchive;
+
+    private static AMS_AMB_HEADER mppStdShaderArchive()
+    {
+        if (nngStdShaderArchive != null)
+            return nngStdShaderArchive;
+
+        var amb = new AMS_AMB_HEADER();
+        amb.data = ContentSource.Current.Read(MPP_STDSHADER_ARCHIVE);
+
+        using (var stream = new MemoryStream(amb.data))
+            readAmbHeader(stream, ref amb);
+
+        amb.buf = new object[amb.file_num];
+        nngStdShaderArchive = amb;
+        return amb;
+    }
 
     private static NnStdShaderEffect mppLoadStdShader(NNS_STDSHADER_NAME name)
     {
@@ -286,13 +402,15 @@ internal partial class AppMain
         NnStdShaderEffect effect = null;
         try
         {
-            using (Stream stream = TitleContainer.OpenStream(
-                "Content\\Shaders\\nnstd\\" + permutation + MPP_SHADER_EXTENSION))
-            {
-                var code = new byte[stream.Length];
-                stream.Read(code, 0, code.Length);
-                effect = new NnStdShaderEffect(OpenGL.mppglGetDevice(), code);
-            }
+            var member = permutation + MPP_SHADER_EXTENSION;
+            var chunk = amBindSearch(mppStdShaderArchive(), member);
+            if (chunk == null)
+                throw new FileNotFoundException($"no '{member}' in {MPP_STDSHADER_ARCHIVE}");
+
+            // Effect wants the blob on its own, and the chunk is a window onto the whole archive
+            var code = new byte[chunk.length];
+            Buffer.BlockCopy(chunk.array, chunk.offset, code, 0, code.Length);
+            effect = new NnStdShaderEffect(OpenGL.mppglGetDevice(), code);
         }
         catch (Exception ex)
         {
@@ -309,7 +427,6 @@ internal partial class AppMain
             || !(plistptr.pPrimList is NNS_PRIMTYPE_DX_STRIPLIST strip))
             return;
 
-        // XNA needs render states turned into state objects before the draw call
         mppApplyStdShaderRenderState();
 
         GraphicsDevice device = OpenGL.mppglGetDevice();

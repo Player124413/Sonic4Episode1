@@ -1,5 +1,11 @@
 ﻿internal partial class AppMain
 {
+    private const string GMD_GMK_SPRING_MDL_FILENAME = "G_COM/GMK/GMK_SPRING_MDL.AMB";
+    private const string GMD_GMK_SPRING_TEX_FILENAME = "G_COM/GMK/GMK_SPRING_TEX.AMB";
+
+    // the 3GS light workaround below is mobile only, console lights springs normally
+    private static bool gm_gmk_spring_as_console;
+
     private static OBS_OBJECT_WORK GmGmkSpringInit(
         GMS_EVE_RECORD_EVENT eve_rec,
         int pos_x,
@@ -53,18 +59,21 @@
         }
         else
             gmGmkSpringFwInit(work);
-        if (GsGetMainSysInfo().stage_id == 14)
+        if (!gm_gmk_spring_as_console)
         {
-            work.obj_3d.use_light_flag = 0U;
-            work.obj_3d.use_light_flag |= 64U;
-        }
-        else
-        {
-            int nMaterial = work.obj_3d._object.nMaterial;
-            for (int index2 = 0; index2 < nMaterial; ++index2)
+            if (GsGetMainSysInfo().stage_id == 14)
             {
-                NNS_MATERIALPTR matptr = work.obj_3d._object.pMatPtrList[index2];
-                mppSetMaterialFlag(matptr, mppMaterialFlag(matptr) | 3U);
+                work.obj_3d.use_light_flag = 0U;
+                work.obj_3d.use_light_flag |= 64U;
+            }
+            else
+            {
+                int nMaterial = work.obj_3d._object.nMaterial;
+                for (int index2 = 0; index2 < nMaterial; ++index2)
+                {
+                    NNS_MATERIALPTR matptr = work.obj_3d._object.pMatPtrList[index2];
+                    mppSetMaterialFlag(matptr, mppMaterialFlag(matptr) | 3U);
+                }
             }
         }
         work.flag |= 1073741824U;
@@ -73,6 +82,9 @@
 
     public static void GmGmkSpringBuild()
     {
+        gm_gmk_spring_as_console = amFsAllConsoleGrade(
+            GMD_GMK_SPRING_MDL_FILENAME, GMD_GMK_SPRING_TEX_FILENAME);
+
         gm_gmk_spring_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(791), GmGameDatGetGimmickData(792), 0U);
     }
 

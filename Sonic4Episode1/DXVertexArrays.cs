@@ -79,19 +79,8 @@ internal sealed class DXVertexArrays
             arrays.TexCoords3 = ReadVector2(data, offset + 16, stride, count, bigEndian);
         offset += texCount * 8;
 
-        // Tangent then binormal, float3 each (NND_VTXSTRIDE_DX_TAN_F32 / _BNRM_F32), and they sit
-        // AFTER the texture coordinates. That ordering is not a guess: the NN DXG20 declaration
-        // builder in the retail PC binary (0x413CB0) fills D3DVERTEXELEMENT9s with a single running
-        // offset in the order position, blend, normal, colour, colour2, texcoords, tangent
-        // (usage 6), binormal (usage 7).
-        //
-        // These are read rather than skipped: PC's zone 2 dice are tangent-space normal mapped
-        // (Z2_DICE_A_NRM.DDS, permutation ...RDMJC0000MHC4) so the shader needs a real tangent
-        // frame, and DXVertex has had Tangent and Binormal slots all along.
-        //
-        // Worth knowing why putting these directly after the normal is a trap: for the one format
-        // that uses them here, 0x00010143, both orderings total 56, so the stride check below still
-        // passes and the texture coordinates get silently read out of the binormal instead
+        // tangent/binormal sit after the texcoords, not after normal; format 0x00010143 totals 56
+        // bytes either way, so getting this wrong silently reads texcoords out of the binormal
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_TAN_F32) != 0u)
         {
             arrays.Tangents = ReadVector3(data, offset, stride, count, bigEndian);
@@ -144,15 +133,15 @@ internal sealed class DXVertexArrays
 
     private static float ReadSingle(byte[] data, int at, bool bigEndian)
     {
+#if NETCOREAPP3_0_OR_GREATER
         var span = data.AsSpan(at, 4);
-#if NET40
-        return bigEndian
-            ? BinaryPrimitivesEx.ReadSingleBigEndian(span)
-            : BinaryPrimitivesEx.ReadSingleLittleEndian(span);
-#else
         return bigEndian
             ? BinaryPrimitives.ReadSingleBigEndian(span)
             : BinaryPrimitives.ReadSingleLittleEndian(span);
+#else
+        return bigEndian
+            ? BinaryPrimitivesEx.ReadSingleBigEndian(data, at)
+            : BinaryPrimitivesEx.ReadSingleLittleEndian(data, at);
 #endif
     }
 
@@ -208,11 +197,8 @@ internal sealed class DXVertexArrays
         return values;
     }
 
-    // BLENDFMT_I8 is one packed u32, not four independent bytes, so the quad reverses with the
-    // rest of the file. Measured on GMK_T_ROPE_MDL, which ships in both byte orders: PC reads
-    // [0,1,0,0] against XBLA's [0,0,1,0] for the same vertex. Left unswapped, both of that
-    // vertex's weights land on bone 0, every vertex goes rigid to a single bone, and the model
-    // draws correctly and never deforms. See docs/console-gimmicks.md.
+    // BLENDFMT_I8 is one packed u32, not four independent bytes, so the whole quad reverses order
+    // under big endian rather than each byte swapping in place
     private static byte[][] ReadBlendIndices(byte[] data, int offset, int stride, int count, bool bigEndian)
     {
         var values = new byte[count][];

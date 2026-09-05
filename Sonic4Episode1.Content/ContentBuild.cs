@@ -311,13 +311,15 @@ internal static class ContentBuild
     }
 
     private static byte[] Emit(string path, string relative, BuildReport report,
-        ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
+        ContentProfile profile, Dictionary<string, string> patches, bool flip = false,
+        IReadOnlyCollection<string> noFlip = null)
     {
-        return Emit(File.ReadAllBytes(path), relative, report, profile, patches, flip);
+        return Emit(File.ReadAllBytes(path), relative, report, profile, patches, flip, noFlip);
     }
 
     private static byte[] Emit(byte[] bytes, string relative, BuildReport report,
-        ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
+        ContentProfile profile, Dictionary<string, string> patches, bool flip = false,
+        IReadOnlyCollection<string> noFlip = null)
     {
         if (IsLooseAma(relative))
             return bytes;
@@ -325,7 +327,7 @@ internal static class ContentBuild
         try
         {
             var normalised = AmbTree.Normalise(bytes);
-            return Transcode(normalised, relative, report, profile, patches, flip) ?? normalised;
+            return Transcode(normalised, relative, report, profile, patches, flip, noFlip) ?? normalised;
         }
         catch (Exception ex)
         {
@@ -337,7 +339,8 @@ internal static class ContentBuild
     // rebuilds texture members in place, only the bytes and extension change so no index moves;
     // returns null when nothing changed, so the caller keeps the normalised bytes as-is
     private static byte[] Transcode(byte[] archive, string relative, BuildReport report,
-        ContentProfile profile, Dictionary<string, string> patches, bool flip = false)
+        ContentProfile profile, Dictionary<string, string> patches, bool flip = false,
+        IReadOnlyCollection<string> noFlip = null)
     {
         if (!AmbTree.TryReadNested(archive, out var header))
             return null;
@@ -358,7 +361,11 @@ internal static class ContentBuild
 
             if (AmbTree.LooksLikeArchive(header.data, header.offsets[i], header.lengths[i], name, out _))
             {
-                var rebuilt = Transcode(data, relative + "/" + diskName, report, profile, patches, flip);
+                // a nested archive the group excluded keeps its orientation, and so does everything
+                // under it: the exclusion is about which draw path samples the textures inside
+                var nestedFlip = flip && !NamedInNoFlip(noFlip, name);
+                var rebuilt = Transcode(data, relative + "/" + diskName, report, profile, patches,
+                    nestedFlip, noFlip);
                 if (rebuilt != null)
                 {
                     data = rebuilt;
@@ -432,13 +439,31 @@ internal static class ContentBuild
         return added;
     }
 
+    // matched on the member name, with or without its extension, so "EFF_CMN_TEX_MD_BA.AMB" and
+    // "EFF_CMN_TEX_MD_BA" both name the same nested archive
+    private static bool NamedInNoFlip(IReadOnlyCollection<string> noFlip, string name)
+    {
+        if (noFlip == null || noFlip.Count == 0)
+            return false;
+
+        var stem = Path.GetFileNameWithoutExtension(name);
+        foreach (var declared in noFlip)
+        {
+            if (string.Equals(declared, name, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Path.GetFileNameWithoutExtension(declared), stem,
+                    StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
     private static bool Retarget(ref byte[] data, ref string name, string relative,
         BuildReport report, ContentProfile profile, bool flip = false)
     {
         var info = TextureFormats.Probe(data);
         var bytes = data;
 
-        // stays lazy: a texture already in the target format decodes zero times, as before
         TextureTranscode.Decoded decoded = null;
         try
         {
@@ -486,9 +511,7 @@ internal static class ContentBuild
     }
 
     // a patch tree is authored against one build's members, so it must not travel to a variant
-    // sibling cut from a different one. D_STGSLCT_TAB09 is the example: it repairs alpha the iPad
-    // set shipped wrong, and xbla's own copy never had that defect, so applying it there replaced
-    // a good texture with one that then got flipped as well.
+    // sibling cut from a different one
     private static readonly Dictionary<string, string> NoPatches = new Dictionary<string, string>();
 
     // refuses anything the profile named but can't honour, rather than dropping it quietly
@@ -517,7 +540,7 @@ internal static class ContentBuild
 
             var output = Path.Combine(profile.Output, VariantName(key, spec.Name));
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            File.WriteAllBytes(output, Emit(path, key, local, profile, NoPatches, spec.Flip));
+            File.WriteAllBytes(output, Emit(path, key, local, profile, NoPatches, spec.Flip, spec.NoFlip));
             local.VariantsEmitted++;
             local.Variants.Add(key + " " + spec.Name);
         });
@@ -606,7 +629,7 @@ internal static class ContentBuild
 
             var output = Path.Combine(profile.Output, VariantName(key, spec.Name));
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            File.WriteAllBytes(output, Emit(sparse, key, local, profile, NoPatches, spec.Flip));
+            File.WriteAllBytes(output, Emit(sparse, key, local, profile, NoPatches, spec.Flip, spec.NoFlip));
 
             local.VariantsEmitted++;
             foreach (var index in picked.Keys)
@@ -718,7 +741,6 @@ internal static class ContentBuild
             if (actual.file_num > expected.file_num)
                 appended += actual.file_num - expected.file_num;
 
-            // compared without the extension: transcoding renames PNG to DDS on purpose
             for (int i = 0; i < expected.file_num; i++)
             {
                 var was = Path.GetFileNameWithoutExtension(expected.files[i]);
@@ -739,7 +761,6 @@ internal static class ContentBuild
             .SelectMany(name => Archives(sources.Source(name)).Keys)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        // an output file that is none of base, declared variant sibling, or declared overlay
         foreach (var pattern in new[] { "*.AMB", "*.AMA" })
         foreach (var path in Directory.EnumerateFiles(profile.Output, pattern, SearchOption.AllDirectories))
         {
@@ -827,7 +848,6 @@ internal static class ContentBuild
         }
     }
 
-    // every texture in the output, base and variants and overlays alike
     private static void CheckTextureFormats(ContentProfile profile, CheckReport report,
         Dictionary<string, string> patches)
     {
@@ -895,7 +915,6 @@ internal static class ContentBuild
             report.Notes.Add($"{pitchAndLinear} DDS set both DDSD_PITCH and DDSD_LINEARSIZE");
     }
 
-    // G_COM/RING/RING_MDL.AMB plus variant "pc" -> G_COM/RING/RING_MDL.pc.AMB
     public static string VariantName(string relative, string variant)
     {
         var directory = Path.GetDirectoryName(relative);

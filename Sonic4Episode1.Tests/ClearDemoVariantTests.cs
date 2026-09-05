@@ -3,10 +3,6 @@ using System.Reflection;
 
 namespace Sonic4Episode1.Tests;
 
-// G_RSLT is the one CPIT_MAIN archive whose ids are a strict prefix rather than a divergence:
-// 0-99 identical between builds, iPhone appending 100-105 for the six touch-button pieces. So
-// unlike GMS_FIX_VARIANT nothing here swaps a table, and what the descriptor carries is behaviour.
-// see docs/cleardemo-port-notes.md
 public class ClearDemoVariantTests
 {
     private static GmClearDemo.GMS_CLRDM_VARIANT Mobile => GmClearDemo.gm_clrdm_variant_mobile;
@@ -37,8 +33,6 @@ public class ClearDemoVariantTests
         Assert.False(Mobile.is_console);
     }
 
-    // the touch buttons are actions 100-105, which is exactly what the console archive does not
-    // have. Everything else on the retry screen is inside the shared prefix.
     [Fact]
     public void OnlyTheMobileArmReachesPastTheConsoleArchive()
     {
@@ -63,7 +57,6 @@ public class ClearDemoVariantTests
         Assert.Equal(0.0f, Mobile.retry_default_frame);
     }
 
-    // the three sites that only exist on one side, each from a #ifdef with no counterpart arm
     [Fact]
     public void TheOneSidedBehavioursSitOnTheRightArm()
     {
@@ -78,8 +71,7 @@ public class ClearDemoVariantTests
         Assert.True(Console.time_sonic_icon_per_frame);
     }
 
-    // four sites take decide, cancel or start; the time-attack record display takes decide only.
-    // That asymmetry is SEGA's, and collapsing the two predicates would quietly lose it.
+    // kept distinct on purpose: the record display only responds to decide, unlike the four decide/cancel/start sites
     [Fact]
     public void TheTwoSkipPredicatesAreDistinctOnConsole()
     {

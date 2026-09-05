@@ -4,12 +4,6 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
-// Zone 1's gimmicks ship as their own amFsAllVariant group. The archives are member for member
-// identical between the builds, which is why they need no format fork, but the gimmick *modules*
-// fork on _IPHONE for lighting and for how a thing is drawn, so there is a runtime gate after all.
-// See docs/console-gimmicks.md.
-//
-// amFsLoadVariants replaces a process-wide static, so this runs in the shared collection.
 [Collection(FsVariantCollection.Name)]
 public class GimmickVariantTests
 {
@@ -23,8 +17,6 @@ public class GimmickVariantTests
         AppMain.amFsLoadVariants(new StringReader(string.Join("\n", lines)));
     }
 
-    // every G_ZONE1/GMK archive the stage's own load table names, which is the only place those
-    // names live
     private static string[] GroupFor(int stage_id)
     {
         var info = AppMain.gm_gamedat_tbl_gimmick_info_tbl[stage_id];
@@ -48,8 +40,6 @@ public class GimmickVariantTests
             .ToArray();
     }
 
-    // the manifest content-sources.toml produces. seventeen archives, and END_SONIC is not one of
-    // them: it is a post-fork mobile addition the XBLA beta does not have at all
     private static readonly string[] Declared =
     {
         "G_ZONE1/GMK/GMK_LAND_1_MDL.AMB",
@@ -88,8 +78,6 @@ public class GimmickVariantTests
             Assert.Equal(AppMain.AMD_FS_VARIANT_CONSOLE, AppMain.amFsResolvedVariant(path));
     }
 
-    // the failure a half-built group produces: one archive left off the manifest keeps the base
-    // asset while its siblings go console, which is a stage with one mobile gimmick in it
     [Fact]
     public void AnUndeclaredArchiveStaysOnTheBase()
     {
@@ -99,7 +87,6 @@ public class GimmickVariantTests
         Assert.Equal(AppMain.AMD_FS_VARIANT_CONSOLE, AppMain.amFsResolvedVariant(Declared[1]));
     }
 
-    // gimmicks resolve on their own, so declaring them does not drag the map group across
     [Fact]
     public void GimmicksAndTheMapResolveIndependently()
     {
@@ -119,7 +106,7 @@ public class GimmickVariantTests
     }
 
     // the gimmick modules fork on _IPHONE even though the archives do not, so there is a runtime
-    // gate after all. See docs/console-gimmicks.md.
+    // gate after all
     [Fact]
     public void TheGateFollowsTheDeclaredGroup()
     {

@@ -3,7 +3,7 @@ internal partial class AppMain
     // two pause menus: the console one in gm/PauseMenu (gmPauseMenu.cpp, a cursor menu) and the
     // touch one the WP7 build shipped (gmPauseMenu_i.cpp, decompiled as CMain_PauseMenu). They have
     // the same eleven functions, so the only thing that has to agree is which one answered
-    // GmPauseMenuLoadStart. see docs/pause-action-ids.md
+    // GmPauseMenuLoadStart.
     private static bool gm_pause_menu_console;
 
     public static void GmPauseMenuLoadStart()

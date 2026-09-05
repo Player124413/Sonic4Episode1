@@ -5,7 +5,6 @@ namespace Sonic4Episode1.Tests;
 // Hit rects are written in a 480x320 space that was authored against a 1080-wide 2D box (3:2 at
 // 720 tall, the iPhone). The art under them is CORW_CENTER, so it moves with the window. These pin
 // that a finger on the art produces the authored rect coordinate at any aspect.
-// See docs/camera-view-extent.md.
 public class TouchRectAlignmentTests
 {
     private const float BaseW = 960f;
@@ -74,7 +73,6 @@ public class TouchRectAlignmentTests
         Assert.InRange(touch, rectCentre - 1f, rectCentre + 1f);
     }
 
-    // the whole point: the same piece of art gives the same touch coordinate whatever the window
     [Fact]
     public void TheMappingIsAspectIndependent()
     {

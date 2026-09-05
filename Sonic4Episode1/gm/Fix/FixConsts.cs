@@ -22,7 +22,6 @@ internal static partial class GmFix
 
     public const int GMD_FIX_PART_SCORE_DIGIT_NUM = 9;
 
-    // console-only, and console-only in the C++ too: act 2-2's score shifts left on a 4:3 screen
     public const int GMD_FIX_PART_SCORE_S22_TA_NARROWSCREEN_ADJUST_OFST_X = 0x40000;
 
     public const uint GMD_FIX_PART_TIMER_FLAG_RED_BY_TEX_FRAME = 1 << 0;
@@ -48,7 +47,7 @@ internal static partial class GmFix
 
     public const ushort GMD_FIX_TASK_PAUSELEVEL = 0;
 
-    // shared with the results screen, game over and the title card. see docs/per-member-variants.md
+    // shared with the results screen, game over and the title card
     public const string GMD_FIX_DATA_FILENAME = "G_COM/CPIT/CPIT_MAIN.AMB";
 
     // 35999 frames is 9:59:98, the display's ceiling

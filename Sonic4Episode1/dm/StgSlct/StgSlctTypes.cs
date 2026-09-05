@@ -116,9 +116,9 @@ internal static partial class StgSlct
         DME_STGSLCT_STAGE_NONE
     }
 
-    // mobile action set, 116 entries. paired with act_id_tbl_mobile: declaration order is data,
-    // it decides which archive each action is built from, so nothing here may be reordered.
-    // ACT_NONE deliberately lands on ACT_TAB_COVER2, see docs/stgslct-action-ids.md
+    // paired with act_id_tbl_mobile: declaration order is data, it decides which archive each
+    // action is built from, so nothing here may be reordered. ACT_NONE lands on the same value as
+    // ACT_TAB_COVER2, since ACT_TAB_END aliases ACT_TAB_S_NUM9.
     public enum DME_STGSLCT_ACT
     {
         ACT_ZONE_BG_LT = 0,
@@ -255,8 +255,7 @@ internal static partial class StgSlct
         ACT_NONE
     }
 
-    // console action set, 130 entries. adds the cursors, the obi banner, the mode text effects and
-    // the window chrome; drops the eight touch button sprites. paired with act_id_tbl_console.
+    // paired with act_id_tbl_console
     public enum DME_STGSLCT_ACT_REG
     {
         ACT_ZONE_BG_LT = 0,

@@ -1,12 +1,10 @@
 internal partial class AppMain
 {
-    // The giant card and the card road it spawns. PC gmGmkTrumpRoadInit 0x4FA1E0 (event 295, ours
-    // 380) and gmGmkTrumpRoadRouteInit 0x4F9F70 (event 378, ours 393). Behaviour, work layout and
-    // provenance are in docs/z2a2-trumproad-re.md; the player half is GmPlySeqTrumpRoad.cs.
+    // the giant card and the card road it spawns; the player half is GmPlySeqTrumpRoad.cs.
     //
-    // The card takes three homing attacks, then spawns the road at its own position and goes
-    // dormant. The road plays ROUTE01-04 and carries the player along node 11 of its own model,
-    // then crossfades to the matching GOAL and deletes itself.
+    // the card takes three homing hits, then spawns the road at its own position and goes
+    // dormant. the road plays ROUTE01-04, carries the player along node 11 of its own model,
+    // then crossfades to the matching GOAL and deletes itself
 
     // GMK_TRUMPROAD_MDL.AMB: member 0 is CARDS_ROAD_MODEL, member 1 is CARD_MASSIVE
     private const int GMD_GMK_TRUMPROAD_MODEL_ROAD = 0;
@@ -14,7 +12,6 @@ internal partial class AppMain
 
     private const int GMD_GMK_TRUMPROAD_CARD_HP = 3;
 
-    // def_flag, from the high half of PC's write at +456. Bobbin's 0xFFFE was the wrong neighbour
     private const ushort GMD_GMK_TRUMPROAD_CARD_DEF_FLAG = 0xFFFD;
 
     // the node the rider is glued to. boss 1 registers the same one
@@ -22,8 +19,7 @@ internal partial class AppMain
 
     private const int GMD_GMK_TRUMPROAD_SNM_REG_MAX = 12;
 
-    // MTN members: 0/1 are the card's two hit reactions, then ROUTE01/GOAL01 .. ROUTE04/GOAL04.
-    // gm_gmk_trumproad_route_mtn_idx on PC, 0x581828
+    // MTN members: 0/1 are the card's two hit reactions, then ROUTE01/GOAL01 .. ROUTE04/GOAL04
     internal static readonly int[] gm_gmk_trumproad_route_mtn_idx = { 2, 4, 6, 8 };
 
     private const int GMD_GMK_TRUMPROAD_ROUTE_MAX = 4;
@@ -96,10 +92,6 @@ internal partial class AppMain
         return obj_work;
     }
 
-    // Transcribed field by field from PC 0x4FA1E0 after mapping OBS_RECT_WORK's real layout:
-    // OBS_RECT carries a trailing VecFx32 pos, making it 24 bytes and OBS_RECT_WORK 64, which is
-    // exactly the spacing of the card's three blocks at +408/+472/+536. Every one of PC's writes
-    // then lands on a named field, including the two that had been unreadable offsets
     private static void gmGmkTrumpRoadCardSetRect(GMS_GMK_TRUMPROAD_WORK work)
     {
         GMS_ENEMY_COM_WORK ene_com = ((GMS_ENEMY_3D_WORK)work).ene_com;
@@ -107,22 +99,20 @@ internal partial class AppMain
         OBS_RECT_WORK pRec = ene_com.rect_work[0];
         ObjRectWorkZSet(pRec, -16, -32, -16, 16, -8, 16);
 
-        // PC masks before it sets. Our factory rects do not have these bits, so the mask is inert
-        // today, but a rect arriving with them set would collide differently than PC's does
+        // masks before setting the flag bits; a no-op today since factory rects never carry them,
+        // but that would matter if one did
         pRec.flag = pRec.flag & 0xFFFEFCFBU | 4U | 0x400U;
 
         pRec.ppHit = null;
         pRec.ppDef = new OBS_RECT_WORK_Delegate1(gmGmkTrumpRoadCardHitCb);
 
-        // +452 and +456 in the binary: hit_power/def_power then hit_flag/def_flag. The card takes
-        // no attack flags of its own and accepts everything except bit 1
+        // the card takes no attack flags of its own and accepts everything except bit 1
         ObjRectAtkSet(pRec, 0, 0);
         ObjRectDefSet(pRec, GMD_GMK_TRUMPROAD_CARD_DEF_FLAG, 0);
 
-        // Rect 2 is never enabled, but gmPlayerGetHomingTarget aims at the midpoint of its top and
-        // bottom. Left at zero the player homes in on the card's origin while the hittable box
-        // above it goes untouched. -24/-8 puts the aim point at -16, inside rect 0. PC writes only
-        // these four, leaving back and front at their defaults
+        // rect 2 is never enabled, but gmPlayerGetHomingTarget aims at the midpoint of its top and
+        // bottom. left at zero the player would home on the card's origin while the hittable box
+        // above goes untouched; -24/-8 puts the aim point at -16, inside rect 0
         OBS_RECT aim = ene_com.rect_work[2].rect;
         aim.left = 0;
         aim.top = -24;
@@ -172,8 +162,8 @@ internal partial class AppMain
         gmGmkTrumpRoadReboundPlayer();
     }
 
-    // PC gmPlayerSetHomingRebound 0x4EB610, the branch this family reaches: a player still in the
-    // homing state is bounced into the recovery state, which is what stops it and throws it back
+    // a player still in the homing state is bounced into the recovery state, which is what stops
+    // it and throws it back
     private static void gmGmkTrumpRoadReboundPlayer()
     {
         GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[0];
@@ -222,20 +212,17 @@ internal partial class AppMain
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
         work.route = MTM_MATH_CLIP(eve_rec.left, 0, GMD_GMK_TRUMPROAD_ROUTE_MAX - 1);
 
-        // PC 0x4F9F70 does `flag |= 0x210` here, and it is what makes the ride possible at all. The
-        // road's origin stays at the card while the rider travels several hundred units away, so
-        // without NOCLIP the object system releases it the moment that origin leaves the view
-        // margin (view_out_ofst = size_tbl + 192 = 256), sets OBD_OBJECT_TASKCLEAR, and GmPlayer
-        // then nulls gmk_obj because the gimmick it was riding no longer exists
+        // this is what makes the ride possible at all: the road's origin stays at the card while
+        // the rider travels several hundred units away, so without NOCLIP the object system
+        // releases it the moment that origin leaves the view margin (view_out_ofst = size_tbl +
+        // 192 = 256), sets OBD_OBJECT_TASKCLEAR, and GmPlayer then nulls gmk_obj because the
+        // gimmick it was riding no longer exists
         obj_work.flag |= OBD_OBJECT_NOCLIP | OBD_OBJECT_PARENT_NODIE;
 
-        // Empirical, and not understood. Without this the road stops drawing once its origin has
-        // scrolled a certain distance away, even though the object survives (flag NOCLIP above
-        // keeps it off ppViewCheck) and its draw function keeps being called. PC does not set it.
-        // Nothing in this tree reads disp_flag bit 28 either, and the one comment about the flag,
-        // at TitleOpVariant.cs:20, calls it iPhone-only - so the mechanism is something other than
-        // the name suggests, most likely the bit reaching the am layer as a drawflag, where bit 28
-        // does have meaning. Removing it brings the disappearance straight back
+        // empirical: without this the road stops drawing once its origin scrolls far enough away,
+        // even though NOCLIP above keeps the object alive and its draw function keeps getting
+        // called. nothing else in this tree reads disp_flag bit 28; removing it brings the
+        // disappearance straight back
         obj_work.disp_flag |= OBD_DISP_NOCLIP;
 
         GmBsCmnInitBossMotionCBSystem(obj_work, work.bmcb_mgr);
@@ -258,9 +245,9 @@ internal partial class AppMain
         return obj_work;
     }
 
-    // PC gmGmkTrumpRoadRouteDraw 0x4F9CF0: tag the model for the card-road pass, push that pass's
-    // projection and view, then draw normally. The camera command has to be pushed every frame,
-    // because the display list is rebuilt every frame
+    // tags the model for the card-road pass, pushes that pass's projection and view, then draws
+    // normally; the camera command has to be pushed every frame because the display list is
+    // rebuilt every frame
     private static void gmGmkTrumpRoadRouteDraw(OBS_OBJECT_WORK obj_work)
     {
         obj_work.obj_3d.command_state = OBD_DRAW_CMD_STATE_TRUMPROAD;
@@ -312,8 +299,8 @@ internal partial class AppMain
 
         gmGmkTrumpRoadStopRideSe(work);
 
-        // GOAL0x is always the member after its ROUTE. PC crossfades the two on the obj3d's second
-        // channel; this hard cuts, which is a visible difference at the end of the ride
+        // GOAL0x is always the member after its ROUTE; this hard cuts rather than crossfading, a
+        // visible difference at the end of the ride
         // TODO(port): blend ROUTE's final pose into GOAL rather than cutting
         ObjDrawObjectActionSet3DNN(obj_work, gm_gmk_trumproad_route_mtn_idx[work.route] + 1, 0);
         obj_work.disp_flag &= ~OBD_DISP_END;
@@ -332,7 +319,7 @@ internal partial class AppMain
             GmBsCmnDeleteSNMWork(work.snm_work);
         }
 
-        // PC's destructor stops the handle too, not just the route end, so a road that dies without
+        // stopping the ride SE here too, not just at route end, means a road that dies without
         // finishing its ROUTE does not leave the cue running
         gmGmkTrumpRoadStopRideSe(work);
 

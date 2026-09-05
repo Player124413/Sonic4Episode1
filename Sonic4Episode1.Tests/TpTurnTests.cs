@@ -3,9 +3,7 @@ namespace Sonic4Episode1.Tests;
 // The flip cards are almost entirely table driven, and every one of those tables fails quietly: a
 // frame segment reads its model from one table, its offset from a second and its two materials from
 // a third, all indexed [variant][slot], so a row that drifts by one slot draws the right models in
-// the wrong places rather than crashing. That is not hypothetical - the first hand transcription of
-// variants 4 and 6 was off by one slot, and it was the offset table disagreeing that caught it.
-// See docs/z2a2-tp-turn-re.md.
+// the wrong places rather than crashing.
 public class TpTurnTests
 {
     private static readonly int[] AllVariants = { 0, 1, 2, 3, 4, 5, 6 };
@@ -30,8 +28,6 @@ public class TpTurnTests
         }
     }
 
-    // The three per-slot tables have to agree on which slots are live. This is the check that
-    // caught variants 4 and 6 sitting a slot off the offsets they belong to
     [Fact]
     public void TheLiveSlotsAgreeAcrossEveryTable()
     {

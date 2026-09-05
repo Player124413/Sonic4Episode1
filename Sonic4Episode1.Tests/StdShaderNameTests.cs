@@ -2,8 +2,7 @@ using System.IO;
 
 namespace Sonic4Episode1.Tests;
 
-// The key algorithm was recovered from nnGetStdShaderName in libnndxg20.lib. See
-// docs/nn-stdshader-ubershader.md for the table and how it was read.
+// The key algorithm was recovered from nnGetStdShaderName in libnndxg20.lib.
 public class StdShaderNameTests
 {
     private static string[] RetailKeys()
@@ -31,7 +30,6 @@ public class StdShaderNameTests
         }
     }
 
-    // the packer only ever produces 80 bits, nothing above that may be set
     [Fact]
     public void RetailNamesFitTheEightyBitsThePackerProduces()
     {

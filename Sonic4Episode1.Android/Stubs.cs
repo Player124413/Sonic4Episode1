@@ -1,61 +1,15 @@
-﻿global using TitleContainer = AndroidTitleContainer;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.Hardware;
 using Android.Views;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Media;
-using Xamarin.Google.Android.Play.Core.AssetPacks;
 
-internal static class DirectoryRoot
-{
-    public static string Root { get; set; }
-}
-
-internal static class AndroidTitleContainer
-{
-    public static Stream OpenStream(string assetName)
-    {
-        assetName = assetName.Replace('\\', '/');
-        return File.OpenRead(Path.Combine(DirectoryRoot.Root, assetName));
-    }
-}
-
-internal partial class AndroidContentManager(IServiceProvider serviceProvider) : ContentManager(serviceProvider)
-{
-    protected override Stream OpenStream(string assetName)
-    {
-        assetName = assetName.Replace('\\', '/');
-
-        return File.OpenRead(Path.Combine(DirectoryRoot.Root, "Content", assetName) + ".xnb");
-    }
-
-    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_filePath")]
-    public static extern ref string GetFilePath(Song instance);
-
-    public override T Load<T>(string assetName)
-    {
-        T t = base.Load<T>(assetName);
-
-        if (t is Song song)
-        {
-            var filePath = GetFilePath(song);
-            if (!filePath.StartsWith("file://"))
-                GetFilePath(song) = "file://" + Path.Combine(DirectoryRoot.Root, filePath);
-        }
-
-        return t;
-    }
-}
 
 namespace Sonic4ep1
 {
@@ -318,3 +272,4 @@ namespace Microsoft.Devices.Sensors
     {
     }
 }
+

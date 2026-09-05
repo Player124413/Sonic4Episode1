@@ -1,8 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="Sonic4Episode1.Android.Sonic4Episode1.Android" android:versionCode="1" android:versionName="1.0">
-	<!-- ASTC LDR is core in GLES 3.2 and an extension on 3.0/3.1, so 3.0 plus the extension is the
-	     filter. The content tree is astc only, there is no BC fallback to drop to -->
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0">
+	<!-- no package attribute: it beats $(ApplicationId), and the one that was here was the template's
+	     project name twice over, which is also what names the external files directory -->
+
+	<!-- FNA3D takes the SDL_GPU driver and gets Vulkan, so this is a floor rather than the API the
+	     game draws with. The texture filter that was here said astc, which stopped being true when
+	     the head moved to the dxt set and the CPU decode behind it -->
 	<uses-feature android:glEsVersion="0x00030000" android:required="true" />
-	<supports-gl-texture android:name="GL_KHR_texture_compression_astc_ldr" />
-	<application android:label="@string/app_name" android:icon="@drawable/icon"></application>
+
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!-- the content host is http on a LAN address while there is nothing to serve it properly -->
+	<application android:label="@string/app_name" android:icon="@drawable/icon" android:usesCleartextTraffic="true"></application>
 </manifest>

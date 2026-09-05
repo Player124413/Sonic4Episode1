@@ -381,7 +381,7 @@ internal partial class AppMain
 
     internal static MP_HEADER readMPFile(AmbChunk data)
     {
-        if (data.length == 0)
+        if (data == null || data.length == 0)
             return null;
         MP_HEADER mpHeader = new MP_HEADER();
         bool bigEndian = gmMapGridIsBigEndian(data, 2);
@@ -417,7 +417,7 @@ internal partial class AppMain
 
     internal static MD_HEADER readMDFile(AmbChunk data)
     {
-        if (data.length == 0)
+        if (data == null || data.length == 0)
             return null;
         MD_HEADER mdHeader = new MD_HEADER();
         bool bigEndian = gmMapGridIsBigEndian(data, 1);
@@ -998,13 +998,11 @@ internal partial class AppMain
         dest_camera_pos[1] = dest_target_pos;
         if ((map_sys_work.flag & GMD_MAP_FLAG_ADD_MAP_MAIN_ADD_SCRL_H) == GMD_MAP_FLAG_ADD_MAP_MAIN_ADD_SCRL_H)
         {
-            // メインカメラ位置ユーザースクロール対応
             main_camera_pos[0].x = map_sys_work.main_cam_user_disp[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
             main_camera_pos[1].x = map_sys_work.main_cam_user_target[MTD_X] + map_sys_work.main_cam_user_ofst[MTD_X];
         }
         cam_disp_width_half = (float)(OBD_LCD_X / 2);
         cam_disp_height_half = (float)(OBD_LCD_Y / 2);
-        // 限界位置
         limit_left = 0 + cam_disp_width_half;
         limit_right = g_gm_main_system.map_size[MTD_X] - cam_disp_width_half;
         limit_top = 0 + cam_disp_height_half;
@@ -1017,27 +1015,25 @@ internal partial class AppMain
         }
         else if (camera_id >= GME_CAMERA_NO_MID1)
         {
-            map_state = map_sys_work.map_state[(camera_id - GME_CAMERA_NO_MID1) + 2/*超近景と中景を飛ばす*/];
+            // +2 skips the near-view and mid-view map_state slots handled above
+            map_state = map_sys_work.map_state[(camera_id - GME_CAMERA_NO_MID1) + 2];
         }
         else
         {
             MTM_ASSERT(0);
-            map_state = map_sys_work.map_state[0];    // 仮に0番にしておく
+            map_state = map_sys_work.map_state[0];
         }
 
         for (i = 0; i < 2; i++)
         {
             if ((map_sys_work.flag & GMD_MAP_FLAG_ADD_MAP_LOOP_X) == 0)
             {
-                // X
                 if (main_camera_pos[i].x <= limit_left)
                 {
-                    // 限界位置
                     (dest_camera_pos[i]).x = cam_disp_width_half;
                 }
                 else if (main_camera_pos[i].x >= limit_right)
                 {
-                    // 限界位置
                     (dest_camera_pos[i]).x = map_state.map_size[MTD_X] - cam_disp_width_half;
                 }
                 else
@@ -1048,25 +1044,18 @@ internal partial class AppMain
             }
             else
             {
-                // ループあり
-                //(*dest_camera_pos[i]).x = cam_disp_width_half +
-                //			(main_camera_pos[i].x - cam_disp_width_half) * map_state.scrl_scale[MTD_X];
                 (dest_camera_pos[i]).x = main_camera_pos[i].x * map_state.scrl_scale[MTD_X];
             }
 
-            // ユーザースクロール後のオフセット値反映
             (dest_camera_pos[i]).x += map_state.cam_ofst[MTD_X];
 
             {
-                // Y
                 if (-main_camera_pos[i].y <= limit_top)
                 {
-                    // 限界位置
                     (dest_camera_pos[i]).y = -cam_disp_height_half;
                 }
                 else if (-main_camera_pos[i].y >= limit_bottom)
                 {
-                    // 限界位置
                     (dest_camera_pos[i]).y = -(map_state.map_size[MTD_Y] - cam_disp_height_half);
                 }
                 else
@@ -1076,10 +1065,6 @@ internal partial class AppMain
                 }
             }
 
-            //// ユーザースクロール後のオフセット値反映
-            //(*dest_camera_pos[i]).y += map_state.cam_ofst[MTD_Y];
-
-            // Z
             (dest_camera_pos[i]).z = main_camera_pos[i].z;
         }
     }

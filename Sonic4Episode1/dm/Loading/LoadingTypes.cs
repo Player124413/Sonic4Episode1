@@ -10,8 +10,6 @@ internal static partial class DmLoading
         DME_LOADING_DATA_TYPE_NONE,
     }
 
-    // ACT_STOP sits between ACT_RUN and ACT_PERIOD1 in D_LOAD.AMA and is not created, which is why
-    // dm_act_id_tbl skips id 4. see docs/startup-screen-variants.md
     internal enum DME_LOADING_ACT
     {
         ACT_BG_WHITE = 0,

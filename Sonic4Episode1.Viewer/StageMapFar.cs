@@ -40,7 +40,7 @@ internal readonly struct StageMapFarLayout
 }
 
 // Mobile ships .INO, XBLA .ENO, PC .ZNO. The console arms carry whole models mobile dropped, so
-// this picks which object table a background is read against. See docs/map-far.md.
+// this picks which object table a background is read against.
 internal enum StageMapFarArm
 {
     Unknown,

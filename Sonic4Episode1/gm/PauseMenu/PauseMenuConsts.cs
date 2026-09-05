@@ -15,9 +15,6 @@ internal static partial class GmPauseMenu
     public const float GMD_PMENU_SEL_CENTER_Y = GMD_PMENU_SCREEN_H * 0.5f + 32.0f;
     public const float GMD_PMENU_SEL_PITCH_Y = 51.0f;
 
-    // the XBOX arm has six: resume, retry, options, ranking, trophies, world map. Ranking and
-    // trophies want DmRanking and AoTrophyShowAchievementUI, neither of which this port has, so
-    // four ship and the act tables keep all six. see docs/pause-action-ids.md
     public const int GMD_PMENU_SEL_NUM = 4;
     public const int GMD_PMENU_SEL_NUM_FULL = 6;
 

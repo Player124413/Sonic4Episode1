@@ -2,8 +2,6 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
-// G_FIX is the one archive in CPIT_MAIN whose action ids genuinely differ between builds, and the
-// difference is two transposed indices plus an append. see docs/gmfix-port-notes.md
 public class GmFixVariantTests
 {
     private static int[] Mobile => GmFix.gm_fix_variant_mobile.timer_timeattack_act_id_tbl;
@@ -26,7 +24,6 @@ public class GmFixVariantTests
         }
     }
 
-    // the same two sprites, at whichever index each build gives them
     [Fact]
     public void TheTransposedPairIsSwappedAndNotReordered()
     {
@@ -43,7 +40,6 @@ public class GmFixVariantTests
         Assert.All(Console, id => Assert.True(id < ConsoleActNum, $"action {id} is not in console G_FIX"));
     }
 
-    // the on-screen controls are the whole of the mobile-only block, so the console arm drops them
     [Fact]
     public void TheVirtualPadIsEntirelyMobile()
     {
@@ -74,7 +70,6 @@ public class GmFixVariantTests
             GmFix.GmFixPlanFor(false, 0U));
     }
 
-    // the console variant carries its own flat tables rather than borrowing a plan row
     [Fact]
     public void TheConsoleVariantSuppliesItsOwnPlanFreeTables()
     {
@@ -97,7 +92,6 @@ public class GmFixVariantTests
             GmFix.gm_fix_score_stage22_act_id_tbl[0].Skip(1));
     }
 
-    // challenge is the one where the two builds genuinely agree
     [Fact]
     public void TheChallengeTablesAgreeBetweenBuilds()
     {
@@ -130,7 +124,6 @@ public class GmFixVariantTests
         }
     }
 
-    // the remaining #ifdef'd behaviour, so a future edit cannot quietly apply one build's to both
     [Fact]
     public void TheBehaviourFlagsAreOppositeWhereTheCppSaysTheyAre()
     {

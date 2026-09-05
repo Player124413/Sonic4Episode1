@@ -1,17 +1,11 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Android.App;
-using Android.Content;
 using Android.Content.PM;
-using Android.Gms.Extensions;
-using Android.OS;
 using Android.Util;
-using Android.Views;
-using AndroidX.Core.View;
 using Microsoft.Xna.Framework;
-using Xamarin.Google.Android.Play.Core.AssetPacks;
-using Xamarin.Google.Android.Play.Core.AssetPacks.Model;
+using Org.Libsdl.App;
+using static SDL3.SDL;
 
 namespace Sonic4Episode1.Android
 {
@@ -24,149 +18,106 @@ namespace Sonic4Episode1.Android
         ScreenOrientation = ScreenOrientation.UserLandscape,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenSize
     )]
-    public class Sonic4Activity : AndroidGameActivity
+    public class Sonic4Activity : SDLActivity
     {
-        // the Guide shim needs an Activity to get onto the UI thread with, and the game loop only
-        // ever knows about Game
-        internal static Sonic4Activity Current { get; private set; }
-
-        private Sonic4Ep1 _game;
-        private View _view;
-        private IAssetPackManager _assetPackManager;
-        private AssetPackStateUpdateListenerWrapper _listener;
-
         private ProgressDialog _dialog;
-        private bool _listening;
-        private bool _running;
+        private const string Profile = "mobile-hd-astc";
+        private const string ContentHost = "https://wamwoowam.co.uk/sonic4-new/";
+        internal static Sonic4Activity Current { get; private set; }
+        protected override string[] GetLibraries() => ["SDL3"];
 
-        // Completed can arrive more than once across a resume, and Game.Run does not survive being
-        // called twice
-        private void Run()
+        protected override void OnCreate(global::Android.OS.Bundle savedInstanceState)
         {
-            if (_running)
-                return;
-
-            _running = true;
-
-            _dialog?.Dismiss();
-            _dialog = null;
-
-            DirectoryRoot.Root = _assetPackManager.GetPackLocation("content").AssetsPath();
-            _game.Run();
-        }
-
-        private void StartListening()
-        {
-            if (_listening)
-                return;
-
-            _listening = true;
-            _assetPackManager.RegisterListener(_listener.Listener);
-        }
-
-        private void StopListening()
-        {
-            if (!_listening)
-                return;
-
-            _listening = false;
-            _assetPackManager.UnregisterListener(_listener.Listener);
-        }
-
-        protected override async void OnCreate(Bundle bundle)
-        {
-            base.OnCreate(bundle);
             Current = this;
+            base.OnCreate(savedInstanceState);
+        }
 
-            var controller = WindowCompat.GetInsetsController(Window, Window.DecorView);
-            controller.SystemBarsBehavior = WindowInsetsControllerCompat.BehaviorShowTransientBarsBySwipe;
-            controller.Hide(WindowInsetsCompat.Type.NavigationBars());
+        // SDLThread. The default body dlopens libmain.so and hands SDL_main to SDL_RunApp, which is
+        // SDL_SetMainReady plus a call. Same thing, minus the dlopen.
+        //
+        // It has to block for as long as the game is up. SDLMain calls nativeCleanupMainThread and
+        // finishes the Activity the moment this returns, so an async body ends the app at its first
+        // await
+        protected override void Main()
+        {
+            SDL_SetMainReady();
 
-            _game = new Sonic4Ep1();
-            _view = _game.Services.GetService<View>();
-            SetContentView(_view);
+            SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+            SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+            SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+            SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
-            _listener = new AssetPackStateUpdateListenerWrapper();
-            _listener.StateUpdate += Listener_StateUpdate;
+            // one tree per profile, so switching between them is a relaunch rather than a
+            // reinstall. The title location is what holds the tree, not the tree: the boot readers
+            // write the "Content\\" prefix themselves, and OpenStream lowercases the whole name,
+            // the directory included
+            var home = Path.Combine(FilesDir.AbsolutePath, Profile);
+            var root = Path.Combine(home, "content");
 
-            _assetPackManager = AssetPackManagerFactory.GetInstance(_view.Context);
-            StartListening();
-
-            var assetsFolderPath = _assetPackManager.GetPackLocation("content")?.AssetsPath();
-            if (assetsFolderPath is not null)
-            {
-                Run();
-                return;
-            }
+            TitleContainer.SetRoot_EXT(home);
 
             try
             {
-                await _assetPackManager.Fetch(["content"]).AsAsync<AssetPackStates>();
+                ContentSource.Current = BundleContentSource
+                    .InstallAsync(root, SetLocation(), new Progress<double>(ShowProgress))
+                    .GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
-                ContentUnavailable(ex.Message);
+                Log.Error(nameof(Sonic4Activity), $"content install failed: {ex}");
+                RunOnUiThread(() => ContentUnavailable(ex.Message));
+                return;
             }
+
+            RunOnUiThread(Dismiss);
+
+            // Content.RootDirectory stays the relative "Content" the ctor sets. An absolute one
+            // gets lowercased whole by OpenStream, application id included, and there is no
+            // /data/user/0/org.wamwoowam.sonic4episode1
+            using var game = new Sonic4Ep1();
+            game.Run();
         }
 
-        protected override void OnResume()
+        private string SetLocation()
         {
-            StartListening();
-            base.OnResume();
+            if (ContentHost.Length != 0)
+                return $"{ContentHost.TrimEnd('/')}/sets/{Profile}";
+
+            return Path.Combine(GetExternalFilesDir(null).AbsolutePath, "sets", Profile);
         }
 
-        protected override void OnPause()
+        private void ShowProgress(double fraction)
         {
-            StopListening();
-            base.OnPause();
-        }
-
-        private void Listener_StateUpdate(object? sender, AssetPackStateUpdateListenerWrapper.AssetPackStateEventArgs e)
-        {
-            var status = e.State.Status();
-            switch (status)
+            RunOnUiThread(() =>
             {
-                case AssetPackStatus.Downloading:
-                    if (_dialog == null)
-                    {
-                        _dialog = new ProgressDialog(_view.Context);
-                        _dialog.SetTitle("Downloading content...");
-                        _dialog.SetCancelable(false);
-                        _dialog.Max = 100;
-                        _dialog.Show();
-                    }
+                _dialog ??= Show();
+                _dialog.Progress = (int)(fraction * 100);
+            });
 
-                    long downloaded = e.State.BytesDownloaded();
-                    long totalSize = e.State.TotalBytesToDownload();
-                    double percent = totalSize > 0 ? 100.0 * downloaded / totalSize : 0;
-                    _dialog.Progress = (int)percent;
-                    Log.Info("Listener_StateUpdate", $"Downloading {percent}");
-                    break;
-                case AssetPackStatus.Failed:
-                    ContentUnavailable($"asset pack error {e.State.ErrorCode()}");
-                    break;
-                case AssetPackStatus.Completed:
-                    {
-                        Run();
-                        break;
-                    }
-                case AssetPackStatus.WaitingForWifi:
-                case AssetPackStatus.RequiresUserConfirmation:
-                    _assetPackManager.ShowConfirmationDialog(this);
-                    break;
+            ProgressDialog Show()
+            {
+                // TODO(wam): what the player reads while the game downloads itself
+                var dialog = new ProgressDialog(this);
+                dialog.SetTitle("Downloading content...");
+                dialog.SetCancelable(false);
+                dialog.Max = 100;
+                dialog.Show();
+                return dialog;
             }
         }
 
-        // without this a failed fetch leaves the progress dialog up forever with nothing said
-        private void ContentUnavailable(string detail)
+        private void Dismiss()
         {
-            Log.Error(nameof(Sonic4Activity), $"content pack unavailable: {detail}");
-
             _dialog?.Dismiss();
             _dialog = null;
+        }
+
+        private void ContentUnavailable(string detail)
+        {
+            Dismiss();
 
             // TODO(wam): the message the player actually sees when content cannot be downloaded
-            new AlertDialog.Builder(_view.Context)
+            new AlertDialog.Builder(this)
                 .SetTitle("Content unavailable")
                 .SetMessage(detail)
                 .SetCancelable(false)

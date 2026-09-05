@@ -19,6 +19,7 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <PublishAot>true</PublishAot>
     <ValidateXcodeVersion>false</ValidateXcodeVersion>
+    <EnableSGenConc>True</EnableSGenConc>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -58,12 +59,6 @@
   <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
   <PropertyGroup>
     <ContentProfile>mobile-hd-dxt</ContentProfile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <EnableSGenConc>True</EnableSGenConc>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <EnableSGenConc>True</EnableSGenConc>
   </PropertyGroup>
   <Import Project="..\Content.targets" />
   <Import Project="..\Shaders\Shaders.targets" />

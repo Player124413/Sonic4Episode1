@@ -2,10 +2,7 @@ using static AppMain;
 
 internal static partial class GmPauseMenu
 {
-    // the C++ compiles a different numbering per platform: mobile has no RANKING or TROPHY, so its
-    // BACK is 2 where console's is 4. GmPause and GmMain used to read the raw number, which would
-    // have made "back to world map" behave like retry the moment the console menu shipped.
-    // RANKING and TROPHY have no screen to reach in this port, see docs/pause-action-ids.md
+    // RANKING and TROPHY have no screen to reach in this port yet, the enum keeps them so the numbering still lines up
     public enum GME_PMENU_RESULT
     {
         GME_PMENU_RESULT_RETRY = 0,
@@ -31,8 +28,7 @@ internal static partial class GmPauseMenu
         GMD_PMENU_STATE_RELEASED,
     }
 
-    // the four section markers are how gmPmProcBegin and gmPmUtilSetTexture decide which of the
-    // four archives an action index belongs to, so the ordering is load-bearing
+    // gmPmProcBegin and gmPmUtilSetTexture pick an archive by comparing act_no against these markers, so this enum's order can't change
     public enum GME_PMENU_ACT
     {
         ACT_TITLE_BASE = 0,

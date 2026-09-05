@@ -74,6 +74,7 @@ internal abstract class Controller
 
     public abstract void SetVibrationEnabled(bool enabled);
     public abstract void SetVibration(ushort left, ushort right);
+    public virtual bool IsGamePadConnected => false;
 
     public ControllerReading UpdateControllerReading()
     {

@@ -1,10 +1,10 @@
 using static AppMain;
 
-// the results screen, gmClearDemo.cpp. G_RSLT is members 30-43 of CPIT_MAIN and its action ids are
-// a strict prefix of the mobile ones: 0-99 identical, iPhone appends 100-105 for the touch buttons.
+// the results screen; G_RSLT is members 30-43 of CPIT_MAIN, and its action ids are a strict prefix
+// of the mobile ones: 0-99 identical, iPhone appends 100-105 for touch buttons.
 internal static partial class GmClearDemo
 {
-    // the G_RSLT_<lang> member, the only one that can sit past the end of the archive. the shared
+    // the G_RSLT_<lang> member is the only one that can sit past the end of the archive; the shared
     // G_RSLT pair is hardcoded 30/31 at every call site
     private static int gmClearDemoLanguage()
     {
@@ -72,6 +72,7 @@ internal static partial class GmClearDemo
         gm_clrdm_variant = gmClearDemoIsConsoleDataComplete()
             ? gm_clrdm_variant_console
             : gm_clrdm_variant_mobile;
+        gm_clrdm_has_next_prompt = gmClearDemoIsNextPromptDataComplete();
 
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         MTS_TASK_TCB mtsTaskTcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(gmClearDemoProcMain), new GSF_TASK_PROCEDURE(gmClearDemoDest), 0U, 0, 18448U, 5, () => new GMS_CLRDM_MAIN_WORK(), "CLRDM_MAIN");
@@ -135,6 +136,7 @@ internal static partial class GmClearDemo
         gm_clrdm_variant = gmClearDemoIsConsoleDataComplete()
             ? gm_clrdm_variant_console
             : gm_clrdm_variant_mobile;
+        gm_clrdm_has_next_prompt = false;
 
         GSS_MAIN_SYS_INFO mainSysInfo = GsGetMainSysInfo();
         MTS_TASK_TCB mtsTaskTcb = MTM_TASK_MAKE_TCB(new GSF_TASK_PROCEDURE(gmClearDemoProcMain), new GSF_TASK_PROCEDURE(gmClearDemoDest), 0U, 0, 18448U, 5, () => new GMS_CLRDM_MAIN_WORK(), "CLRDM_MAIN");
@@ -204,6 +206,12 @@ internal static partial class GmClearDemo
                 else
                     g_gs_main_sys_info.prev_stage_id = ushort.MaxValue;
             }
+
+            // the NEXT prompt skips the map, where a clear would normally reach the disk; this is
+            // the actual save path when skipping ahead, since DmSaveMenuStart no-ops during the
+            // main game
+            if ((g_gm_main_system.game_flag & GMD_GAME_FLAG_NEXT_STAGE) != 0)
+                DmCmnBackupSave(false, false, false);
 
             if (((int) work.flag & 16384) != 0)
                 work.flag &= 4294950911U;

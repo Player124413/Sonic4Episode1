@@ -93,7 +93,7 @@ internal partial class AppMain
         var bounds = m_game.Window.ClientBounds;
         var caps = Microsoft.Xna.Framework.Input.Touch.TouchPanel.GetCapabilities();
 
-        Console.WriteLine($"[s4diag] {where} bb={pp.BackBufferWidth}x{pp.BackBufferHeight}"
+        var line = $"[s4diag] {where} bb={pp.BackBufferWidth}x{pp.BackBufferHeight}"
             + $" vp={vp.X},{vp.Y},{vp.Width}x{vp.Height} client={bounds.Width}x{bounds.Height}"
             + $" 2d={_am_draw_video.width_2d}x{_am_draw_video.height_2d}"
             + $" scale={_am_draw_video.scale_x_2d},{_am_draw_video.scale_y_2d}"
@@ -104,7 +104,19 @@ internal partial class AppMain
             // FNA writes this back to 0 when SDL_WINDOW_HIGH_PIXEL_DENSITY did not survive window
             // creation, so it says whether high DPI was refused rather than never asked for
             + $" highdpi={Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI")}"
-            + $" mode={GraphicsAdapter.DefaultAdapter.CurrentDisplayMode}");
+            + $" mode={GraphicsAdapter.DefaultAdapter.CurrentDisplayMode}";
+
+        mppDiagWrite(line);
+    }
+
+    internal static void mppDiagWrite(string line)
+    {
+#if WINDOWS_UWP
+        // no stdout in an appcontainer, this only shows up in the debugger
+        System.Diagnostics.Debug.WriteLine(line);
+#else
+        Console.WriteLine(line);
+#endif
     }
 
     // the gameplay view in world units and the resulting pixel density per axis. the two densities
@@ -178,7 +190,6 @@ internal partial class AppMain
     private static int _mppDiagLastTouchCount = -1;
     public static void onTouchEvents()
     {
-        // PATCH
         var state = new List<TouchLocation>();
         if (TouchPanel.GetCapabilities().IsConnected)
         {

@@ -115,16 +115,6 @@ internal sealed class NnStdShaderEffect : Effect
 
         bool isArray = parameter.Elements != null && parameter.Elements.Count > 0;
 
-#if MONOGAME
-        // MonoGame's SetValue(Matrix[]) walks Elements, and a one entry array does not have any,
-        // it comes back as a plain matrix
-        if (!isArray)
-        {
-            parameter.SetValue(values[0]);
-            return;
-        }
-#endif
-
         int capacity = isArray ? parameter.Elements.Count : 1;
         if (count > capacity)
             count = capacity;
@@ -258,11 +248,9 @@ internal sealed class NnStdShaderEffect : Effect
         return matrix;
     }
 
-    // u_UserUniform[4]. gmMap.cpp:3249-3259 pushes all four, and NNM_MTX(m, row, col) is
-    // m[col][row] (nns.h:788), so uniform k is m[k][0..3]: four consecutive floats, which is row k
-    // of the storage either way round. NN is column-vector and XNA row-vector, and that transpose
-    // is exactly what makes the same four floats mean the same thing in both.
-    // the refraction body lives in the pixel half, so ps_u_UserUniform is the copy that matters
+    // NN is column-vector and XNA is row-vector, but a row is the same four floats either way, so
+    // projection row k maps straight onto u_UserUniform[k] with no transpose; refraction reads the
+    // pixel copy, ps_u_UserUniform
     public void SetUserUniforms(Vector4[] uniforms)
     {
         userUniform.Set(uniforms);
@@ -353,26 +341,12 @@ internal sealed class NnStdShaderEffect : Effect
     {
         private readonly Vector4[] registers;
 
-#if MONOGAME
-        // MonoGame cannot compile a struct uniform at all, so its permutations rebuild the NN
-        // structs from loose float4 registers named u_XReg0, u_XReg1 and so on, see
-        // docs/monogame-mojoshader-ctab.md. One bank serves both halves, and a register the
-        // permutation never reads is absent from the constant table.
-        private readonly EffectParameter[] parameters;
-#else
         private readonly Uniform uniform;
-#endif
 
         public StructUniform(Effect effect, string name, int registerCount)
         {
             registers = new Vector4[registerCount];
-#if MONOGAME
-            parameters = new EffectParameter[registerCount];
-            for (int i = 0; i < registerCount; ++i)
-                parameters[i] = effect.Parameters[name + "Reg" + i];
-#else
             uniform = new Uniform(effect, name);
-#endif
         }
 
         public void Set(Vector4 register0)
@@ -393,15 +367,7 @@ internal sealed class NnStdShaderEffect : Effect
 
         private void Apply()
         {
-#if MONOGAME
-            for (int i = 0; i < parameters.Length; ++i)
-            {
-                if (parameters[i] != null)
-                    parameters[i].SetValue(registers[i]);
-            }
-#else
             uniform.Set(registers);
-#endif
         }
     }
 
@@ -409,25 +375,11 @@ internal sealed class NnStdShaderEffect : Effect
     {
         private readonly Vector4[] registers = new Vector4[LightRegistersSet];
 
-#if MONOGAME
-        // the flat registers run across the whole array, so a light starts every
-        // NnStdShaderLightRegisters of them
-        private const int NnStdShaderLightRegisters = 12;
-
-        private readonly EffectParameter[] parameters;
-#else
         private readonly Uniform uniform;
-#endif
 
         public LightUniform(Effect effect, string name)
         {
-#if MONOGAME
-            parameters = new EffectParameter[NnStdShaderLightRegisters];
-            for (int i = 0; i < parameters.Length; ++i)
-                parameters[i] = effect.Parameters[name + "Reg" + i];
-#else
             uniform = new Uniform(effect, name);
-#endif
         }
 
         public void Set(int index, Vector4 ambient, Vector4 diffuse, Vector4 specular, Vector4 position)
@@ -437,23 +389,10 @@ internal sealed class NnStdShaderEffect : Effect
             registers[2] = specular;
             registers[3] = position;
 
-#if MONOGAME
-            int first = index * NnStdShaderLightRegisters;
-            if (first + registers.Length > parameters.Length)
-                return;
-
-            for (int i = 0; i < registers.Length; ++i)
-            {
-                if (parameters[first + i] != null)
-                    parameters[first + i].SetValue(registers[i]);
-            }
-#else
             Element(uniform.Vertex, index)?.SetValue(registers);
             Element(uniform.Pixel, index)?.SetValue(registers);
-#endif
         }
 
-#if !MONOGAME
         // a permutation reading only element 0 can come back from MojoShader as a plain struct, no Elements
         private static EffectParameter Element(EffectParameter lights, int index)
         {
@@ -465,6 +404,5 @@ internal sealed class NnStdShaderEffect : Effect
 
             return index == 0 ? lights : null;
         }
-#endif
     }
 }

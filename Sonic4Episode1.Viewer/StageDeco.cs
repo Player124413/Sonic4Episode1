@@ -27,8 +27,6 @@ internal sealed class StageDecoration
     public Vector2 Centre;
 }
 
-// The decorations for one stage, loaded the way gmGameDatLoadProcPostDeco and GmDecoBuildData do,
-// out of a plain directory. Parse only, like StageMap. See docs/console-deco.md.
 internal sealed class StageDeco
 {
     public string Path { get; }

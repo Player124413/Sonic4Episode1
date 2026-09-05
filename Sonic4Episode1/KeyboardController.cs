@@ -28,7 +28,8 @@ internal class KeyboardController : Controller
             reading.direction |= BUTTON.Y;
         if (state.IsKeyDown(Keys.E))
             reading.direction |= BUTTON.R;
-        if (state.IsKeyDown(Keys.Escape) || state.IsKeyDown(Keys.Enter))
+        var altHeld = state.IsKeyDown(Keys.LeftAlt) || state.IsKeyDown(Keys.RightAlt);
+        if (state.IsKeyDown(Keys.Escape) || (state.IsKeyDown(Keys.Enter) && !altHeld))
             reading.direction |= BUTTON.START;
     }
 }

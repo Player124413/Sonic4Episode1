@@ -3,8 +3,6 @@ using System.IO;
 
 namespace Sonic4Episode1.Tests;
 
-// The Xenon render state table, and its one end-to-end case. Every pair below was measured by
-// `s4content xenonenums` over 2869 material pairs; see docs/xenon-render-state.md.
 public class XenonRenderStateTests
 {
     private static string Fixture(string name)
@@ -78,9 +76,6 @@ public class XenonRenderStateTests
         Assert.Throws<NotSupportedException>(() => AppMain.mppXenonCmpFunc((ushort)xenon));
     }
 
-    // docs/nn-asset-loading-paths.md's worked example, both sides of it. On disk the Xenon ring
-    // reads 0006 0007 0006 0007 | 0000 1505 | 0004 0003; Steam's reads 0500 0600 0500 0600 |
-    // 0100 0515 | 0500 0400. Translated, the two describe the same material in the same numbers.
     [Fact]
     public void TheStagedXenonRingReadsAsItsSteamTwin()
     {

@@ -4,8 +4,6 @@ using static GmPauseMenu.GME_PMENU_ACT;
 
 internal static partial class GmPauseMenu
 {
-    // measured out of the xbla archives, not the generated headers: the leak ships only Wii and
-    // iPhone id sets and the Wii ordering is wrong for console. see docs/pause-action-ids.md
     private static class ConsoleIds
     {
         public const int IDA_G_PAUSE_ACT_TITLE_BASE = 0;
@@ -24,7 +22,6 @@ internal static partial class GmPauseMenu
         public const int IDA_G_PAUSE_L_ACT_MSG_RETRY2 = 10;
         public const int IDA_G_PAUSE_L_ACT_MSG_MAINMENU = 11;
 
-        // one glyph where Wii and PS3 have the O/X pair, so both act slots map here
         public const int IDA_G_PAUSE_P_ACT_MARK_BACK = 0;
 
         public const int IDA_G_PAUSE_P_L_ACT_BTN_RETRY = 0;
@@ -51,9 +48,6 @@ internal static partial class GmPauseMenu
     public const string GMD_PMENU_FILE_PLNG_AMA = GMD_PMENU_FILE_DIR_PATH + "G_PAUSE_P_L.AMA";
     public const string GMD_PMENU_FILE_WIN_AMB = GMD_PMENU_FILE_DIR_PATH + "G_PAUSE_WIN.AMB";
 
-    // six rows, because that is what xbla ships. The five WP7 languages have no console pause
-    // archives at all, so gmPmIsConsoleDataComplete drops the whole screen back to the touch menu
-    // rather than letting an index run off the end.
     internal static readonly string[] gm_pm_file_lng_amb_name_tbl =
     [
         GMD_PMENU_FILE_DIR_PATH + "G_PAUSE_JP.AMB",
@@ -74,8 +68,7 @@ internal static partial class GmPauseMenu
         GMD_PMENU_FILE_DIR_PATH + "G_PAUSE_P_SP.AMB",
     ];
 
-    // indexed by GME_PMENU_ACT. The six button plates are the same two ids over and over: one
-    // plate, one selected plate, drawn six times at different heights.
+    // indexed by GME_PMENU_ACT
     internal static readonly int[] gm_pm_act_id_tbl =
     [
         ConsoleIds.IDA_G_PAUSE_ACT_TITLE_BASE,
@@ -116,8 +109,7 @@ internal static partial class GmPauseMenu
         ConsoleIds.IDA_G_PAUSE_P_L_ACT_BTN_WORLD_S,
     ];
 
-    // top to bottom. Ranking and trophies sit between options and world map in the C++ and are
-    // left out here; the enum entries stay so putting them back is an edit to this list.
+    // top to bottom
     internal static readonly GME_PMENU_ACT[] gm_pm_sel_act_tbl =
     [
         ACT_PL_BTN_RESUME,

@@ -29,6 +29,8 @@ internal partial class AppMain
     public const uint GMD_GAME_FLAG_BGM_PLAY_ENABLE = 134217728;
     public const uint GMD_GAME_FLAG_BGM_PLAY_WAIT = 268435456;
     public const uint GMD_GAME_FLAG_SUSPENDED_PAUSE = 536870912;
+    // PC keeps this at 0x8000000, which is BGM_PLAY_ENABLE here
+    public const uint GMD_GAME_FLAG_NEXT_STAGE = 1073741824;
     public const uint GMD_GAME_FLAG_PAUSE_WAIT_MASK = 32968936;
     public const uint GMD_GAME_FLAG_START_CLEAR_MASK = 107488254;
 }

@@ -3,7 +3,7 @@ internal partial class AppMain
     // The gimmick archives are member for member identical between the two builds, which is why
     // they ship as content alone with no format fork. The gimmick *modules* are a different matter:
     // they carry _IPHONE forks about lighting and about how a thing is drawn, and those are only
-    // correct for the models that are actually loaded. See docs/console-gimmicks.md.
+    // correct for the models that are actually loaded.
     private static bool gm_gmk_as_console;
 
     // named off the stage's own gimmick table. The G_COM gimmicks are deliberately not part of any

@@ -1,5 +1,11 @@
 ﻿internal partial class AppMain
 {
+    private const string GMD_ENE_HARI_MDL_FILENAME = "G_COM/ENE/ENE_HARI_MDL.AMB";
+    private const string GMD_ENE_HARI_TEX_FILENAME = "G_COM/ENE/ENE_HARI_TEX.AMB";
+
+    // mobile swaps LIGHT_0 for LIGHT_6, console lights it normally
+    private static bool gm_ene_harisenbo_as_console;
+
     private static OBS_OBJECT_WORK GmEneHariSenboInit(
           GMS_EVE_RECORD_EVENT eve_rec,
           int pos_x,
@@ -47,13 +53,19 @@
             gmEneHarisenboRedAtkWaitInit(work);
         }
         gmEneHariCreateJetEfct((GMS_ENE_HARI_WORK)work);
-        work.obj_3d.use_light_flag &= 4294967294U;
-        work.obj_3d.use_light_flag |= 64U;
+        if (!gm_ene_harisenbo_as_console)
+        {
+            work.obj_3d.use_light_flag &= 4294967294U;
+            work.obj_3d.use_light_flag |= 64U;
+        }
         return work;
     }
 
     public static void GmEneHariSenboBuild()
     {
+        gm_ene_harisenbo_as_console = amFsAllConsoleGrade(
+            GMD_ENE_HARI_MDL_FILENAME, GMD_ENE_HARI_TEX_FILENAME);
+
         gm_ene_harisenbo_obj_3d_list = GmGameDBuildRegBuildModel(readAMBFile(GmGameDatGetEnemyData(658)), readAMBFile(GmGameDatGetEnemyData(659)), 0U);
         AMS_AMB_HEADER header = readAMBFile(GmGameDatGetEnemyData(659));
         AmbChunk ambChunk = amBindGet(header, header.file_num - 1, out header.dir);

@@ -4,9 +4,7 @@ using static GmStartDemo.GME_START_DEMO_DATA_TYPE;
 
 internal static partial class GmStartDemo
 {
-    // The five languages after SP are WP7 additions: iOS never shipped them, so their members only
-    // exist in the wp7-orig CPIT_MAIN (98 members against the HD set's 58) and the indices here run
-    // past the end of every other build's copy. gmStartDemoLanguage falls those back to US.
+    // indices past SP (5) are WP7-only additions; gmStartDemoLanguage falls other builds back to US for those
     private static readonly int[][] gm_start_demo_data_amb_id =
     [
         [IDB_CPIT_MAIN_G_START_AMB, IDB_CPIT_MAIN_G_START_JP_AMB],
@@ -90,9 +88,6 @@ internal static partial class GmStartDemo
         GMD_START_DEMO_DATA_TYPE_CMN,
     ];
 
-    // SEGA wrote the special stage row as NULL, i.e. action id 0, which is zone 1's name. Read as
-    // the "no action" sentinel it declares two lines up instead. Unreachable either way: GmMain
-    // routes special stages to GmSplStageStart. see docs/startdemo-port-notes.md
     private static readonly int[][] gm_start_demo_action_id_zone =
     [
         [IDA_G_START_ROOT_NODE_ZONE1],

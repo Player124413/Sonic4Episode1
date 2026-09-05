@@ -76,10 +76,9 @@ internal partial class AppMain
         OBS_CAMERA obj_camera = obj_camera_sys.obj_camera[cam_id];
         obj_camera.flag |= 16U;
 
-        // PC's sub_4BDD90 branches on the stage here, and the card stage alone gets a tight depth
-        // range instead of 1..60000. It applies to every camera the init builds, not just the near
-        // layer's, which is the point: that stage draws a perspective pass into the same buffer as
-        // its ortho one, and the two are only comparable over a range this narrow
+        // the card stage alone gets a tight depth range instead of 1..60000, for every camera the
+        // init builds, not just the near layer's: that stage draws a perspective pass into the same
+        // buffer as its ortho one, and the two are only comparable over a range this narrow
         bool card_stage = g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_2_2;
 
         obj_camera.znear = card_stage ? 224f : 1f;
@@ -159,7 +158,6 @@ internal partial class AppMain
         troll_camera.Roll = obj_camera.roll;
     }
 
-    // objCamera.cpp:227-230. dy is fixed, dx grows with aspect, so a wider window sees more
     public static void ObjCameraGetOrthoExtent(float scale, float aspect, out float dx, out float dy)
     {
         dy = g_obj.disp_height * scale * 0.5f;
@@ -312,6 +310,9 @@ internal partial class AppMain
                 obsCamera.disp_ofst.x = 0.0f;
                 obsCamera.disp_ofst.y = 0.0f;
                 obsCamera.disp_ofst.z = 0.0f;
+#if CAMERA_TRACE
+                objCameraTrace(obsCamera);
+#endif
                 if (((int)obsCamera.flag & OBD_CAMERA_3D) != 0)
                 {
                     float dx, dy;
@@ -355,6 +356,47 @@ internal partial class AppMain
         }
         GlobalPool<NNS_VECTOR>.Release(nnsVector);
     }
+
+#if CAMERA_TRACE
+    // TODO(wam): remove, vertical camera judder diagnostics. define CAMERA_TRACE to arm.
+    // judder shows as pos_y oscillating while work_y (the target) moves smoothly; a stuck
+    // camera shows as a non-null func that never clears.
+    private static int objCameraTraceFrame;
+
+    // Delegate.Method needs reflection metadata ILC will not have rooted, so it throws rather
+    // than degrades on .NET Native
+    private static string objCameraTraceFuncName(OBJF_CAMERA_USER_FUNC func)
+    {
+        if (func == null)
+            return "-";
+
+        try
+        {
+            return func.Method.Name;
+        }
+        catch
+        {
+            return "set";
+        }
+    }
+
+    private static void objCameraTrace(OBS_CAMERA c)
+    {
+        var targetY = c.target_obj != null
+            ? FXM_FX32_TO_FLOAT(c.target_obj.pos.y)
+            : c.target_pos.y;
+
+        mppDiagWrite($"[s4cam] f={objCameraTraceFrame} id={c.camera_id} flag={(int)c.flag:X}"
+            + $" func={objCameraTraceFuncName(c.user_func)}"
+            + $" tgt_y={targetY:F4} work_y={c.work.y:F4}"
+            + $" pos_y={c.pos.y:F4} prev_y={c.prev_pos.y:F4} dy={c.pos.y - c.prev_pos.y:F4}"
+            + $" spd_y={c.spd.y:F4} disp_y={c.disp_pos.y:F4}"
+            + $" shift={c.shift} allow_y={c.allow.y:F4} ofst_y={c.ofst.y:F4}");
+
+        if (c.camera_id == 0)
+            objCameraTraceFrame += 1;
+    }
+#endif
 
     private static void objCameraMove(OBS_CAMERA obj_camera)
     {

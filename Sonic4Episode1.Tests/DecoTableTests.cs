@@ -3,10 +3,6 @@ using Sonic4Episode1.Viewer;
 
 namespace Sonic4Episode1.Tests;
 
-// The per-id decoration tables are what both the console draw arm and the stage viewer read, and
-// none of them has an _IPHONE fork. These pin the parts that would fail silently: a model index
-// that stops matching the archive draws the wrong decoration, and a scale that stops matching
-// g_obj.draw_scale draws the right one at the wrong size. See docs/console-deco.md.
 public class DecoTableTests
 {
     private const int Sunflower = 17;
@@ -59,10 +55,7 @@ public class DecoTableTests
         Assert.Equal(-1, AppMain.g_gm_deco_node_motion_index[id][0]);
     }
 
-    // GmMain sets g_obj.draw_scale to GMD_OBJ_DRAW_SCALE for the whole game, and
-    // ObjDrawAction3DNN applies it to any object that does not set OBD_DISP_NODRAWSCALE. Zone 1
-    // sets it nowhere, so every decoration draws 3.2x. Getting this wrong is not a crash, it is
-    // sunflowers the size of the marker box.
+    // zone 1 sets no OBD_DISP_NODRAWSCALE override, so ObjDrawAction3DNN draws every decoration at the global GMD_OBJ_DRAW_SCALE
     [Theory]
     [InlineData(17)]
     [InlineData(18)]
@@ -79,8 +72,6 @@ public class DecoTableTests
         Assert.Equal(new Vector3(AppMain.GMD_OBJ_DRAW_SCALE), StageDeco.Scale(id));
     }
 
-    // the dispatch decides what a decoration draws with, and the viewer reads it rather than
-    // carrying its own list of ids
     [Fact]
     public void TheDispatchTableDecidesWhatADecorationDrawsWith()
     {

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
+using static SDL2.SDL;
+using static SDL2.SDL.SDL_MessageBoxFlags;
+using static SDL2.SDL.SDL_MessageBoxButtonFlags;
 
 namespace Sonic4ep1
 {
@@ -37,7 +41,7 @@ namespace Sonic4ep1
         public const string ID_A1_NAME = @"The Story Begins";
         public const string ID_A1_DESC = @"Clear Splash Hill Zone Act 1.";
         public const string ID_MUSIC_INTERRUPT_CAPTON = @"Interrupt Music";
-        public const string ID_MUSIC_INTERRUPT_TEXT = @"Do you want to interrupt your music and use game backround music?";
+        public const string ID_MUSIC_INTERRUPT_TEXT = @"Do you want to interrupt your music and use game background music?";
         public const string ID_SUPERSONIC = @"Super Sonic";
         public const string ID_A3_NAME = @"Enemy Hunter";
         public const string ID_A3_DESC = @"Defeat 1,000 enemies.";
@@ -73,5 +77,79 @@ namespace Sonic4ep1
         public const string ID_UPDATE_TEXT = @"An update is available! This update is required to connect to Xbox LIVE. Update now?";
 
         public static CultureInfo Culture { get; internal set; }
+    }
+}
+
+
+namespace Microsoft.Xna.Framework.GamerServices
+{
+    public enum MessageBoxIcon : uint
+    {
+        Alert = SDL_MESSAGEBOX_INFORMATION,
+        Warning = SDL_MESSAGEBOX_WARNING,
+        Error = SDL_MESSAGEBOX_ERROR,
+        None = 0
+    }
+
+    public static class Guide
+    {
+        public static bool IsVisible { get; private set; } = false;
+        public static bool IsScreenSaverEnabled { get; set; }
+
+        public static IAsyncResult BeginShowMessageBox(string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
+        {
+            return BeginShowMessageBox(PlayerIndex.One, title, text, buttons, focusButton, icon, callback, state);
+        }
+
+        public static IAsyncResult BeginShowMessageBox(PlayerIndex player, string title, string text, IEnumerable<string> buttons, int focusButton, MessageBoxIcon icon, AsyncCallback callback, object state)
+        {
+            var tcs = new TaskCompletionSource<int?>();
+            var task = tcs.Task.ContinueWith(t =>
+            {
+                IsVisible = false;
+                callback?.Invoke(t);
+            });
+
+            tcs.SetResult(null);
+            return task;
+
+            var btns = buttons.ToArray();
+            var data = new SDL_MessageBoxData
+            {
+                title = title,
+                message = text,
+                numbuttons = btns.Length,
+                buttons = new SDL_MessageBoxButtonData[btns.Length]
+            };
+
+            for (int i = 0; i < btns.Length; i++)
+            {
+                data.buttons[i].text = btns[i];
+                data.buttons[i].buttonid = i;
+                if (i == focusButton)
+                    data.buttons[i].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+            }
+
+            data.window = IntPtr.Zero;
+            data.flags = (SDL_MessageBoxFlags)icon;
+
+            IsVisible = true;
+
+            if (SDL_ShowMessageBox(ref data, out int button) == 0)
+            {
+                tcs.SetResult(button);
+            }
+            else
+            {
+                tcs.SetResult(null);
+            }
+
+            return task;
+        }
+
+        public static int? EndShowMessageBox(IAsyncResult result)
+        {
+            return ((Task<int?>)result).Result;
+        }
     }
 }

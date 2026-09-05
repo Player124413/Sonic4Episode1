@@ -25,8 +25,10 @@ internal partial class AppMain
         public string file_name;
         public Stream stream;
         public byte[] read_buf;
-        public Task readTask;
-        public FsBackgroundReadComplete callback;
+        public Task<byte[]> readTask;
+
+        // set when a read failed and this request is parked; amFsRetryRequest clears it
+        public Exception error;
         public AMS_AMB_HEADER amb_header;
         public bool is_real_amb = false;
         public bool big_endian = false;
@@ -85,42 +87,16 @@ internal partial class AppMain
 
     public static AMS_FS amFsReadBackground(string file_name)
     {
-        FsReadSpeedBytesPerFrame = 32768;
-        return amFsReadBackground(file_name, (FsBackgroundReadComplete)null);
+        return amFsReadBackground(file_name, null);
     }
 
     public static AMS_FS amFsReadBackgroundAs(string file_name, string variant)
     {
-        FsReadSpeedBytesPerFrame = 32768;
-        return amFsReadBackground(file_name, null, variant);
+        return amFsReadBackground(file_name, variant);
     }
 
-    public static AMS_FS amFsReadBackground(string file_name, int BytesPerFrame)
+    private static AMS_FS amFsReadBackground(string file_name, string variant)
     {
-        FsReadSpeedBytesPerFrame = BytesPerFrame;
-        return amFsReadBackground(file_name, null);
-    }
-
-    public static AMS_FS amFsReadBackgroundAs(string file_name, int BytesPerFrame, string variant)
-    {
-        FsReadSpeedBytesPerFrame = BytesPerFrame;
-        return amFsReadBackground(file_name, null, variant);
-    }
-
-    public static AMS_FS amFsReadBackground(
-        string file_name,
-        FsBackgroundReadComplete callback)
-    {
-        return amFsReadBackground(file_name, callback, null);
-    }
-
-    private static AMS_FS amFsReadBackground(
-        string file_name,
-        FsBackgroundReadComplete callback,
-        string variant)
-    {
-        //Console.WriteLine(file_name);
-
         AMS_FS amsFs;
         if (ams_fsList.Count > 0 && lastReadAMS_FS != null && lastReadAMS_FS.file_name == file_name
             && lastReadAMS_FS.variant == variant)
@@ -131,7 +107,6 @@ internal partial class AppMain
         else
         {
             amsFs = new AMS_FS();
-            amsFs.callback = callback;
             amsFs.file_name = file_name;
             amsFs.variant = variant;
             amsFs.stat = 2;
@@ -503,6 +478,19 @@ internal partial class AppMain
             : null;
     }
 
+    // the tier whose sibling supplies members of this archive, best first, or null for none. Same
+    // walk as amFsResolvedVariant, so a .pc sibling can sit over a .console archive
+    public static string amFsMemberVariantResolved(string path)
+    {
+        foreach (var variant in am_fs_variant_order)
+        {
+            if (amFsMemberVariantIndices(path, variant) != null)
+                return variant;
+        }
+
+        return null;
+    }
+
     // the member-level counterpart of amFsAllVariant: a screen that names its own members of a
     // shared archive, and falls back wholesale if any of them is missing
     public static bool amFsAllMemberVariant(string variant, string path, params int[] indices)
@@ -616,17 +604,17 @@ internal partial class AppMain
         if (value.stream != null)
             return true;
 
+        // parked after a failed read. Sticky, or the next frame would just issue the request again
+        // and turn one dead file into a request storm
+        if (value.error != null)
+            return false;
+
         if (value.read_buf == null && value.readTask == null)
         {
-            var source = TitleContainer.OpenStream("Content\\" + resolved);
 #if ASYNC_IO
-#if ASYNC_TARGETING_PACK
-            value.readTask = Task.Factory.StartNew(() => value.read_buf = amFsReadAll(source));
+            value.readTask = ContentSource.Current.ReadAsync(resolved);
 #else
-            value.readTask = Task.Run(() => value.read_buf = amFsReadAll(source));
-#endif
-#else
-            value.read_buf = amFsReadAll(source);
+            value.read_buf = ContentSource.Current.Read(resolved);
 #endif
         }
 
@@ -637,14 +625,42 @@ internal partial class AppMain
 
             var completed = value.readTask;
             value.readTask = null;
-            completed.GetAwaiter().GetResult();
+
+            // the C++ leaves a failed read at the head of the queue as AMD_FS_STAT_CANTOPEN and
+            // waits to be told to retry. Rethrowing here would take the frame loop with it
+            if (completed.IsFaulted)
+            {
+                value.error = completed.Exception?.GetBaseException();
+                Console.Error.WriteLine($"amFs: '{resolved}' failed: {value.error?.Message}");
+                return false;
+            }
+
+            value.read_buf = completed.GetAwaiter().GetResult();
         }
 
         value.stream = new MemoryStream(value.read_buf, false);
         return true;
     }
 
-    private static byte[] amFsReadAll(Stream source)
+    // the request the queue is stuck on, or null. amFs only ever services the head, so a parked
+    // one blocks everything behind it, which is what makes it worth surfacing
+    public static AMS_FS amFsFailedRequest()
+    {
+        if (ams_fsList.Count == 0)
+            return null;
+
+        var head = ams_fsList.First.Value;
+        return head.error != null ? head : null;
+    }
+
+    public static void amFsRetryRequest(AMS_FS cdfsp)
+    {
+        cdfsp.error = null;
+        cdfsp.readTask = null;
+        cdfsp.read_buf = null;
+    }
+
+    public static byte[] amFsReadAll(Stream source)
     {
         using (source)
         {
@@ -713,7 +729,7 @@ internal partial class AppMain
 
             amFsFinishCopy(value);
 
-            value.member_variant_name = value.variant ?? am_fs_variant;
+            value.member_variant_name = value.variant ?? amFsMemberVariantResolved(value.file_name);
             value.member_variant = amFsMemberVariantIndices(
                 value.file_name, value.member_variant_name);
             value.phase = value.member_variant == null ? 2 : 1;
@@ -754,8 +770,6 @@ internal partial class AppMain
         value.stat = 3;
         value.phase = 3;
         ams_fsList.RemoveFirst();
-        if (value.callback != null)
-            value.callback(value);
     }
 
 

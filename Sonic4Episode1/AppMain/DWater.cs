@@ -252,6 +252,11 @@ internal partial class AppMain
         amMatrixPop();
     }
 
+    // p[2] of the C++'s pre-transformed verts, so it is a device depth rather than a position.
+    // GmWaterSurfaceDrawNoWaterField writes depth-only quads in PRE_WATER to keep the water inside
+    // the drain tank, and this is what they have to be nearer than.
+    private const float DWATER_QUAD_DEPTH = 0.0125f;
+
     // gmWaterSurface.cpp:2355, the _PC | _XBOX branch
     private static void dwaterDrawWater(AMS_RENDER_TARGET texture)
     {
@@ -274,10 +279,7 @@ internal partial class AppMain
         float ofst_v = param.draw_v;
         float water_u = param.repeat_u * 0.5f * param.scale;
         float water_v = param.repeat_v * param.scale;
-        // The C++ assumes pos.y lands in [-1,1], but this port's ortho cameras yield half-range
-        // NDC (+/-0.5 across the visible height), so everything downstream is 2x short.
-        // Measured: ndc.y 0.363 -> surface at ~148px, -0.505 -> ~1086px on a 1080 backbuffer.
-        float dy = pos.y * 2.0f;
+        float dy = pos.y;
         float water_ou = 0.0f;
 
         float w = AMD_SCREEN_WIDTH;
@@ -303,30 +305,31 @@ internal partial class AppMain
         src.z = 0.0f;
         nnTransformVector(dst, mtx, src);
         _dwater_verts[0] = new VertexPositionColorTexture(
-            new Vector3(ox + dst.x, oy - dst.y, 0.0f), top,
+            new Vector3(ox + dst.x, oy - dst.y, DWATER_QUAD_DEPTH), top,
             new Vector2(water_ou - water_u + ofst_u, dv + ofst_v));
 
         src.x = -src.x;
         nnTransformVector(dst, mtx, src);
         _dwater_verts[1] = new VertexPositionColorTexture(
-            new Vector3(ox + dst.x, oy - dst.y, 0.0f), top,
+            new Vector3(ox + dst.x, oy - dst.y, DWATER_QUAD_DEPTH), top,
             new Vector2(water_ou + water_u + ofst_u, dv + ofst_v));
 
         src.x = baseX;
         src.y += src.x * 2.0f;
         nnTransformVector(dst, mtx, src);
         _dwater_verts[2] = new VertexPositionColorTexture(
-            new Vector3(ox + dst.x, oy - dst.y, 0.0f), bottom,
+            new Vector3(ox + dst.x, oy - dst.y, DWATER_QUAD_DEPTH), bottom,
             new Vector2(water_ou - water_u + ofst_u, water_v + dv + ofst_v));
 
         src.x = -src.x;
         nnTransformVector(dst, mtx, src);
         _dwater_verts[3] = new VertexPositionColorTexture(
-            new Vector3(ox + dst.x, oy - dst.y, 0.0f), bottom,
+            new Vector3(ox + dst.x, oy - dst.y, DWATER_QUAD_DEPTH), bottom,
             new Vector2(water_ou + water_u + ofst_u, water_v + dv + ofst_v));
 
         Effect effect = _dmap_water.shader.effect;
-        effect.Parameters["MatrixTransform"].SetValue(Matrix.CreateOrthographicOffCenter(0f, w, h, 0f, 0f, 1f));
+        // far at -1 so vertex z comes out of the projection as itself
+        effect.Parameters["MatrixTransform"].SetValue(Matrix.CreateOrthographicOffCenter(0f, w, h, 0f, 0f, -1f));
         effect.Parameters["TexColor"].SetValue(texture.target);
         effect.Parameters["TexOffset"].SetValue(_dmap_water.tex_water.texture);
         effect.Parameters["TexGray"].SetValue(_dmap_water.tex_color.texture);

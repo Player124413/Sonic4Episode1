@@ -4,11 +4,7 @@ using static AppMain;
 
 internal static partial class GmClearDemo
 {
-    // Everything gmClearDemo.cpp puts behind an #ifdef, picked once in gmClearDemoInit. 77
-    // conditional blocks in the file, but 47 are cosmetic: 42 of them write scale.x/y = 1.0f *
-    // FX32_ONE, which ObjObjectCreate already did. Only these ten change behaviour, and none of
-    // them changes the shape of a table, so unlike GMS_FIX_VARIANT nothing here is an array.
-    // see docs/cleardemo-port-notes.md
+    // picked once in gmClearDemoInit; unlike GMS_FIX_VARIANT nothing here needs to be an array
     internal sealed class GMS_CLRDM_VARIANT
     {
         // four sites take decide, cancel or start; the one on the time-attack record display takes
@@ -25,8 +21,8 @@ internal static partial class GmClearDemo
         public bool clears_nn_command_state_tbl;
         public bool sets_bg_color_black;
 
-        // console re-derives the time-attack Sonic icon every frame where mobile sets it once at
-        // action load. Same result while the player is frozen, which they are.
+        // console re-derives the time-attack sonic icon every frame, mobile sets it once at load;
+        // same result since the player is frozen
         public bool time_sonic_icon_per_frame;
 
         public bool is_console;
@@ -34,9 +30,8 @@ internal static partial class GmClearDemo
 
     private static GMS_CLRDM_VARIANT gm_clrdm_variant = gm_clrdm_variant_mobile;
 
-    // G_RSLT ids are a strict prefix, so the console arms would run on either archive. This gates
-    // on the assets anyway, for the same reason every other screen does: the two builds' art is not
-    // a shared vocabulary and mixing them is what the whole variant mechanism exists to stop.
+    // ids are a strict prefix, so this checks the actual assets instead: the two builds' art isn't
+    // a shared vocabulary, and that's what the variant mechanism exists to stop
     private static bool gmClearDemoIsConsoleDataComplete()
     {
         var lng = gmClearDemoLanguage();

@@ -5,14 +5,14 @@ internal partial class AppMain
 {
     internal class ArrayPool<T> where T : new()
     {
-#if !NETCOREAPP
+#if !NETCOREAPP && !NETSTANDARD2_0_OR_GREATER
         private List<T[]> freeArrays_ = new List<T[]>();
         private List<T[]> usedArrays_ = new List<T[]>();
 #endif
 
         public T[] AllocArray(int size)
         {
-#if !NETCOREAPP
+#if !NETCOREAPP && !NETSTANDARD2_0_OR_GREATER
             int index1 = -1;
             int num = this.freeArrays_.Count > 0 ? this.freeArrays_[0].Length : -1;
             for (int index2 = 0; index2 < this.freeArrays_.Count; ++index2)
@@ -38,7 +38,7 @@ internal partial class AppMain
 
         public void ReleaseArray(T[] array)
         {
-#if !NETCOREAPP
+#if !NETCOREAPP && !NETSTANDARD2_0_OR_GREATER
             this.freeArrays_.Add(array);
             this.usedArrays_.Remove(array);
 #else
@@ -48,7 +48,7 @@ internal partial class AppMain
 
         public void ReleaseUsedArrays()
         {
-#if !NETCOREAPP
+#if !NETCOREAPP && !NETSTANDARD2_0_OR_GREATER
             this.freeArrays_.AddRange(usedArrays_);
             this.usedArrays_.Clear();
 #endif
@@ -56,7 +56,7 @@ internal partial class AppMain
 
         public void Clear()
         {
-#if !NETCOREAPP
+#if !NETCOREAPP && !NETSTANDARD2_0_OR_GREATER
             this.freeArrays_.Clear();
             this.usedArrays_.Clear();
 #endif

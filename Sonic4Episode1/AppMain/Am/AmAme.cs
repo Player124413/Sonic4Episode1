@@ -1,24 +1,53 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 
 internal partial class AppMain
 {
+    private const uint AMD_AME_FILE_ID = 0x454D4123;
+    private const int AMD_AME_FILE_VERSION = 0x00020000;
+
+    // "#AME" is four bytes and reads the same either way, so the version is what tells the two
+    // builds apart: 0x00020000 in the right order, 0x00000200 in the wrong one
+    public static BinaryReader mppOpenAmeChunk(Stream stream)
+    {
+        long start = stream.Position;
+        var probe = new BinaryReader(stream);
+        uint id = probe.ReadUInt32();
+        int version = probe.ReadInt32();
+        stream.Position = start;
+
+        if (id != AMD_AME_FILE_ID)
+            throw new InvalidDataException($"unrecognised AME file header 0x{id:X8}");
+
+        if (version == AMD_AME_FILE_VERSION)
+            return probe;
+
+        if (BinaryPrimitives.ReverseEndianness(version) == AMD_AME_FILE_VERSION)
+            return new EndianBinaryReader(stream, bigEndian: true);
+
+        throw new InvalidDataException($"unrecognised AME file version 0x{version:X8}");
+    }
+
     public static AMS_AME_HEADER readAMEfile(string filename)
     {
         filename = string.Format("Content/{0}", filename);
-        BinaryReader br = new BinaryReader(TitleContainer.OpenStream(filename));
-        AMS_AME_HEADER amsAmeHeader = readAMEfile(br);
-        br.Dispose();
-        return amsAmeHeader;
+        using (Stream stream = TitleContainer.OpenStream(filename))
+        {
+            BinaryReader br = mppOpenAmeChunk(stream);
+            AMS_AME_HEADER amsAmeHeader = readAMEfile(br);
+            br.Dispose();
+            return amsAmeHeader;
+        }
     }
 
     public static AMS_AME_HEADER readAMEfile(AmbChunk data)
     {
         using (MemoryStream memoryStream = new MemoryStream(data.array, data.offset, data.length))
         {
-            using (BinaryReader br = new BinaryReader(memoryStream))
+            using (BinaryReader br = mppOpenAmeChunk(memoryStream))
                 return readAMEfile(br);
         }
     }
@@ -61,6 +90,20 @@ internal partial class AppMain
         node.parent_offset = parent_offset;
     }
 
+    // AMS_RGBA8888 is a union of four bytes over a u32, so the file holds r,g,b,a at four byte
+    // offsets rather than an integer. It does not reverse with the rest of a big-endian file, and
+    // reading it as a u32 through the endian reader lands the channels as a,b,g,r.
+    private static AMS_RGBA8888 readColor(BinaryReader br)
+    {
+        return new AMS_RGBA8888
+        {
+            r = br.ReadByte(),
+            g = br.ReadByte(),
+            b = br.ReadByte(),
+            a = br.ReadByte(),
+        };
+    }
+
     private static void readVector4(BinaryReader br, NNS_VECTOR4D v)
     {
         v.x = br.ReadSingle();
@@ -95,7 +138,6 @@ internal partial class AppMain
         amsAmeHeader.node = new AMS_AME_NODE[amsAmeHeader.node_num];
         br.BaseStream.Seek(amsAmeHeader.node_ofst, SeekOrigin.Begin);
 
-        // TODO: why is this a dictionary not an array?
         Dictionary<uint, AMS_AME_NODE> dictionary = new Dictionary<uint, AMS_AME_NODE>(amsAmeHeader.node_num);
         for (int index1 = 0; index1 < amsAmeHeader.node_num; ++index1)
         {
@@ -209,8 +251,8 @@ internal partial class AppMain
                         amsAmeNodeSprite.twist_angle = br.ReadSingle();
                         amsAmeNodeSprite.twist_angle_chaos = br.ReadSingle();
                         amsAmeNodeSprite.twist_angle_speed = br.ReadSingle();
-                        amsAmeNodeSprite.color_start.color = br.ReadUInt32();
-                        amsAmeNodeSprite.color_end.color = br.ReadUInt32();
+                        amsAmeNodeSprite.color_start = readColor(br);
+                        amsAmeNodeSprite.color_end = readColor(br);
                         amsAmeNodeSprite.blend = br.ReadInt32();
                         amsAmeNodeSprite.texture_slot = br.ReadInt16();
                         amsAmeNodeSprite.texture_id = br.ReadInt16();
@@ -239,10 +281,10 @@ internal partial class AppMain
                         amsAmeNodeLine.inside_width_end = br.ReadSingle();
                         amsAmeNodeLine.outside_width_start = br.ReadSingle();
                         amsAmeNodeLine.outside_width_end = br.ReadSingle();
-                        amsAmeNodeLine.inside_color_start.color = br.ReadUInt32();
-                        amsAmeNodeLine.inside_color_end.color = br.ReadUInt32();
-                        amsAmeNodeLine.outside_color_start.color = br.ReadUInt32();
-                        amsAmeNodeLine.outside_color_end.color = br.ReadUInt32();
+                        amsAmeNodeLine.inside_color_start = readColor(br);
+                        amsAmeNodeLine.inside_color_end = readColor(br);
+                        amsAmeNodeLine.outside_color_start = readColor(br);
+                        amsAmeNodeLine.outside_color_end = readColor(br);
                         amsAmeNodeLine.blend = br.ReadInt32();
                         amsAmeNodeLine.texture_slot = br.ReadInt16();
                         amsAmeNodeLine.texture_id = br.ReadInt16();
@@ -272,8 +314,8 @@ internal partial class AppMain
                         amsAmeNodePlane.scale_x_end = br.ReadSingle();
                         amsAmeNodePlane.scale_y_start = br.ReadSingle();
                         amsAmeNodePlane.scale_y_end = br.ReadSingle();
-                        amsAmeNodePlane.color_start.color = br.ReadUInt32();
-                        amsAmeNodePlane.color_end.color = br.ReadUInt32();
+                        amsAmeNodePlane.color_start = readColor(br);
+                        amsAmeNodePlane.color_end = readColor(br);
                         amsAmeNodePlane.blend = br.ReadInt32();
                         amsAmeNodePlane.texture_slot = br.ReadInt16();
                         amsAmeNodePlane.texture_id = br.ReadInt16();
@@ -301,8 +343,8 @@ internal partial class AppMain
                         amsAmeNodeModel.start_time = br.ReadSingle();
                         amsAmeNodeModel.model_name = br.ReadChars(8);
                         amsAmeNodeModel.lod = br.ReadInt32();
-                        amsAmeNodeModel.color_start.color = br.ReadUInt32();
-                        amsAmeNodeModel.color_end.color = br.ReadUInt32();
+                        amsAmeNodeModel.color_start = readColor(br);
+                        amsAmeNodeModel.color_end = readColor(br);
                         amsAmeNodeModel.blend = br.ReadInt32();
                         amsAmeNodeModel.scroll_u = br.ReadSingle();
                         amsAmeNodeModel.scroll_v = br.ReadSingle();

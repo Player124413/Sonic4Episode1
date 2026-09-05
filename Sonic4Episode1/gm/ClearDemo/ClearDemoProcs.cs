@@ -17,6 +17,7 @@ internal static partial class GmClearDemo
             amFlagOn(ref main_work.flag, 128U);
         if (AoActIsEndTrs(main_work.tex_ring_act.obj_2d.act))
             amFlagOn(ref main_work.flag, 256U);
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -38,6 +39,7 @@ internal static partial class GmClearDemo
             amFlagOn(ref main_work.flag, 4U);
         }
 
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -67,8 +69,8 @@ internal static partial class GmClearDemo
             main_work.timer = 0.0f;
         }
 
-        // the pad check is a WP7 addition on top of the touch arm, not something the C++ has, so it
-        // stays on the mobile side rather than widening the console skip to any held button
+        // pad check is a WP7 addition on the touch arm; the C++ doesn't have it, so it stays
+        // mobile-only instead of widening the console skip to any held button
         if (gm_clrdm_variant.is_skip_pressed()
             || (gm_clrdm_variant.has_touch_buttons && AoPad.AoPadADirect() != 0))
         {
@@ -82,6 +84,7 @@ internal static partial class GmClearDemo
             main_work.timer = 0.0f;
         }
 
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -110,6 +113,7 @@ internal static partial class GmClearDemo
         }
         else
         {
+            gmClearDemoSetNextPromptInput(main_work);
             gmClearDemoSetSortBufAct(main_work);
             gmClearDemoSetScoreData(main_work);
             gmClearDemoUpdateAct(main_work);
@@ -123,10 +127,12 @@ internal static partial class GmClearDemo
         {
             main_work.proc_update = new GMS_CLRDM_MAIN_WORK._WorkDelegate(gmClearDemoProcFadeOut);
             IzFadeInitEasy(0U, 1U, 32f);
+            gmClearDemoSettleNextPrompt(main_work);
         }
 
         if (((int) main_work.flag & 16) != 0)
             gmClearDemoSetFlashSonic(main_work);
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -146,6 +152,7 @@ internal static partial class GmClearDemo
                 gmClearDemoSetFlashSonic(main_work);
             if (main_work.game_mode == 0)
             {
+                gmClearDemoSetNextPromptInput(main_work);
                 gmClearDemoSetSortBufAct(main_work);
                 gmClearDemoSetScoreData(main_work);
                 gmClearDemoUpdateAct(main_work);
@@ -229,7 +236,6 @@ internal static partial class GmClearDemo
     private static void gmClearDemoProcTimeDispEffect(GMS_CLRDM_MAIN_WORK main_work)
     {
         main_work.timer += main_work.count;
-        // decide only here, where the other four also take cancel and start. SEGA's asymmetry.
         if (gm_clrdm_variant.is_time_skip_pressed())
             main_work.flag |= 4U;
         if (main_work.timer > (double) main_work.idle_time || ((int) main_work.flag & 4) != 0)
@@ -313,10 +319,7 @@ internal static partial class GmClearDemo
         gm_clrdm_variant.proc_retry_input(main_work);
     }
 
-    // the console arm: a cursor over the two labels, where the touch one has a button per choice.
-    // cur_retry_slct is 0 for retry and 1 for back to the act select; it is already on
-    // GMS_CLRDM_MAIN_WORK because the C++ declares it outside the #ifdef and the mobile build
-    // carries it dead.
+    // cur_retry_slct is 0 for retry and 1 for back to the act select
     private static void gmClearDemoSetRetryInputPad(GMS_CLRDM_MAIN_WORK main_work)
     {
         if ((AoPad.AoPadStand() & BUTTON.CANCEL) != 0)
@@ -468,10 +471,10 @@ internal static partial class GmClearDemo
         ((OBS_OBJECT_WORK) main_work.tex_retry_act).disp_flag &= 4294967263U;
         ((OBS_OBJECT_WORK) main_work.tex_back_slct_act).disp_flag &= 4294967263U;
         ((OBS_OBJECT_WORK) main_work.bg_retry).disp_flag &= 4294967263U;
-        // console leaves DISP_CLEAR_TIME set, and because gmClearDemoProcChangeRetryOut falls
-        // through to SetTimeAtkSortBufAct the seven digits come straight back the same frame. That
-        // is why the normal-stage retry screen shows the run's time and the special-stage one, which
-        // returns before that call, does not.
+        // console leaves DISP_CLEAR_TIME set, and gmClearDemoProcChangeRetryOut falls through to
+        // SetTimeAtkSortBufAct so the seven digits come straight back the same frame. that's why
+        // normal-stage retry shows the run time and special-stage, which returns before that call,
+        // does not.
         if (gm_clrdm_variant.hides_clear_time_on_retry)
         {
             amFlagOff(ref main_work.flag, 1024U);
@@ -520,6 +523,7 @@ internal static partial class GmClearDemo
             amFlagOn(ref main_work.flag, 128U);
         if (AoActIsEndTrs(main_work.tex_ring_act.obj_2d.act))
             amFlagOn(ref main_work.flag, 256U);
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -541,6 +545,7 @@ internal static partial class GmClearDemo
             amFlagOn(ref main_work.flag, 4U);
         }
 
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -582,6 +587,7 @@ internal static partial class GmClearDemo
             main_work.timer = 0.0f;
         }
 
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -610,6 +616,7 @@ internal static partial class GmClearDemo
         }
         else
         {
+            gmClearDemoSetNextPromptInput(main_work);
             gmClearDemoSetSortBufAct(main_work);
             gmClearDemoSetScoreData(main_work);
             gmClearDemoUpdateAct(main_work);
@@ -623,10 +630,12 @@ internal static partial class GmClearDemo
         {
             main_work.proc_update = new GMS_CLRDM_MAIN_WORK._WorkDelegate(gmClearDemoProcSpeScoreFadeOut);
             IzFadeInitEasy(0U, 3U, 32f);
+            gmClearDemoSettleNextPrompt(main_work);
         }
 
         if (((int) main_work.flag & 16) != 0)
             gmClearDemoSetFlashSonic(main_work);
+        gmClearDemoSetNextPromptInput(main_work);
         gmClearDemoSetSortBufAct(main_work);
         gmClearDemoSetScoreData(main_work);
         gmClearDemoUpdateAct(main_work);
@@ -644,6 +653,7 @@ internal static partial class GmClearDemo
         {
             if (((int) main_work.flag & 16) != 0)
                 gmClearDemoSetFlashSonic(main_work);
+            gmClearDemoSetNextPromptInput(main_work);
             gmClearDemoSetSortBufAct(main_work);
             gmClearDemoSetScoreData(main_work);
             gmClearDemoUpdateAct(main_work);

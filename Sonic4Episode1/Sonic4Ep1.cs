@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using mpp;
 using GameFramework;
 using System.Linq;
+using Microsoft.Xna.Framework.Input.Touch;
 
 
 #if WINDOWSPHONE7_5 || WASM || IOS || ANDROID
@@ -71,7 +72,7 @@ public class Sonic4Ep1 : Game
 
 #if WINDOWSPHONE7_5
         AppMain.storePath = storePath = ""; // unused, works via IsolatedStorage
-#elif WINDOWS_UAP
+#elif WINDOWS_UWP
         AppMain.storePath = storePath = Windows.Storage.ApplicationData.Current.RoamingFolder.Path;
 #elif ANDROID
         AppMain.storePath = storePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -85,21 +86,21 @@ public class Sonic4Ep1 : Game
 #if WINDOWSPHONE7_5
         this.graphics.PreferredBackBufferWidth = 533;
         this.graphics.PreferredBackBufferHeight = 320;
-#elif IOS
+#elif IOS || ANDROID
         var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
         GetFixedWidthBackBuffer(displayMode.Width, displayMode.Height, out var preferredWidth, out var preferredHeight);
         this.graphics.PreferredBackBufferWidth = preferredWidth;
         this.graphics.PreferredBackBufferHeight = preferredHeight;
 
         System.Diagnostics.Debug.WriteLine(displayMode);
-#elif WINDOWS_UAP
+#elif WINDOWS_UWP
         this.graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         this.graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 #else
         this.graphics.PreferredBackBufferWidth = 1280;
         this.graphics.PreferredBackBufferHeight = 720;
 #endif
-#if WINDOWS_UAP || IOS || ANDROID || WINDOWSPHONE7_5
+#if WINDOWS_UWP || IOS || ANDROID || WINDOWSPHONE7_5
         this.graphics.IsFullScreen = true;
         this.graphics.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
 #else
@@ -113,7 +114,7 @@ public class Sonic4Ep1 : Game
             e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
 #endif
 
-#if IOS
+#if IOS || ANDROID
             /* FNA subscribes to ClientSizeChanged itself and re-pins the back buffer to the window,
              * which beats PreferredBackBuffer. This event is raised at the end of
              * INTERNAL_CreateGraphicsDeviceInformation, after that has happened and on both the
@@ -136,22 +137,8 @@ public class Sonic4Ep1 : Game
             }
 #endif
 
-#if ANDROID
-            var largestSupported = e.GraphicsDeviceInformation.Adapter.SupportedDisplayModes
-                .OrderByDescending(m => m.Width * m.Height)
-                .FirstOrDefault(m => m.Format == SurfaceFormat.Color);
-
-            if (largestSupported != null)
-            {
-                this.graphics.PreferredBackBufferWidth = largestSupported.Width;
-                this.graphics.PreferredBackBufferHeight = largestSupported.Height;
-            }
-#endif
         };
 
-#if ANDROID
-        this.Content = new AndroidContentManager(this.Services);
-#endif
         this.Content.RootDirectory = "Content";
 
         this.IsMouseVisible = true;
@@ -170,7 +157,7 @@ public class Sonic4Ep1 : Game
 #endif
     }
 
-#if IOS
+#if IOS || ANDROID
     // TODO(wam): revisit when ultrawide gets a real pass
     private const int FixedBackBufferWidth = 1920;
 
@@ -214,6 +201,49 @@ public class Sonic4Ep1 : Game
     }
 #endif
 
+#if !WINDOWS_UWP && !IOS && !ANDROID && !WINDOWSPHONE7_5 && !WASM
+    private bool fullScreenKeyHeld;
+    private int windowedWidth, windowedHeight;
+
+    private void UpdateFullScreenToggle()
+    {
+        var state = Keyboard.GetState();
+        var held = state.IsKeyDown(Keys.Enter)
+            && (state.IsKeyDown(Keys.LeftAlt) || state.IsKeyDown(Keys.RightAlt));
+
+        if (held && !fullScreenKeyHeld)
+            ToggleFullScreen();
+
+        fullScreenKeyHeld = held;
+    }
+
+    private void ToggleFullScreen()
+    {
+        var presentation = this.GraphicsDevice.PresentationParameters;
+        if (graphics.IsFullScreen)
+        {
+            graphics.PreferredBackBufferWidth = windowedWidth;
+            graphics.PreferredBackBufferHeight = windowedHeight;
+        }
+        else
+        {
+            windowedWidth = presentation.BackBufferWidth;
+            windowedHeight = presentation.BackBufferHeight;
+
+            var display = this.GraphicsDevice.Adapter.CurrentDisplayMode;
+            graphics.PreferredBackBufferWidth = display.Width;
+            graphics.PreferredBackBufferHeight = display.Height;
+        }
+
+        graphics.IsFullScreen = !graphics.IsFullScreen;
+        graphics.ApplyChanges();
+
+        newWidth = graphics.PreferredBackBufferWidth;
+        newHeight = graphics.PreferredBackBufferHeight;
+        resizedFlag = true;
+    }
+#endif
+
     protected override void Initialize()
     {
         this.scissorState = new RasterizerState() { ScissorTestEnable = true, CullMode = CullMode.None };
@@ -245,10 +275,11 @@ public class Sonic4Ep1 : Game
         //this.fnts[0] = this.Content.Load<SpriteFont>("small");
         //this.fnts[2] = this.Content.Load<SpriteFont>("large");
 
+        LoadContentFailureAssets();
+
 #if SHOW_FPS
         this.spriteBatch = new SpriteBatch(this.GraphicsDevice);
-        var font = this.Content.Load<SpriteFont>("medium");
-        _benchmark = new BenchmarkObject(this, font, Vector2.Zero, Color.Red);
+        _benchmark = new BenchmarkObject(this, failureFont, Vector2.Zero, Color.Red);
         _benchmark.IsEnabled = true;
 #endif
 
@@ -303,12 +334,19 @@ public class Sonic4Ep1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+#if !WINDOWS_UWP && !IOS && !ANDROID && !WINDOWSPHONE7_5 && !WASM
+        UpdateFullScreenToggle();
+#endif
+
         if (resizedFlag)
         {
             resizedFlag = false;
 
-            var width = newWidth > 0 ? newWidth : graphics.GraphicsDevice.Viewport.Width;
-            var height = newHeight > 0 ? newHeight : graphics.GraphicsDevice.Viewport.Height;
+            // the device viewport is the pillarboxed rect, so reading it back here would feed the
+            // narrowed width in as the new back buffer size and ratchet the window down each resize
+            var bounds = this.Window.ClientBounds;
+            var width = newWidth > 0 ? newWidth : bounds.Width;
+            var height = newHeight > 0 ? newHeight : bounds.Height;
             newWidth = newHeight = 0;
 
             var current = graphics.GraphicsDevice.PresentationParameters;
@@ -351,6 +389,12 @@ public class Sonic4Ep1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        if (DrawContentFailure())
+        {
+            base.Draw(gameTime);
+            return;
+        }
+
         if (AppMain.mppIsPillarboxed)
             mpp.OpenGL.mppglClearBackBuffer(Color.Black);
 
@@ -369,5 +413,88 @@ public class Sonic4Ep1 : Game
         // LiveFeature.getInstance().ShowOverride();
         // Upsell.drawUpsellScreen();
         base.Draw(gameTime);
+    }
+
+#if WASM
+    private const string ContentFailureText =
+        "You appear to be offline.\nSONIC THE HEDGEHOG 4 requires an\ninternet connection to play.\n\nPress A or tap the screen to retry.\n\nAnything not saved will be lost.";
+#else
+    private const string ContentFailureText =
+        "The game disc could not be read.\nPlease read the Wii Operations\nManual for more information.";
+#endif
+
+    private SpriteBatch failureBatch;
+    private SpriteFont failureFont;
+    private Texture2D failurePanel;
+    private bool failureArmed;
+
+    private void LoadContentFailureAssets()
+    {
+        try
+        {
+            failureBatch = new SpriteBatch(this.GraphicsDevice);
+            failurePanel = CreateFailurePanel();
+            // New Rodin, which is what the game sets its own text in
+            failureFont = this.Content.Load<SpriteFont>("newrodin");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"content failure overlay incomplete: {ex.Message}");
+        }
+    }
+
+    private static bool ContentFailureRestartPressed()
+    {
+        return TouchPanel.GetState().Count > 0
+            || Mouse.GetState().LeftButton == ButtonState.Pressed
+            || Keyboard.GetState().IsKeyDown(Keys.A)
+            || GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed;
+    }
+
+    private bool DrawContentFailure()
+    {
+        if (AppMain.amFsFailedRequest() == null)
+            return false;
+
+        if (failureBatch == null || failurePanel == null)
+            return false;
+
+        this.GraphicsDevice.SetRenderTarget(null);
+        this.GraphicsDevice.Clear(Color.Black);
+
+        var viewport = this.GraphicsDevice.Viewport;
+        failureBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        failureBatch.Draw(failurePanel, new Rectangle(0, 0, viewport.Width, viewport.Height),
+            new Color(0, 0, 0, 200));
+
+        if (failureFont != null)
+        {
+            var lines = ContentFailureText.Split('\n');
+            var spacing = failureFont.LineSpacing;
+            var top = (viewport.Height - lines.Length * spacing) / 2;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var size = failureFont.MeasureString(lines[i]);
+                failureBatch.DrawString(failureFont, lines[i],
+                    new Vector2((viewport.Width - size.X) / 2, top + i * spacing), Color.White);
+            }
+        }
+
+        failureBatch.End();
+
+        if (!ContentFailureRestartPressed())
+            failureArmed = true;
+        else if (failureArmed)
+            ContentFailure.Restart?.Invoke();
+
+        return true;
+    }
+
+    private Texture2D CreateFailurePanel()
+    {
+        var panel = new Texture2D(this.GraphicsDevice, 1, 1);
+        panel.SetData(new[] { Color.White });
+        return panel;
     }
 }

@@ -5,9 +5,6 @@ internal partial class AppMain
     // nnfmaterialdxg20.h aliases every NND_*_STDSHADER_* constant straight onto that platform's D3D
     // macro, so a material exports whatever the building platform's header said. Xbox 360's render
     // state enums are not D3D9's, and a big-endian DXG20 file is Xenon by construction.
-    //
-    // Measured, not assumed. See docs/xenon-render-state.md for the harvest and its coverage; an
-    // unmapped value throws rather than translating to something plausible.
     private static ushort mppXenonValue(ushort value, ushort[] table, string name)
     {
         if (value >= table.Length || table[value] == 0)

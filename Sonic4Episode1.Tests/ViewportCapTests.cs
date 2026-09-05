@@ -2,8 +2,6 @@ using Xunit;
 
 namespace Sonic4Episode1.Tests;
 
-// The game renders Hor+ up to an aspect cap and pillarboxes beyond it, so that a very wide display
-// does not reveal unbounded amounts of unauthored level. See docs/camera-view-extent.md.
 public class ViewportCapTests
 {
     [Theory]
@@ -41,7 +39,6 @@ public class ViewportCapTests
         Assert.Equal(AppMain.mppAspectCap, vp.Width / (float)vp.Height, 2);
     }
 
-    // the bars are equal, so the drawn area is centred rather than drifting to one side
     [Fact]
     public void TheBarsAreBalanced()
     {

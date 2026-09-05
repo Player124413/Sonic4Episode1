@@ -826,34 +826,18 @@ uniform float4x4				u_TextureMatrix[NND_OPT_MAX_TEXMAP];
 uniform float					u_NormalScale;
 #endif
 
-#ifdef NND_FLAT_UNIFORM_STRUCTS
-NND_FLAT_FRONT_MATERIAL(u_FrontMaterial);
-#else
 uniform MATERIAL_PARAMETERS		u_FrontMaterial;
-#endif
 
 #if NND_PROF_MAX_LIGHT
-#ifdef NND_FLAT_UNIFORM_STRUCTS
-NND_FLAT_LIGHT_SOURCE(u_LightSource);
-#else
 uniform LIGHT_SOURCE_PARAMETERS u_LightSource [NND_PROF_MAX_LIGHT];
-#endif
 #endif
 
 #if !( NND_OPT_FRAG_LIGHTING ) && NND_OPT_LIGHTING
-#ifdef NND_FLAT_UNIFORM_STRUCTS
-NND_FLAT_LIGHT_MODEL(u_FrontLightModelProduct);
-#else
 uniform LIGHT_MODEL_PRODUCTS	u_FrontLightModelProduct;
-#endif
 #endif
 
 #if ( !( NND_PROF_FRAG_FOG ) && ( NND_PROF_FOG_MODEL ) )
-#ifdef NND_FLAT_UNIFORM_STRUCTS
-NND_FLAT_FOG(u_Fog);
-#else
 uniform	FOG_PARAMETERS			u_Fog;
-#endif
 #endif
 
 /*------ Fixed Variable ( GL User-define ) --------------------------------*/

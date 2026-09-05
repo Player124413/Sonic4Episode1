@@ -34,7 +34,7 @@ public class MemberVariantTests
             AppMain.amFsResolveAs("DEMO/LOADING/D_LOADING.AMB", AppMain.AMD_FS_VARIANT_CONSOLE));
     }
 
-    // the splice pairs the sibling's members with these positionally, so the order is load-bearing
+    // the splice pairs the sibling's members with these positionally, so the order matters
     [Fact]
     public void DeclaredIndicesComeBackAscending()
     {
@@ -63,6 +63,22 @@ public class MemberVariantTests
         Assert.True(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, Cpit, 44, 45));
         Assert.False(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, Cpit, 44, 46));
         Assert.False(AppMain.amFsAllMemberVariant(AppMain.AMD_FS_VARIANT_CONSOLE, "G_COM/CPIT/OTHER.AMB", 44));
+    }
+
+    // a member sibling resolves through the same tier walk as a whole archive, so pc members can
+    // sit over a console archive. A whole-archive line says nothing about siblings
+    [Fact]
+    public void MemberSiblingsResolveBestTierFirst()
+    {
+        Load(Cpit + " console", Cpit + "#30 pc", Cpit + "#31 pc", Cpit + "#44 console");
+        Assert.Equal(AppMain.AMD_FS_VARIANT_PC, AppMain.amFsMemberVariantResolved(Cpit));
+        Assert.Equal(new[] { 30, 31 }, AppMain.amFsMemberVariantIndices(Cpit, AppMain.AMD_FS_VARIANT_PC));
+
+        Load(Cpit + "#44 console");
+        Assert.Equal(AppMain.AMD_FS_VARIANT_CONSOLE, AppMain.amFsMemberVariantResolved(Cpit));
+
+        Load(Cpit + " console");
+        Assert.Null(AppMain.amFsMemberVariantResolved(Cpit));
     }
 
     // moving an archive from `members` to `archives` must not change what a screen sees, or the
@@ -99,7 +115,6 @@ public class MemberVariantTests
         return Archive(bigEndian: false, members);
     }
 
-    // splices `sibling` over `header` the way phase 1 of the background read does
     private static void Splice(
         AppMain.AMS_AMB_HEADER header, AppMain.AMS_AMB_HEADER sibling, params int[] indices)
     {

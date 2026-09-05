@@ -369,3 +369,5 @@ Shaders/mgfx/mojoshader-cmake4.patch
 /Shaders/mgfx
 /Shaders/MonoGame
 /Shaders
+/Sonic4Episode1.Wasm/wwwroot/sets
+/docs

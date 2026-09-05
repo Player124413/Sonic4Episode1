@@ -299,7 +299,7 @@ internal partial class AppMain
         return gmDecoInitModelMotioinMaterial(dec_rec, x, y, type).obj_work;
     }
 
-    // the glare quads, gmDeco.cpp:4864. Mobile has no glare subsystem at all.
+    // the glare quads; mobile has no glare subsystem at all, hence the null branch
     private static OBS_OBJECT_WORK GmDecoInitPrimitive3D(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
@@ -311,9 +311,8 @@ internal partial class AppMain
             : null;
     }
 
-    // the sunflowers and the log, which react to the player running past. The mobile arm is
-    // GMD_DECO_USE_DRAW_TVX_NOMOTION at gmDeco.cpp:4744: degrade to a static model, because the
-    // mobile MTN archive is empty. Not a slip, do not "fix" it.
+    // the sunflowers and the log, which react to the player running past. the mobile arm degrades
+    // to a static model because the mobile MTN archive is empty - not a slip, don't "fix" it
     private static OBS_OBJECT_WORK GmDecoInitModelMotionTouch(
       GMS_EVE_RECORD_DECORATE dec_rec,
       int x,
@@ -333,8 +332,8 @@ internal partial class AppMain
     {
         GMS_DECO_WORK gmsDecoWork = gmDecoInitFall(dec_rec, x, y, type);
 
-        // the registration is draw server bookkeeping, gmDeco.cpp:4907, and nothing reads it on
-        // console because gmDecoDrawServerMain does not exist there
+        // the registration is draw server bookkeeping; nothing reads it on console because
+        // gmDecoDrawServerMain does not exist there
         if (!gm_deco_as_model)
         {
             OBS_OBJECT_WORK objWork = gmsDecoWork.obj_work;
@@ -392,14 +391,7 @@ internal partial class AppMain
         if (deco_work == null)
             return null;
         ((OBS_OBJECT_WORK)deco_work).flag &= 4294967293U;
-        int id = dec_rec.id;
-        short num1 = g_gm_deco_rect_size[id][0];
-        short num2 = g_gm_deco_rect_size[id][1];
-        short left = (short)(-num1 / 2);
-        short top = (short)(-num2 / 2);
-        short right = (short)(num1 / 2);
-        short bottom = (short)(num2 / 2);
-        gmDecoSetRect(deco_work, left, top, -500, right, bottom, 500, g_gm_deco_func_rect[id]);
+        gmDecoSetTouchRect(deco_work, dec_rec.id);
         return (OBS_OBJECT_WORK)deco_work;
     }
 
@@ -471,8 +463,8 @@ internal partial class AppMain
                 tex_amb.dir = sPath;
                 info.obj_3d_list = GmGameDBuildRegBuildModel(mdl_amb, tex_amb, 0);
 
-                // gmDeco.cpp:4405, zone types 1 to 3. The glare texture is named by the same
-                // archive's TXB, so it shares the header rather than reading it again
+                // zone types 1 to 3; the glare texture is named by the same archive's TXB, so it
+                // shares the header rather than reading it again
                 if (zone_type <= GSD_MAIN_ZONE_TYPE_3)
                     GmDecoGlareSetData(tex_amb);
             }
@@ -495,9 +487,9 @@ internal partial class AppMain
         fall_tex_amb.dir = sPath;
         gmDecoLoadFallBaseTexture(header, fall_tex_amb);
 
-        // gmDeco.cpp:4396. Measured with viewer --deco-shaders: the console fall materials are
-        // user profile 1, and their permutation is only built with the sampler bit. Without it the
-        // key comes back unbuilt, so this is not optional on console the way it is on mobile.
+        // measured with viewer --deco-shaders: the console fall materials are user profile 1, and
+        // their permutation is only built with the sampler bit; without it the key comes back
+        // unbuilt, so this is not optional on console the way it is on mobile
         uint fall_flag_ex = gm_deco_as_model ? NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 : 0;
         info.obj_3d_list_fall = GmGameDBuildRegBuildModel(fall_mdl_amb, fall_tex_amb, 0, fall_flag_ex);
     }
@@ -734,9 +726,9 @@ internal partial class AppMain
                 obsActioN3DNnWorkArray = info.obj_3d_list_fall;
                 break;
 
-            // the glare and the effects have no model of their own. gmDeco.cpp:5313 and :5502 list
-            // them out; they never reach here anyway, since g_gm_decorate_tbl sends them to
-            // GmDecoInitPrimitive3D and the GmDecoInitEffect family instead
+            // the glare and the effects have no model of their own; they never reach here anyway,
+            // since g_gm_decorate_tbl sends them to GmDecoInitPrimitive3D and the GmDecoInitEffect
+            // family instead
             case 14:
             case 15:
             case 16:
@@ -1028,11 +1020,11 @@ internal partial class AppMain
                 target = gmDecoGetRenderWorkFront();
                 if (target == null)
                 {
-                    // The C++ takes _gm_mapFar_render_work directly here, which only works on
-                    // PC because the sea already switched the bound target away from it earlier
-                    // in the frame (gmMapFar.cpp:4296). That user func is not registered in this
-                    // port, so pick whichever target we are not rendering into, as zone 3 does -
-                    // otherwise the copy is a self-copy and the shader samples its own output.
+                    // the C++ takes _gm_mapFar_render_work directly here, which only works on PC
+                    // because the sea already switched the bound target away from it earlier in
+                    // the frame. that user func is not registered in this port, so pick whichever
+                    // target we are not rendering into, as zone 3 does - otherwise the copy is a
+                    // self-copy and the shader samples its own output
                     target = _am_render_manager.targetp != _gm_mapFar_render_work
                         ? _gm_mapFar_render_work
                         : _am_draw_target;
@@ -1095,9 +1087,9 @@ internal partial class AppMain
         return target;
     }
 
-    // gmDeco.cpp:6589. The _PC | _XBOX arm is mppBindFallShaderUserSampler verbatim, which is why
-    // that helper lives in GmMap and is shared. The mobile arm has no fall shader at all, so there
-    // the target is only recorded and gmDecoFallMaterialCallback binds a standalone effect instead.
+    // the console arm is mppBindFallShaderUserSampler verbatim, which is why that helper lives in
+    // GmMap and is shared. the mobile arm has no fall shader at all, so there the target is only
+    // recorded and gmDecoFallMaterialCallback binds a standalone effect instead
     private static void gmDecoDrawFallRender(
       AMS_RENDER_TARGET render_target,
       NNS_MATRIX proj_mtx)
@@ -1188,25 +1180,24 @@ internal partial class AppMain
         gmDecoDraw(obj_work);
     }
 
-    // _PC sets NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 and lets NN pick the shader (gmDeco.cpp:6700);
-    // the _WII arm below it uses a callback and a standalone effect, which is the mobile route.
-    // The callback assumes the material carries only the artwork, which is true of mobile's fall
-    // material and false of console's, so it must not run on console data.
+    // console sets NND_DRAWOBJ_MATCTRL_USERSAMPLER2D1 and lets NN pick the shader; the mobile
+    // route uses a callback and a standalone effect instead. the callback assumes the material
+    // carries only the artwork, which is true of mobile's fall material and false of console's,
+    // so it must not run on console data
     private static void gmDecoSetFallMaterialCallback(OBS_OBJECT_WORK obj_work)
     {
         obj_work.obj_3d.material_cb_func = gm_deco_as_model ? null : _gmDecoFallMaterialCallback;
         obj_work.obj_3d.material_cb_param = null;
     }
 
-    // GMD_DECO_USE_DRAW_SERVER is (1 & (_IPHONE | _PC)), so it is on for mobile and PC and OFF for
-    // Xbox. g_gm_deco_func_out forks on it at gmDeco.cpp:2741, :2754, :2774 and :2788: the draw
-    // server route registers a fall into g_deco_fall_manager and draws every registration as one
-    // scrolling primitive strip, where the console route draws each fall as its own NN model
-    // through the fall shader. Our table is the draw server arm, so these eight swap back.
+    // GMD_DECO_USE_DRAW_SERVER is on for mobile and PC, off for Xbox: the draw server route
+    // registers a fall into g_deco_fall_manager and draws every registration as one scrolling
+    // primitive strip, where the console route draws each fall as its own NN model through the
+    // fall shader. our table is the draw server arm, so these eight swap back.
     //
-    // It matters for what the strip is textured with as much as for the shader. The strip takes
+    // it matters for what the strip is textured with as much as for the shader: the strip takes
     // texlist->nTex - 1, the last texture the fall model names, which is the artwork on mobile
-    // because mobile names exactly one and Z1_fall_add2 on console because console names three.
+    // (names exactly one) and Z1_fall_add2 on console (names three)
     private static MPP_VOID_OBS_OBJECT_WORK gmDecoOutFunc(int id)
     {
         if (!gm_deco_as_model)
@@ -1237,9 +1228,8 @@ internal partial class AppMain
     private static readonly MPP_VOID_OBS_OBJECT_WORK _gmDecoDrawFallBack =
         new MPP_VOID_OBS_OBJECT_WORK(gmDecoDrawFallBack);
 
-    // gmDeco.cpp:3869 ships two tables; console's is ours with the buckets it has no slot for
-    // collapsed onto 3DNN. Checked positionally across all 184 entries, so it is a remap rather
-    // than a second table.
+    // console's original table is ours with the buckets it has no slot for collapsed onto 3DNN;
+    // checked positionally across all 184 entries, so this is a remap rather than a second table
     private static uint gmDecoCommandState(int id)
     {
         uint state = g_gm_deco_command_state[id];
@@ -1599,16 +1589,16 @@ internal partial class AppMain
       TaskWorkFactoryDelegate work_size)
     {
         int id = dec_rec.id;
-        if (((int)g_gm_deco_user_flag[id] & 1) != 0 && ((int)g_gs_main_sys_info.game_flag & 32) == 0)
+        if (((int)gmDecoUserFlag(id) & 1) != 0 && ((int)g_gs_main_sys_info.game_flag & 32) == 0)
         {
             dec_rec.pos_x = byte.MaxValue;
             return null;
         }
         GMS_DECO_WORK gmsDecoWork = gmDecoLoadObj(dec_rec, work_size, x, y, g_gm_deco_func_main[id], g_gm_deco_func_move[id], gmDecoOutFunc(id), g_gm_deco_func_dest[id]);
-        gmsDecoWork.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
+        gmsDecoWork.obj_work.disp_flag |= gmDecoDispFlag(id);
         gmsDecoWork.obj_work.user_work = g_gm_deco_user_work[id];
         gmsDecoWork.obj_work.user_timer = g_gm_deco_user_timer[id];
-        gmsDecoWork.obj_work.user_flag = g_gm_deco_user_flag[id];
+        gmsDecoWork.obj_work.user_flag = gmDecoUserFlag(id);
         gmsDecoWork.obj_work.flag |= 2U;
         if (((int)gmsDecoWork.obj_work.disp_flag & 1) != 0)
         {
@@ -1634,10 +1624,10 @@ internal partial class AppMain
         int id = dec_rec.id;
         int index1 = -1;
         TaskWorkFactoryDelegate work_size;
-        if (((int)g_gm_deco_user_flag[id] & 4) != 0)
+        if (((int)gmDecoUserFlag(id) & 4) != 0)
         {
             work_size = () => new GMS_DECO_SUBMODEL_WORK();
-            index1 = g_gm_deco_model_index[id][1];
+            index1 = gmDecoModelIndex(id, 1);
         }
         else
             work_size = () => new GMS_DECO_WORK();
@@ -1648,7 +1638,7 @@ internal partial class AppMain
         if (obj3Dlist == null)
         {
             deco_work.model_tex = gmDecoDataGetInfo().tvx_tex;
-            int num = g_gm_deco_model_index[id][0];
+            int num = gmDecoModelIndex(id, 0);
             deco_work.obj_3d.command_state = gmDecoCommandState(id);
             deco_work.model_index = num;
             if (index1 != -1)
@@ -1657,11 +1647,11 @@ internal partial class AppMain
                 decoSubmodelWork.obj_3d_sub.command_state = gmDecoCommandState(id);
                 decoSubmodelWork.sub_model_index = index1;
             }
-            deco_work.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
+            deco_work.obj_work.disp_flag |= gmDecoDispFlag(id);
         }
         else
         {
-            int index2 = g_gm_deco_model_index[id][0];
+            int index2 = gmDecoModelIndex(id, 0);
             if (index2 != -1)
             {
                 gmDecoLoadModel(deco_work, obj3Dlist[index2]);
@@ -1670,7 +1660,7 @@ internal partial class AppMain
                 // authored quarter turn about Z. Only the PC-era decoration ids set this bit, which
                 // is why nothing needed it before: it is what stands half of the card stage's dice
                 // and cards on their side
-                if (((int)g_gm_deco_user_flag[id] & 0x800) != 0)
+                if (((int)gmDecoUserFlag(id) & 0x800) != 0)
                     deco_work.obj_work.dir.z = 0x4000;
             }
             if (index1 != -1)
@@ -1678,14 +1668,14 @@ internal partial class AppMain
                 GMS_DECO_SUBMODEL_WORK decoSubmodelWork = (GMS_DECO_SUBMODEL_WORK)deco_work;
                 ObjCopyAction3dNNModel(obj3Dlist[index1], decoSubmodelWork.obj_3d_sub);
                 decoSubmodelWork.obj_3d_sub.drawflag |= 32U;
-                if (((int)g_gm_deco_user_flag[id] & 128) != 0)
+                if (((int)gmDecoUserFlag(id) & 128) != 0)
                 {
                     decoSubmodelWork.obj_3d_sub.use_light_flag &= 4294967294U;
                     decoSubmodelWork.obj_3d_sub.use_light_flag |= 4U;
                 }
                 decoSubmodelWork.obj_3d_sub.command_state = gmDecoCommandState(id);
             }
-            deco_work.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
+            deco_work.obj_work.disp_flag |= gmDecoDispFlag(id);
             if (((int)deco_work.obj_work.disp_flag & 1) != 0)
             {
                 deco_work.obj_work.scale.x = -4096;
@@ -1705,7 +1695,7 @@ internal partial class AppMain
     {
         int id = deco_work.event_record.id;
         AMS_AMB_HEADER motionHeader = gmDecoDataGetMotionHeader(id);
-        int motion_index = g_gm_deco_node_motion_index[id][0];
+        int motion_index = gmDecoNodeMotionIndex(id, 0);
         if (motion_index != -1)
         {
             gmDecoLoadMotion(deco_work, motion_index, motionHeader);
@@ -1714,9 +1704,9 @@ internal partial class AppMain
             ObjDrawObjectActionSet(objWork, 0);
             objWork.disp_flag = dispFlag;
         }
-        if (((int)g_gm_deco_user_flag[id] & 4) == 0)
+        if (((int)gmDecoUserFlag(id) & 4) == 0)
             return;
-        int index = g_gm_deco_node_motion_index[id][1];
+        int index = gmDecoNodeMotionIndex(id, 1);
         if (index == -1)
             return;
         ObjAction3dNNMotionLoad(((GMS_DECO_SUBMODEL_WORK)deco_work).obj_3d_sub, 0, false, null, null, index, motionHeader);
@@ -1745,14 +1735,7 @@ internal partial class AppMain
         if (deco_work == null)
             return null;
         ((OBS_OBJECT_WORK)deco_work).flag &= 4294967293U;
-        int id = dec_rec.id;
-        short num1 = g_gm_deco_rect_size[id][0];
-        short num2 = g_gm_deco_rect_size[id][1];
-        short left = (short)(-num1 / 2);
-        short top = (short)(-num2 / 2);
-        short right = (short)(num1 / 2);
-        short bottom = (short)(num2 / 2);
-        gmDecoSetRect(deco_work, left, top, -500, right, bottom, 500, g_gm_deco_func_rect[id]);
+        gmDecoSetTouchRect(deco_work, dec_rec.id);
         return deco_work;
     }
 
@@ -1769,7 +1752,7 @@ internal partial class AppMain
             ObjDrawObjectActionSet3DNNMaterial(objWork, 0);
             objWork.disp_flag = dispFlag;
         }
-        if (((int)g_gm_deco_user_flag[id] & 4) == 0)
+        if (((int)gmDecoUserFlag(id) & 4) == 0)
             return;
         int index = g_gm_deco_mat_motion_index[id][1];
         if (index == -1)
@@ -1815,8 +1798,8 @@ internal partial class AppMain
             return null;
         ((OBS_OBJECT_WORK)deco_work).flag &= 4294967293U;
         int id = dec_rec.id;
-        short num1 = g_gm_deco_rect_size[id][0];
-        short num2 = g_gm_deco_rect_size[id][1];
+        short num1 = gmDecoRectSize(id, 0);
+        short num2 = gmDecoRectSize(id, 1);
         short left = (short)(-num1 / 2);
         short top = (short)(-num2 / 2);
         short right = (short)(num1 / 2);
@@ -1883,7 +1866,7 @@ internal partial class AppMain
         if (gmsDecoWork == null)
             return null;
         int id = dec_rec.id;
-        int efct_zone_idx = g_gm_deco_model_index[id][1];
+        int efct_zone_idx = gmDecoModelIndex(id, 1);
         int zone_no = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_EFFECT_3DES_WORK gmsEffect3DesWork = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx);
         gmsEffect3DesWork.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
@@ -1907,7 +1890,7 @@ internal partial class AppMain
         GMS_DECO_WORK gmsDecoWork = gmDecoInitNomodel(dec_rec, x, y, type, () => new GMS_DECO_WORK());
         if (gmsDecoWork == null)
             return null;
-        gmsDecoWork.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
+        gmsDecoWork.obj_work.disp_flag |= gmDecoDispFlag(id);
         return gmsDecoWork;
     }
 
@@ -1935,12 +1918,12 @@ internal partial class AppMain
         GMS_DECO_WORK gmsDecoWork = gmDecoInitNomodel(dec_rec, x, y, type, () => new GMS_DECO_WORK());
         if (gmsDecoWork == null)
             return null;
-        int efct_zone_idx = g_gm_deco_model_index[id][0];
+        int efct_zone_idx = gmDecoModelIndex(id, 0);
         int zone_no = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_EFFECT_3DES_WORK gmsEffect3DesWork = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx);
         gmsEffect3DesWork.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
-        gmsEffect3DesWork.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
-        int num1 = (int)gmsEffect3DesWork.efct_com.obj_work.user_flag | (int)g_gm_deco_user_flag[id];
+        gmsEffect3DesWork.efct_com.obj_work.disp_flag |= gmDecoDispFlag(id);
+        int num1 = (int)gmsEffect3DesWork.efct_com.obj_work.user_flag | (int)gmDecoUserFlag(id);
         gmsEffect3DesWork.efct_com.obj_work.user_flag = (uint)num1;
         int num2 = (int)gmsEffect3DesWork.efct_com.obj_work.user_work | (int)g_gm_deco_user_work[id];
         gmsEffect3DesWork.efct_com.obj_work.user_work = (uint)num2;
@@ -1965,12 +1948,12 @@ internal partial class AppMain
         GMS_DECO_WORK gmsDecoWork = gmDecoInitNomodel(dec_rec, x1, y1, type, () => new GMS_DECO_WORK());
         if (gmsDecoWork == null)
             return null;
-        int efct_zone_idx = g_gm_deco_model_index[id][0];
+        int efct_zone_idx = gmDecoModelIndex(id, 0);
         int zone_no = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_EFFECT_3DES_WORK efct_3des = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx);
         efct_3des.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
-        efct_3des.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
-        efct_3des.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
+        efct_3des.efct_com.obj_work.disp_flag |= gmDecoDispFlag(id);
+        efct_3des.efct_com.obj_work.user_flag |= gmDecoUserFlag(id);
         efct_3des.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
         efct_3des.obj_3des.command_state = gmDecoCommandState(id);
         efct_3des.efct_com.obj_work.user_flag |= gmsDecoWork.obj_work.user_flag;
@@ -1979,7 +1962,7 @@ internal partial class AppMain
             efct_3des.efct_com.obj_work.ppFunc = gmsDecoWork.obj_work.ppFunc;
             gmsDecoWork.obj_work.ppFunc = null;
         }
-        if (((int)g_gm_deco_user_flag[id] & 256) != 0)
+        if (((int)gmDecoUserFlag(id) & 256) != 0)
         {
             int num1 = (int)g_gm_deco_user_work[id] << 16 >> 16;
             int num2 = (int)g_gm_deco_user_work[id] >> 16;
@@ -2000,18 +1983,18 @@ internal partial class AppMain
         GMS_DECO_WORK gmsDecoWork = gmDecoInitNomodel(dec_rec, x1, y1, type, () => new GMS_DECO_WORK());
         if (gmsDecoWork == null)
             return null;
-        int efct_zone_idx = g_gm_deco_model_index[id][0];
+        int efct_zone_idx = gmDecoModelIndex(id, 0);
         int zone_no = g_gm_gamedat_zone_type_tbl[g_gs_main_sys_info.stage_id];
         GMS_EFFECT_3DES_WORK gmsEffect3DesWork1 = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx);
         gmsEffect3DesWork1.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
-        gmsEffect3DesWork1.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
-        gmsEffect3DesWork1.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
+        gmsEffect3DesWork1.efct_com.obj_work.disp_flag |= gmDecoDispFlag(id);
+        gmsEffect3DesWork1.efct_com.obj_work.user_flag |= gmDecoUserFlag(id);
         gmsEffect3DesWork1.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
         gmsEffect3DesWork1.obj_3des.command_state = gmDecoCommandState(id);
         GMS_EFFECT_3DES_WORK gmsEffect3DesWork2 = GmEfctZoneEsCreate(gmsDecoWork.obj_work, zone_no, efct_zone_idx + 1);
         gmsEffect3DesWork2.efct_com.obj_work.dir.z = g_gm_deco_rot_z[dec_rec.id];
-        gmsEffect3DesWork2.efct_com.obj_work.disp_flag |= g_gm_deco_disp_flag[id];
-        gmsEffect3DesWork2.efct_com.obj_work.user_flag |= g_gm_deco_user_flag[id];
+        gmsEffect3DesWork2.efct_com.obj_work.disp_flag |= gmDecoDispFlag(id);
+        gmsEffect3DesWork2.efct_com.obj_work.user_flag |= gmDecoUserFlag(id);
         gmsEffect3DesWork2.efct_com.obj_work.user_work |= g_gm_deco_user_work[id];
         gmsEffect3DesWork2.obj_3des.command_state = gmDecoCommandState(id);
         if (gmsDecoWork.obj_work.ppFunc != null)

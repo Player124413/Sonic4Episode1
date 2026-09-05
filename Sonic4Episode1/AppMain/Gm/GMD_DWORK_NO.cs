@@ -42,6 +42,13 @@
     public const int GMD_DWORK_NO_EFFECT_ZONE_AME_START = 511;
     public const int GMD_DWORK_NO_EFFECT_ZONE_AME_00 = 511;
     public const int GMD_DWORK_NO_EFFECT_ZONE_AME_END = 581;
+
+    // zone 2 does not fit the extent above. PC's EFF_ZONE2 holds 8 anims where mobile holds 2, and
+    // growing 511..581 in place would move 419 ids plus the raw numbers the load tables pass, so
+    // zone 2 sits past the end and every other zone keeps its numbering
+    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_START = 1012;
+    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_END = 1019;
+
     public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START = 582;
     public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_END = 583;
     public const int GMD_DWORK_NO_EFFECT_ZONE_OBJECT_START = 584;
@@ -464,5 +471,5 @@
     public const int GMD_DWORK_NO_GMK_END = 1011;
     public const int GMD_DWORK_NO_DEC_START = 1011;
     public const int GMD_DWORK_NO_DEC_END = 1012;
-    public const int GMD_DWORK_NO_MAX = 1012;
+    public const int GMD_DWORK_NO_MAX = 1020;
 }

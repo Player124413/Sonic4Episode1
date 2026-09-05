@@ -9,7 +9,7 @@ namespace Sonic4Episode1.Tests;
 
 // The background is a nested #AMB whose member order differs per zone, which is why gmMapFarBuildData
 // has six builders. These pin the table that dispatch implies, and that the viewer reads the archive
-// name out of gm_gamedat_tbl_map_info_tbl rather than formatting it. See docs/map-far.md.
+// name out of gm_gamedat_tbl_map_info_tbl rather than formatting it.
 public class StageMapFarTests
 {
     private static byte[] Chunk(uint header, bool bigEndian, int length = 64)
@@ -120,7 +120,6 @@ public class StageMapFarTests
         Assert.Null(far.Motions);
     }
 
-    // zone 2 is the odd one out: its textures are member 3 and it is the only zone with node motion
     [Fact]
     public void ZoneTwoTakesItsTexturesFromMemberThreeAndHasMotions()
     {

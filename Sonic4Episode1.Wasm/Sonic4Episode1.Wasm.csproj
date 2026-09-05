@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 	<PropertyGroup>
-		<TargetFramework>net11.0-browser</TargetFramework>
+		<TargetFrameworks>net11.0-browser</TargetFrameworks>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>TRACE;FNA;AOT;WASM;ASYNC_IO;BGM_STREAM;</DefineConstants>
@@ -20,7 +20,7 @@
     <BlazorWebAssemblyJiterpreter>false</BlazorWebAssemblyJiterpreter>
     
     <EmccLinkOptimizationFlag>-Oz</EmccLinkOptimizationFlag>
-    <EmccExtraLDFlags>-sFULL_ES3 -Oz -lidbfs.js</EmccExtraLDFlags>
+    <EmccExtraLDFlags>-sFULL_ES3 -Oz</EmccExtraLDFlags>
     <EmccInitialHeapSize>268435456</EmccInitialHeapSize>
     
     <WasmNativeDebugSymbols>false</WasmNativeDebugSymbols>
@@ -35,7 +35,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <InvariantTimezone>true</InvariantTimezone>
 
-    <OptimizationPreference>Size</OptimizationPreference>
+    <!--<OptimizationPreference>Size</OptimizationPreference>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
 
     <DebuggerSupport>false</DebuggerSupport>
@@ -49,7 +49,7 @@
     <MetricsSupport>false</MetricsSupport>
     <UseSizeOptimizedLinq>true</UseSizeOptimizedLinq>
     <XmlResolverIsNetworkingEnabledByDefault>false</XmlResolverIsNetworkingEnabledByDefault>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>-->
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -60,7 +60,6 @@
 		<!--<EmccExportedRuntimeMethod Include="SDL" />-->
 		<!--<EmccExportedRuntimeMethod Include="GL" />-->
 		<EmccExportedRuntimeMethod Include="FS" />
-		<EmccExportedRuntimeMethod Include="IDBFS" />
 		<!--<EmccExportedRuntimeMethod Include="setMainLoop" />-->
 		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
 	</ItemGroup>
@@ -68,9 +67,12 @@
 	<ItemGroup>
 		<HostJsSource Include="lib\host\src\**\*.ts;lib\host\_framework\**\*.ts;lib\host\package.json;lib\host\pnpm-lock.yaml;lib\host\tsconfig.json;lib\host\build.mjs" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Compile Remove="Stubs.cs" />
+	</ItemGroup>
 
-	<Target Name="BuildHostJs" BeforeTargets="ResolveProjectStaticWebAssets;BeforeBuild"
-			Inputs="@(HostJsSource)" Outputs="wwwroot\js\index.js">
+	<Target Name="BuildHostJs" BeforeTargets="ResolveProjectStaticWebAssets;BeforeBuild" Inputs="@(HostJsSource)" Outputs="wwwroot\js\index.js">
 		<Exec Command="pnpm install --frozen-lockfile" WorkingDirectory="$(MSBuildProjectDirectory)\lib\host" />
 		<Exec Command="pnpm run build" WorkingDirectory="$(MSBuildProjectDirectory)\lib\host" />
 	</Target>

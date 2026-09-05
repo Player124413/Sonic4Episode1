@@ -8,9 +8,6 @@ internal static partial class DmLoading
     private const int DATA_TYPE_NUM = (int)DME_LOADING_DATA_TYPE_MAX;
     private const int ACT_COUNT = (int)ACT_NUM;
 
-    // D_LOAD.AMA declares nine actions and this is those minus ACT_STOP. shared rather than
-    // per-variant: the dump has no file/iPhone/ace/D_LOAD.HMA, only file/common, and dmLoading.cpp
-    // has no platform #ifdef. see docs/startup-screen-variants.md
     private static readonly uint[] dm_act_id_tbl =
     [
         IDA_D_LOAD_ACT_BG_WHITE,

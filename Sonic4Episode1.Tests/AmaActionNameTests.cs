@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
+[Collection(AmaReaderCollection.Name)]
 public class AmaActionNameTests
 {
     private static AppMain.A2S_AMA_HEADER Read(string fixture)
@@ -130,7 +131,7 @@ public class AmaActionNameTests
     }
 
     // reading a big-endian header the wrong way round gives act_num 0x09000000, which sized act_tbl
-    // straight to roughly a gigabyte. see docs/amb-archives.md
+    // straight to roughly a gigabyte
     [Fact]
     public void DoesNotSizeTablesFromAMisreadHeader()
     {
@@ -140,7 +141,7 @@ public class AmaActionNameTests
     // G_PAUSE.AMA and G_PAUSE_L.AMA are the only loose .AMA files in the game, and the console ones
     // are big-endian with nothing around them to say so: readAMAFile(string) has no container and
     // passes bigEndian false. Detection is the only thing standing between the console pause menu
-    // and a gigabyte-sized act_tbl. see docs/pause-action-ids.md
+    // and a gigabyte-sized act_tbl
     [Fact]
     public void TheConsolePauseFilesReadWithoutAContainerToAskAboutByteOrder()
     {

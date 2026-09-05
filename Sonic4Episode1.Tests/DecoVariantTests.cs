@@ -2,11 +2,6 @@ using System.IO;
 
 namespace Sonic4Episode1.Tests;
 
-// Decorations ship as their own amFsAllVariant group, separate from the map's. Console draws an NN
-// model per decoration; mobile draws baked TVX sprites. The property that matters is that the two
-// gates move independently, so a missing sibling on one side cannot drag the other back.
-// See docs/console-deco.md.
-//
 // amFsLoadVariants replaces a process-wide static, so this runs in the shared collection.
 [Collection(FsVariantCollection.Name)]
 public class DecoVariantTests
@@ -45,7 +40,6 @@ public class DecoVariantTests
         Assert.True(AppMain.gmDecoIsConsoleDataComplete(Stage1_Boss));
     }
 
-    // the whole reason for a second gate: declaring one does not move the other
     [Fact]
     public void DecoAndMapResolveIndependently()
     {
@@ -64,10 +58,30 @@ public class DecoVariantTests
         Load();
 
         Assert.False(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
+        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage1_1));
     }
 
-    // zone 4 loads its own DECO_ZONE4, so declaring zone 1's does not reach it. This is the
-    // decoration twin of the ZONE1_MAPFAR trap that made the map arm pin its loads.
+    [Fact]
+    public void ConsoleGradeDoesNotImplyThePcTier()
+    {
+        Load(Zone1Deco + " console");
+        Assert.True(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
+        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage1_1));
+
+        Load(Zone1Deco + " console", Zone1Deco + " pc");
+        Assert.True(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
+        Assert.True(AppMain.gmDecoIsPcDataComplete(Stage1_1));
+    }
+
+    [Fact]
+    public void ZoneFourIsNotDraggedToThePcTierByZoneOne()
+    {
+        Load(Zone1Deco + " console", Zone1Deco + " pc");
+
+        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage4_1));
+    }
+
+    // zone 4 loads its own DECO_ZONE4, so declaring zone 1's does not reach it
     [Fact]
     public void ZoneFourIsUnaffectedByZoneOnesDeclaration()
     {
@@ -76,8 +90,7 @@ public class DecoVariantTests
         Assert.False(AppMain.gmDecoIsConsoleDataComplete(Stage4_1));
     }
 
-    // the special stages load no decorations at all, so "complete" has to be false rather than
-    // vacuously true
+    // special stages load no decorations, so "complete" must be false, not vacuously true
     [Fact]
     public void AStageWithNoDecorationsIsNotConsoleComplete()
     {

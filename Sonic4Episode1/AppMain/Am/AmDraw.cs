@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using mpp;
 
@@ -105,6 +106,7 @@ internal partial class AppMain
     private static Pool<NNS_TRS> amDraw_NNS_TRS_Pool;
     private static Pool<AOS_ACT_DRAW> amDraw_AOS_ACT_DRAW_Pool;
     private static Pool<NNS_OBJECT> amDraw_NNS_OBJECT_Pool;
+    private static Pool<AMS_SORT_DRAW_OBJECT_WORK> amDraw_AMS_SORT_DRAW_OBJECT_WORK_Pool;
 
     public static uint AMD_FCOLTORGBA8888(float r, float g, float b, float a)
     {
@@ -198,9 +200,12 @@ internal partial class AppMain
         set => _am_render_manager.target_now.aspect = value;
     }
 
+    // stands in for a memset stack local in the C++, so it has to come back zeroed
     private static AMS_PARAM_DRAW_PRIMITIVE amDrawAlloc_AMS_PARAM_DRAW_PRIMITIVE()
     {
-        return amDraw_AMS_PARAM_DRAW_PRIMITIVE_Pool.Alloc();
+        AMS_PARAM_DRAW_PRIMITIVE param = amDraw_AMS_PARAM_DRAW_PRIMITIVE_Pool.Alloc();
+        param.Clear();
+        return param;
     }
 
     private static NNS_MATRIX amDrawAlloc_NNS_MATRIX()
@@ -339,6 +344,11 @@ internal partial class AppMain
         return amDraw_NNS_OBJECT_Pool.Alloc();
     }
 
+    private static AMS_SORT_DRAW_OBJECT_WORK amDrawAlloc_AMS_SORT_DRAW_OBJECT_WORK()
+    {
+        return amDraw_AMS_SORT_DRAW_OBJECT_WORK_Pool.Alloc();
+    }
+
     private static void amDrawResetCache()
     {
         amDraw_AMS_PARAM_DRAW_PRIMITIVE_Pool.ReleaseUsedObjects();
@@ -359,6 +369,7 @@ internal partial class AppMain
         amDraw_NNS_TRS_Pool.ReleaseUsedObjects();
         amDraw_AOS_ACT_DRAW_Pool.ReleaseUsedObjects();
         amDraw_NNS_OBJECT_Pool.ReleaseUsedObjects();
+        amDraw_AMS_SORT_DRAW_OBJECT_WORK_Pool.ReleaseUsedObjects();
         amDraw_NNS_TRS_Array_Pool.ReleaseUsedArrays();
         amDraw_GMS_BS_CMN_CNM_NODE_INFO_Array_Pool.ReleaseUsedArrays();
         amDraw_GMS_BS_CMN_CNM_NODE_INFO_Pool.ReleaseUsedObjects();
@@ -427,9 +438,7 @@ internal partial class AppMain
         return true;
     }
 
-    // Split out of amDrawBegin so a target switch can clear too. In the retail binary the flag is
-    // handed straight to IDirect3DDevice9::Clear, and amRenderSetTarget drops out of the scene
-    // before rebinding, which is what lets this fire on every switch (0x467580 -> 0x452AF0).
+    // split out of amDrawBegin so a target switch can clear too
     private static void amRenderClear(uint flag, NNS_RGBA_U8 color, float depth)
     {
         if (flag == 0U || _am_draw_in_scene != 0)
@@ -554,7 +563,7 @@ internal partial class AppMain
         if (target == null)
             target = amsRenderTarget;
         if (target != null && target.target != null)
-            OpenGL.mppglBlit(target.target, _am_render_default.width, _am_render_default.height);
+            OpenGL.mppglBlit(target.target, mppViewport);
         _am_draw_offset_x = 0;
 
     }
@@ -1047,11 +1056,8 @@ internal partial class AppMain
     {
         AMS_PARAM_DRAW_PRIMITIVE paramDrawPrimitive = amDrawAlloc_AMS_PARAM_DRAW_PRIMITIVE();
         paramDrawPrimitive.Assign(setParam);
-        if (paramDrawPrimitive.mtx == null)
-        {
-            paramDrawPrimitive.mtx = amDraw_NNS_MATRIX_Pool.Alloc();
-            paramDrawPrimitive.mtx.Assign(amMatrixGetCurrent());
-        }
+        paramDrawPrimitive.mtx = amDraw_NNS_MATRIX_Pool.Alloc();
+        paramDrawPrimitive.mtx.Assign(amMatrixGetCurrent());
         amDrawRegistCommand(state, -14, paramDrawPrimitive);
     }
 
@@ -1407,13 +1413,59 @@ internal partial class AppMain
         if (amsParamDrawObject.texlist != null)
             nnSetTextureList(amsParamDrawObject.texlist);
         nnSetMaterialCallback(amsParamDrawObject.material_func);
+        uint immediate = amsParamDrawObject.sub_obj_type | NND_SUBOBJTYPE_RIGID | NND_SUBOBJTYPE_PLIABLE
+            | NND_SUBOBJTYPE_OPAQUE | NND_SUBOBJTYPE_PUNCHTHROUGH;
+        uint flag = amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag;
         if (command.command_id == -6)
-            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag, 0U, amsParamDrawObject.flag_ex);
+            nnDrawObject(amsParamDrawObject._object, pltMtx, nstat, immediate, flag, 0U, amsParamDrawObject.flag_ex);
         else
-            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, (uint)((int)amsParamDrawObject.sub_obj_type | 256 | 512 | 7), amsParamDrawObject.flag | drawflag | _am_draw_state.drawflag, amsParamDrawObject.flag_ex);
+            nnDrawMaterialMotionObject(amsParamDrawObject._object, pltMtx, nstat, immediate, flag, amsParamDrawObject.flag_ex);
         if (amsParamDrawObject.material_func != null)
             nnSetMaterialCallback(null);
+        _amDrawRegistSortObject(command, amsParamDrawObject, pltMtx, nNode, nstat, nnsMatrix.M23, drawflag);
         amMatrixPop();
+    }
+
+    private static void _amDrawRegistSortObject(
+      AMS_COMMAND_HEADER command,
+      AMS_PARAM_DRAW_OBJECT drawObject,
+      NNS_MATRIX[] plt_mtx,
+      int nNode,
+      uint[] nstat,
+      float view_z,
+      uint drawflag)
+    {
+        NNS_OBJECT _object = drawObject._object;
+        if ((_object.fType & NND_OBJTYPE_TRANSPARENT) == 0)
+            return;
+
+        AMS_SORT_DRAW_OBJECT_WORK work = amDrawAlloc_AMS_SORT_DRAW_OBJECT_WORK();
+        if (work.plt_mtx == null || work.plt_mtx.Length < nNode)
+        {
+            work.plt_mtx = new NNS_MATRIX[nNode];
+            for (int index = 0; index < nNode; ++index)
+                work.plt_mtx[index] = new NNS_MATRIX();
+        }
+        for (int index = 0; index < nNode; ++index)
+            work.plt_mtx[index].Assign(plt_mtx[index]);
+        if (work.nstat == null || work.nstat.Length < nNode)
+            work.nstat = new uint[nNode];
+        System.Array.Copy(nstat, work.nstat, nNode);
+        amDrawGetState(work.state);
+
+        AMS_PARAM_SORT_DRAW_OBJECT sort = work.param;
+        sort.drawflag = drawflag;
+        sort.draw_object = drawObject;
+        sort.mtx = work.plt_mtx;
+        sort.nstat_list = work.nstat;
+        sort.draw_state = work.state;
+
+        work.cmd_header.state = command.state;
+        work.cmd_header.command_id = command.command_id == -6
+            ? AMD_COMMAND_SORT_DRAW_OBJECT
+            : AMD_COMMAND_SORT_DRAW_OBJECT_MATMTN;
+        work.cmd_header.param = sort;
+        amDrawAddSort(work.cmd_header, (int)((_object.Radius * drawObject.scaleZ - view_z) * 100f));
     }
 
     private static void _amDrawObjectSetMaterial(AMS_COMMAND_HEADER command, uint drawflag)
@@ -1520,7 +1572,22 @@ internal partial class AppMain
 
     private static void _amDrawSortObject(AMS_COMMAND_HEADER command, uint drawflag)
     {
-        mppAssertNotImpl();
+        AMS_PARAM_SORT_DRAW_OBJECT paramSort = (AMS_PARAM_SORT_DRAW_OBJECT)command.param;
+        AMS_PARAM_DRAW_OBJECT drawObject = paramSort.draw_object;
+        if (drawObject.texlist != null)
+            nnSetTextureList(drawObject.texlist);
+        if (paramSort.draw_state != null)
+            amDrawSetState(paramSort.draw_state);
+        nnSetMaterialCallback(drawObject.material_func);
+        uint transparent = drawObject.sub_obj_type | NND_SUBOBJTYPE_RIGID | NND_SUBOBJTYPE_PLIABLE
+            | NND_SUBOBJTYPE_TRANSPARENT;
+        uint flag = drawObject.flag | paramSort.drawflag | _am_draw_state.drawflag;
+        if (command.command_id == AMD_COMMAND_SORT_DRAW_OBJECT)
+            nnDrawObject(drawObject._object, paramSort.mtx, paramSort.nstat_list, transparent, flag, 0U, drawObject.flag_ex);
+        else
+            nnDrawMaterialMotionObject(drawObject._object, paramSort.mtx, paramSort.nstat_list, transparent, flag, drawObject.flag_ex);
+        if (drawObject.material_func != null)
+            nnSetMaterialCallback(null);
     }
 
     private static NNS_MATRIX amDrawGetWorldViewMatrix()
@@ -2026,7 +2093,7 @@ internal partial class AppMain
         if (prev == target)
             return prev != _am_render_default ? prev : null;
 
-        // ends the scene before rebinding, the way the binary does, so the clear below can fire
+        // ends the scene before rebinding so the clear below can fire
         _am_draw_in_scene = 0;
 
         OpenGL.mppglSetRenderTarget(target.target);
@@ -2070,7 +2137,7 @@ internal partial class AppMain
             return;
 
         AMS_RENDER_TARGET prev = amRenderSetTarget(target);
-        OpenGL.mppglBlit(src.target, target.width, target.height);
+        OpenGL.mppglBlit(src.target, new Rectangle(0, 0, target.width, target.height));
         amRenderSetTarget(prev ?? _am_render_default);
     }
 }

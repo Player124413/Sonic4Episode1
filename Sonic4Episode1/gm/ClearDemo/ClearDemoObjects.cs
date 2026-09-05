@@ -48,6 +48,7 @@ internal static partial class GmClearDemo
         OBS_OBJECT_WORK work8 = GmCockpit.GMM_COCKPIT_CREATE_WORK(work_size, null, 0, "CLRDM_SONICICON2");
         main_work.sonic_icon_act2 = (GMS_COCKPIT_2D_WORK) work8;
         obsObjectWork = null;
+        gmClearDemoCreateObjNextPromptWork(main_work);
     }
 
     private static void gmClearDemoCreateObjActTime(GMS_CLRDM_MAIN_WORK main_work)
@@ -172,6 +173,7 @@ internal static partial class GmClearDemo
         OBS_OBJECT_WORK work10 = GmCockpit.GMM_COCKPIT_CREATE_WORK(work_size, null, 0, "CLRDM_SONICICON2");
         main_work.sonic_icon_act2 = (GMS_COCKPIT_2D_WORK) work10;
         obsObjectWork = null;
+        gmClearDemoCreateObjNextPromptWork(main_work);
     }
 
     private static void gmClearDemoCreateObjSpeTime(GMS_CLRDM_MAIN_WORK main_work)
@@ -282,6 +284,7 @@ internal static partial class GmClearDemo
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.sonic_icon_act, main_work.sonic_icon_act.obj_2d, null, null, 30, GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[0]), 17U, 0);
         ((OBS_OBJECT_WORK) main_work.sonic_icon_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.sonic_icon_act).scale.y = 4096;
+        gmClearDemoCreateObjNextPromptAct(main_work);
     }
 
     private static void gmClearDemoCreateObjNormalTimeAtk(GMS_CLRDM_MAIN_WORK main_work)
@@ -378,6 +381,7 @@ internal static partial class GmClearDemo
         ObjObjectAction2dAMALoadSetTexlist((OBS_OBJECT_WORK) main_work.tex_extend_act, main_work.tex_extend_act.obj_2d, null, null, g_gm_clear_demo_data_ama_id[gmClearDemoLanguage()], GmGameDatGetCockpitData(), AoTexGetTexList(main_work.tex[1]), 10U, 0);
         ((OBS_OBJECT_WORK) main_work.tex_extend_act).scale.x = 4096;
         ((OBS_OBJECT_WORK) main_work.tex_extend_act).scale.y = 4096;
+        gmClearDemoCreateObjNextPromptAct(main_work);
     }
 
     private static void gmClearDemoCreateObjSpecialTimeAtk(GMS_CLRDM_MAIN_WORK main_work)

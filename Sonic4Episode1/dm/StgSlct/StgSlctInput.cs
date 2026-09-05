@@ -10,9 +10,8 @@ internal static partial class StgSlct
 {
     // ---- shared between the console arms and, where the C++ leaves them unguarded, the mobile ones
 
-    // Picking the new zone is the pad's job only. The touch handlers have already assigned
-    // cur_zone and chng_zone by the time they reach the shared body, which is why the C++ keeps
-    // these two lines inside #if !_IPHONE and the rest outside it.
+    // picking the new zone is the pad's job only; touch handlers already set cur_zone/chng_zone
+    // before reaching the shared apply body below
     private static void dmStgSlctChangeZonePad(
         DMS_STGSLCT_MAIN_WORK main_work, DMS_STGSLCT_BOUNDS bounds, int diff)
     {
@@ -205,8 +204,8 @@ internal static partial class StgSlct
 
             if (zone[er.CTrgState.EState.Out])
             {
-                // SEGA's sentinel for "nothing highlighted". It is not ZONE_TYPE_NONE, so the
-                // restore below does not catch it, see docs/stgslct-port-quirks.md
+                // uint.MaxValue here is the sentinel for nothing highlighted; it's not
+                // ZONE_TYPE_NONE, so the restore check below does not catch it
                 main_work.cur_zone = uint.MaxValue;
                 touch.is_disp_cover = false;
             }

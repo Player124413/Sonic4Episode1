@@ -1,5 +1,11 @@
 ﻿internal partial class AppMain
 {
+    private const string GMD_GMK_NEEDLE_MDL_FILENAME = "G_COM/GMK/GMK_NEEDLE_MDL.AMB";
+    private const string GMD_GMK_NEEDLE_TEX_FILENAME = "G_COM/GMK/GMK_NEEDLE_TEX.AMB";
+
+    // console draws three models per needle event, mobile draws TVX billboards off GMK_NEEDLE_TVX
+    private static bool gm_gmk_needle_as_console;
+
     private static OBS_OBJECT_WORK GmGmkNeedleInit(
       GMS_EVE_RECORD_EVENT eve_rec,
       int pos_x,
@@ -11,6 +17,8 @@
         GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)gmsEnemy3DWork;
         gmsGmkNeedleWork.needle_type = GmGmkNeedleGetType(eve_rec.id);
         ObjObjectCopyAction3dNNModel(work, gm_gmk_needle_obj_3d_list[0], gmsEnemy3DWork.obj_3d);
+        if (gm_gmk_needle_as_console)
+            gmGmkNeedleBirthParts(work, gmsGmkNeedleWork.needle_type);
         work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkNeedleDrawFunc);
         gmsEnemy3DWork.ene_com.col_work.obj_col.obj = work;
         gmsEnemy3DWork.ene_com.col_work.obj_col.width = (ushort)gm_gmk_col_rect_tbl[gmsGmkNeedleWork.needle_type][0];
@@ -60,6 +68,8 @@
         GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)gmsEnemy3DWork;
         gmsGmkNeedleWork.needle_type = GmGmkNeedleGetType(eve_rec.id);
         ObjObjectCopyAction3dNNModel(work, gm_gmk_needle_obj_3d_list[0], gmsEnemy3DWork.obj_3d);
+        if (gm_gmk_needle_as_console)
+            gmGmkNeedleBirthParts(work, gmsGmkNeedleWork.needle_type);
         work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkNeedleDrawFunc);
         gmsEnemy3DWork.ene_com.col_work.obj_col.obj = work;
         gmsEnemy3DWork.ene_com.col_work.obj_col.width = (ushort)gm_gmk_col_rect_tbl[gmsGmkNeedleWork.needle_type][0];
@@ -102,7 +112,27 @@
       int pos_y,
       byte type)
     {
-        return null;
+        if (!gm_gmk_needle_as_console)
+            return null;
+
+        OBS_OBJECT_WORK work = GMM_ENEMY_CREATE_WORK(eve_rec, pos_x, pos_y, () => new GMS_GMK_NEEDLE_WORK(), "GMK_NEEDLE_BACK");
+        GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work;
+        GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)gmsEnemy3DWork;
+        gmsGmkNeedleWork.needle_type = type;
+        ObjObjectCopyAction3dNNModel(work, gm_gmk_needle_obj_3d_list[IDB_GMK_NEEDLE_MDL_GMK_NEEDLE_B_ZNO], gmsEnemy3DWork.obj_3d);
+        work.pos.z = GMD_OBJ_GIMMICK_POS_Z - 3 * 4096;
+        work.flag |= 8U;
+        work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkBackNeedleDrawFunc);
+        work.move_flag |= 8449U;
+        work.flag |= 2U;
+        if (g_gs_main_sys_info.stage_id == 14)
+        {
+            ObjDrawObjectActionSet(work, IDB_GMK_NEEDLE_MDL_GMK_NEEDLE_B_ZNO);
+            work.obj_3d.use_light_flag &= 4294967294U;
+            work.obj_3d.use_light_flag |= 4U;
+        }
+        work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkNeedleBackFwMain);
+        return work;
     }
 
     private static OBS_OBJECT_WORK GmGmkStandNeedleInit(
@@ -111,15 +141,184 @@
       int pos_y,
       byte type)
     {
-        return null;
+        if (!gm_gmk_needle_as_console)
+            return null;
+
+        OBS_OBJECT_WORK work = GMM_ENEMY_CREATE_WORK(eve_rec, pos_x, pos_y, () => new GMS_GMK_NEEDLE_WORK(), "GMK_NEEDLE_STAND");
+        GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work;
+        GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)gmsEnemy3DWork;
+        gmsGmkNeedleWork.needle_type = type;
+        ObjObjectCopyAction3dNNModel(work, gm_gmk_needle_obj_3d_list[IDB_GMK_NEEDLE_MDL_GMK_NEEDLE_STAND_ZNO], gmsEnemy3DWork.obj_3d);
+        work.flag |= 8U;
+        work.pos.z = GMD_OBJ_GIMMICK_POS_Z - 1;
+        work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkStandNeedleDrawFunc);
+        work.move_flag |= 8449U;
+        work.flag |= 2U;
+        if (g_gs_main_sys_info.stage_id == 14)
+        {
+            ObjDrawObjectActionSet(work, IDB_GMK_NEEDLE_MDL_GMK_NEEDLE_STAND_ZNO);
+            work.obj_3d.use_light_flag &= 4294967294U;
+            work.obj_3d.use_light_flag |= 4U;
+        }
+        work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkNeedleStandFwMain);
+        return work;
+    }
+
+    private static void gmGmkNeedleBackFwMain(OBS_OBJECT_WORK obj_work)
+    {
+        if (obj_work.parent_obj != null)
+            obj_work.scale.y = obj_work.parent_obj.scale.y;
+    }
+
+    private static void gmGmkNeedleStandFwMain(OBS_OBJECT_WORK obj_work)
+    {
+    }
+
+    private static void gmGmkBackNeedleDrawFunc(OBS_OBJECT_WORK obj_work)
+    {
+        GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)(GMS_ENEMY_3D_WORK)obj_work;
+        int[][] table = gmGmkNeedleOfstTable(gmsGmkNeedleWork.needle_type);
+        int save_x = obj_work.ofst.x;
+        int save_y = obj_work.ofst.y;
+
+        for (int index = 3; index < 5; ++index)
+        {
+            if (table != null)
+            {
+                obj_work.ofst.x = table[index][0];
+                obj_work.ofst.y = table[index][1];
+            }
+            gmGmkNeedleSetDrawDir(obj_work, gmsGmkNeedleWork.needle_type);
+            ObjDrawActionSummary(obj_work);
+        }
+
+        obj_work.ofst.x = save_x;
+        obj_work.ofst.y = save_y;
+    }
+
+    private static void gmGmkStandNeedleDrawFunc(OBS_OBJECT_WORK obj_work)
+    {
+        GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)(GMS_ENEMY_3D_WORK)obj_work;
+        ushort needle_type = gmsGmkNeedleWork.needle_type;
+        int[][] table = gmGmkNeedleOfstTable(needle_type);
+        int save_x = obj_work.ofst.x;
+        int save_y = obj_work.ofst.y;
+
+        // the stand is common to both rows, so it draws all five; the back two sit at a different
+        // depth, and the two upward types put them in front rather than behind
+        for (int index = 0; index < 5; ++index)
+        {
+            if (table == null)
+                continue;
+
+            obj_work.ofst.x = table[index][0];
+            obj_work.ofst.y = table[index][1];
+
+            if (index == 3 || index == 4)
+            {
+                obj_work.pos.z = needle_type == 0 || needle_type == 4
+                    ? GMD_OBJ_GIMMICK_POS_Z - 2 * 4096
+                    : GMD_OBJ_GIMMICK_POS_Z_BACK + 4096;
+            }
+            else
+            {
+                obj_work.pos.z = GMD_OBJ_GIMMICK_POS_Z;
+            }
+
+            gmGmkNeedleSetDrawDir(obj_work, needle_type);
+            ObjDrawActionSummary(obj_work);
+        }
+
+        obj_work.ofst.x = save_x;
+        obj_work.ofst.y = save_y;
     }
 
     public static void GmGmkNeedleBuild()
     {
+        gm_gmk_needle_as_console = amFsAllConsoleGrade(
+            GMD_GMK_NEEDLE_MDL_FILENAME, GMD_GMK_NEEDLE_TEX_FILENAME);
+
         gm_gmk_needle_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(822), GmGameDatGetGimmickData(823), 0U);
+
+        // GMK_NEEDLE_TVX has no console counterpart and the console arm draws models instead
+        if (gm_gmk_needle_as_console)
+            return;
+
         gm_gmk_needle_obj_tvx_list = GmGameDatGetGimmickData(824);
         tvx_needle = new TVX_FILE((AmbChunk)amBindGet(gm_gmk_needle_obj_tvx_list, 0));
         tvx_stand = new TVX_FILE((AmbChunk)amBindGet(gm_gmk_needle_obj_tvx_list, 1));
+    }
+
+    // console splits one needle event into three objects: this one draws the front row, and two
+    // local events draw the back row and the stand as their own models. Mobile has no back model
+    // at all (its slot holds a second copy of the front one) and draws the lot as TVX billboards.
+    private static void gmGmkNeedleBirthParts(OBS_OBJECT_WORK obj_work, ushort needle_type)
+    {
+        GMS_ENEMY_3D_WORK gmk_work = (GMS_ENEMY_3D_WORK)obj_work;
+        GMS_EVE_RECORD_EVENT eve_rec = gmk_work.ene_com.eve_rec;
+
+        OBS_OBJECT_WORK back_obj = GmEventMgrLocalEventBirth(GMD_EVENT_ID_NEEDLE_BACK,
+            obj_work.pos.x, obj_work.pos.y, eve_rec.flag, eve_rec.left, eve_rec.top,
+            eve_rec.width, eve_rec.height, (byte)needle_type);
+
+        OBS_OBJECT_WORK stand_obj = GmEventMgrLocalEventBirth(GMD_EVENT_ID_NEEDLE_STAND,
+            obj_work.pos.x, obj_work.pos.y, eve_rec.flag, eve_rec.left, eve_rec.top,
+            eve_rec.width, eve_rec.height, (byte)needle_type);
+
+        // both have clipping disabled, so they are parented to die with the needle
+        if (back_obj != null)
+            back_obj.parent_obj = obj_work;
+        if (stand_obj != null)
+            stand_obj.parent_obj = obj_work;
+    }
+
+    private static int[][] gmGmkNeedleOfstTable(ushort needle_type)
+    {
+        switch (needle_type)
+        {
+            case 0:
+            case 4:
+                return gm_gmk_disp_ofst_tbl_u;
+            case 1:
+                return gm_gmk_disp_ofst_tbl_l;
+            case 2:
+            case 5:
+                return gm_gmk_disp_ofst_tbl_d;
+            case 3:
+                return gm_gmk_disp_ofst_tbl_r;
+            default:
+                return null;
+        }
+    }
+
+    // the front row's three long needles; the back two and the stand are their own objects
+    private static void gmGmkNeedleDrawFrontModels(OBS_OBJECT_WORK obj_work, ushort needle_type)
+    {
+        int[][] table = gmGmkNeedleOfstTable(needle_type);
+        int save_x = obj_work.ofst.x;
+        int save_y = obj_work.ofst.y;
+
+        for (int index = 0; index < 3; ++index)
+        {
+            if (table != null)
+            {
+                obj_work.ofst.x = table[index][0];
+                obj_work.ofst.y = table[index][1];
+            }
+            gmGmkNeedleSetDrawDir(obj_work, needle_type);
+            ObjDrawActionSummary(obj_work);
+        }
+
+        obj_work.ofst.x = save_x;
+        obj_work.ofst.y = save_y;
+    }
+
+    private static void gmGmkNeedleSetDrawDir(OBS_OBJECT_WORK obj_work, ushort needle_type)
+    {
+        if (needle_type < 4)
+            obj_work.dir.z = (ushort)(GMD_GMK_DRAW_ROTATE_DIR * (needle_type - GMD_GMK_NDL_TYPE_UP));
+        else if (needle_type == GMD_GMK_NDL_TYPE_ACT_DOWN)
+            obj_work.dir.z = 0x8000;
     }
 
     public static void GmGmkNeedleFlush()
@@ -352,6 +551,12 @@
         if (!GmMainIsDrawEnable())
             return;
         GMS_GMK_NEEDLE_WORK gmsGmkNeedleWork = (GMS_GMK_NEEDLE_WORK)(GMS_ENEMY_3D_WORK)obj_work;
+        if (gm_gmk_needle_as_console)
+        {
+            gmGmkNeedleDrawFrontModels(obj_work, gmsGmkNeedleWork.needle_type);
+            return;
+        }
+
         if (((int)obj_work.disp_flag & 32) != 0)
             return;
         VecFx32 pos = new VecFx32();

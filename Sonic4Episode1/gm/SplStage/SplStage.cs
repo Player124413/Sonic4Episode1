@@ -2,9 +2,6 @@ using System;
 
 using static AppMain;
 
-// the special stage session controller, gmSplStage.cpp. It loads no archive of its own: the ring
-// and time overlay is SPST, which belongs to GmFix. The one #ifdef in the file is at :426 and every
-// reachable arm of it is the same line. see docs/gmfix-port-notes.md
 internal static partial class GmSplStage
 {
     private static MTS_TASK_TCB gm_spl_tcb;
@@ -219,8 +216,7 @@ internal static partial class GmSplStage
         UNREFERENCED_PARAMETER(tcb);
     }
 
-    // both lights turn with pseudofall_dir, which is what keeps them fixed relative to the screen
-    // while the stage rotates under Sonic
+    // rotates with pseudofall_dir so both lights stay fixed relative to the screen while the stage spins under Sonic
     private static void gmSplStageLightCtrl(GMS_SPL_STG_WORK tcb_work)
     {
         var col = new NNS_RGBA(1f, 1f, 1f, 1f);
@@ -275,8 +271,7 @@ internal static partial class GmSplStage
 
             var dest_y = 0;
 
-            // the C++ offsets Sonic's display position rather than his real one; the alternative
-            // is in the file behind #if 0, with a note that it breaks collision
+            // offsets Sonic's display position, not his real one, since the real one breaks collision
             GmObjGetRotPosXY(
                 dest_x, dest_y,
                 ref ply_work.obj_work.ofst.x, ref ply_work.obj_work.ofst.y,

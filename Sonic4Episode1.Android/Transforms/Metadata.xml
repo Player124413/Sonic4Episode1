@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <!-- these four are protected static fields whose types are package private in SDL's java, so
+       the generator binds the field and not the type, and the binding does not compile. Nothing
+       here touches them -->
+  <remove-node path="/api/package[@name='org.libsdl.app']/class[@name='SDLActivity']/field[@name='mClipboardHandler']" />
+  <remove-node path="/api/package[@name='org.libsdl.app']/class[@name='SDLActivity']/field[@name='mMotionListener']" />
+  <remove-node path="/api/package[@name='org.libsdl.app']/class[@name='SDLControllerManager']/field[@name='mHapticHandler']" />
+  <remove-node path="/api/package[@name='org.libsdl.app']/class[@name='SDLControllerManager']/field[@name='mJoystickHandler']" />
+</metadata>

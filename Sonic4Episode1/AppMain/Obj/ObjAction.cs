@@ -849,7 +849,15 @@ internal partial class AppMain
         object texlistbuf = null;
         obj_3des.model_reg_index = amObjectLoad(out obj_3des._object, out texlist, out texlistbuf, buf, drawflag | g_obj.load_drawflag, null, null);
         obj_3des.flag |= 2147483648U;
-        amEffectSetObject(obj_3des.ecb, obj_3des._object, 16);
+        amEffectSetObject(obj_3des.ecb, obj_3des._object, ObjAction3dESDrawState());
+    }
+
+    // mobile registers effect models in the POST pass, console in the normal 3DNN one
+    private static int ObjAction3dESDrawState()
+    {
+        return (int)(gm_efct_cmn_as_console
+            ? OBD_DRAW_CMD_STATE_3DNN
+            : OBD_DRAW_CMD_STATE_3DNN_POST);
     }
 
     private static void ObjObjectAction3dESModelLoad(
@@ -957,7 +965,7 @@ internal partial class AppMain
         ObjAction3dESModelLoadToDwork(object_dwork, null, 0U);
         obj3des.object_data_work = object_dwork;
         obj3des._object = (NNS_OBJECT)object_dwork.pData;
-        amEffectSetObject(obj3des.ecb, obj3des._object, 16);
+        amEffectSetObject(obj3des.ecb, obj3des._object, ObjAction3dESDrawState());
     }
 
     private static bool ObjAction3dESEffectLoadCheck(OBS_ACTION3D_ES_WORK obj_3des)

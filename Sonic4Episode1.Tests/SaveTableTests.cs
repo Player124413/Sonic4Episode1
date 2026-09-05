@@ -3,13 +3,10 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
-// see docs/dmsave-port-notes.md. the size numbers below are what the mobile arm drew before the
-// variant landed, so they pin the substitution rather than describe an intent
 public class SaveTableTests
 {
     private const int ActNum = (int)DmSave.DME_SAVE_ACT.ACT_NUM;
 
-    // action counts of the four archives this screen indexes, both builds
     private const int ConsoleWinActs = 1;
     private const int ConsoleMsgActs = 14;
     private const int MobileWinActs = 8;
@@ -115,7 +112,6 @@ public class SaveTableTests
         Assert.Equal(AppMain.AMD_FS_VARIANT_BASE, mobile.fs_variant);
     }
 
-    // refactor pin: every one of these was an inlined literal before text_scale replaced it
     [Theory]
     [InlineData(AppMain.GSD_LANGUAGE_JP, false, 641, 303)]
     [InlineData(AppMain.GSD_LANGUAGE_GE, false, 749, 303)]

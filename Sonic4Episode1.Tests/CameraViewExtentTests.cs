@@ -2,15 +2,10 @@ using Xunit;
 
 namespace Sonic4Episode1.Tests;
 
-// The scene used to be drawn rolled 90 degrees into a portrait framebuffer, which is an iPhone-only
-// arm of the C++ that the WP7 build inherited. Unrolling it means the ortho box is objCamera.cpp
-// verbatim again and GMD_CAMERA_SCALE goes back to its book value. These pin the result.
-// See docs/camera-view-extent.md.
 public class CameraViewExtentTests
 {
     private const float DispHeight = 720f;
 
-    // full world extent visible at a given backbuffer, x then y
     private static (float w, float h) Extent(float bbWidth, float bbHeight)
     {
         AppMain.g_obj.disp_height = DispHeight;
@@ -18,8 +13,7 @@ public class CameraViewExtentTests
         return (dx * 2f, dy * 2f);
     }
 
-    // gmMain.h:83-84 at a 16:9 window is scale * 1280 by scale * 720. Independently cross-checked
-    // by the console's own GMD_OBJ_CLIP_LCD_X/Y at gmMain.h:88-89, which are 383 and 215.
+    // gmMain.h: a 16:9 window is scale*1280 by scale*720, matching GMD_OBJ_CLIP_LCD_X/Y (383, 215)
     [Fact]
     public void SixteenNineFramingMatchesTheConsole()
     {
@@ -41,8 +35,6 @@ public class CameraViewExtentTests
         Assert.Equal(bbWidth / w, bbHeight / h, 3);
     }
 
-    // Hor+: a wider window sees more level, it does not see less of it vertically. This is the
-    // property the rotated form had backwards, because it derived the vertical from the aspect.
     [Fact]
     public void AWiderWindowShowsMoreHorizontallyAndTheSameVertically()
     {

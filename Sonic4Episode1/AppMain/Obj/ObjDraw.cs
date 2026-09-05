@@ -300,10 +300,17 @@
             if (pos.HasValue && ((int)p_disp_flag1 & 293609472) == 0)
             {
                 OBS_CAMERA obsCamera = ObjCameraGet(_g_obj.glb_camera_id);
-                float num1 = obsCamera.disp_pos.x + obsCamera.left;
-                float num2 = obsCamera.disp_pos.x + obsCamera.right;
-                float num3 = (float)-(obsCamera.disp_pos.y + (double)obsCamera.top);
-                float num4 = (float)-(obsCamera.disp_pos.y + (double)obsCamera.bottom);
+
+                // the box is world axis aligned but the camera can roll, so both axes take the
+                // wider ortho extent. the C++ hardcodes bottom/top here, which is its wider pair
+                bool wider_x = obsCamera.right - obsCamera.left >= obsCamera.top - obsCamera.bottom;
+                float cull_min = wider_x ? obsCamera.left : obsCamera.bottom;
+                float cull_max = wider_x ? obsCamera.right : obsCamera.top;
+
+                float num1 = obsCamera.disp_pos.x + cull_min;
+                float num2 = obsCamera.disp_pos.x + cull_max;
+                float num3 = (float)-(obsCamera.disp_pos.y + (double)cull_max);
+                float num4 = (float)-(obsCamera.disp_pos.y + (double)cull_min);
                 float num5 = 1f;
                 if (((int)p_disp_flag1 & 65536) == 0)
                 {
@@ -1379,22 +1386,6 @@
         {
             if (obj_draw_3dnn_command_state_tbl[index] != uint.MaxValue)
             {
-                // Two passes are drawn under a perspective projection while the rest of the stage
-                // is ortho, so their depths are not comparable with what is already in the buffer
-                // and they lose the test against scenery they should be in front of. Both draw
-                // over everything by design, so give them a clean buffer:
-                //
-                // - the card road, which is its own pass
-                // - the card stage's near map layer, which carries the neon suit signs. Only that
-                //   stage draws its near layer in perspective, which is why no other one needs it
-                if (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_TRUMPROAD
-                    || (obj_draw_3dnn_command_state_tbl[index] == OBD_DRAW_CMD_STATE_NEAR_MAP
-                        && gmMapNearLayerIsPerspective()))
-                {
-                    mpp.OpenGL.glClearDepthf(1f);
-                    mpp.OpenGL.glClear(256U);
-                }
-
                 amDrawExecCommand(obj_draw_3dnn_command_state_tbl[index], g_obj.drawflag);
                 if (obj_draw_3dnn_command_state_exe_end_scene_tbl[index])
                     amDrawEndScene();
@@ -1458,10 +1449,7 @@
             switch (proj_type)
             {
                 case 1:
-                    //float top = (float)(g_obj.disp_height * (5.0 / 64.0) * 0.5);
-                    //float right = top * cam.Aspect;
-                    //nnMakeOrthoMatrix(nnsMatrix2, -right, right, -top, top, cam.ZNear, cam.ZFar);
-                    float scale = 0.078125f;    // ワイド時に横5ブロック分がこれぐらい
+                    float scale = 0.078125f;    // about 5 blocks wide on a widescreen aspect
                     float dx, dy;
                     ObjCameraGetOrthoExtent(scale, cam.Aspect, out dx, out dy);
                     nnMakeOrthoMatrix(nnsMatrix2, -dx, dx, -dy, dy, cam.ZNear, cam.ZFar);
@@ -1479,11 +1467,8 @@
         amDrawRegistCommand(command_state, OBD_DRAW_USER_COMMAND_3DNN_SET_CAMERA, param3DnnSetCamera);
     }
 
-    // console defers every transparent object into the sort list, so blended geometry draws after all
-    // the depth writes rather than fighting them. objDraw.cpp:6020, the block the iPhone build
-    // compiles out. Three things there C# cannot say: a motion param cast to AMS_PARAM_DRAW_OBJECT
-    // on a shared prefix, the matrix palette living at the tail of the struct, and the handler
-    // recovering the struct from the command pointer. All three are copies here instead.
+    // console defers every transparent object into the sort list, so blended geometry draws after
+    // all the depth writes rather than fighting them
     private static void objDraw3DNNRegistSortDraw(
       OBS_DRAW_PARAM_3DNN_SORT_MODEL sortParam,
       NNS_OBJECT _object,
@@ -1688,7 +1673,7 @@
         if (((int)g_obj.def_user_light_flag ^ (int)drawParam3DnnMotion.use_light_flag) != 0)
             objDrawSetDefaultLight();
 
-        // objDraw.cpp:6335 drops scaleZ from the key here, and the motion param has none
+        // the motion param carries no scaleZ, so this passes 1f instead of a real value
         objDraw3DNNRegistSortDraw(sortParam,
             paramDrawMotionTrs._object, paramDrawMotionTrs.texlist, paramDrawMotionTrs.sub_obj_type,
             paramDrawMotionTrs.flag, paramDrawMotionTrs.flag_ex, 1f,

@@ -248,8 +248,8 @@ namespace Microsoft.Phone.Tasks
     
         public void Show()
         {
-#if WINDOWS_UAP
-            Windows.System.Launcher.LaunchUriAsync(Uri);
+#if WINDOWS_UWP
+            _=Windows.System.Launcher.LaunchUriAsync(Uri);
 #elif WASM
             WebBrowserTask_Open(Uri.ToString());
 #else

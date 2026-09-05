@@ -1,12 +1,12 @@
 internal partial class AppMain
 {
-    // The four flip panels on a card. PC gmGmkTpTurnInitPict 0x4F8C10 (event 377, ours 392), never
-    // placed in a map: a card spawns its own through GmEventMgrLocalEventBirth, which is why the
-    // panel's kind, column, row and revealed state arrive packed into the maker's type byte.
+    // the four flip panels on a card. never placed in a map: a card spawns its own through
+    // GmEventMgrLocalEventBirth, so the panel's kind, column, row and revealed state arrive
+    // packed into the maker's type byte.
     //
-    // Running into one flips it. The spin axis and direction come from how the player was moving
-    // at the moment of contact, and when the animation finishes the revealed kind is offered to
-    // the match logic in GmGmkTpTurnMatch.cs.
+    // running into one flips it; the spin axis and direction come from how the player was moving
+    // at contact, and when the flip finishes the revealed kind goes to the match logic in
+    // GmGmkTpTurnMatch.cs.
 
     internal const int GMD_GMK_TP_TURN_KIND_EGG = 0;
     internal const int GMD_GMK_TP_TURN_KIND_RING = 1;
@@ -41,13 +41,18 @@ internal partial class AppMain
     private const int GMD_GMK_TP_TURN_FLIP_FRAMES = 108;
     private const int GMD_GMK_TP_TURN_FLIP_FRAMES_DIAGONAL = 96;
 
+    private const int GMD_GMK_TP_TURN_FLIP_EFFECT_Z_OFST = 0x20000;
+    private const int GMD_GMK_TP_TURN_EFFECT_MAX = 8;
+
+    private static int gm_gmk_tp_turn_effect_num;
+
     // 2.0 units per frame. Below this in both axes the panel tumbles in place instead
     private const int GMD_GMK_TP_TURN_SPIN_SPD_THRESHOLD = 0x2000;
 
     private const int GMD_GMK_TP_TURN_TUMBLE_CYCLE = 24;
 
-    // PC gmGmkTpTurnSpawnPicts 0x4F7C60. The board lays out four lines, one per deck record;
-    // everything else is a single line, across for the row variants and down for the column ones
+    // the board lays out four lines, one per deck record; everything else is a single line,
+    // across for the row variants and down for the column ones
     private static void gmGmkTpTurnSpawnPicts(GMS_GMK_TP_TURN_WORK work)
     {
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
@@ -84,7 +89,6 @@ internal partial class AppMain
         gmGmkTpTurnBirthPictLine(work, obj_work.pos.x, line_y, 0, horizontal);
     }
 
-    // PC gmGmkTpTurnBirthPictLine 0x4F7840
     private static void gmGmkTpTurnBirthPictLine(
       GMS_GMK_TP_TURN_WORK work,
       int pos_x,
@@ -149,7 +153,6 @@ internal partial class AppMain
         return obj_work;
     }
 
-    // PC gmGmkTpTurnSetupPict 0x4F8890
     private static void gmGmkTpTurnSetupPict(
       GMS_GMK_TP_TURN_PICT_WORK work,
       int kind,
@@ -176,8 +179,6 @@ internal partial class AppMain
         pRec.rect.pos.y = 0;
         pRec.rect.pos.z = 0;
 
-        // PC enables the block, then masks and rewrites the same word. The mask clears one bit
-        // more than the card road's does
         pRec.flag |= 4U;
         pRec.flag = pRec.flag & 0xFFFEF8FBU | 0x404U;
         pRec.ppHit = null;
@@ -207,7 +208,6 @@ internal partial class AppMain
         obj_work.dir.z = 0;
     }
 
-    // PC gmGmkTpTurnPictSetHidden 0x4F7300
     private static void gmGmkTpTurnPictSetHidden(GMS_GMK_TP_TURN_PICT_WORK work)
     {
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
@@ -219,15 +219,14 @@ internal partial class AppMain
         obj_work.dir.z = 0;
     }
 
-    // PC gmGmkTpTurnPictTouch 0x4F86A0. Any contact at all starts a flip
+    // any contact at all starts a flip
     private static void gmGmkTpTurnPictTouch(OBS_RECT_WORK pict_rect, OBS_RECT_WORK other_rect)
     {
         GMS_GMK_TP_TURN_PICT_WORK work = (GMS_GMK_TP_TURN_PICT_WORK)pict_rect.parent_obj;
 
-        // The rect only fires once per unbroken contact, but a panel is wide enough to step out of
-        // and back into, and PC has no guard of its own that I could find. Without this you can
-        // turn one panel over and over, and since each finished flip offers its kind to the match
-        // again, three bumps of the same ring card pays out
+        // the rect only fires once per unbroken contact, but a panel is wide enough to step out of
+        // and back into. without this guard you could flip the same panel repeatedly and re-offer
+        // its kind to the match every time
         if (work.revealed || work.flip_timer > 0)
             return;
 
@@ -286,8 +285,8 @@ internal partial class AppMain
         }
         else
         {
-            // dead stop against a panel. PC re-hides it and then runs a zero speed flip, so the
-            // timer still elapses and the reveal still counts, there is just nothing to see
+            // dead stop against a panel re-hides it and then runs a zero-speed flip, so the timer
+            // still elapses and the reveal still counts even though nothing visibly moves
             gmGmkTpTurnPictSetHidden(work);
         }
 
@@ -304,13 +303,73 @@ internal partial class AppMain
         work.revealed = true;
         ((OBS_OBJECT_WORK)work).ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTpTurnPictStateFlip);
 
-        // TODO(port): PC spawns a sparkle here (gmGmkTpTurnBirthFlipEffect 0x4F8360) through an
-        // id-indexed effect spawner and a per stage effect definition table that this tree has no
-        // counterpart for. See docs/z2a2-tp-turn-re.md section 6
+        gmGmkTpTurnBirthFlipEffect(work);
         GmSoundPlaySE("Cards1");
     }
 
-    // PC gmGmkTpTurnPictStateFlip 0x4F8490
+    // which anim plays is picked by the spin, and the two diagonal modes tilt the sparkle to line
+    // up with the corner it turned about
+    private static void gmGmkTpTurnBirthFlipEffect(GMS_GMK_TP_TURN_PICT_WORK work)
+    {
+        int efct_idx = 0;
+        float tilt = 0f;
+
+        switch (work.spin_mode)
+        {
+            case 0:
+                efct_idx = work.spin_speed <= 0f ? 3 : 4;
+                break;
+
+            case 1:
+                efct_idx = work.spin_speed <= 0f ? 5 : 0;
+                break;
+
+            case 2:
+                efct_idx = 5;
+                tilt = work.spin_speed <= 0f ? 25f : 205f;
+                break;
+
+            case 3:
+                efct_idx = 5;
+                tilt = work.spin_speed <= 0f ? -25f : -205f;
+                break;
+        }
+
+        OBS_OBJECT_WORK pict = (OBS_OBJECT_WORK)work;
+        OBS_OBJECT_WORK efct = (OBS_OBJECT_WORK)GmEfctZoneEsCreate(
+            null, GSD_MAIN_ZONE_TYPE_2, efct_idx);
+
+        efct.pos.x = pict.pos.x;
+        efct.pos.y = pict.pos.y;
+        efct.pos.z = pict.pos.z + GMD_GMK_TP_TURN_FLIP_EFFECT_Z_OFST;
+        efct.dir.z = (ushort)AKM_DEGtoA16(tilt);
+
+        ++gm_gmk_tp_turn_effect_num;
+        efct.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTpTurnFlipEffectState);
+        mtTaskChangeTcbDestructor(efct.tcb,
+            new GSF_TASK_PROCEDURE(gmGmkTpTurnFlipEffectDest));
+    }
+
+    // past the cap the oldest one still alive kills itself, and hands its destructor back so it
+    // does not decrement the count a second time on the way out
+    private static void gmGmkTpTurnFlipEffectState(OBS_OBJECT_WORK obj_work)
+    {
+        if (gm_gmk_tp_turn_effect_num > GMD_GMK_TP_TURN_EFFECT_MAX)
+        {
+            obj_work.flag |= 8U;
+            --gm_gmk_tp_turn_effect_num;
+            mtTaskChangeTcbDestructor(obj_work.tcb, new GSF_TASK_PROCEDURE(ObjObjectExit));
+        }
+
+        GmEffectDefaultMainFuncDeleteAtEnd(obj_work);
+    }
+
+    private static void gmGmkTpTurnFlipEffectDest(MTS_TASK_TCB tcb)
+    {
+        --gm_gmk_tp_turn_effect_num;
+        ObjObjectExit(tcb);
+    }
+
     private static void gmGmkTpTurnPictStateFlip(OBS_OBJECT_WORK obj_work)
     {
         GMS_GMK_TP_TURN_PICT_WORK work = (GMS_GMK_TP_TURN_PICT_WORK)obj_work;

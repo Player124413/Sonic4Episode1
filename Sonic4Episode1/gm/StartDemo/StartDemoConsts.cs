@@ -16,8 +16,7 @@ internal static partial class GmStartDemo
     // where the in-animation is parked once it has played
     public const float GMD_START_DEMO_FRAME_HELD = 40.0f;
 
-    // the archive the whole screen lives in, shared with the HUD, results, game over and the
-    // special stage. see docs/per-member-variants.md
+    // shared archive: also used by the HUD, results, game over and special stage screens
     public const string GMD_START_DEMO_DATA_FILENAME = "G_COM/CPIT/CPIT_MAIN.AMB";
 
     // mobile pushes every part one unit forward so the card clears the 3D scene; console does not

@@ -46,7 +46,6 @@ internal partial class AppMain
 
     // FI/PT/RU/CN/HK are WP7 additions. Their CPIT_MAIN members sit past index 57 and only exist in
     // the 98-member WP7 archive; every other build stops at 57 and indexing one throws.
-    // see docs/startdemo-port-notes.md
     public static int GmGameDatCockpitLanguage(int[] member_by_language)
     {
         var lang = GsEnvGetLanguage();
@@ -84,6 +83,7 @@ internal partial class AppMain
         gmMapSelectVariant(stage_id);
         gmDecoSelectVariant(stage_id);
         gmGmkSelectVariant(stage_id);
+        gmMainSelectLightVariant(stage_id);
         for (int index = 0; index < 1; ++index)
             work.char_id[index] = (ushort)char_id_list[index];
         work.proc_type = proc_type;
@@ -368,11 +368,9 @@ internal partial class AppMain
             context.file_path = loadData.path;
             if (loadData.proc_pre != null)
                 loadData.proc_pre(context);
-            int stageId = context.stage_id;
-            int bytes_per_frame = 7 == stageId && "G_ZONE2/BOSS/BOSS02.AMB" == context.file_path || 11 == stageId && "G_ZONE3/BOSS/BOSS03.AMB" == context.file_path || (15 == stageId && "G_ZONEF/BOSS/BOSS04.AMB" == context.file_path || 16 == stageId && "G_ZONEF/BOSS/BOSS05.AMB" == context.file_path) ? 8192 : 65536;
             context.fs_req = gmMapOwnsLoad(loadData)
-                ? amFsReadBackgroundAs(context.file_path, bytes_per_frame, gm_map_variant.fs_variant)
-                : amFsReadBackground(context.file_path, bytes_per_frame);
+                ? amFsReadBackgroundAs(context.file_path, gm_map_variant.fs_variant)
+                : amFsReadBackground(context.file_path);
             context.state = GME_GAMEDAT_LOAD_STATE.GMD_GAMEDAT_LOAD_STATE_LOADING;
         }
         else if (amFsIsComplete(context.fs_req))

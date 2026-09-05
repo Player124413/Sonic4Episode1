@@ -3,7 +3,7 @@ using System.Text;
 
 internal partial class AppMain
 {
-    // NNS_STDSHADER_PROFILE, nnlshaderdxg20.h:164; array-backed since the key packer indexes fields by offset
+    // array-backed since the key packer indexes fields by offset
     internal class NNS_STDSHADER_PROFILE
     {
         public const int FieldCount = 46;
@@ -64,7 +64,6 @@ internal partial class AppMain
         public int UserProfileDrawobj { get => fields[45]; set => fields[45] = value; }
     }
 
-    // NNS_STDSHADER_NAME, nnlshaderdxg20.h:229. The Uint64 typedef above it is inside an #if 0.
     internal struct NNS_STDSHADER_NAME : IEquatable<NNS_STDSHADER_NAME>
     {
         public ulong low;
@@ -95,7 +94,6 @@ internal partial class AppMain
     public const int NameDigits = 26;
     private const string Base32Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
-    // recovered from nnGetStdShaderName in libnndxg20.lib, see docs/nn-stdshader-ubershader.md
     private static readonly int[] mppStdShaderNameWidth =
     {
         1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1,

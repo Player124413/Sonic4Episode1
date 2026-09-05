@@ -1,7 +1,16 @@
 ﻿internal partial class AppMain
 {
+    private const string GMD_GMK_CAPSULE_MDL_FILENAME = "G_COM/GMK/GMK_CAPSULE_MDL.AMB";
+    private const string GMD_GMK_CAPSULE_TEX_FILENAME = "G_COM/GMK/GMK_CAPSULE_TEX.AMB";
+
+    // only mobile and Wii set the body's idle action, console leaves it in bind pose until RUN
+    private static bool gm_gmk_capsule_as_console;
+
     private static void GmGmkCapsuleBuild()
     {
+        gm_gmk_capsule_as_console = amFsAllConsoleGrade(
+            GMD_GMK_CAPSULE_MDL_FILENAME, GMD_GMK_CAPSULE_TEX_FILENAME);
+
         gm_gmk_capsule_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(860), GmGameDatGetGimmickData(861), 0U);
     }
 
@@ -64,7 +73,8 @@
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)work;
         ObjObjectCopyAction3dNNModel(work, gm_gmk_capsule_obj_3d_list[0], gmsEnemy3DWork.obj_3d);
         ObjObjectAction3dNNMotionLoad(work, 0, false, ObjDataGet(862), null, 0, null);
-        ObjDrawObjectActionSet(work, 0);
+        if (!gm_gmk_capsule_as_console)
+            ObjDrawObjectActionSet(work, 0);
         work.pos.z = -131072;
         work.move_flag |= 8448U;
         work.disp_flag |= 4194304U;

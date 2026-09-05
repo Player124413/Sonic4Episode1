@@ -4,7 +4,7 @@ namespace Sonic4Episode1.Tests;
 // rather than a row: a parameter set that is a frame out still flips, it just stops landing on the
 // end of its motion, and a stagger that rounds the wrong way desynchronises every card in the
 // stage against level time without ever looking broken. Every constant below was read out of
-// gmGmkTrumpStageInit and its phase functions; see docs/z2a2-trumpstage-re.md.
+// gmGmkTrumpStageInit and its phase functions.
 public class TrumpStageTests
 {
     private const ushort CYCLIC = 0;

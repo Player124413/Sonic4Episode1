@@ -14,6 +14,8 @@ internal static class Program
   unpack <archive|tree> <outdir>   extract to editable directories plus _archive.toml
          [--decode]                write textures as PNG rather than their shipped format
   pack   <dir> <out>               rebuild; a directory holding _archive.toml, or a tree of them
+  packflat <dir> <out>             pack a plain directory of files into one archive, no descriptor
+         [--filter <glob>]         only files matching, e.g. *.fxb
   diff   <treeA> <treeB>           compare two content trees by archive and member
          [--ignore-extension]      match members by stem, for comparing across texture formats
   normalise <tree> <outdir>        rewrite every archive, nested ones included, as #AMB
@@ -41,6 +43,7 @@ Output is always #AMB. The legacy magic-less layout is read only.";
             {
                 case "unpack": return Unpack(args);
                 case "pack": return Pack(args);
+                case "packflat": return PackFlat(args);
                 case "diff": return Diff(args);
                 case "normalise":
                 case "normalize": return Normalise(args);
@@ -165,6 +168,60 @@ Output is always #AMB. The legacy magic-less layout is read only.";
         }
 
         Console.WriteLine($"packed {count} archives into {target}");
+        return 0;
+    }
+
+    // for directories that were never an unpacked archive: the shader permutations and the sound
+    // effects are loose files the runtime opens one at a time, and an archive is how the engine
+    // already knows to hold a set of them
+    private static int PackFlat(string[] args)
+    {
+        if (args.Length < 3)
+        {
+            Console.Error.WriteLine("usage: packflat <dir> <out> [--filter <glob>]");
+            return 1;
+        }
+
+        var source = args[1];
+        var target = args[2];
+        var filter = "*";
+
+        for (int i = 3; i < args.Length - 1; i++)
+        {
+            if (args[i] == "--filter")
+                filter = args[i + 1];
+        }
+
+        if (!Directory.Exists(source))
+        {
+            Console.Error.WriteLine($"no such directory: {source}");
+            return 1;
+        }
+
+        // ordinal so two runs on the same directory produce identical bytes
+        var files = Directory
+            .EnumerateFiles(source, filter, SearchOption.TopDirectoryOnly)
+            .OrderBy(Path.GetFileName, StringComparer.Ordinal)
+            .ToList();
+
+        if (files.Count == 0)
+        {
+            Console.Error.WriteLine($"no files matching '{filter}' in {source}");
+            return 1;
+        }
+
+        var entries = files
+            .Select(path => new AppMain.AmbEntry(Path.GetFileName(path), File.ReadAllBytes(path)))
+            .ToList();
+
+        var directory = Path.GetDirectoryName(Path.GetFullPath(target));
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+
+        var packed = AppMain.writeAmbArchive(entries, false);
+        File.WriteAllBytes(target, packed);
+
+        Console.WriteLine($"packed {entries.Count} files into {target} ({packed.Length} bytes)");
         return 0;
     }
 

@@ -142,13 +142,15 @@ internal partial class AppMain
 		{
 			efct_work = GmEfctCmnEsCreate(ply_work.obj_work, GME_EFCT_CMN_IDX.ROLLDASH_L);
 			GmComEfctSetDispOffsetF(efct_work, 1.5f, 5f, GMD_PLY_EFCT_OFST_FRONT_PLAYER);
-			efct_work.obj_3des.ecb.drawObjState = 0U;
+			if (!gm_efct_cmn_as_console)
+				efct_work.obj_3des.ecb.drawObjState = OBD_DRAW_CMD_STATE_3DNN;
 		}
 		else
 		{
 			efct_work = GmEfctCmnEsCreate(ply_work.obj_work, GME_EFCT_CMN_IDX.ROLLDASH_R);
 			GmComEfctSetDispOffsetF(efct_work, -1.5f, 5f, GMD_PLY_EFCT_OFST_FRONT_PLAYER);
-			efct_work.obj_3des.ecb.drawObjState = 0U;
+			if (!gm_efct_cmn_as_console)
+				efct_work.obj_3des.ecb.drawObjState = OBD_DRAW_CMD_STATE_3DNN;
 		}
 
 		efct_work.efct_com.obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmPlyEfctRollDashMain);
@@ -328,17 +330,11 @@ internal partial class AppMain
 
 		if ((ply_work.player_flag & GMD_PLF_PINBALL_SONIC) != 0)
 		{
-			// ピンボール中は生成しない
 			return;
 		}
 
 		efct_work = GmEfctCmnEsCreate(ply_work.obj_work, GME_EFCT_CMN_IDX_BRAKE);
 
-		//	// GmEffectDefaultMainFuncDeleteAtEndCopyDirZ
-		//	// メイン処理差し替え
-		//	efct_work.efct_com.obj_work.ppFunc = gmPlyEfctSweatMain;
-		// 位置調整 USE FLIP
-		//GmEffect3DESSetDispOffset(efct_work, -8.f, -16.f, -8.f);
 		GmComEfctSetDispOffsetF(efct_work, -8.0f, 16.0f, 0);
 		efct_work.efct_com.obj_work.parent_ofst.z = FXM_FLOAT_TO_FX32(GMD_PLY_EFCT_OFST_FRONT_PLAYER);
 	}
@@ -406,21 +402,14 @@ internal partial class AppMain
 	{
 		GMS_EFFECT_3DES_WORK efct_work = GmEfctCmnEsCreate(ply_work.obj_work, GME_EFCT_CMN_IDX_BUBBLE);
 
-		// 親クリア
 		efct_work.efct_com.obj_work.parent_obj = null;
 
-		// GmEffectDefaultMainFuncDeleteAtEnd
-		// メイン処理差し替え
 		efct_work.efct_com.obj_work.ppFunc = gmPlyEfctBubbleMain;
 
 		efct_work.efct_com.obj_work.move_flag &= ~OBD_MOVE_NOMOVE;
 
 		efct_work.obj_3des.flag |= OBD_ACTFLAG_3D_ES_PARTICLE_DEPEND;
 
-		// 初期速度設定
-		//efct_work.efct_com.obj_work.spd.y = (mtMathRand() & 0x1F) << 8;
-
-		// 位置調整
 		GmEffect3DESAddDispOffset(efct_work, 0, 0.0f, 10.0f);
 	}
 
@@ -564,7 +553,6 @@ internal partial class AppMain
 	{
 		GMS_EFFECT_3DES_WORK efct_work = null;
 		// unsure what this flag is
-		// if(ply_work.efct_spin_jump_blur == null || (ply_work.efct_spin_jump_blur.flag & 0xc ))
 		if (ply_work.efct_spin_jump_blur == null ||
 			(((GMS_EFFECT_3DES_WORK)ply_work.efct_spin_jump_blur).efct_com.obj_work.obj_3des == null))
 		{

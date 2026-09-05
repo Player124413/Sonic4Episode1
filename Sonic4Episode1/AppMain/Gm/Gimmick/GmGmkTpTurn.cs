@@ -1,14 +1,5 @@
 internal partial class AppMain
 {
-    // The flip cards: three makers over one card behaviour, plus the frame the card draws. The
-    // panels are GmGmkTpTurnPict.cs and the match logic is GmGmkTpTurnMatch.cs. Behaviour, work
-    // layout and provenance are in docs/z2a2-tp-turn-re.md.
-    //
-    // PC gmGmkTpTurnInitBoard 0x4F8AD0 (event 302, ours 381), gmGmkTpTurnInitRow 0x4F89F0 (303,
-    // ours 382) and gmGmkTpTurnInitColumn 0x4F8A60 (304, ours 383). The card itself never collides
-    // and has no state beyond its highlight timer; running into one of its panels is what does
-    // everything.
-
     private const int GMD_GMK_TP_TURN_VARIANT_BOARD = 0;
     private const int GMD_GMK_TP_TURN_VARIANT_ROW = 1;
     private const int GMD_GMK_TP_TURN_VARIANT_COLUMN = 2;
@@ -59,8 +50,7 @@ internal partial class AppMain
         GMS_ENEMY_3D_WORK gmk_work = (GMS_ENEMY_3D_WORK)work;
         OBS_OBJECT_WORK obj_work = gmk_work.ene_com.obj_work;
 
-        // the card is scenery. PC clears bit 2 of blocks 0 and 1 and leaves block 2 at its
-        // factory default, which is already inactive
+        // the card is scenery, not a collider
         gmk_work.ene_com.rect_work[0].flag &= ~4U;
         gmk_work.ene_com.rect_work[1].flag &= ~4U;
 
@@ -151,8 +141,6 @@ internal partial class AppMain
         return idx;
     }
 
-    // PC gmGmkTpTurnBindFrameModels 0x4F7F30. Each live slot gets its own copy of the shared model
-    // work plus the variant's material archive, and the base material selected into it
     private static void gmGmkTpTurnBindFrameModels(GMS_GMK_TP_TURN_WORK work, int variant)
     {
         OBS_OBJECT_WORK obj_work = (OBS_OBJECT_WORK)work;
@@ -167,11 +155,8 @@ internal partial class AppMain
             OBS_ACTION3D_NN_WORK obj_3d = work.frame_obj_3d[slot];
             ObjCopyAction3dNNModel(g_gm_gmk_tp_turn_obj_3d_list[member], obj_3d);
 
-            // A mirrored segment comes out of the vertex shader wound the other way round, so the
-            // face that used to point at the camera is now a back face and the default cull throws
-            // the whole quad away. Confirmed off the GPU: the two columns are the same quad at the
-            // same depth, one winding counter clockwise and the other clockwise, with the normal's
-            // handedness flipped with it. Culling the front instead puts the mirrored half back
+            // a mirrored segment's winding reverses, so the default backface cull throws the whole
+            // quad away; culling the front side instead keeps the mirrored half visible
             if ((gm_gmk_tp_turn_draw_flag_tbl[slot] & OBD_DISP_HFLIP) != 0)
                 obj_3d.drawflag = obj_3d.drawflag & ~NND_DRAWOBJ_CULLING_MASK | NND_DRAWOBJ_BACKSIDE;
 
@@ -186,11 +171,6 @@ internal partial class AppMain
         obj_work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTpTurnCardDraw);
     }
 
-    // PC registers the whole MAT archive once and picks a member with the material action id, so
-    // its tables index the archive directly. This tree loads a single member into registration
-    // slot 0 instead, the shape every other gimmick and the decorations use, which leaves the
-    // action id always 0 and makes the archive member the thing that gets reloaded. So the
-    // base-to-lit swap costs a load here where on PC it was only a select
     private static void gmGmkTpTurnSetSlotMaterial(GMS_GMK_TP_TURN_WORK work, int slot, int member)
     {
         OBS_ACTION3D_NN_WORK obj_3d = work.frame_obj_3d[slot];
@@ -208,11 +188,10 @@ internal partial class AppMain
         ((OBS_OBJECT_WORK)work).disp_flag |= OBD_DISP_REPEAT;
     }
 
-    // Attaching a material motion moves the draw onto ObjDrawAction3DNN's motion branch, which
-    // submits motion.data[] as a per-node TRS list. amMotionCreate only allocates that array and a
-    // node motion is what fills it, so an eighteen node frame segment with a material and no node
-    // motion collapses to nothing. TP_TURN ships no MTN at all, so seed the list from the model's
-    // own bind pose and the segment stands still in the right shape with its materials animating
+    // a material motion draws off motion.data as a per-node TRS list; amMotionCreate only
+    // allocates that array, a node motion is what fills it. TP_TURN ships no MTN at all, so a
+    // frame segment with a material and no node motion would collapse to nothing without seeding
+    // the list from the model's own bind pose here
     private static void gmGmkTpTurnSeedBindPose(OBS_ACTION3D_NN_WORK obj_3d)
     {
         AMS_MOTION motion = obj_3d.motion;
@@ -236,8 +215,6 @@ internal partial class AppMain
         }
     }
 
-    // PC gmGmkTpTurnCardState 0x4F74C0. Two visual states, base and lit, off a timer only a match
-    // ever adds to
     private static void gmGmkTpTurnCardState(OBS_OBJECT_WORK obj_work)
     {
         GMS_GMK_TP_TURN_WORK work = (GMS_GMK_TP_TURN_WORK)obj_work;
@@ -275,8 +252,6 @@ internal partial class AppMain
         }
     }
 
-    // PC gmGmkTpTurnCardDraw 0x4F7DB0. The frame is ten separate draws at fixed offsets, the odd
-    // slots mirrored in x off the same models as the even ones
     private static void gmGmkTpTurnCardDraw(OBS_OBJECT_WORK obj_work)
     {
         GMS_GMK_TP_TURN_WORK work = (GMS_GMK_TP_TURN_WORK)obj_work;
@@ -300,12 +275,10 @@ internal partial class AppMain
             VecFx32 scale = obj_work.scale;
             uint disp_flag = gm_gmk_tp_turn_draw_flag_tbl[slot];
 
-            // Mirror the odd slots the way PC does, by clearing the flag's own HFLIP and negating
-            // scale.x. Leaving HFLIP set instead looks equivalent and is not: the engine turns it
-            // into a half turn about Y, which points the segment away from the camera, so it comes
-            // out unlit even once the winding is accounted for. A mirror flips x and leaves the
-            // normal facing front. Either way the winding reverses, which is what the cull flip in
-            // gmGmkTpTurnBindFrameModels is for
+            // clearing HFLIP and negating scale.x instead of leaving HFLIP set: HFLIP turns the
+            // segment a half turn about Y, pointing it away from the camera so it comes out unlit;
+            // negating scale.x mirrors it in x while the normal keeps facing front. either way the
+            // winding reverses, which is what the cull flip in gmGmkTpTurnBindFrameModels is for
             if ((disp_flag & OBD_DISP_HFLIP) != 0)
             {
                 disp_flag &= ~OBD_DISP_HFLIP;
@@ -316,7 +289,7 @@ internal partial class AppMain
                 disp_flag |= OBD_DISP_NODISP;
 
             // the neon runs off the global clock rather than per card, so every frame in the stage
-            // pulses together. mmobject is only set once a material motion has really registered
+            // pulses together; mmobject is only set once a material motion has actually registered
             if (obj_3d.motion != null && obj_3d.motion.mmobject != null)
             {
                 float start = amMotionMaterialGetStartFrame(obj_3d.motion, obj_3d.mat_act_id);

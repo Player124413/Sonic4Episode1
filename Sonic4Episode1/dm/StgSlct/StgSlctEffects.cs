@@ -4,10 +4,8 @@ using static StgSlct.DME_STGSLCT_ZONE_TYPE;
 
 internal static partial class StgSlct
 {
-    // which way each zone is still travelling, per is_final_open, per zone. +1 means the "not
-    // finished yet" guard is pos > target, -1 means pos < target. The in and out sets are not
-    // inverses of each other, and SEGA marked the all-open zone 5 rows suspect in both. Treated
-    // as data and reproduced exactly, see docs/stgslct-port-quirks.md
+    // the in and out guard tables below aren't inverses of each other, and the all-open zone row
+    // is suspect in both; that's reproduced from the original data exactly, not a bug to fix
     private static readonly sbyte[][][] dm_stgslct_zone_out_guard_tbl = [
         [[+1, +1], [+1, -1], [-1, +1], [-1, -1]],
         [[+1, +1], [+1, +1], [-1, +1], [-1, -1], [+1, -1]],

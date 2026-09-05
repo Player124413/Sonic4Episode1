@@ -2203,7 +2203,9 @@ internal partial class AppMain
         else if (((int)g_gs_main_sys_info.game_flag & 1) != 0)
         {
             CPadVirtualPad cpadVirtualPad = CPadVirtualPad.CreateInstance();
-            int num2 = cpadVirtualPad.IsValid() ? cpadVirtualPad.GetValue() : (int)AoPad.AoPadMDirect();
+            int num2 = (int)AoPad.AoPadMDirect();
+            if (cpadVirtualPad.IsValid())
+                num2 |= cpadVirtualPad.GetValue();
 
             if ((8 & num2) != 0)
                 num1 |= ply_work.key_map[3];

@@ -158,6 +158,7 @@ namespace mpp
         private static DualTextureEffect m_dualTextureEffect;
         private static SpriteBatch m_blitBatch;
         private static Effect m_overrideEffect;
+        private static RenderTarget2D m_renderTarget;
         private static Viewport m_viewport;
         private static Matrix m_invScreen;
         private static Texture2D m_fakeTexture;
@@ -1711,8 +1712,8 @@ namespace mpp
             if (pname != 2899U)
                 throw new NotImplementedException();
             m_ambientColor.X = param.f0;
-            m_ambientColor.Y = param.f0;
-            m_ambientColor.Z = param.f0;
+            m_ambientColor.Y = param.f1;
+            m_ambientColor.Z = param.f2;
         }
 
         public static void glLoadIdentity()
@@ -1788,7 +1789,6 @@ namespace mpp
                     m_diffuseColorAlpha = param.f3;
                     break;
                 case 4610:
-                    // TODO: this is disabled
                     m_specularColor.X = param.f0 * 0.128f;
                     m_specularColor.Y = param.f1 * 0.128f;
                     m_specularColor.Z = param.f2 * 0.128f;
@@ -2075,6 +2075,7 @@ namespace mpp
         {
             flushDrawArrays();
             m_graphicsDevice.SetRenderTarget(target);
+            m_renderTarget = target;
             m_viewportSet = false;
         }
 
@@ -2112,13 +2113,32 @@ namespace mpp
             m_viewportSet = false;
         }
 
-        public static void mppglBlit(Texture2D src, int width, int height)
+        // dest is in surface pixels, not viewport pixels. SpriteBatch measures its quad against
+        // GraphicsDevice.Viewport and never looks at m_viewport, so leaving the pillarboxed
+        // viewport bound here would offset the composite by its own origin a second time
+        public static void mppglBlit(Texture2D src, Rectangle dest)
         {
             flushDrawArrays();
             if (m_blitBatch == null)
                 m_blitBatch = new SpriteBatch(m_graphicsDevice);
+
+            int surface_w, surface_h;
+            if (m_renderTarget != null)
+            {
+                surface_w = m_renderTarget.Width;
+                surface_h = m_renderTarget.Height;
+            }
+            else
+            {
+                PresentationParameters pp = m_graphicsDevice.PresentationParameters;
+                surface_w = pp.BackBufferWidth;
+                surface_h = pp.BackBufferHeight;
+            }
+            m_graphicsDevice.Viewport = new Viewport(0, 0, surface_w, surface_h);
+            m_graphicsDevice.ScissorRectangle = new Rectangle(0, 0, surface_w, surface_h);
+
             m_blitBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
-            m_blitBatch.Draw(src, new Rectangle(0, 0, width, height), Color.White);
+            m_blitBatch.Draw(src, dest, Color.White);
             m_blitBatch.End();
             m_viewportSet = false;
         }

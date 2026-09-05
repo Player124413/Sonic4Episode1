@@ -3,7 +3,6 @@ using System.Linq;
 
 namespace Sonic4Episode1.Tests;
 
-// see docs/dmtitle-action-names.md for the ACT_TEX_START/ACT_LANG aliasing bug this guards against
 public class TitleActionTableTests
 {
     [Fact]
@@ -22,7 +21,6 @@ public class TitleActionTableTests
             DmTitle.dm_title_g_dm_act_id_tbl_pc.Length);
     }
 
-    // regression: ACT_TEX_NO/ACT_TEX_BACK used to read past the end of AOS_ACTION[41]
     [Fact]
     public void EveryReferencedMobileActionIsInRange()
     {
@@ -61,8 +59,6 @@ public class TitleActionTableTests
             Assert.Equal(id, DmTitle.dm_title_g_dm_act_id_tbl_iphone[(int)act]);
     }
 
-    // regression: the descriptors were declared above the tables they reference, and static field
-    // initialisers run in textual order, so act_id_tbl bound to null and only blew up in game
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -145,8 +141,8 @@ public class TitleActionTableTests
         Assert.Null(DmTitle.TitleVariantForTest(false).mmenu_win_size_h2);
     }
 
-    // every one of these took the wrong #if arm before the re-derive. 138 and 304 are the trailing
-    // #else, which is Wii; the _PC || _XBOX values are 288 and 264. dmTitle.cpp:120-134, :161-175
+    // 138 and 304 are the trailing #else, which is Wii; the _PC || _XBOX values are 288 and 264.
+    // dmTitle.cpp:120-134, :161-175
     [Fact]
     public void ConsoleLayoutMatchesThePcArm()
     {
@@ -190,9 +186,6 @@ public class TitleActionTableTests
         Assert.InRange((int)DmTitle.DME_TITLE_MENU_TYPE.DME_TITLE_MENU_TYPE_NUM, 1, frames);
     }
 
-    // slots 3 and 4 hold different items per build. before this existed, dmTitleSetNextEvent
-    // switched on a bare index, so console's "Return to Game Library" ran the mobile arm's
-    // leaderboards case and opened options with the Xbox Live flag set
     [Fact]
     public void MenuActionsSayWhatEachSlotDoes()
     {
@@ -218,7 +211,6 @@ public class TitleActionTableTests
             console.menu_actions);
     }
 
-    // the table is indexed by menu slot, and the cursor shift can push a slot one past its position
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -237,7 +229,6 @@ public class TitleActionTableTests
             Assert.True(count - 1 + 1 < variant.menu_actions.Length, $"{count} slots overruns menu_actions");
     }
 
-    // the cursor y table is indexed by cur_slct_menu, which slct_menu_num bounds
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

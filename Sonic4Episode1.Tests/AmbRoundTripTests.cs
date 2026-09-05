@@ -154,7 +154,6 @@ public class AmbRoundTripTests
         Assert.True(failures.Count == 0, string.Join("\n", failures.Take(10)));
     }
 
-    // see docs/amb-archives.md for ZONE1_M_M.AMB, which has this exact shape
     [Fact]
     public void ReadsAnEmptyLegacyArchive()
     {

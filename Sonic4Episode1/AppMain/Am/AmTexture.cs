@@ -178,8 +178,6 @@ internal partial class AppMain
         {
 #if FNA
             return Texture2D.DDSFromStreamEXT(m_game.GraphicsDevice, memoryStream);
-#elif THIRD_PARTY_DDS
-            return (Texture2D)DdsKtxXna.DdsKtxLoader.FromStream(m_game.GraphicsDevice, memoryStream);
 #else
             throw new InvalidOperationException("DDS textures are not supported on this platform.");
 #endif

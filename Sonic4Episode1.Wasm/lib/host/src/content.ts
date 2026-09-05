@@ -59,8 +59,15 @@ export async function sizes(): Promise<Record<ContentSet, number>> {
     const entries = await Promise.all((Object.keys(PROFILES) as ContentSet[]).map(async set => {
         const profile = PROFILES[set][astc ? 1 : 0];
         try {
-            const response = await fetch(`sets/${profile}.tar.gz`, { method: 'HEAD' });
-            return [set, Number(response.headers.get('content-length') ?? 0)] as const;
+            // the whole set, boot plus every bundle. A player only downloads the bundles they
+            // reach, but the honest number to show against a content choice is the total
+            const response = await fetch(`sets/${profile}/manifest.txt`);
+            const text = await response.text();
+            const total = text.split('\n')
+                .filter(line => line.startsWith('boot ') || line.startsWith('bundle '))
+                .reduce((sum, line) => sum + Number(line.trim().split(' ').pop() ?? 0), 0);
+
+            return [set, total] as const;
         } catch {
             return [set, 0] as const;
         }

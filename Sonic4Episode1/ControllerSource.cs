@@ -30,6 +30,8 @@ class MonoGameController : Controller
             GamePad.SetVibration((PlayerIndex)index, (float)left / ushort.MaxValue, (float)right / ushort.MaxValue);
     }
 
+    public override bool IsGamePadConnected => GamePad.GetState((PlayerIndex)index).IsConnected;
+
     public override void UpdateControllerReading(ref ControllerReading reading)
     {
         var state = GamePad.GetState((PlayerIndex)index, GamePadDeadZone.Circular);

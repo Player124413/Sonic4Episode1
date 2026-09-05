@@ -149,8 +149,7 @@ public class StageLoadTests
     }
 
     // the mobile TVX arm indexes tvxamb[id - 1], so an id may reach file_num but never pass it.
-    // console indexes by id straight and keeps member 0 blank, which is the same ids one along;
-    // see docs/content-catalog.md
+    // console indexes by id straight and keeps member 0 blank, which is the same ids one along
     [Fact]
     public void NoStagedBlockIdOutrunsItsModelArchive()
     {
@@ -176,10 +175,8 @@ public class StageLoadTests
         }
     }
 
-    // user0 tags a block model as a waterfall or as taking the extra light. Measured 2026-08-30: it
-    // is zero throughout every mobile archive, which is why this port has never drawn a waterfall.
-    // XBLA zone 2 has 61 WATER, PC zone 2 has 56 WATER and 5 EX_LIGHT, both zone 4s have 10
-    // EX_LIGHT. See docs/map-waterfalls.md.
+    // user0 tags a block model as a waterfall or as taking the extra light; it is zero throughout
+    // every mobile archive, which is why this port has never drawn a waterfall
     [Fact]
     public void NoStagedBlockModelIsTagged()
     {

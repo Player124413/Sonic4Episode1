@@ -2,13 +2,6 @@
 
 namespace Sonic4Episode1.Tests;
 
-// NND_VTXMEMBER_DX_BLENDFMT_I8 stores the four bone indices as one packed u32, so the quad reverses
-// with the rest of a big-endian file. Reading it as four independent bytes is silent: the model
-// still draws, every vertex just ends up rigid to whichever bone the reversal moved its weight onto,
-// and a skinned model renders perfectly and never deforms.
-//
-// Measured on GMK_T_ROPE_MDL, which ships in both byte orders with identical content: PC decodes
-// [0,1,0,0] where XBLA decoded [0,0,1,0]. See docs/console-gimmicks.md.
 public class DXBlendIndexEndianTests
 {
     // one vertex of the rope's skinned mesh: 3 float weights, then the packed index quad
@@ -78,8 +71,6 @@ public class DXBlendIndexEndianTests
         Assert.Equal(little.Weights.W, big.Weights.W, 5);
     }
 
-    // the failure this caused: with the quad reversed, the 0.2 and the 0.8 both land on bone 0, so
-    // the vertex is fully weighted to one bone and cannot deform
     [Fact]
     public void TheReversedQuadWouldCollapseOntoASingleBone()
     {

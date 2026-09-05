@@ -1,10 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: AppMain
-// Assembly: Sonic4 ep I, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: 093CE2FC-33E2-4332-B0FE-1EA1E44D3AE7
-// Assembly location: C:\Users\wamwo\Documents\GitHub\Sonic4Ep1-WP7-Decompilation\XAP\Sonic4 ep I.dll
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.CompilerServices;
@@ -4947,7 +4941,7 @@ internal partial class AppMain
     public const int AOD_ACT_SCREEN_HEIGHT = 320;
 
     // g_ao_act_wide_w on iPhone, and the 2D box every hit rect in the game was authored against.
-    // 3:2 at 720 tall. see docs/camera-view-extent.md
+    // 3:2 at 720 tall
     public const float AOD_ACT_AUTHORED_WIDE_W = 1080f;
     public const int A2D_AMA_USR_FLAG_USR_LOOP = 1;
     public const int A2D_AMA_HIT_FLAG_HIT_LOOP = 1;
@@ -14336,7 +14330,6 @@ internal partial class AppMain
     private static uint[] _am_debug_flag;
     private static uint _am_draw_counter;
     public static NNS_MATRIXSTACK _am_default_stack;
-    //private static AppMain.AMS_THREAD _am_cri_thread;
     public static int _am_sample_count;
     public static bool _am_sample_draw_enable;
     private static bool _am_sample_is_suspended;
@@ -14347,7 +14340,6 @@ internal partial class AppMain
     private static bool _am_sample_end_suspended;
     public static RenderTarget2D _renderTarget;
     public static AppMain _instance;
-    //public static IsolatedStorageFile store;
     public static string storePath;
     public static PresentationParameters presentationParameters;
     private static byte[] g_gs_bin_win_a_amb;
@@ -14362,7 +14354,6 @@ internal partial class AppMain
     private static int _am_tlist_cline;
     private static int _am_tlist_dline;
     private static LinkedList<AMS_FS> ams_fsList;
-    public static int FsReadSpeedBytesPerFrame;
     public static AMS_FS lastReadAMS_FS;
     public static uint GMD_SMSG_FLAG_WIN_DISP;
     public static uint GMD_SMSG_FLAG_OK_DISP;
@@ -15393,7 +15384,6 @@ internal partial class AppMain
 
     public void EvBuyScreenStart(object arg)
     {
-        //Upsell.launchUpsellScreen(null);
     }
 
     public static void MTM_ASSERT(int _e)
@@ -15454,7 +15444,9 @@ internal partial class AppMain
         sysEvtDataArray1[3] = new SYS_EVT_DATA((DmTitle.DmTitleStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
         sysEvtDataArray1[4] = new SYS_EVT_DATA((DmTitle.DmMainMenuStart), null, null, null, null, new short[8] { 6, 5, 8, 7, 2, 3, 0, 0 }, 0U);
         sysEvtDataArray1[5] = new SYS_EVT_DATA((StgSlct.DmStgSlctStart), null, null, null, null, new short[8] { 6, 11, 7, 4, 3, 0, 0, 0 }, 0U);
-        sysEvtDataArray1[6] = new SYS_EVT_DATA((this.GmMainInit), null, null, null, null, new short[9] { 5, 6, 9, 11, 4, 3, 14, 0, 0 }, 0U);
+        // case 7 is the PC's straight-to-next-act path. It goes through DM_NEXT_STAGE_MAIN there,
+        // which we do not have, so it re-enters the main game directly
+        sysEvtDataArray1[6] = new SYS_EVT_DATA((this.GmMainInit), null, null, null, null, new short[9] { 5, 6, 9, 11, 4, 3, 14, 6, 0 }, 0U);
         SYS_EVT_DATA[] sysEvtDataArray3 = sysEvtDataArray1;
         short[] numArray2 = new short[8];
         numArray2[0] = 2;
@@ -15513,7 +15505,6 @@ internal partial class AppMain
 
     public int AppInit(string pDocPath)
     {
-        // AppMain.store = IsolatedStorageFile.GetUserStoreForApplication();
         storePath = pDocPath;
         presentationParameters = m_graphicsDevice.PresentationParameters;
         this.amIPhoneInitNN(presentationParameters);
@@ -15549,7 +15540,6 @@ internal partial class AppMain
                     if (isForeground)
                     {
                         amKeyGetData();
-                        //amPadGetData();
                         AoPad.AoPadUpdate();
                     }
 
@@ -15617,7 +15607,6 @@ internal partial class AppMain
                     if (isForeground)
                     {
                         amKeyGetData();
-                        //amPadGetData();
                         AoPad.AoPadUpdate();
                     }
 
@@ -15669,13 +15658,6 @@ internal partial class AppMain
 
     private void cri_proc(int arg)
     {
-        //AppMain.AMS_ALARM alarm = (AppMain.AMS_ALARM)null;
-        //this.amAlarmCreateTimer(alarm);
-        //this.amAlarmSetTimer(alarm, 16666U);
-        //while (AppMain.amThreadCheckExit(AppMain._am_cri_thread) == 0)
-        //    this.amAlarmWaitTimer(ref alarm);
-        //AppMain.amAlarmDelete(alarm);
-        //AppMain.amThreadQuit(AppMain._am_cri_thread);
     }
 
     public static void finish()

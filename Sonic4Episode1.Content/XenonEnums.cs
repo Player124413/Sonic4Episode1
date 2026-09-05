@@ -7,12 +7,10 @@ using System.Linq;
 
 namespace Sonic4Episode1.Content;
 
-// Harvests (D3D9, Xenon) render state pairs out of the corpus. The same model shipped in both the
+// harvests (D3D9, Xenon) render state pairs out of the corpus. the same model shipped in both the
 // Steam and XBLA builds describes the same material with different numbers, because
-// nnfmaterialdxg20.h aliases every NND_*_STDSHADER_* onto that platform's D3D macro. One sample
-// would be guesswork; this walks every model present in both trees and reports what actually occurs.
-//
-// See docs/nn-asset-loading-paths.md for the worked example this generalises.
+// nnfmaterialdxg20.h aliases every NND_*_STDSHADER_* onto that platform's D3D macro. one sample
+// would be guesswork; this walks every model present in both trees and reports what actually occurs
 internal static class XenonEnums
 {
     private sealed class Field
@@ -240,8 +238,7 @@ internal static class XenonEnums
         }
     }
 
-    // by stem: the same member is .ZNO on PC and .ENO on Xenon, which is 110 of the 370 shared
-    // archives per docs/content-catalog.md
+    // by stem: the same member is .ZNO on PC and .ENO on Xenon
     private static string MemberName(AppMain.AMS_AMB_HEADER header, int index)
     {
         var name = header.files?[index];
@@ -287,8 +284,8 @@ internal static class XenonEnums
         if (pc == null || xenon == null)
             return;
 
-        // LogicOp and fFlag are the offset anchors from the worked example: both are the same value
-        // on both platforms, so if they disagree the struct is being read at the wrong offset
+        // LogicOp and fFlag are the offset anchors: both are the same value on both platforms, so
+        // if they disagree the struct is being read at the wrong offset
         if (pc.fFlag != xenon.fFlag || pc.LogicOp != xenon.LogicOp
             || pc.AlphaRef != xenon.AlphaRef || pc.BlendColor != xenon.BlendColor)
         {

@@ -121,8 +121,6 @@ internal partial class AppMain
 
     public delegate void GSF_INIT_FUNC();
 
-    public delegate void FsBackgroundReadComplete(AMS_FS fs);
-
     public delegate void pfnGMS_SMSG_MGR_WORK(GMS_SMSG_MGR_WORK p);
 
     public delegate void seq_func_delegate(GMS_PLAYER_WORK ply_work);

@@ -5,13 +5,8 @@ using static GmPauseMenu.GME_PMENU_ACT;
 
 namespace Sonic4Episode1.Tests;
 
-// the console pause menu builds all 37 actions up front from four archives, picked by which of the
-// four section markers an index falls past. Get a marker or an id wrong and AoActCreate returns
-// null for a sprite that is only drawn on one branch of the state machine.
-//
-// These read no .AMA: the action counts are pinned against the shipped files in
-// AmaActionNameTests, whose reader caches are process-wide statics and must not be raced.
-// see docs/pause-action-ids.md
+// these read no .AMA: the action counts are pinned against the shipped files in
+// AmaActionNameTests, whose reader caches are process-wide statics and must not be raced
 public class PauseMenuTableTests
 {
     private const int CmnActNum = 6;
@@ -37,7 +32,6 @@ public class PauseMenuTableTests
         Assert.Equal((int)ACT_NUM, GmPauseMenu.gm_pm_act_id_tbl.Length);
     }
 
-    // the whole point of the markers: an id is only meaningful against the archive its slot names
     [Fact]
     public void EveryIdIsInsideTheArchiveItsSlotNames()
     {
@@ -131,7 +125,7 @@ public class PauseMenuTableTests
     }
 
     // xbla ships six languages; this build has eleven. The tables staying six long is what makes
-    // the amFsAllVariant gate load-bearing rather than decorative.
+    // the amFsAllVariant gate do real work rather than being decorative.
     [Fact]
     public void TheLanguageTablesStopWhereTheConsoleAssetsDo()
     {
@@ -142,7 +136,6 @@ public class PauseMenuTableTests
         Assert.True(AppMain.GSD_LANGUAGE_NUM > GmPauseMenu.gm_pmenu_bb_width_tbl.Length);
     }
 
-    // the four archives the gate names have to be the four the loader actually reads
     [Fact]
     public void TheGateNamesEveryFileTheLoaderReads()
     {

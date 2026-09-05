@@ -5,9 +5,6 @@ using DirectXTexNet;
 
 namespace Sonic4Episode1.Content;
 
-// turns a shipped PNG into a DDS the engine can upload without decoding. Source is the PNG rather
-// than the retail PVR it came from; PNG is lossless so re-encoding either gives the same result,
-// see docs/content-catalog.md. Renaming .PNG to .DDS is safe since amTextureLoad probes extensions
 internal static class TextureTranscode
 {
     public static bool IsTexture(string name)
@@ -279,7 +276,7 @@ internal static class TextureTranscode
     }
 
     // a decode held open so the alpha analysis that picks the target and the encode that follows
-    // can share it. PVRTC decode dwarfs everything else here, and planning used to pay it twice
+    // can share it
     public sealed class Decoded : IDisposable
     {
         private readonly ScratchImage loaded;

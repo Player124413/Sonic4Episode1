@@ -24,12 +24,9 @@ internal static partial class DmTitle
     public const int DMD_TITLE_AMA_DATA_ARC_ID = 0;
     public const int DMD_TITLE_AMB_DATA_ARC_ID = 1;
 
-    // dmTitle.cpp:120-134. the 304 arm is the #else that iPhone lands in; console is 264
     private const float DMD_TITLE_CRSR_DFLT_POS_X_PC = 264f;
     private const float DMD_TITLE_CRSR_DFLT_POS_X_IOS = 304f;
 
-    // the C++ console menu is seven items; RANK and ZISSEKI are dropped here because both
-    // dead-end, so 5/6/6 becomes 3/4/4. see docs/dmtitle-port-notes.md
     private const int DMD_TITLE_SLCT_MENU_NUM_FIRST_PC = 3;
     private const int DMD_TITLE_SLCT_MENU_NUM_PLAYED_PC = 4;
     private const int DMD_TITLE_SLCT_MENU_NUM_TRIAL_PC = 4;
@@ -62,10 +59,7 @@ internal static partial class DmTitle
 
     private const float DMD_TITLE_MMENU_WIN_SIZE_W_PC = 486.0f;
 
-    // dmTitle.cpp:162 gives the _PC || _XBOX window 486x288, but that 288 is sized for the seven
-    // menu items that arm has. Dropping RANK and ZISSEKI takes two 50-unit slots out, so 188.
-    // That lands on SEGA's own _PS3 value (dmTitle.cpp:165), whose menu is also five items with
-    // the same 3/4/4 counts, which is the cross-check rather than the source.
+    // 188 = 288 (the PC/XBOX window height) minus two 50-unit slots for the dropped RANK/ZISSEKI items
     private const float DMD_TITLE_MMENU_WIN_SIZE_H_PC = 188.0f;
 
     private const float DMD_TITLE_MMENU_WIN_SIZE_W_IOS = 800.0f;
