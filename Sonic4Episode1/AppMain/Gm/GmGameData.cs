@@ -928,7 +928,7 @@ internal partial class AppMain
 
     internal static GMS_GAMEDAT_LOAD_INFO gmGameDatEnemyInfoFor(int stage_id)
     {
-        if (stage_id == 5 && gmStageIsPcLevel())
+        if (stage_id == 5 && gmStageIsPCLevel())
             return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_enemy02_02_pc, gm_gamedat_tbl_enemy02_02_pc.Length);
 
         return gm_gamedat_tbl_enemy_info_tbl[stage_id];
@@ -936,7 +936,7 @@ internal partial class AppMain
 
     internal static GMS_GAMEDAT_LOAD_INFO gmGameDatGimmickInfoFor(int stage_id)
     {
-        if (stage_id == 5 && gmStageIsPcLevel())
+        if (stage_id == 5 && gmStageIsPCLevel())
             return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_gimmick02_02_pc, gm_gamedat_tbl_gimmick02_02_pc.Length);
 
         return gm_gamedat_tbl_gimmick_info_tbl[stage_id];
@@ -947,7 +947,7 @@ internal partial class AppMain
         // the PC-era act 2 places enemies (0/7/10), land (81/83) and break objects (130); the
         // pinball minigame does not, and its tables do not load these archives, so building them
         // there would read a null head
-        if (gmStageIsPcLevel())
+        if (gmStageIsPCLevel())
         {
             GmEneGardonBuild();
             GmEneHaroBuild();
@@ -1298,7 +1298,7 @@ internal partial class AppMain
 
     private static void gmGameDatFlushStage22()
     {
-        if (gmStageIsPcLevel())
+        if (gmStageIsPCLevel())
         {
             GmEneGardonFlush();
             GmEneHaroFlush();

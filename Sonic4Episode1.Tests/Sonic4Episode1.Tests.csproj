@@ -16,7 +16,6 @@
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 
   <ItemGroup>
-    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
     <!-- compiled in rather than referenced: both projects import the same projitems, and neither of
          these files touches DirectXTexNet, so the test host never loads the native DLL -->
     <Compile Include="..\Sonic4Episode1.Content\TextureFormat.cs" Link="TextureFormat.cs" />

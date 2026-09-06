@@ -248,13 +248,28 @@ internal partial class AppMain
         return amDraw_DMAP_PARAM_WATER_Pool.Alloc();
     }
 
+    private static int NNS_PRIM3D_PCT_wraps;
+
+    private static void amDrawLogPrimRingWrap(string ring)
+    {
+        ++NNS_PRIM3D_PCT_wraps;
+        if ((NNS_PRIM3D_PCT_wraps & (NNS_PRIM3D_PCT_wraps - 1)) == 0)
+            mppDiagWrite($"[amdraw] prim3d pct {ring} ring wrapped inside a frame, wrap #{NNS_PRIM3D_PCT_wraps}");
+    }
+
     public static NNS_PRIM3D_PCT_ARRAY amDrawAlloc_NNS_PRIM3D_PCT(int count)
     {
         ++NNS_PRIM3D_PCT_ALLOC_CNT;
         if (NNS_PRIM3D_PCT_buf_size + count >= 16384)
+        {
             NNS_PRIM3D_PCT_buf_size = 0;
+            amDrawLogPrimRingWrap("vertex");
+        }
         if (NNS_PRIM3D_PCT_arrays_count >= 1024)
+        {
             NNS_PRIM3D_PCT_arrays_count = 0;
+            amDrawLogPrimRingWrap("array");
+        }
         NNS_PRIM3D_PCT_ARRAY nnsPriM3DPctArray = NNS_PRIM3D_PCT_arrays[NNS_PRIM3D_PCT_arrays_count];
         nnsPriM3DPctArray.buffer = NNS_PRIM3D_PCT_buf;
         nnsPriM3DPctArray.offset = NNS_PRIM3D_PCT_buf_size;
@@ -2044,7 +2059,8 @@ internal partial class AppMain
         target.target = new RenderTarget2D(
             device, width, height, false,
             SurfaceFormat.Color, DepthFormat.Depth24Stencil8,
-            1, RenderTargetUsage.PreserveContents);
+            Sonic4Ep1.pInstance.GraphicsDevice.PresentationParameters.MultiSampleCount, 
+            RenderTargetUsage.PreserveContents);
 
         if (target.tex_name == 0U)
             OpenGL.glGenTexture(out target.tex_name);

@@ -111,10 +111,10 @@ internal partial class AppMain
 
     internal static void mppDiagWrite(string line)
     {
-#if WINDOWS_UWP
-        // no stdout in an appcontainer, this only shows up in the debugger
+        // an appcontainer has no stdout, and a debugger attached to any head shows Debug but not
+        // Console, so send it both ways rather than wondering which one swallowed the probe
         System.Diagnostics.Debug.WriteLine(line);
-#else
+#if !WINDOWS_UWP
         Console.WriteLine(line);
 #endif
     }

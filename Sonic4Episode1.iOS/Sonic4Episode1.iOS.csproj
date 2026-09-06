@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-ios</TargetFramework>
+    <TargetFramework>net11.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
-    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>16.0</SupportedOSPlatformVersion>
     
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsAotCompatible>true</IsAotCompatible>
@@ -15,11 +15,8 @@
       To learn more, see: https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
     -->
     <TrimMode Condition="'$(Configuration)' == 'Release'">full</TrimMode>
-    <ProvisioningType>manual</ProvisioningType>
-    <CodesignKey>iPhone Developer</CodesignKey>
     <PublishAot>true</PublishAot>
     <ValidateXcodeVersion>false</ValidateXcodeVersion>
-    <EnableSGenConc>True</EnableSGenConc>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -58,7 +55,9 @@
 
   <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
   <PropertyGroup>
-    <ContentProfile>mobile-hd-dxt</ContentProfile>
+    <ContentProfile>mobile-hd-astc</ContentProfile>
+    <CodesignKey>Apple Development: Created via API (U5XH2XPN49)</CodesignKey>
+    <CodesignProvision>VS: WildCard Development</CodesignProvision>
   </PropertyGroup>
   <Import Project="..\Content.targets" />
   <Import Project="..\Shaders\Shaders.targets" />

@@ -25623,9 +25623,9 @@ internal partial class AppMain
         64,
         256
         };
-        gmDecoExtendTablesForPcLevels();
-        gmEventExtendTablesForPcLevels();
-        gmPlySeqExtendStateDataForPcLevels();
+        gmDecoExtendTablesForPCLevels();
+        gmEventExtendTablesForPCLevels();
+        gmPlySeqExtendStateDataForPCLevels();
         g_gm_gmk_trumproad_obj_3d_list = null;
         g_gm_gmk_tp_turn_obj_3d_list = null;
         g_gm_gmk_trumpstage_obj_3d_list = null;

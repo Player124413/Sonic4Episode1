@@ -58,6 +58,7 @@ internal partial class AppMain
             zone_2_boss_scroll_y = g_map_far_zone_2_boss_scroll_y,
 
             zone_3_obj_data_mat_motion = g_map_far_zone_3_scene_obj_data_mat_motion,
+            zone_3_obj_func_out = g_map_far_zone_3_scene_obj_func_out,
 
             zone_3_scroll_x = g_map_far_zone_3_scroll_x,
             zone_3_scroll_y = g_map_far_zone_3_scroll_y,
@@ -165,6 +166,11 @@ internal partial class AppMain
 
             // Z3_FAR_ZNV, the light shafts from the sky
             zone_3_obj_data_mat_motion = new uint[] { 0 },
+
+            zone_3_obj_func_out = new MPP_VOID_OBS_OBJECT_WORK[]
+            {
+                new MPP_VOID_OBS_OBJECT_WORK(gmMapFarSceneObjFuncDrawBg),
+            },
 
             zone_3_scroll_x = new GMS_MAP_FAR_SCROLL[] { new GMS_MAP_FAR_SCROLL(0, 600, 1) },
             zone_3_scroll_y = new GMS_MAP_FAR_SCROLL[] { new GMS_MAP_FAR_SCROLL(0, 100, 1) },

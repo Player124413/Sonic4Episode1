@@ -60,13 +60,13 @@ internal sealed class DXVertexArrays
 
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_COL_U32) != 0u)
         {
-            arrays.Colors = ReadColors(data, offset, stride, count);
+            arrays.Colors = ReadColors(data, offset, stride, count, bigEndian);
             offset += 4;
         }
 
         if ((desc.Format & AppMain.NND_VTXMEMBER_DX_COL2_U32) != 0u)
         {
-            arrays.Colors2 = ReadColors(data, offset, stride, count);
+            arrays.Colors2 = ReadColors(data, offset, stride, count, bigEndian);
             offset += 4;
         }
 
@@ -172,13 +172,15 @@ internal sealed class DXVertexArrays
         return values;
     }
 
-    private static Color[] ReadColors(byte[] data, int offset, int stride, int count)
+    private static Color[] ReadColors(byte[] data, int offset, int stride, int count, bool bigEndian)
     {
         var values = new Color[count];
         for (int i = 0; i < count; ++i)
         {
             int at = i * stride + offset;
-            values[i] = new Color(data[at + 2], data[at + 1], data[at], data[at + 3]);
+            values[i] = bigEndian
+                ? new Color(data[at + 1], data[at + 2], data[at + 3], data[at])
+                : new Color(data[at + 2], data[at + 1], data[at], data[at + 3]);
         }
         return values;
     }

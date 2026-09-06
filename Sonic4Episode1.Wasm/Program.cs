@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using SDL3;
 
 public static partial class Program
@@ -20,6 +21,7 @@ public static partial class Program
             // a parked read leaves the engine half built, so the offer is a clean restart rather
             // than a retry into whatever state the level got to
             ContentFailure.Restart = ReloadPage;
+            TitleContainer.IsLowerCase_EXT = true;
 
             await BundleContentSource.InstallAsync(profile);
             ContentSource.Current = new BundleContentSource();

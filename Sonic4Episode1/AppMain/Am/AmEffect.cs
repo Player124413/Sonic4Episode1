@@ -114,6 +114,56 @@ internal partial class AppMain
         tail.prev = list;
     }
 
+    private struct AMS_AME_POOL_STAT
+    {
+        public string name;
+        public int size;
+        public int num;
+        public int peak;
+        public int wraps;
+        public int double_frees;
+    }
+
+    private static AMS_AME_POOL_STAT _am_ecb_stat;
+    private static AMS_AME_POOL_STAT _am_entry_stat;
+    private static AMS_AME_POOL_STAT _am_runtime_stat;
+    private static AMS_AME_POOL_STAT _am_work_stat;
+
+    private static AMS_AME_POOL_STAT amEffectPoolStatInit(string name, int size)
+    {
+        return new AMS_AME_POOL_STAT { name = name, size = size };
+    }
+
+    private static void amEffectPoolTake(ref AMS_AME_POOL_STAT stat, AMS_AME_LIST block)
+    {
+        ++stat.num;
+        if (stat.num > stat.peak)
+        {
+            stat.peak = stat.num;
+            if (stat.peak % (stat.size >> 3) == 0)
+                mppDiagWrite($"[ame] {stat.name} peak {stat.peak}/{stat.size}");
+        }
+        if (block.in_use)
+        {
+            ++stat.wraps;
+            if ((stat.wraps & (stat.wraps - 1)) == 0)
+                mppDiagWrite($"[ame] {stat.name} pool handed out a live block, {stat.num} live of {stat.size}, wrap #{stat.wraps}");
+        }
+        block.in_use = true;
+    }
+
+    private static void amEffectPoolGive(ref AMS_AME_POOL_STAT stat, AMS_AME_LIST block)
+    {
+        --stat.num;
+        if (!block.in_use)
+        {
+            ++stat.double_frees;
+            if ((stat.double_frees & (stat.double_frees - 1)) == 0)
+                mppDiagWrite($"[ame] {stat.name} block freed twice, {stat.num} live of {stat.size}, double free #{stat.double_frees}");
+        }
+        block.in_use = false;
+    }
+
     public static void amEffectSystemInit()
     {
         NNS_RGBA diffuse = new NNS_RGBA(1f, 1f, 1f, 1f);
@@ -122,6 +172,10 @@ internal partial class AppMain
         _am_enable_draw = 1;
         _am_unit_frame = 1f;
         _am_unit_time = 0.01666667f;
+        _am_ecb_stat = amEffectPoolStatInit("ecb", 128);
+        _am_entry_stat = amEffectPoolStatInit("entry", 512);
+        _am_runtime_stat = amEffectPoolStatInit("runtime", 512);
+        _am_work_stat = amEffectPoolStatInit("work", AMD_AME_WORK_SIZE);
         _am_ecb_alloc = 0;
         _am_ecb_free = 0;
         _am_ecb_head.Clear();
@@ -305,6 +359,7 @@ internal partial class AppMain
         ++_am_ecb_alloc;
         if (_am_ecb_alloc >= 128)
             _am_ecb_alloc = 0;
+        amEffectPoolTake(ref _am_ecb_stat, amsAmeEcb);
         amsAmeEcb.Clear();
         amsAmeEcb.attribute = attribute;
         amsAmeEcb.priority = priority;
@@ -762,6 +817,7 @@ internal partial class AppMain
 
     public static void amEffectFreeRuntimeWork(AMS_AME_RUNTIME_WORK work)
     {
+        amEffectPoolGive(ref _am_work_stat, work);
         _am_work_ref[_am_work_free] = work;
         ++_am_work_free;
         if (_am_work_free < AMD_AME_WORK_SIZE)

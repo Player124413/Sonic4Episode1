@@ -30,7 +30,14 @@ root = "Sources/fonts"
 
 [[assets]]
 source = "wp7-orig"
-paths = ["LIVE", "UPSELL", "Kootenay.xnb", "large.xnb", "medium.xnb", "small.xnb"]
+paths = [
+  "LIVE",
+  "UPSELL",
+  "Kootenay.xnb",
+  "large.xnb",
+  "medium.xnb",
+  "small.xnb",
+]
 
 [[assets]]
 source = "sound"
@@ -246,9 +253,7 @@ archives = [
 [group.pc-zone1-deco]
 source = "pc"
 name = "pc"
-archives = [
-  "G_ZONE1/DECO/DECO_ZONE1.AMB",
-]
+archives = ["G_ZONE1/DECO/DECO_ZONE1.AMB"]
 
 # same closure over XBLA, for mobile-hd: desktop-hd gets the PC-era card stage, mobile-hd the
 # XBLA-era pinball one. XBLA has 53 of PC's 71 archives under G_ZONE2; the 18 it's missing are the
@@ -341,6 +346,32 @@ archives = [
   "G_COM/EFF/EFF_E014.AMB",
 ]
 
+# a boss archive holds the boss model, its motions and its own effects in one file, so it is mixed
+# the way EFF_CMN is and needs the same treatment: the .AME sprites flip, the textures the model
+# nodes name do not. BOSS02 is not here, it moves with zone 2 in console-stages-pc /
+# console-stages-z2.
+[group.console-bosses]
+source = "xbla"
+name = "console"
+flip = true
+# BOSS0x_TEX is the boss itself. The two BOSS05 ones are the jet and thunder effect models,
+# arc indices 39 and 40 in gm_boss5_efct_data_info_tbl, the only effects in any boss that use a
+# model; every other EFF_BS*_TEX is registered with a null model dwork.
+no_flip = [
+  "BOSS01_TEX.AMB",
+  "BOSS03_TEX.AMB",
+  "BOSS04_TEX.AMB",
+  "BOSS05_TEX.AMB",
+  "EFF_BSF_TEX_MD_JT.AMB",
+  "EFF_BSF_TEX_TH.AMB",
+]
+archives = [
+  "G_ZONE1/BOSS/BOSS01.AMB",
+  "G_ZONE3/BOSS/BOSS03.AMB",
+  "G_ZONE4/BOSS/BOSS04.AMB",
+  "G_ZONEF/BOSS/BOSS05.AMB",
+]
+
 [group.console-menus]
 source = "xbla"
 name = "console"
@@ -424,13 +455,28 @@ members = [
 base = "ios-hd"
 overlays = ["wp7-orig"]
 patches = ["patches"]
-variants = ["console-menus", "console-effects", "console-stages", "console-stages-pc", "pc-zone1-deco", "pc-results"]
+variants = [
+  "console-menus",
+  "console-effects",
+  "console-bosses",
+  "console-stages",
+  "console-stages-pc",
+  "pc-zone1-deco",
+  "pc-results",
+]
 
 [profile.mobile-hd]
 base = "ios-hd"
 overlays = ["wp7-orig"]
 patches = ["patches"]
-variants = ["console-effects", "console-stages", "console-stages-pc", "pc-zone1-deco"]
+variants = [
+  "console-effects",
+  "console-bosses",
+  "console-stages",
+  "console-stages-pc",
+  "pc-zone1-deco",
+  "pc-zone1-deco",
+]
 
 [profile.mobile-sd]
 base = "wp7-orig"
@@ -444,7 +490,14 @@ textures = { encode = ["bc1", "bc3"], accept = ["bc1", "bc2", "bc3", "png"] }
 [profile.desktop-hd-astc]
 extends = "desktop-hd"
 heads = ["wasm"]
-textures = { encode = ["astc6x6", "astc4x4"], accept = ["astc4x4", "astc6x6", "png"] }
+textures = { encode = [
+  "astc6x6",
+  "astc4x4",
+], accept = [
+  "astc4x4",
+  "astc6x6",
+  "png",
+] }
 
 [profile.desktop-hd-raw]
 extends = "desktop-hd"
@@ -470,7 +523,14 @@ textures = { encode = ["bc1", "bc3"], accept = ["bc1", "bc2", "bc3", "png"] }
 [profile.mobile-hd-astc]
 extends = "mobile-hd"
 heads = ["android", "ios", "wasm"]
-textures = { encode = ["astc6x6", "astc4x4"], accept = ["astc4x4", "astc6x6", "png"] }
+textures = { encode = [
+  "astc6x6",
+  "astc4x4",
+], accept = [
+  "astc4x4",
+  "astc6x6",
+  "png",
+] }
 
 [profile.mobile-hd-png]
 extends = "mobile-hd"
@@ -485,4 +545,11 @@ textures = { encode = ["png"], accept = ["png"] }
 [profile.mobile-sd-astc]
 extends = "mobile-sd"
 heads = ["android", "ios", "wasm"]
-textures = { encode = ["astc6x6", "astc4x4"], accept = ["astc4x4", "astc6x6", "png"] }
+textures = { encode = [
+  "astc6x6",
+  "astc4x4",
+], accept = [
+  "astc4x4",
+  "astc6x6",
+  "png",
+] }

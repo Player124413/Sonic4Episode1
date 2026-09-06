@@ -224,7 +224,7 @@ internal partial class AppMain
         gm_ring_data = new GMS_EVE_DATA_RG_HEADER((AmbChunk)amBindGet(gGmGamedat, 8));
         gm_deco_data = new GMS_EVE_DATA_DC_HEADER((AmbChunk)amBindGet(gGmGamedat, 7));
 
-        if (gmStageIsPcLevel())
+        if (gmStageIsPCLevel())
             gmEventRemapPcEventIds(gm_eve_data);
     }
 

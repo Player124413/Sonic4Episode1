@@ -45,6 +45,21 @@ public class CameraViewExtentTests
         Assert.True(wider.w > wide.w);
     }
 
+    // GmCameraTruckFunc clamped the camera against map_fcol with GSD_DISP_WIDTH/2 * scale, which is
+    // the half view only while the window is 1280 wide. It is a flat 191.8 at every aspect, so a
+    // wider window walked the camera a full 64 unit block past the map edge and showed the clear
+    // colour down the side. ObjCameraGetOrthoExtent is that same expression generalised, so it has
+    // to agree exactly at 16:9 or the fix moved the framing rather than widening it.
+    [Fact]
+    public void TheOrthoExtentIsTheConsoleClampExpressionAtSixteenNine()
+    {
+        AppMain.g_obj.disp_height = DispHeight;
+        AppMain.ObjCameraGetOrthoExtent(AppMain.GMD_CAMERA_SCALE, 1280f / 720f, out float dx, out float dy);
+
+        Assert.Equal(1280f * 0.5f * AppMain.GMD_CAMERA_SCALE, dx, 3);
+        Assert.Equal(720f * 0.5f * AppMain.GMD_CAMERA_SCALE, dy, 3);
+    }
+
     [Fact]
     public void TheHorizontalExtentTracksTheAspect()
     {

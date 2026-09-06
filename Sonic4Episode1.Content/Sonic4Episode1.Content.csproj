@@ -17,10 +17,6 @@
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 
   <ItemGroup>
-    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
   </ItemGroup>
 

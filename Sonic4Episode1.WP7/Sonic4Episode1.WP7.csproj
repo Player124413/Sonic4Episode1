@@ -9,7 +9,7 @@
 		<LangVersion>9.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<DebugType>full</DebugType>
-		<DefineConstants>WINDOWSPHONE7_5;ASYNC_IO;ASYNC_TARGETING_PACK;BGM_MEDIAPLAYER;</DefineConstants>
+		<DefineConstants>WINDOWSPHONE7_5;ASYNC_IO;ASYNC_TARGETING_PACK;BGM_MEDIAPLAYER;HAS_GAMERSERVICES;</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

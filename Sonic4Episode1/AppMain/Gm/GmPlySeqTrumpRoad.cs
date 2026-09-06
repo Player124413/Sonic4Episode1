@@ -18,7 +18,7 @@ internal partial class AppMain
     // check_attr = MTN_SPEED_NOSET, accept_attr = 0. Nothing transitions out of the ride by input.
     // MTN_SPEED_NOSET is what stops GmPlySeqMain resetting obj_3d.speed to 1.0 every frame after
     // the state function has set it to 2.5. Inert for mobile levels, which never enter state 67
-    internal static void gmPlySeqExtendStateDataForPcLevels()
+    internal static void gmPlySeqExtendStateDataForPCLevels()
     {
         for (int char_id = 0; char_id < g_gm_ply_seq_state_data_tbl.Length; ++char_id)
         {

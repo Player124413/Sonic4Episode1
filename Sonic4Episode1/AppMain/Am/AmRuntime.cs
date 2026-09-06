@@ -6,6 +6,7 @@
         ++_am_runtime_alloc;
         if (_am_runtime_alloc >= 512)
             _am_runtime_alloc = 0;
+        amEffectPoolTake(ref _am_runtime_stat, amsAmeRuntime);
         amsAmeRuntime.Clear();
         return amsAmeRuntime;
     }
@@ -20,6 +21,7 @@
         AMS_AME_RUNTIME_WORK next2 = (AMS_AME_RUNTIME_WORK)runtime.active_head.next;
         for (AMS_AME_RUNTIME_WORK activeTail = (AMS_AME_RUNTIME_WORK)runtime.active_tail; next2 != activeTail; next2 = (AMS_AME_RUNTIME_WORK)next2.next)
             amEffectFreeRuntimeWork(next2);
+        amEffectPoolGive(ref _am_runtime_stat, runtime);
         _am_runtime_ref[_am_runtime_free] = runtime;
         ++_am_runtime_free;
         if (_am_runtime_free < 512)
@@ -33,6 +35,7 @@
         ++_am_work_alloc;
         if (_am_work_alloc >= AMD_AME_WORK_SIZE)
             _am_work_alloc = 0;
+        amEffectPoolTake(ref _am_work_stat, amsAmeRuntimeWork);
         amsAmeRuntimeWork.Clear();
         return amsAmeRuntimeWork;
     }
@@ -43,6 +46,7 @@
         ++_am_entry_alloc;
         if (_am_entry_alloc >= 512)
             _am_entry_alloc = 0;
+        amEffectPoolTake(ref _am_entry_stat, amsAmeEntry);
         amsAmeEntry.runtime = runtime;
         if (ecb.entry_head == null)
         {
@@ -69,6 +73,7 @@
             ecb.entry_tail = (AMS_AME_ENTRY)entry.prev;
         else
             entry.next.prev = entry.prev;
+        amEffectPoolGive(ref _am_entry_stat, entry);
         _am_entry_ref[_am_entry_free] = entry;
         ++_am_entry_free;
         if (_am_entry_free >= 512)

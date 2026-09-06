@@ -58,7 +58,7 @@ public class DecoVariantTests
         Load();
 
         Assert.False(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
-        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage1_1));
+        Assert.False(AppMain.gmDecoIsPCDataComplete(Stage1_1));
     }
 
     [Fact]
@@ -66,11 +66,11 @@ public class DecoVariantTests
     {
         Load(Zone1Deco + " console");
         Assert.True(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
-        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage1_1));
+        Assert.False(AppMain.gmDecoIsPCDataComplete(Stage1_1));
 
         Load(Zone1Deco + " console", Zone1Deco + " pc");
         Assert.True(AppMain.gmDecoIsConsoleDataComplete(Stage1_1));
-        Assert.True(AppMain.gmDecoIsPcDataComplete(Stage1_1));
+        Assert.True(AppMain.gmDecoIsPCDataComplete(Stage1_1));
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class DecoVariantTests
     {
         Load(Zone1Deco + " console", Zone1Deco + " pc");
 
-        Assert.False(AppMain.gmDecoIsPcDataComplete(Stage4_1));
+        Assert.False(AppMain.gmDecoIsPCDataComplete(Stage4_1));
     }
 
     // zone 4 loads its own DECO_ZONE4, so declaring zone 1's does not reach it

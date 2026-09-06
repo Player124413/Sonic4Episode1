@@ -291,7 +291,7 @@ internal static partial class GmFix
     // readout and time attack parts, so PC's act 2, an ordinary stage, is excluded
     private static bool gmFixIsStage22()
     {
-        return GsGetMainSysInfo().stage_id == 5 && !gmStageIsPcLevel();
+        return GsGetMainSysInfo().stage_id == 5 && !gmStageIsPCLevel();
     }
 
     private static bool gmFixIsStageTruck()

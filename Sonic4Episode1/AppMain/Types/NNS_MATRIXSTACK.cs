@@ -38,12 +38,19 @@ internal partial class AppMain
             return this.stack.Count == 0 ? this.identity : this.stack[this.stack.Count - 1];
         }
 
+        // copies, the C++ stack holds values. storing the caller's matrix here hands it to the
+        // matrix pool when this level is popped, and it then gets aliased with the next push
         public void set(NNS_MATRIX mtx)
         {
             if (this.stack.Count > 0)
-                this.stack[this.stack.Count - 1] = mtx;
-            else
-                this.push(mtx);
+            {
+                this.stack[this.stack.Count - 1].Assign(mtx);
+                return;
+            }
+
+            NNS_MATRIX copy = new NNS_MATRIX();
+            copy.Assign(mtx);
+            this.push(copy);
         }
 
         public void clear()

@@ -55,6 +55,7 @@ namespace Sonic4Episode1.Android
             var root = Path.Combine(home, "content");
 
             TitleContainer.SetRoot_EXT(home);
+            TitleContainer.IsLowerCase_EXT = true;
 
             try
             {

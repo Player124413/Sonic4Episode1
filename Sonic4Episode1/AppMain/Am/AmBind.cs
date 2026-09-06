@@ -32,13 +32,6 @@ internal partial class AppMain
             header.data, header.data_base + header.offsets[index], header.lengths[index], header);
     }
 
-    // An AMB can carry absent members, stored as offset 0 and size 0. On console those stay null
-    // through amBindConv, whose amConvert macro only rebases a non-zero offset, so amBindGet hands
-    // the caller a null and every `if (data)` guard in the game works. Ours built a zero-length
-    // chunk pointing at the header instead, which no caller checks for because none has to.
-    //
-    // It goes unnoticed until an archive is mostly absent members: ZONE2_M_M has 4 live of 268, and
-    // handing the other 264 to the NN motion parser is an EndOfStreamException on stage load
     public static AmbChunk amBindGet(
       AMS_AMB_HEADER header,
       int index,
@@ -58,12 +51,6 @@ internal partial class AppMain
         return amBindChunk(header, index);
     }
 
-    // Console keys absence off the offset, because its archives store 0 there for a member with no
-    // data and amConvert only rebases a non-zero one. Ours cannot: the content build repacks, and
-    // its packer gives every absent member the running data position with a zero length, so
-    // ZONE2_M_M's 264 absent members come out at offset 4320 rather than 0. Length is the predicate
-    // that holds for both, and it is the one that matters anyway - a member with no bytes has
-    // nothing any reader can parse
     private static bool amBindIsAbsent(AMS_AMB_HEADER header, int index)
     {
         var sibling = header.member_variant_amb;

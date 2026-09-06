@@ -4131,15 +4131,29 @@ internal partial class AppMain
         nngDrawPrimBlend = blend;
     }
 
+    private static int nngDrawPrimTexMisses;
+
     private static void nnSetPrimitiveTexNum(NNS_TEXLIST texlist, int num)
     {
         if (texlist != null && num >= 0 && num < texlist.nTex)
         {
             nngDrawPrimTexName = texlist.pTexInfoList[num].TexName;
             nngDrawPrimTexture = 1;
+            if (nngDrawPrimTexName == 0U)
+                nnLogPrimTexMiss($"tex {num} of {texlist.nTex} has no gl name yet");
         }
         else
+        {
             nngDrawPrimTexture = 0;
+            nnLogPrimTexMiss(texlist == null ? $"tex {num} on a null texlist" : $"tex {num} outside texlist of {texlist.nTex}");
+        }
+    }
+
+    private static void nnLogPrimTexMiss(string what)
+    {
+        ++nngDrawPrimTexMisses;
+        if ((nngDrawPrimTexMisses & (nngDrawPrimTexMisses - 1)) == 0)
+            mppDiagWrite($"[nnprim] {what}, still bound to gl name {nngDrawPrimTexName}, miss #{nngDrawPrimTexMisses}");
     }
 
     private static void nnSetPrimitiveTexState(int blend, int coord, int uwrap, int vwrap)

@@ -1253,6 +1253,10 @@
         gmBoss2BodyInitMoveNormal(body_work, dest_pos, 60f);
         body_work.proc_update = new MPP_VOID_GMS_BOSS2_BODY_WORK(gmBoss2BodyStatePreBallUpdateRise);
         GmCameraScaleSet(GMD_BOSS2_BODY_BALL_CAMERA_SCALE, (1.0f - GMD_BOSS2_BODY_BALL_CAMERA_SCALE) / GMD_BOSS2_BODY_BALL_FRAME_RISE);
+
+        // gmBoss2.cpp:4405, #if !_IPHONE. the zoom out above is unguarded, so without this the
+        // view grows and the block window does not. DefeatUpdateScatter already undoes it
+        GmMapSetDrawMarginMag();
     }
 
     private static void gmBoss2BodyStatePreBallUpdateRise(GMS_BOSS2_BODY_WORK body_work)

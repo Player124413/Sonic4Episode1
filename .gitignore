@@ -371,3 +371,4 @@ Shaders/mgfx/mojoshader-cmake4.patch
 /Shaders
 /Sonic4Episode1.Wasm/wwwroot/sets
 /docs
+*.sha256

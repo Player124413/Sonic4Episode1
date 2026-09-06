@@ -5583,9 +5583,11 @@ internal partial class AppMain
     public const int GMD_MAP_DRAW_WIDTH_DEF = 6;
     public const int GMD_MAP_DRAW_HEIGHT_DEF = 6;
 
-    // GmMapSetDrawMarginMag widens the window by one more block each side than SEGA's fixed margin.
-    // that is this port's own, and the check buffer has to be sized for it: worst case index is
-    // DF_SIZE + span + 7, where 7 is the largest ofst a 4-bit signed MD_BLOCK can carry
+    // GmMapSetDrawMarginMag is SEGA's, but gmMap.cpp:78 leaves it out of the check buffer, so
+    // folding it in here is ours. worst case index is DF_SIZE + span + 7, where 7 is the largest
+    // ofst a 4-bit signed MD_BLOCK can carry. GmMapGetDrawBlockSpan can also widen span past the
+    // table for a wide window, which is bounded by mppAspectCap and so pinned by test rather than
+    // derived here
     public const int GMD_MAP_DRAW_MARGIN_ADJUST_MAX = 1;
 
     // the console gmMapMain pushes gm_map_draw_size to 8 for zone 2-2, so one buffer covering both

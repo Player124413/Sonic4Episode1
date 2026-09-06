@@ -620,8 +620,8 @@ internal partial class AppMain
                 mapState[index].map_block_num[1] = mpHeader.map_h;
                 mapState[index].map_size[0] = mapState[index].map_block_num[0] * 64;
                 mapState[index].map_size[1] = mapState[index].map_block_num[1] * 64;
-                mapState[index].scrl_scale[0] = (float)((mapState[index].map_size[0] - (double)OBD_LCD_X) / (g_gm_main_system.map_size[0] - (double)OBD_LCD_X));
-                mapState[index].scrl_scale[1] = (float)((mapState[index].map_size[1] - (double)OBD_LCD_Y) / (g_gm_main_system.map_size[1] - (double)OBD_LCD_Y));
+                mapState[index].scrl_scale[0] = GmMapCalcScrlScale(mapState[index].map_size[0], g_gm_main_system.map_size[0], OBD_LCD_X);
+                mapState[index].scrl_scale[1] = GmMapCalcScrlScale(mapState[index].map_size[1], g_gm_main_system.map_size[1], OBD_LCD_Y);
                 mapState[index].command_state = g_gs_main_sys_info.stage_id == 1 || g_gs_main_sys_info.stage_id == 2 || (g_gs_main_sys_info.stage_id == 8 || g_gs_main_sys_info.stage_id == 10) ? gm_map_addmap_command_state_z1_act2_3_z3_act1_3_tbl[index] : (g_gs_main_sys_info.stage_id != 16 ? gm_map_addmap_command_state_tbl[index] : gm_map_addmap_command_state_zf_tbl[index]);
             }
         }
@@ -700,6 +700,47 @@ internal partial class AppMain
         gm_map_draw_margin_adjust = 1U;
     }
 
+    // gmMap.cpp centres the block count on the camera's cell rather than on the camera, so the
+    // leftmost column is off screen margin at 16:9 and on screen once the view passes about 256
+    // units either side. one more column on the left, port-local, same spirit as mppAspectCap
+    private const int GMD_MAP_DRAW_EXTRA_LEFT = 1;
+
+
+    // ratio of scrollable travel, so a background layer reaches its far edge exactly when the main
+    // map does. gmMap.cpp:892 has no guards because lcd was a compile time 383 there and no layer
+    // was ever narrower than it. lcd tracks the window now, so a layer between the old and new
+    // widths comes out negative and scrolls backwards. it cannot line its edges up at that point,
+    // so fall back to the plain size ratio the LOOP_X arm uses: still parallax, still tracks the
+    // player, only the level ends stop matching exactly. zero would pin it and let you walk off it
+    internal static float GmMapCalcScrlScale(int layer_size, int main_size, int lcd_size)
+    {
+        if (main_size <= 0)
+            return 0f;
+
+        float layer_travel = layer_size - lcd_size;
+        float main_travel = main_size - lcd_size;
+        if (layer_travel <= 0f || main_travel <= 0f)
+            return layer_size / (float)main_size;
+
+        return layer_travel / main_travel;
+    }
+
+    // gmMap.cpp:1030 is GMD_MAP_DRAW_WIDTH + MARGIN * 2 + adjust * 2, sized so 6 blocks plus a
+    // block of phase slack each side covers the 383.6 unit view a 16:9 console had. the window is
+    // centred on the camera's own block, so what a wider view needs is (num >> 1) * 64 either side.
+    // widening here rather than in the table keeps 16:9 identical, see docs/camera-view-extent.md
+    internal static int GmMapGetDrawBlockSpan(int draw_size, int margin_adjust, int lcd_size)
+    {
+        int span = draw_size + GMD_MAP_DRAW_MARGIN * 2 + margin_adjust * 2;
+
+        // lcd_size is a truncated short, so the real extent is under lcd_size + 1. rounding the
+        // half extent up to whole blocks off that covers the truncation without costing a block at
+        // any aspect the cap allows
+        int half = lcd_size + 1;
+        int needed = 2 * ((half + GMD_MAP_BLOCK_SIZE * 2 - 1) / (GMD_MAP_BLOCK_SIZE * 2));
+        return span < needed ? needed : span;
+    }
+
     private static void GmMapDrawMap(
       OBS_ACTION3D_NN_WORK[] obj3d_tbl,
       MP_HEADER mp_header,
@@ -715,9 +756,9 @@ internal partial class AppMain
         float num2 = 0.0f;
         int num3 = (int)pos_x >> 6;
         int num4 = (int)pos_y >> 6;
-        int num5 = (int)GMD_MAP_DRAW_WIDTH + 2 + (int)gm_map_draw_margin_adjust * 2;
-        int num6 = (int)GMD_MAP_DRAW_HEIGHT + 2 + (int)gm_map_draw_margin_adjust * 2;
-        int block_left = num3 - (num5 >> 1);
+        int num5 = GmMapGetDrawBlockSpan((int)GMD_MAP_DRAW_WIDTH, (int)gm_map_draw_margin_adjust, OBD_LCD_X);
+        int num6 = GmMapGetDrawBlockSpan((int)GMD_MAP_DRAW_HEIGHT, (int)gm_map_draw_margin_adjust, OBD_LCD_Y);
+        int block_left = num3 - (num5 >> 1) - GMD_MAP_DRAW_EXTRA_LEFT;
         int block_right = num3 + (num5 >> 1);
         int block_top = num4 - (num6 >> 1);
         int block_bottom = num4 + (num6 >> 1);
@@ -773,6 +814,7 @@ internal partial class AppMain
         }
         if (block_bottom >= mp_header.map_h)
             block_bottom = mp_header.map_h - 1;
+
         if (block_left < block_right)
         {
             if (loop_h)
@@ -785,6 +827,7 @@ internal partial class AppMain
             gmMapDrawMapRange(obj3d_tbl, mp_header, md_header, trans_x + num1, trans_y, trans_z, block_left, mp_header.map_w - 1, block_top, block_bottom);
             gmMapDrawMapRange(obj3d_tbl, mp_header, md_header, trans_x + num2, trans_y, trans_z, 0, block_right, block_top, block_bottom);
         }
+
     }
 
     private static void gmMapDrawMapRange(
@@ -944,7 +987,7 @@ internal partial class AppMain
         if ((work.flag & 2147483648U) > 0U)
             mapOtherMapState.scrl_scale[0] = mapOtherMapState.map_size[0] / (float)g_gm_main_system.map_size[0] / mag;
         else
-            mapOtherMapState.scrl_scale[0] = (float)((mapOtherMapState.map_size[0] - (double)OBD_LCD_X) / (g_gm_main_system.map_size[0] - (double)OBD_LCD_X)) / mag;
+            mapOtherMapState.scrl_scale[0] = GmMapCalcScrlScale(mapOtherMapState.map_size[0], g_gm_main_system.map_size[0], OBD_LCD_X) / mag;
     }
 
     private static void GmMapSetAddMapUserScrlXAddSize(float move_size)
@@ -1180,8 +1223,15 @@ internal partial class AppMain
         ObjDrawSetParallelLight(NNE_LIGHT_5, ref col, intensity, nnsVector);
     }
 
+    // gmMap.cpp:1993 wraps this in #if _IPHONE, and console's GMD_MAP_DRAW_WIDTH is a literal 6.
+    // the table is phone memory tuning, hand-minimised per boss to the point where zone 2, 3 and 4
+    // bosses cover 192 units against a 191.8 half view. the direct writes in gmMapMainModel stay,
+    // those are ours for the card stage's perspective near layer
     private static void GmMapSetMapDrawSize(int size)
     {
+        if (gm_map_variant.blocks_as_model)
+            return;
+
         gm_map_draw_size[0] = gm_map_set_draw_size[size, 0];
         gm_map_draw_size[1] = gm_map_set_draw_size[size, 1];
     }
@@ -1526,12 +1576,13 @@ internal partial class AppMain
         float num2 = 0.0f;
         int num3 = (int)pos_x >> 6;
         int num4 = (int)pos_y >> 6;
-        int num5 = (int)GMD_MAP_DRAW_WIDTH + 2 + (int)gm_map_draw_margin_adjust * 2;
-        int num6 = (int)GMD_MAP_DRAW_HEIGHT + 2 + (int)gm_map_draw_margin_adjust * 2;
-        int block_left = num3 - (num5 >> 1);
+        int num5 = GmMapGetDrawBlockSpan((int)GMD_MAP_DRAW_WIDTH, (int)gm_map_draw_margin_adjust, OBD_LCD_X);
+        int num6 = GmMapGetDrawBlockSpan((int)GMD_MAP_DRAW_HEIGHT, (int)gm_map_draw_margin_adjust, OBD_LCD_Y);
+        int block_left = num3 - (num5 >> 1) - GMD_MAP_DRAW_EXTRA_LEFT;
         int block_right = num3 + (num5 >> 1);
         int block_top = num4 - (num6 >> 1);
         int block_bottom = num4 + (num6 >> 1);
+
         if (block_left < 0)
         {
             if (!loop_h)

@@ -302,7 +302,7 @@ public class MapVariantTests
         Assert.False(mobile.zone_2_scales_sky);
         Assert.True(console.zone_2_scales_sky);
 
-        // zone 3's whole fork is one index: INVALID against Z3_FAR_ZNV
+        // INVALID against Z3_FAR_ZNV
         Assert.Equal(uint.MaxValue, mobile.zone_3_obj_data_mat_motion[0]);
         Assert.Equal(0u, console.zone_3_obj_data_mat_motion[0]);
 
@@ -310,6 +310,20 @@ public class MapVariantTests
         Assert.Equal(4, console.zone_final_obj_data.Length);
         Assert.False(mobile.zone_final_rotates_per_object);
         Assert.True(console.zone_final_rotates_per_object);
+    }
+
+    // gmMapFar.cpp:841-848. mobile stands Lost Labyrinth's backdrop up as one flat quad through
+    // Draw2DBG, console draws the real model through DrawBg, and each of those carries its own
+    // per-stage cull windows tuned against its own arm's scroll width. running the mobile pair on
+    // console put the windows in a 678 wide space the camera only reaches 600 of
+    [Fact]
+    public void ZoneThreeDrawsThroughItsOwnFunctionOnEachArm()
+    {
+        var mobile = AppMain.MapFarVariantForTest(false);
+        var console = AppMain.MapFarVariantForTest(true);
+
+        Assert.Equal("gmMapFarSceneObjFuncDraw2DBG", mobile.zone_3_obj_func_out[0].Method.Name);
+        Assert.Equal("gmMapFarSceneObjFuncDrawBg", console.zone_3_obj_func_out[0].Method.Name);
     }
 
     // every per-zone table has to agree in length with its siblings or the init loops walk off one
@@ -331,6 +345,9 @@ public class MapVariantTests
         Assert.Equal(zoneF, variant.zone_final_obj_func_out.Length);
 
         Assert.NotEmpty(variant.zone_3_obj_data_mat_motion);
+        Assert.Equal(
+            variant.zone_3_obj_data_mat_motion.Length,
+            variant.zone_3_obj_func_out.Length);
 
         Assert.NotEmpty(variant.zone_2_scroll_x);
         Assert.NotEmpty(variant.zone_2_scroll_y);

@@ -407,7 +407,7 @@ internal partial class AppMain
 
         // stage 5 is the pinball minigame on mobile and xbla, where the player is a ball. PC's act
         // 2 is the card stage and wants an ordinary Sonic
-        if (g_gs_main_sys_info.stage_id == 5 && !gmStageIsPcLevel())
+        if (g_gs_main_sys_info.stage_id == 5 && !gmStageIsPCLevel())
             GmPlayerSetPinballSonic(ply_work);
         else if (GSM_MAIN_STAGE_IS_SPSTAGE())
             GmPlayerSetSplStgSonic(ply_work);

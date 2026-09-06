@@ -97,8 +97,8 @@ public class Sonic4Ep1 : Game
         this.graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         this.graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
 #else
-        this.graphics.PreferredBackBufferWidth = 1280;
-        this.graphics.PreferredBackBufferHeight = 720;
+        this.graphics.PreferredBackBufferWidth = 2560;
+        this.graphics.PreferredBackBufferHeight = 1080;
 #endif
 #if WINDOWS_UWP || IOS || ANDROID || WINDOWSPHONE7_5
         this.graphics.IsFullScreen = true;
@@ -110,11 +110,13 @@ public class Sonic4Ep1 : Game
         this.graphics.PreparingDeviceSettings += (object sender, PreparingDeviceSettingsEventArgs e) =>
         {
             e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.One;
-#if !IOS && !ANDROID
+#if !IOS && !ANDROID && !WASM
             e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
+#elif IOS && !WASM // kill mali with the fire of a thousand suns
+            e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 2;
 #endif
 
-#if IOS || ANDROID
+#if IOS || ANDROID || WASM
             /* FNA subscribes to ClientSizeChanged itself and re-pins the back buffer to the window,
              * which beats PreferredBackBuffer. This event is raised at the end of
              * INTERNAL_CreateGraphicsDeviceInformation, after that has happened and on both the
@@ -124,17 +126,6 @@ public class Sonic4Ep1 : Game
             GetFixedWidthBackBuffer(pp.BackBufferWidth, pp.BackBufferHeight, out var bbWidth, out var bbHeight);
             pp.BackBufferWidth = bbWidth;
             pp.BackBufferHeight = bbHeight;
-#endif
-
-#if WASM
-            // same story as iOS: the page owns the canvas, so the size it asked for has to survive
-            // FNA re-pinning the back buffer to whatever SDL made the window
-            if (viewWidth > 0 && viewHeight > 0)
-            {
-                var pp = e.GraphicsDeviceInformation.PresentationParameters;
-                pp.BackBufferWidth = viewWidth;
-                pp.BackBufferHeight = viewHeight;
-            }
 #endif
 
         };
@@ -157,7 +148,7 @@ public class Sonic4Ep1 : Game
 #endif
     }
 
-#if IOS || ANDROID
+#if IOS || ANDROID || WASM
     // TODO(wam): revisit when ultrawide gets a real pass
     private const int FixedBackBufferWidth = 1920;
 

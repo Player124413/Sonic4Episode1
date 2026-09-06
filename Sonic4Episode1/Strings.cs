@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-
 namespace Sonic4ep1
 {
     public static class Strings
@@ -73,7 +66,5 @@ namespace Sonic4ep1
         public const string ID_A11_DESC = @"Clear the E.G.G. Station Zone without taking any damage.";
         public const string ID_LB_NORECORDS = @"No Records";
         public const string ID_UPDATE_TEXT = @"An update is available! This update is required to connect to Xbox LIVE. Update now?";
-
-        public static CultureInfo Culture { get; internal set; }
     }
 }

@@ -18,10 +18,6 @@
   <Import Project="..\Shaders\Shaders.targets" />
 
   <ItemGroup>
-    <Compile Include="..\Sonic4Episode1.FNA\Stubs.cs" Link="Stubs.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
     <PackageReference Include="NVorbis" Version="0.10.5" />
   </ItemGroup>

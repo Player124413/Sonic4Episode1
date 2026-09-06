@@ -65,8 +65,11 @@ internal partial class AppMain
         public GMS_MAP_FAR_SCROLL[] zone_2_scroll_y;
         public GMS_MAP_FAR_SCROLL[] zone_2_boss_scroll_y;
 
-        // the whole of zone 3's fork: mobile ships an empty material archive and animates nothing
+        // mobile ships an empty material archive and animates nothing
         public uint[] zone_3_obj_data_mat_motion;
+
+        // Draw2DBG on mobile against DrawBg on console, and each carries its own cull windows
+        public MPP_VOID_OBS_OBJECT_WORK[] zone_3_obj_func_out;
 
         public GMS_MAP_FAR_SCROLL[] zone_3_scroll_x;
         public GMS_MAP_FAR_SCROLL[] zone_3_scroll_y;

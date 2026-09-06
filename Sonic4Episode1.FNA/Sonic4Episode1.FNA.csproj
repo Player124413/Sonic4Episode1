@@ -11,6 +11,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <NoWarn>$(NoWarn);1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
     <ApplicationIcon>s4.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup>

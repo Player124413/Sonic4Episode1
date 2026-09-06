@@ -4,6 +4,7 @@ internal partial class AppMain
     {
         public AMS_AME_LIST next;
         public AMS_AME_LIST prev;
+        public bool in_use;
 
         public virtual void Clear()
         {

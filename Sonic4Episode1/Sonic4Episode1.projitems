@@ -1192,13 +1192,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)SaveState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)setting\file.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)setting\main.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shims\Guide.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shims\Sensors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShortBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sonic4Ep1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StreamExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Strings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TripleType`3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIntBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Upsell.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UShortBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValueTuple.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ControllerSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)XBOXLive.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)XmlStorage.cs" />

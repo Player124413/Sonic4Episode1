@@ -28,6 +28,7 @@
         }
         ecb.prev.next = ecb.next;
         ecb.next.prev = ecb.prev;
+        amEffectPoolGive(ref _am_ecb_stat, ecb);
         _am_ecb_ref[_am_ecb_free] = ecb;
         ++_am_ecb_free;
         if (_am_ecb_free < 128)

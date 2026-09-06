@@ -114,8 +114,9 @@ PS_OUTPUT nnStdShaderPSUserProfile(PS_INPUT_USERPROFILE Input)
     g_Input = Input.base;
     SampleTexMap();
 
+// SampleTexMap has already folded u_TexDecalAlpha and u_TexBaseAlpha into the alphas below
 #if ( NND_OPT_TEX_DECAL != -1 )
-    float  decalAlpha = g_smpDecal.a * u_TexDecalAlpha;
+    float  decalAlpha = g_smpDecal.a;
     float3 decalColor = g_smpDecal.rgb;
 #else
     float  decalAlpha = 0.0f;
@@ -124,7 +125,7 @@ PS_OUTPUT nnStdShaderPSUserProfile(PS_INPUT_USERPROFILE Input)
 
     float2 offset;
     offset.x = g_smpBase.b;
-    offset.y = g_smpBase.a * u_TexBaseAlpha;
+    offset.y = g_smpBase.a;
 
 #if NND_USER_PROFILE == 1
     offset = offset * 0.01f - 0.005f;
@@ -143,16 +144,22 @@ PS_OUTPUT nnStdShaderPSUserProfile(PS_INPUT_USERPROFILE Input)
 
     float3 scene = tex2D(s_texUserSampler2D1, screen + offset).rgb;
 
-#if NND_USER_PROFILE == 1
+#if ( NND_USER_PROFILE == 1 ) && ( NND_OPT_TEX_DECAL2 != -1 )
+    float  decal2Alpha = g_smpDecal2.a;
+    float3 color = saturate(g_smpDecal2.rgb * decal2Alpha + decalColor * decalAlpha + scene);
+    float  alpha = 1.0f - (1.0f - ceil(decalAlpha)) * (1.0f - decalAlpha) * (1.0f - decal2Alpha);
+#elif NND_USER_PROFILE == 1
     float3 color = saturate(decalColor * decalAlpha + scene);
+    float  alpha = ceil(decalAlpha);
 #else
     float3 color = lerp(scene, decalColor, decalAlpha);
+    float  alpha = ceil(decalAlpha);
 #endif
 
     PS_OUTPUT output;
     output.Col.rgb = lerp(u_Fog.color.rgb, saturate(color * g_Input.FrontCol[0].rgb),
                           g_Input.ViewPosFog.NND_SUFFIX_FOG);
-    output.Col.a = ceil(decalAlpha) * g_Input.FrontCol[0].a;
+    output.Col.a = alpha * g_Input.FrontCol[0].a;
     return output;
 }
 #endif

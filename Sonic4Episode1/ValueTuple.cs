@@ -7,6 +7,7 @@
 // ReSharper disable SuspiciousTypeConversion.Global
 // ReSharper disable JoinDeclarationAndInitializer
 
+#if NET40 || WINDOWSPHONE7_5
 namespace System
 {
 	using Collections;
@@ -2397,3 +2398,4 @@ namespace System
 		}
 	}
 }
+#endif

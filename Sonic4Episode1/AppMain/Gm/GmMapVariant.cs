@@ -48,7 +48,7 @@ internal partial class AppMain
     // resolved once per stage by gmMapSelectVariant. True when this stage's levels are the PC-era
     // ones rather than the mobile-era layouts both mobile and xbla ship, which is what decides the
     // things that differ per LEVEL rather than per asset kind
-    internal static bool gmStageIsPcLevel()
+    internal static bool gmStageIsPCLevel()
     {
         return gm_map_variant == gm_map_variant_pc;
     }

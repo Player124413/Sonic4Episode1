@@ -230,7 +230,7 @@ internal sealed class StageMap
         for (int i = 0; i < models.file_num; i++)
         {
             var chunk = AppMain.amBindGet(models, i, out _);
-            if (chunk.length < 4)
+            if (chunk == null || chunk.length < 4)
                 continue;
 
             uint id = (uint)(chunk.array[chunk.offset]

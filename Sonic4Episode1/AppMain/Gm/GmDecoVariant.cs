@@ -23,7 +23,7 @@ internal partial class AppMain
         return gmDecoAllDecoArchives(stage_id, amFsIsConsoleGrade);
     }
 
-    internal static bool gmDecoIsPcDataComplete(int stage_id)
+    internal static bool gmDecoIsPCDataComplete(int stage_id)
     {
         return gmDecoAllDecoArchives(stage_id,
             v => string.Equals(v, AMD_FS_VARIANT_PC, StringComparison.OrdinalIgnoreCase));
@@ -52,6 +52,6 @@ internal partial class AppMain
     private static void gmDecoSelectVariant(int stage_id)
     {
         gm_deco_as_model = gmDecoIsConsoleDataComplete(stage_id);
-        gm_deco_as_pc = gmDecoIsPcDataComplete(stage_id);
+        gm_deco_as_pc = gmDecoIsPCDataComplete(stage_id);
     }
 }

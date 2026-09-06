@@ -49,7 +49,7 @@ internal partial class AppMain
         { 317, GMD_EVENT_ID_GMK_TRUMP_STAGE_C9 },
     };
 
-    internal static void gmEventExtendTablesForPcLevels()
+    internal static void gmEventExtendTablesForPCLevels()
     {
         Array.Resize(ref g_gm_event_tbl, GMD_EVENT_ID_MAX_PC);
         Array.Resize(ref g_gm_event_size_tbl, GMD_EVENT_ID_MAX_PC);

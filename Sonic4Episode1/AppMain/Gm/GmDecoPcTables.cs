@@ -39,7 +39,7 @@ internal partial class AppMain
 
     // 184/185 static scenery, 186-188 and 193-195 dice, 189-192 and 196-199 trump cards. The set
     // repeats because the second group is the same models with a different touch response
-    internal static void gmDecoExtendTablesForPcLevels()
+    internal static void gmDecoExtendTablesForPCLevels()
     {
         const int from = GMD_DECORATE_ID_PC_START;
         const int to = GMD_DECORATE_ID_MAX_PC;

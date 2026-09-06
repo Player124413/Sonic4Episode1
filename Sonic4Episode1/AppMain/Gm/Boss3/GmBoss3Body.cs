@@ -489,7 +489,9 @@
         }
         else
         {
-            if (_am_draw_video.wide_screen)
+            // gmBoss3.cpp:2562 is !wide_screen. the intro zoom out is there to fit the arena on a
+            // 4:3 screen, and pairing it with the wider block window is why they go together
+            if (!_am_draw_video.wide_screen)
             {
                 GmCameraScaleSet(0.85f, 0.0025f);
                 GmMapSetDrawMarginMag();

@@ -1515,7 +1515,7 @@
 			AMS_AMB_HEADER mat_amb_header = null;
 			if (uint.MaxValue != mat_motion_index)
 				mat_amb_header = readAMBFile(amBindGet(gmMapFarDataGetAmbHeader(), 2));
-			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, mat_motion_index, mat_amb_header, 0U, null, g_map_far_zone_3_scene_obj_func_main[index], g_map_far_zone_3_scene_obj_func_out[index], command_state);
+			gmMapFarSceneLoadObj((GMD_MAP_FAR_OBJ_INDEX)index, obj3d, mat_motion_index, mat_amb_header, 0U, null, g_map_far_zone_3_scene_obj_func_main[index], gm_map_far_variant.zone_3_obj_func_out[index], command_state);
 		}
 		for (int index = 0; index < g_map_far_zone_3_scene_obj_data.Length; ++index)
 			gmMapFarDataGetObjWork((GMD_MAP_FAR_OBJ_INDEX)index).user_work = (uint)index;
