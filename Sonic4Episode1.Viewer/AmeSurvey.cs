@@ -23,9 +23,11 @@ internal static class AmeSurvey
         public readonly Dictionary<ushort, int> Types = new Dictionary<ushort, int>();
         public readonly List<string> Failures = new List<string>();
         public readonly SortedSet<string> UnhandledIn = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        public readonly SortedDictionary<string, SortedSet<int>> TexturesIn =
+            new SortedDictionary<string, SortedSet<int>>(StringComparer.OrdinalIgnoreCase);
     }
 
-    public static int Run(string directory)
+    public static int Run(string directory, bool textures = false)
     {
         if (!Directory.Exists(directory))
         {
@@ -49,7 +51,7 @@ internal static class AmeSurvey
             }
         }
 
-        Report(directory, archives.Length, tally);
+        Report(directory, archives.Length, tally, textures);
         return tally.Failures.Count == 0 && tally.NullNodes == 0 ? 0 : 1;
     }
 
@@ -113,6 +115,13 @@ internal static class AmeSurvey
                 ushort type = (ushort)node.type;
                 tally.Types.TryGetValue(type, out int count);
                 tally.Types[type] = count + 1;
+
+                int texture = TextureOf(node);
+                if (texture < 0)
+                    continue;
+                if (!tally.TexturesIn.TryGetValue(name, out var ids))
+                    tally.TexturesIn[name] = ids = new SortedSet<int>();
+                ids.Add(texture);
             }
         }
         catch (Exception ex)
@@ -121,7 +130,21 @@ internal static class AmeSurvey
         }
     }
 
-    private static void Report(string directory, int archives, Tally tally)
+    // the three node kinds that name a texture. The index is into whichever texlist the effect is
+    // created with, which is one per bank, so these numbers only mean anything against the archive
+    // the effect actually ships in
+    private static int TextureOf(AppMain.AMS_AME_NODE node)
+    {
+        if (node is AppMain.AMS_AME_NODE_SPRITE sprite)
+            return sprite.texture_slot * 1000 + sprite.texture_id;
+        if (node is AppMain.AMS_AME_NODE_LINE line)
+            return line.texture_slot * 1000 + line.texture_id;
+        if (node is AppMain.AMS_AME_NODE_PLANE plane)
+            return plane.texture_slot * 1000 + plane.texture_id;
+        return -1;
+    }
+
+    private static void Report(string directory, int archives, Tally tally, bool textures)
     {
         Console.WriteLine($"{directory}");
         Console.WriteLine($"  {archives} archive(s), {tally.Files} AME parsed, "
@@ -137,6 +160,19 @@ internal static class AmeSurvey
                 ? ((AppMain.AME_AME_NODE_TYPE)pair.Key).ToString()
                 : "UNKNOWN";
             Console.WriteLine($"    0x{pair.Key:X4}  {pair.Value,6}  {label}");
+        }
+
+        if (textures)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"  texture ids named, by file ({tally.TexturesIn.Count} files)");
+            foreach (var pair in tally.TexturesIn)
+                Console.WriteLine($"    {pair.Key}: {string.Join(", ", pair.Value)}");
+
+            var all = new SortedSet<int>();
+            foreach (var ids in tally.TexturesIn.Values)
+                all.UnionWith(ids);
+            Console.WriteLine($"    all: {string.Join(", ", all)}");
         }
 
         if (tally.UnhandledIn.Count != 0)

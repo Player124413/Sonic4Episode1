@@ -10,11 +10,13 @@ namespace Sonic4Episode1.Tests;
 // inside `#if !defined GMD_GAMEDAT_NO_CREATE_MAP_MOTION` between ATTR and MAPFAR.
 public class MapMotionTests
 {
-    private const string MTN = "G_ZONE2/MAP/ZONE2_M_M.AMB";
-    private const string MMTN = "G_ZONE2/MAP/ZONE2_M_V.AMB";
+    // zones 2 and 3, the stages with motion sidecars
+    public static TheoryData<int> MotionStages => new() { 4, 5, 6, 7, 8, 9, 10, 11 };
 
-    // zone 2's four acts, the only stages with motion sidecars
-    public static TheoryData<int> Zone2Stages => new() { 4, 5, 6, 7 };
+    private static string Zone(int stage_id)
+    {
+        return stage_id < 8 ? "ZONE2" : "ZONE3";
+    }
 
     private static AppMain.GMS_GAMEDAT_LOAD_DATA[] ConsoleTable(int stage_id)
     {
@@ -23,23 +25,28 @@ public class MapMotionTests
             case 4: return AppMain.gm_gamedat_tbl_map02_01_console;
             case 5: return AppMain.gm_gamedat_tbl_map02_02_console;
             case 6: return AppMain.gm_gamedat_tbl_map02_03_console;
-            default: return AppMain.gm_gamedat_tbl_map02_BOSS_console;
+            case 7: return AppMain.gm_gamedat_tbl_map02_BOSS_console;
+            case 8: return AppMain.gm_gamedat_tbl_map03_01_console;
+            case 9: return AppMain.gm_gamedat_tbl_map03_02_console;
+            case 10: return AppMain.gm_gamedat_tbl_map03_03_console;
+            default: return AppMain.gm_gamedat_tbl_map03_BOSS_console;
         }
     }
 
     [Theory]
-    [MemberData(nameof(Zone2Stages))]
+    [MemberData(nameof(MotionStages))]
     public void TheSidecarsLandOnTheirOwnSlots(int stage_id)
     {
         var table = ConsoleTable(stage_id);
+        var zone = Zone(stage_id);
 
-        Assert.Equal(MTN, table[AppMain.GMD_GAMEDAT_MAP_MTN].path);
-        Assert.Equal(MMTN, table[AppMain.GMD_GAMEDAT_MAP_MMTN].path);
+        Assert.Equal($"G_{zone}/MAP/{zone}_M_M.AMB", table[AppMain.GMD_GAMEDAT_MAP_MTN].path);
+        Assert.Equal($"G_{zone}/MAP/{zone}_M_V.AMB", table[AppMain.GMD_GAMEDAT_MAP_MMTN].path);
     }
 
     // both go through the map post proc, which is what files them into g_gm_gamedat_map at all
     [Theory]
-    [MemberData(nameof(Zone2Stages))]
+    [MemberData(nameof(MotionStages))]
     public void TheSidecarsLoadThroughTheMapProc(int stage_id)
     {
         var table = ConsoleTable(stage_id);
@@ -55,7 +62,7 @@ public class MapMotionTests
     // the first four rows are what GmMapBuildData reads by slot, and everything after the splice
     // has to keep its order too even though MAPFAR and DECO no longer sit where they did
     [Theory]
-    [MemberData(nameof(Zone2Stages))]
+    [MemberData(nameof(MotionStages))]
     public void SplicingChangesNothingButThePosition(int stage_id)
     {
         var plain = AppMain.gm_gamedat_tbl_map_info_tbl[stage_id];
@@ -90,12 +97,14 @@ public class MapMotionTests
         }
     }
 
-    // zone 1, 3 and 4 ship sidecars on PC too, but ours are not in the content group, so a row for
-    // them would be a load of a file that is not there
+    // zones 1 and 4 ship sidecars on PC too, but ours are not in the content group, so a row for
+    // them would be a load of a file that is not there.
+    // this one is weaker than it looks: gm_map_variant is mobile in the test host and nothing here
+    // moves it, so gmGameDatMapInfoFor short circuits before the switch either way
     [Fact]
-    public void OnlyZoneTwoGetsSidecars()
+    public void ZonesOneAndFourGetNoSidecars()
     {
-        foreach (int stage_id in new[] { 0, 1, 2, 3, 8, 9, 10, 11 })
+        foreach (int stage_id in new[] { 0, 1, 2, 3, 12, 13, 14, 15 })
             Assert.Same(AppMain.gm_gamedat_tbl_map_info_tbl[stage_id].data_tbl,
                 AppMain.gmGameDatMapInfoFor(stage_id).data_tbl);
     }

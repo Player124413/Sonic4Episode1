@@ -55,8 +55,31 @@ public class EventPcIdTests
     [Fact]
     public void EveryPortedIdHasAMaker()
     {
-        for (int id = AppMain.GMD_EVENT_ID_PORTED_START; id < AppMain.GMD_EVENT_ID_MAX_PC; ++id)
+        for (int id = AppMain.GMD_EVENT_ID_PORTED_START; id <= AppMain.GMD_EVENT_ID_NOSET_TRUMP_ROAD_ROUTE; ++id)
             Assert.NotNull(AppMain.g_gm_event_tbl[id]);
+    }
+
+    [Fact]
+    public void EveryLostLabyrinthIdHasAMaker()
+    {
+        for (int id = AppMain.GMD_EVENT_ID_GMK_TORCH; id < AppMain.GMD_EVENT_ID_MAX_PC; ++id)
+            Assert.NotNull(AppMain.g_gm_event_tbl[id]);
+    }
+
+    // PC shares one maker across the fuse line and the dynamite and another across the wall, and
+    // the far-margin twins go to the same pair. Ours keep six distinct ids so the remap stays 1:1,
+    // which only works if they land on the right two makers
+    [Fact]
+    public void TheFuseFamilySharesTwoMakers()
+    {
+        var fuse = AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_FUSE_LINE];
+        var wall = AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_BOMB_WALL];
+
+        Assert.NotEqual(fuse, wall);
+        Assert.Equal(fuse, AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_DYNAMITE]);
+        Assert.Equal(fuse, AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_FUSE_LINE_FAR]);
+        Assert.Equal(fuse, AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_DYNAMITE_FAR]);
+        Assert.Equal(wall, AppMain.g_gm_event_tbl[AppMain.GMD_EVENT_ID_GMK_BOMB_WALL_FAR]);
     }
 
     // PC dispatches all eight suits through gmGmkTrumpStageInit and picks the model off the id, so
@@ -107,37 +130,62 @@ public class EventPcIdTests
         Assert.NotEqual(byte.MaxValue, record.pos_x);
     }
 
+    [Theory]
+    [InlineData(296, AppMain.GMD_EVENT_ID_GMK_TORCH, 64)]
+    [InlineData(297, AppMain.GMD_EVENT_ID_GMK_CANDLE, 64)]
+    [InlineData(298, AppMain.GMD_EVENT_ID_GMK_RAIL_END, 64)]
+    [InlineData(299, AppMain.GMD_EVENT_ID_GMK_RAIL_END_AREA, 64)]
+    [InlineData(305, AppMain.GMD_EVENT_ID_GMK_FUSE_LINE, 128)]
+    [InlineData(306, AppMain.GMD_EVENT_ID_GMK_DYNAMITE, 128)]
+    [InlineData(307, AppMain.GMD_EVENT_ID_GMK_BOMB_WALL, 128)]
+    [InlineData(312, AppMain.GMD_EVENT_ID_GMK_LL2_REGION, 384)]
+    [InlineData(313, AppMain.GMD_EVENT_ID_GMK_LL2_DARK_TRIGGER, 384)]
+    [InlineData(318, AppMain.GMD_EVENT_ID_GMK_FUSE_LINE_FAR, 447)]
+    [InlineData(319, AppMain.GMD_EVENT_ID_GMK_DYNAMITE_FAR, 447)]
+    [InlineData(320, AppMain.GMD_EVENT_ID_GMK_BOMB_WALL_FAR, 448)]
+    public void TheLostLabyrinthIdsAreTranslated(int pc_id, int ported_id, int margin)
+    {
+        var record = Remapped(pc_id);
+
+        Assert.Equal(ported_id, record.id);
+        Assert.NotEqual(byte.MaxValue, record.pos_x);
+        Assert.Equal(margin, AppMain.g_gm_event_size_tbl[ported_id]);
+    }
+
     // 0-294 mean the same thing in both trees, so the whole shared span has to come through
-    // untouched. 295-299 are null in our table and skipped by the dispatch, so they are left alone
-    // rather than dropped
+    // untouched
     [Fact]
     public void TheSharedIdSpaceIsNotTouched()
     {
-        for (int id = 0; id < AppMain.GMD_EVENT_ID_NOSET_START; ++id)
+        for (int id = 0; id < 295; ++id)
         {
-            if (id == 295)
-                continue;
-
             var record = Remapped(id);
             Assert.Equal(id, record.id);
             Assert.NotEqual(byte.MaxValue, record.pos_x);
         }
     }
 
-    // the Lost Labyrinth act 2 family PC interleaves with the cards, plus the unplaced match grid.
-    // none is ported, and all of them index a live maker of ours
+    // 300 and 301 share PC's dark trigger maker but are unplaced on its Z3A2, so they have no row.
+    // both index a live maker of ours, which is why they have to be dropped rather than let through
     [Theory]
     [InlineData(300)]
-    [InlineData(305)]
-    [InlineData(307)]
-    [InlineData(312)]
-    [InlineData(313)]
-    [InlineData(318)]
-    [InlineData(320)]
+    [InlineData(301)]
     public void AnUnportedPcIdIsDroppedRatherThanDispatched(int pc_id)
     {
         Assert.NotNull(AppMain.g_gm_event_tbl[pc_id]);
         Assert.Equal(byte.MaxValue, Remapped(pc_id).pos_x);
+    }
+
+    // the twelve have to stay 1:1 with distinct ids of ours, since PC shares makers across
+    // 305/306/318/319 and 307/320 and we branch on our id instead
+    [Fact]
+    public void TheRemapIsOneToOne()
+    {
+        var ported = AppMain.gm_event_pc_id_remap.Values.ToArray();
+
+        Assert.Equal(24, ported.Length);
+        Assert.Equal(ported.Length, ported.Distinct().Count());
+        Assert.All(ported, id => Assert.InRange(id, AppMain.GMD_EVENT_ID_PORTED_START, AppMain.GMD_EVENT_ID_MAX_PC - 1));
     }
 
     // the invariant that keeps the next PC stage we port off this one's makers: nothing a PC map

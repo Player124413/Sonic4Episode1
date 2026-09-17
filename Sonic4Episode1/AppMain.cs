@@ -889,6 +889,9 @@ internal partial class AppMain
     // 0-12; ours is 18 because 13-17 are already taken by the message windows and the three
     // iPhone-only passes. Same move mobile made when it appended 3DNN_WS for the water slider
     public const uint OBD_DRAW_CMD_STATE_TRUMPROAD = 18;
+    // never named in obj_draw_3dnn_command_state_tbl, so nothing runs it but the light map pass.
+    // that is the whole trick behind PC's list 16
+    public const uint OBD_DRAW_CMD_STATE_LIGHTMAP = 19;
     public const uint OBD_DRAW_CMD_STATE_MAX = 19;
 
     public const byte GMD_TASK_PAUSELEVEL_DEF = 0;
@@ -13420,6 +13423,28 @@ internal partial class AppMain
     private const int GME_EFCT_Z03_IDX_WATER = 34;
     private const int GME_EFCT_Z03_IDX_WATER_02 = 35;
     private const int GME_EFCT_Z03_IDX_MAX = 36;
+
+    // PC's 18 extra anims, appended past mobile's 36 in gm_efct_zone03_pc_extra_create_param_tbl so
+    // every index above still means what it did. Only valid on the pc tier
+    private const int GME_EFCT_Z03_IDX_PC_BOMB_F = 36;
+    private const int GME_EFCT_Z03_IDX_PC_DRAIN_DUST = 37;
+    private const int GME_EFCT_Z03_IDX_PC_DRAIN_SMOKE = 38;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_01 = 39;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_02 = 40;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_03 = 41;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_04 = 42;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_05 = 43;
+    private const int GME_EFCT_Z03_IDX_PC_FIRE_06 = 44;
+    private const int GME_EFCT_Z03_IDX_PC_FUSE_01 = 45;
+    private const int GME_EFCT_Z03_IDX_PC_FUSE_02 = 46;
+    private const int GME_EFCT_Z03_IDX_PC_TRUCK_SMOKE = 47;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_B_A = 48;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_B_B = 49;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_B_C = 50;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_T_A = 51;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_T_B = 52;
+    private const int GME_EFCT_Z03_IDX_PC_WALL_T_C = 53;
+    private const int GME_EFCT_Z03_IDX_PC_MAX = 54;
     private const int GME_EFCT_Z04_IDX_LIGHT_Z4 = 0;
     private const int GME_EFCT_Z04_IDX_PILLAR_Z4 = 1;
     private const int GME_EFCT_Z04_IDX_WALL_M_Z4 = 2;
@@ -13630,6 +13655,7 @@ internal partial class AppMain
     private static OBS_ACTION3D_NN_WORK[] g_gm_gmk_bumper_obj_3d_list;
     private static _eve_func_[] gm_evemgr_create_eve_func_tbl;
     private static ushort[] gm_evemgr_create_size_tbl;
+    private static ushort[] gm_evemgr_create_size_ll2_tbl;
     private static GMS_EVE_MGR_WORK g_gm_eve_mgr_work;
     private static MTS_TASK_TCB gm_eve_mgr_tcb;
     public static GMS_EVE_DATA_EV_HEADER gm_eve_data;
@@ -14004,7 +14030,7 @@ internal partial class AppMain
     private static object[] g_gm_gamedat_map_attr_set;
     private static AMS_AMB_HEADER g_gm_gamedat_enemy_arc;
     private static object[] g_gm_gamedat_ring;
-    private static AMS_AMB_HEADER[] g_gm_gamedat_gimmick;
+    internal static AMS_AMB_HEADER[] g_gm_gamedat_gimmick;
     private static object[] g_gm_gamedat_enemy;
     private static object[] g_gm_gamedat_effect;
     public static AMS_AMB_HEADER g_gm_gamedat_cockpit_main_arc;
@@ -14070,8 +14096,7 @@ internal partial class AppMain
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_03;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_BOSS;
-    // the same four with ZONE2_M_M and ZONE2_M_V spliced in. Zone 2 is the only zone whose motion
-    // sidecars we ship, and the only zone that has anything in them worth animating
+    // the same four with ZONE2_M_M and ZONE2_M_V spliced in
     internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_01_console;
     internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_02_console;
     internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map02_03_console;
@@ -14080,6 +14105,10 @@ internal partial class AppMain
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_03;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_BOSS;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_01_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_02_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_03_console;
+    internal static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map03_BOSS_console;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map04_01;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map04_02;
     private static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_map04_03;
@@ -14162,6 +14191,7 @@ internal partial class AppMain
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick02_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_01;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_02;
+    public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_02_pc;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_03;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick03_BOSS;
     public static readonly GMS_GAMEDAT_LOAD_DATA[] gm_gamedat_tbl_gimmick04_01;
@@ -15244,8 +15274,6 @@ internal partial class AppMain
     // block sets it, and the setting func copies the render target only if one actually drew
     private static bool gm_map_fall_shader_drawn;
 
-    // zone 3-2 runs every near-layer model off one frame counter so they animate in lockstep
-    private static float gm_map_z32_share_frame;
     private static MTS_TASK_TCB gm_map_tcb;
     private static uint gm_map_draw_command_state;
     private static AOS_TEXTURE gm_map_texture;

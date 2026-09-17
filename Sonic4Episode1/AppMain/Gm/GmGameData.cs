@@ -230,6 +230,7 @@ internal partial class AppMain
         GmMapFarRelease();
         GmDecoRelease();
         GmWaterSurfaceRelease();
+        GmPlyPostEffectRelease();
         for (int index = 0; index < 11; ++index)
         {
             if (g_gm_gamedat_effect[index] != null)
@@ -815,6 +816,7 @@ internal partial class AppMain
         GmEventDataBuild();
         GmMapBuildColData();
         GmGmkSwitchReBuild();
+        GmGmkDynamiteReBuild();
         GmGmkPressPillarClear();
     }
 
@@ -901,7 +903,7 @@ internal partial class AppMain
     // and xbla's is the pinball minigame, PC's is the card stage, and the card stage places enemies
     // and gimmicks the minigame never loaded. gmMapSelectVariant has already run by the time these
     // are called, so the tier is known. Everything else falls through to the shared table
-    // Zone 2 is the only zone whose map motion sidecars we ship, and they exist only as
+    // Zones 2 and 3 are the zones whose map motion sidecars we ship, and they exist only as
     // console-grade art, so the two rows are spliced in here rather than living in the tables.
     // Keeping them out of gm_gamedat_tbl_map_info_tbl is deliberate: gmMapAllMapArchives decides
     // the tier by requiring every map row to resolve to it, and rows that only exist above base
@@ -921,6 +923,14 @@ internal partial class AppMain
                 return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_03_console, gm_gamedat_tbl_map02_03_console.Length);
             case 7:
                 return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map02_BOSS_console, gm_gamedat_tbl_map02_BOSS_console.Length);
+            case 8:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map03_01_console, gm_gamedat_tbl_map03_01_console.Length);
+            case 9:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map03_02_console, gm_gamedat_tbl_map03_02_console.Length);
+            case 10:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map03_03_console, gm_gamedat_tbl_map03_03_console.Length);
+            case 11:
+                return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_map03_BOSS_console, gm_gamedat_tbl_map03_BOSS_console.Length);
             default:
                 return gm_gamedat_tbl_map_info_tbl[stage_id];
         }
@@ -938,6 +948,9 @@ internal partial class AppMain
     {
         if (stage_id == 5 && gmStageIsPCLevel())
             return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_gimmick02_02_pc, gm_gamedat_tbl_gimmick02_02_pc.Length);
+
+        if (stage_id == 9 && gmStageIsPCLevel())
+            return new GMS_GAMEDAT_LOAD_INFO(gm_gamedat_tbl_gimmick03_02_pc, gm_gamedat_tbl_gimmick03_02_pc.Length);
 
         return gm_gamedat_tbl_gimmick_info_tbl[stage_id];
     }
@@ -1034,7 +1047,18 @@ internal partial class AppMain
         GmGmkDSignBuild();
         GmEfctEneBuildDataInit(2);
         GmEfctZoneBuildDataInit(2);
-        GmStartMsgBuild();
+
+        if (gmStageIsPCLevel())
+        {
+            GmGmkCandleBuild();
+            GmGmkTorchBuild();
+            GmGmkRailEndBuild();
+            GmGmkDynamiteBuild();
+        }
+
+        // the PC loadout carries no G_MSG_Z3, so building the brief there reads a null head
+        if (!gmStageIsPCLevel())
+            GmStartMsgBuild();
     }
 
     private static void gmGameDatBuildStage33()
@@ -1385,7 +1409,16 @@ internal partial class AppMain
         GmGmkDSignFlush();
         GmEfctEneFlushDataInit(2);
         GmEfctZoneFlushDataInit(2);
-        GmStartMsgFlush();
+
+        if (gmStageIsPCLevel())
+        {
+            GmGmkCandleFlush();
+            GmGmkTorchFlush();
+            GmGmkRailEndFlush();
+            GmGmkDynamiteFlush();
+        }
+        else
+            GmStartMsgFlush();
     }
 
     private static void gmGameDatFlushStage33()

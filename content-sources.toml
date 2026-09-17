@@ -33,6 +33,7 @@ source = "wp7-orig"
 paths = [
   "LIVE",
   "UPSELL",
+  "DEMO/STFRL/STAFF_LIST.YSD",
   "Kootenay.xnb",
   "large.xnb",
   "medium.xnb",
@@ -84,14 +85,6 @@ archives = [
   "G_COM/GMK/GMK_NEEDLE_TEX.AMB",
 
   "G_ZONE1/DECO/DECO_ZONE1.AMB",
-  "G_ZONE3/MAP/ZONE31_MAP.AMB",
-  "G_ZONE3/MAP/ZONE32_MAP.AMB",
-  "G_ZONE3/MAP/ZONE33_MAP.AMB",
-  "G_ZONE3/MAP/ZONE3BOSS_MAP.AMB",
-  "G_ZONE3/MAP/ZONE3_M.AMB",
-  "G_ZONE3/MAP/ZONE3_T.AMB",
-  "G_ZONE3/MAP/ZONE3_ATTR.AMB",
-  "G_ZONE3/MAPFAR/ZONE3_MAPFAR.AMB",
   "G_ZONEF/MAP/ZONEFB_MAP.AMB",
   "G_ZONEF/MAP/ZONEF_M.AMB",
   "G_ZONEF/MAP/ZONEF_T.AMB",
@@ -176,10 +169,6 @@ archives = [
   # with the tier rather than being left behind
   "G_ZONE2/DECO/DECO_ZONE2.AMB",
 
-  # 8 effect anims plus the texture against ios-hd's 2 plus texture. TP_TURN's flip sparkle and
-  # match burst index anims 3, 4 and 5, which only exist here; see GmEffectZone.cs
-  "G_ZONE2/EFF/EFF_ZONE2.AMB",
-
   # card gimmicks, PC-only. Nothing dispatches these yet; they're here so the archive set is complete.
   "G_ZONE2/GMK/GMK_TP_TURN_MDL.AMB",
   "G_ZONE2/GMK/GMK_TP_TURN_TEX.AMB",
@@ -202,7 +191,8 @@ archives = [
 
   # rest of the zone. Member counts match XBLA's, so nothing was blocking these, they just hadn't
   # moved off the mobile base yet. Pinball furniture stays because acts 1 and 3 still place it.
-  "G_ZONE2/BOSS/BOSS02.AMB",
+  # BOSS02 is not here: a boss archive is mixed and needs console-bosses' flip treatment, and only
+  # the map archives have to be on one tier
   "G_ZONE2/MSG/G_MSG_Z2.AMB",
   "G_ZONE2/ENE/ENE_GARDON_MDL.AMB",
   "G_ZONE2/ENE/ENE_GARDON_MTN.AMB",
@@ -243,6 +233,164 @@ archives = [
   "G_ZONE2/GMK/GMK_STOPPER_MAT.AMB",
   "G_ZONE2/GMK/GMK_STOPPER_MDL.AMB",
   "G_ZONE2/GMK/GMK_STOPPER_TEX.AMB",
+]
+
+# Zone 3 the same way as zone 2: PC reworked act 2 into a darkness stage and left acts 1, 3 and the
+# boss alone, but ZONE3_M/_T/_ATTR are shared by all four acts and ZONE3_M is 160 blocks on PC
+# against XBLA's 154 with the order diverging from index 25, so the whole zone moves or none of it
+# does. The nine GMK_TORCH/CANDLE/RAILEND/DYNAMITE archives are PC-only and the stage 9 loadout
+# loads them, though no gimmick reads them yet. BOSS03 stays in console-bosses for the flip.
+[group.console-stages-z3-pc]
+source = "pc"
+name = "pc"
+archives = [
+  "G_ZONE3/MAP/ZONE31_MAP.AMB",
+  "G_ZONE3/MAP/ZONE32_MAP.AMB",
+  "G_ZONE3/MAP/ZONE33_MAP.AMB",
+  "G_ZONE3/MAP/ZONE3BOSS_MAP.AMB",
+  "G_ZONE3/MAP/ZONE3_M.AMB",
+  "G_ZONE3/MAP/ZONE3_T.AMB",
+  "G_ZONE3/MAP/ZONE3_ATTR.AMB",
+
+  # map node and material motion. ZONE3_M_V is 150 members on PC against XBLA's 114: the map's own
+  # material motion is what darkens the near layer, driven to 59 * level
+  "G_ZONE3/MAP/ZONE3_M_M.AMB",
+  "G_ZONE3/MAP/ZONE3_M_V.AMB",
+
+  "G_ZONE3/MAPFAR/ZONE3_MAPFAR.AMB",
+  "G_ZONE3/DECO/DECO_ZONE3.AMB",
+
+  "G_ZONE3/GMK/GMK_CANDLE_MDL.AMB",
+  "G_ZONE3/GMK/GMK_CANDLE_TEX.AMB",
+  "G_ZONE3/GMK/GMK_DYNAMITE_MAT.AMB",
+  "G_ZONE3/GMK/GMK_DYNAMITE_MDL.AMB",
+  "G_ZONE3/GMK/GMK_DYNAMITE_TEX.AMB",
+  "G_ZONE3/GMK/GMK_RAILEND_MDL.AMB",
+  "G_ZONE3/GMK/GMK_RAILEND_TEX.AMB",
+  "G_ZONE3/GMK/GMK_TORCH_MDL.AMB",
+  "G_ZONE3/GMK/GMK_TORCH_TEX.AMB",
+
+  # rest of the zone. Member counts match XBLA's except GMK_TRUCK_MTN, which has a fifth motion on
+  # PC (41 frames, one node): the minecart boarding animation.
+  # LAND_3, B3_PILLAR and SW_WALL3 have no _TVX sibling above the mobile base, because console draws
+  # them as NN models instead: see gm_gmk_land_3_as_model and friends
+  "G_ZONE3/GMK/GMK_B3_PILLAR_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B3_PILLAR_TEX.AMB",
+  "G_ZONE3/GMK/GMK_B_OBJ_3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B_OBJ_3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_B_WALL3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B_WALL3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_DSIGN_MDL.AMB",
+  "G_ZONE3/GMK/GMK_DSIGN_TEX.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_MAT.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_PRESSWALL_MDL.AMB",
+  "G_ZONE3/GMK/GMK_PRESSWALL_TEX.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_MTN.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SPEAR_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SPEAR_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_MTN.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SF_MDL.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MAT.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MDL.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MTN.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_TEX.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_MDL.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_MTN.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_TEX.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_MDL.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_MTN.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_TEX.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_MDL.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_MTN.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_TEX.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_MDL.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_MTN.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_TEX.AMB",
+  "G_ZONE3/MSG/G_MSG_Z3.AMB",
+]
+
+# same closure over XBLA, for mobile-hd, and it is also what console-stages used to hold for zone 3.
+# XBLA has 60 of PC's 69 archives here; the nine it is missing are the darkness gimmicks, which the
+# minecart layout never places. The two map motion sidecars are in both because
+# gmGameDatMapInfoFor splices their rows for any console-grade tier, not just pc
+[group.console-stages-z3]
+source = "xbla"
+name = "console"
+archives = [
+  "G_ZONE3/MAP/ZONE31_MAP.AMB",
+  "G_ZONE3/MAP/ZONE32_MAP.AMB",
+  "G_ZONE3/MAP/ZONE33_MAP.AMB",
+  "G_ZONE3/MAP/ZONE3BOSS_MAP.AMB",
+  "G_ZONE3/MAP/ZONE3_M.AMB",
+  "G_ZONE3/MAP/ZONE3_T.AMB",
+  "G_ZONE3/MAP/ZONE3_ATTR.AMB",
+  "G_ZONE3/MAP/ZONE3_M_M.AMB",
+  "G_ZONE3/MAP/ZONE3_M_V.AMB",
+  "G_ZONE3/MAPFAR/ZONE3_MAPFAR.AMB",
+  "G_ZONE3/DECO/DECO_ZONE3.AMB",
+  "G_ZONE3/GMK/GMK_B3_PILLAR_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B3_PILLAR_TEX.AMB",
+  "G_ZONE3/GMK/GMK_B_OBJ_3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B_OBJ_3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_B_WALL3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_B_WALL3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_DSIGN_MDL.AMB",
+  "G_ZONE3/GMK/GMK_DSIGN_TEX.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_MAT.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_D_TANK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_LAND_3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_PRESSWALL_MDL.AMB",
+  "G_ZONE3/GMK/GMK_PRESSWALL_TEX.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_MTN.AMB",
+  "G_ZONE3/GMK/GMK_ROCK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SPEAR_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SPEAR_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SWITCH3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_MAT.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_MDL.AMB",
+  "G_ZONE3/GMK/GMK_SW_WALL3_TEX.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_MDL.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_MTN.AMB",
+  "G_ZONE3/GMK/GMK_TRUCK_TEX.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SF_MDL.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MAT.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MDL.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_MTN.AMB",
+  "G_ZONE3/GMK/GMK_WATER_SLIDER_TEX.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_MDL.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_MTN.AMB",
+  "G_ZONE3/ENE/ENE_BUKU_TEX.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_MDL.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_MTN.AMB",
+  "G_ZONE3/ENE/ENE_MOGU_TEX.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_MDL.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_MTN.AMB",
+  "G_ZONE3/ENE/ENE_UNIDES_TEX.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_MDL.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_MTN.AMB",
+  "G_ZONE3/ENE/ENE_UNIUNI_TEX.AMB",
+  "G_ZONE3/MSG/G_MSG_Z3.AMB",
 ]
 
 # Zone 1's decoration archive: PC replaces the sunflower (DECO_Z1_HIMAWARI at MDL member 0 becomes
@@ -346,27 +494,67 @@ archives = [
   "G_COM/EFF/EFF_E014.AMB",
 ]
 
+# the per-zone effect archives are effects and want console-effects' flip, but they were sitting as
+# plain lines in the stage groups, which do not flip, so their sprite textures came out the wrong way
+# up. Split out here for the same reason console-effects is split out of console-stages. One group
+# per tier per zone rather than one group holding all four, because each has to ship exactly where
+# its stage group already ships: desktop-hd takes zone 3 on pc, mobile-hd takes it on console.
+#
+# console-stages-z2 still carries EFF_ZONE2 as a plain line. That group is referenced by no profile,
+# so it ships nowhere and the trap is latent; if it is ever switched on, split its effect archive out
+# the same way.
+[group.pc-zone2-effects]
+source = "pc"
+name = "pc"
+flip = true
+# 8 effect anims plus the texture against ios-hd's 2 plus texture. TP_TURN's flip sparkle and match
+# burst index anims 3, 4 and 5, which only exist here; see GmEffectZone.cs
+archives = ["G_ZONE2/EFF/EFF_ZONE2.AMB"]
+
+[group.pc-zone3-effects]
+source = "pc"
+name = "pc"
+flip = true
+# the only zone effect archive on any tier that is mixed the way EFF_CMN is: PC's adds three
+# EFF_WALL_*.ZNO models for the bomb wall crumble and a nested archive of the textures their nodes
+# name, and those draw through stdshader and must not be flipped
+no_flip = ["EFF_ZONE3_TEX_MD_WALL.AMB"]
+# 59 members against 37: the fire, fuse, bomb and wall-crumble sets, sorted in, which shifts every
+# zone 3 effect index. gm_efct_zone03_pc_create_param_tbl is the remap, picked by
+# gmEfctZoneSelectVariant
+archives = ["G_ZONE3/EFF/EFF_ZONE3.AMB"]
+
+[group.console-zone3-effects]
+source = "xbla"
+name = "console"
+flip = true
+archives = ["G_ZONE3/EFF/EFF_ZONE3.AMB"]
+
 # a boss archive holds the boss model, its motions and its own effects in one file, so it is mixed
 # the way EFF_CMN is and needs the same treatment: the .AME sprites flip, the textures the model
-# nodes name do not. BOSS02 is not here, it moves with zone 2 in console-stages-pc /
-# console-stages-z2.
+# nodes name do not. Every boss lives here whatever tier its zone is on: the tier is all-or-none for
+# map archives only, and a boss archive is loaded through the ordinary fallback chain
 [group.console-bosses]
 source = "xbla"
 name = "console"
 flip = true
-# BOSS0x_TEX is the boss itself. The two BOSS05 ones are the jet and thunder effect models,
-# arc indices 39 and 40 in gm_boss5_efct_data_info_tbl, the only effects in any boss that use a
-# model; every other EFF_BS*_TEX is registered with a null model dwork.
+# BOSS0x_TEX is the boss itself. The rest are effect archives that name a model rather than a
+# sprite: BOSS02 has ROLL.ENO, BOSS05 has EFF_JET.ENO and EFF_THUNDER_1.ENO (arc indices 39 and 40
+# in gm_boss5_efct_data_info_tbl). Bosses 1, 3 and 4 ship no effect model, so their EFF_BS*_TEX
+# flips with everything else.
 no_flip = [
   "BOSS01_TEX.AMB",
+  "BOSS02_TEX.AMB",
   "BOSS03_TEX.AMB",
   "BOSS04_TEX.AMB",
   "BOSS05_TEX.AMB",
+  "EFF_BS2_TEX_MD_RO.AMB",
   "EFF_BSF_TEX_MD_JT.AMB",
   "EFF_BSF_TEX_TH.AMB",
 ]
 archives = [
   "G_ZONE1/BOSS/BOSS01.AMB",
+  "G_ZONE2/BOSS/BOSS02.AMB",
   "G_ZONE3/BOSS/BOSS03.AMB",
   "G_ZONE4/BOSS/BOSS04.AMB",
   "G_ZONEF/BOSS/BOSS05.AMB",
@@ -461,6 +649,9 @@ variants = [
   "console-bosses",
   "console-stages",
   "console-stages-pc",
+  "console-stages-z3-pc",
+  "pc-zone2-effects",
+  "pc-zone3-effects",
   "pc-zone1-deco",
   "pc-results",
 ]
@@ -474,6 +665,9 @@ variants = [
   "console-bosses",
   "console-stages",
   "console-stages-pc",
+  "console-stages-z3",
+  "pc-zone2-effects",
+  "console-zone3-effects",
   "pc-zone1-deco",
   "pc-zone1-deco",
 ]

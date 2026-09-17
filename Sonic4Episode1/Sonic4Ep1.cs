@@ -400,10 +400,28 @@ public class Sonic4Ep1 : Game
         this.spriteBatch.End();
 #endif
 
+        DrawPlayerPosition();
+
         // these are disabled but we might as well keep them around
         // LiveFeature.getInstance().ShowOverride();
         // Upsell.drawUpsellScreen();
         base.Draw(gameTime);
+    }
+
+    // TEMP(z3a2-test): player position readout, for lining placements up against the .EV dumps
+    private void DrawPlayerPosition()
+    {
+        if (!AppMain.mppShowPlayerPosition || failureBatch == null || failureFont == null)
+            return;
+
+        string text = AppMain.mppPlayerPositionText();
+        if (text == null)
+            return;
+
+        failureBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        failureBatch.DrawString(failureFont, text, new Vector2(9f, 9f), Color.Black);
+        failureBatch.DrawString(failureFont, text, new Vector2(8f, 8f), Color.White);
+        failureBatch.End();
     }
 
 #if WASM

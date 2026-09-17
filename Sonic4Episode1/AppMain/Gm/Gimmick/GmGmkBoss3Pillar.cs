@@ -67,6 +67,10 @@
         {
             int index2 = numArray[index1];
             ObjCopyAction3dNNModel(g_gm_gmk_boss3_pillar_obj_3d_list[index2], s3PillarMainWork.obj_3d_parts[index1 - 1]);
+            // TODO(port): the console arm loads a material motion per part here
+            // (gmGmkBoss3Pillar.cpp:1055-1067, #if !_IPHONE). mat_id_list is NULL for zone 3 and
+            // only zone final fills it, from g_gm_boss3_pillar_f_mat_id_left/right/top/bottom
+            // against GMD_DWORK_NO_GMK_BOSS3_PILLAR_MAT. Those four tables are not ported yet
             s3PillarMainWork.obj_3d_parts[index1 - 1].drawflag |= 32U;
         }
         return obj_work;
@@ -83,6 +87,15 @@
         GMS_GMK_BOSS3_PILLAR_WALL_WORK s3PillarWallWork = (GMS_GMK_BOSS3_PILLAR_WALL_WORK)obj_work;
         int index = g_gm_gmk_boss3_wall_obj_3d_list.Length > 1 ? 1 : 0;
         ObjCopyAction3dNNModel(g_gm_gmk_boss3_wall_obj_3d_list[index], s3PillarWallWork.obj_3d_parts[0]);
+
+        // the boss wall is built from the SW_WALL3 models, so console has the glare here too
+        if (gm_gmk_as_console)
+        {
+            ObjCopyAction3dNNModel(g_gm_gmk_boss3_wall_obj_3d_list[IDB_GMK_SW_WALL3_MDL_GMK_SW_WALL_G_3_ZNO], s3PillarWallWork.obj_3d_parts[1]);
+            ObjAction3dNNMaterialMotionLoad(s3PillarWallWork.obj_3d_parts[1], 0,
+                ObjDataGet(GMD_DWORK_NO_GMK_BOSS3_WALL_MAT), null, 0, null, 1, 1);
+        }
+
         gmGmkBoss3PillarWallInit(obj_work);
         return obj_work;
     }
@@ -455,6 +468,36 @@
                 int num4 = g_gm_boss3_pillar_f_sub_model_id[(int)num1];
                 break;
         }
+        // gmGmkBoss3Pillar.cpp:1965-1974 and :1993-2007. Console draws the head through the
+        // object's own summary at the pillar scale and each part as an NN model; the TVX arm
+        // substitutes a flat model per part and carries the scale in the tvx disp flag instead
+        if (gm_gmk_as_console)
+        {
+            int saved_scale_x = obj_work.scale.x;
+            int saved_scale_y = obj_work.scale.y;
+            obj_work.scale.x = FX_F32_TO_FX32(1.25f);
+            obj_work.scale.y = FX_F32_TO_FX32(1.25f);
+
+            ObjDrawActionSummary(obj_work);
+
+            for (int index = 1; num3 > index; ++index)
+            {
+                VecFx32 part_pos = new VecFx32(obj_work.pos);
+                part_pos.x += -numArray1[index] * (g_gm_boss3_pillar_adjust_dir[(int)num1][0] * 40) * 4096;
+                part_pos.y += -numArray1[index] * (g_gm_boss3_pillar_adjust_dir[(int)num1][1] * 40) * 4096;
+
+                uint part_disp_flag = obj_work.disp_flag | OBD_DISP_REPEAT;
+                if (ObjObjectPauseCheck(0U) != 0U)
+                    part_disp_flag |= OBD_DISP_NOUPDATE;
+
+                ObjDrawAction3DNN(s3PillarMainWork.obj_3d_parts[index - 1], new VecFx32?(part_pos), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref part_disp_flag);
+            }
+
+            obj_work.scale.x = saved_scale_x;
+            obj_work.scale.y = saved_scale_y;
+            return;
+        }
+
         uint gmdTvxDispScale = GMD_TVX_DISP_SCALE;
         VecFx32 scale;
         scale.x = FX_F32_TO_FX32(1.25f);
@@ -718,6 +761,8 @@
     private static void gmBoss3PillarWallDestFunc(MTS_TASK_TCB tcb)
     {
         GMS_GMK_BOSS3_PILLAR_WALL_WORK tcbWork = (GMS_GMK_BOSS3_PILLAR_WALL_WORK)mtTaskGetTcbWork(tcb);
+        if (gm_gmk_as_console)
+            ObjAction3dNNMotionRelease(tcbWork.obj_3d_parts[1]);
         if (tcbWork.effect_work != null)
         {
             ObjDrawKillAction3DES((OBS_OBJECT_WORK)tcbWork.effect_work);
@@ -739,6 +784,43 @@
         int num2 = 32;
         if (((int)obj_work.disp_flag & 32) != 0)
             return;
+
+        // gmGmkBoss3Pillar.cpp:2531-2609. Console draws a flat quad behind the wall, then each row
+        // as the object summary plus the B and glare parts; the TVX arm has one flat model per row
+        if (gm_gmk_as_console)
+        {
+            GMS_GMK_BOSS3_PILLAR_WALL_WORK wall_work = (GMS_GMK_BOSS3_PILLAR_WALL_WORK)obj_work;
+
+            if (((int)obj_work.user_flag & 16) != 0)
+            {
+                float ofst_x = -num2;
+                int center = g_gm_main_system.map_fcol.left + (g_gm_main_system.map_fcol.right - g_gm_main_system.map_fcol.left) / 2;
+                if (center * 4096 < obj_work.pos.x)
+                    ofst_x = 0.0f;
+
+                float top = FX_FX32_TO_F32(obj_work.pos.y) + -num2 / 2f;
+                float left = FX_FX32_TO_F32(obj_work.pos.x) + ofst_x;
+                gmGmkBoss3PillarWallDrawBack(left, -top, left + num2, -(top + num1 * num2), FX_FX32_TO_F32(obj_work.pos.z) - 10f);
+            }
+
+            uint glare_disp_flag = obj_work.disp_flag | OBD_DISP_REPEAT;
+            if (ObjObjectPauseCheck(0U) == 0U)
+                ObjDrawAction3DNNMaterialUpdate(wall_work.obj_3d_parts[1], ref glare_disp_flag);
+            glare_disp_flag |= OBD_DISP_NOUPDATE;
+
+            for (int index = 0; num1 > index; ++index)
+            {
+                obj_work.ofst.y = num2 * index * 4096;
+                ObjDrawActionSummary(obj_work);
+
+                VecFx32 row_pos = new VecFx32(obj_work.pos);
+                row_pos.y += obj_work.ofst.y;
+                ObjDrawAction3DNN(wall_work.obj_3d_parts[0], new VecFx32?(row_pos), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref obj_work.disp_flag);
+                ObjDrawAction3DNN(wall_work.obj_3d_parts[1], new VecFx32?(row_pos), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref glare_disp_flag);
+            }
+            return;
+        }
+
         TVX_FILE model_tvx = new TVX_FILE((AmbChunk)amBindGet(g_gm_gmk_boss3_wall_obj_tvx_list, 0));
         VecFx32 scale = new VecFx32(4096, 4096, 4096);
         for (int index = 0; num1 > index; ++index)
@@ -749,6 +831,13 @@
         }
     }
 
+    // TODO(port): this is the zone final wall and it is still the iPhone arm only.
+    // gmGmkBoss3Pillar.cpp:2628-2695 has three #if !_IPHONE pieces the port dropped: the back quad
+    // through gmGmkBoss3PillarWallDrawBack (same shape as the zone 3 one above but ofst_y 0), the
+    // glare's ObjDrawAction3DNNMaterialUpdate when unpaused, and a single glare draw at
+    // pos.y + ofst.y before the B part loop. num3 below is the glare disp flag it never uses.
+    // Nothing reaches them yet: zone final's gimmick archives are still on the mobile base, so
+    // gm_gmk_as_console is false there. Port this when the final zone moves tier
     private static void gmBoss3PillarWallOutFuncForFinalZone(OBS_OBJECT_WORK obj_work)
     {
         int num1 = 3;

@@ -21,11 +21,11 @@ if (args.Length > 0 && args[0] == "--survey-ame")
 {
     if (args.Length < 2)
     {
-        Console.Error.WriteLine("usage: viewer --survey-ame <directory>");
+        Console.Error.WriteLine("usage: viewer --survey-ame <directory> [--textures]");
         return 1;
     }
 
-    return AmeSurvey.Run(args[1]);
+    return AmeSurvey.Run(args[1], args.Contains("--textures"));
 }
 
 // --check-motion <dir|file.amb> runs every motion through evaluation and reports what breaks

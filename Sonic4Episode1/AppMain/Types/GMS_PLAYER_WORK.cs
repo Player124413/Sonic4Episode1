@@ -3,6 +3,11 @@ internal partial class AppMain
     internal class GMS_PLAYER_WORK : IOBS_OBJECT_WORK
     {
         public readonly OBS_ACTION3D_NN_WORK[] obj_3d = new OBS_ACTION3D_NN_WORK[4];
+
+        // the Lost Labyrinth torch, and the whole of "is Sonic carrying one". No flag, no sequence
+        // state, and only the torch's own destructor clears it
+        public OBS_OBJECT_WORK torch_work;
+
         public readonly OBS_ACTION3D_NN_WORK[] obj_3d_work = New<OBS_ACTION3D_NN_WORK>(8);
         public readonly OBS_RECT_WORK[] rect_work = New<OBS_RECT_WORK>(3);
         public readonly NNS_MATRIX ex_obj_mtx_r = GlobalPool<NNS_MATRIX>.Alloc();

@@ -53,6 +53,26 @@ internal partial class AppMain
             return (GMS_GMK_UPBUMPER_WORK)p.holder;
         }
 
+        public static explicit operator GMS_GMK_CANDLE_WORK(GMS_ENEMY_3D_WORK p)
+        {
+            return (GMS_GMK_CANDLE_WORK)p.holder;
+        }
+
+        public static explicit operator GMS_GMK_TORCH_WORK(GMS_ENEMY_3D_WORK p)
+        {
+            return (GMS_GMK_TORCH_WORK)p.holder;
+        }
+
+        public static explicit operator GMS_GMK_RAILEND_WORK(GMS_ENEMY_3D_WORK p)
+        {
+            return (GMS_GMK_RAILEND_WORK)p.holder;
+        }
+
+        public static explicit operator GMS_GMK_DYNAMITE_WORK(GMS_ENEMY_3D_WORK p)
+        {
+            return (GMS_GMK_DYNAMITE_WORK)p.holder;
+        }
+
         public static explicit operator GMS_GMK_STEAMP_WORK(GMS_ENEMY_3D_WORK p)
         {
             return (GMS_GMK_STEAMP_WORK)p.holder;

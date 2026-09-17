@@ -469,6 +469,10 @@ internal partial class AppMain
         if (index == -1)
             index = 0;
         ply_work.obj_work.obj_3d = ply_work.obj_3d[gmPlayerModelType(ply_work.char_id, index)];
+
+        // the slots just moved, so a carried torch has to find its hook again. This is what makes
+        // the torch survive a respawn and a model swap
+        GmGmkTorchInstallHooks(ply_work);
     }
 
     private static void GmPlayerStateInit(GMS_PLAYER_WORK ply_work)
@@ -743,7 +747,11 @@ internal partial class AppMain
         ObjRectWorkSet(ply_work.rect_work[0], -8, (short)(field_bottom - 48), 8, (short)(field_bottom - 16));
         ObjRectWorkSet(ply_work.rect_work[1], -16, (short)(field_bottom - 48), 16, (short)(field_bottom - 16));
         ply_work.rect_work[1].flag &= 4294967291U;
-        ObjCameraGet(g_obj.glb_camera_id).user_func = new OBJF_CAMERA_USER_FUNC(GmCameraTruckFunc);
+        // this camera rolls the whole screen with the track, and it belongs with the 1.42x camera,
+        // the steering pad and the truck HUD that gmStageIsTruckRide already gates. PC's act 2 is a
+        // walking stage that happens to contain a cart, and it keeps its camera upright
+        if (gmStageIsTruckRide())
+            ObjCameraGet(g_obj.glb_camera_id).user_func = new OBJF_CAMERA_USER_FUNC(GmCameraTruckFunc);
         if (((int)ply_work.obj_work.disp_flag & 1) != 0)
             GmPlayerSetReverse(ply_work);
         if (ply_work.seq_state == GME_PLY_SEQ_STATE_GMK_DEMO_FW)
@@ -2187,7 +2195,7 @@ internal partial class AppMain
         int key_rot_z)
     {
         ushort num1 = (ushort)(key & 4294967056U);
-        if (GSM_MAIN_STAGE_IS_SPSTAGE() || g_gs_main_sys_info.stage_id == 9)
+        if (GSM_MAIN_STAGE_IS_SPSTAGE() || gmStageIsTruckRide())
         {
             if (((int)g_gs_main_sys_info.game_flag & 512) != 0)
             {

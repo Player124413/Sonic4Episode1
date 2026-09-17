@@ -19,6 +19,7 @@ internal partial class AppMain
         public GMS_EFFECT_3DES_WORK efct_f_spark;
         public GMS_EFFECT_3DES_WORK efct_b_spark;
         public GSS_SND_SE_HANDLE h_snd_lorry;
+        public int rock_timer;
 
         public GMS_GMK_TRUCK_WORK()
         {

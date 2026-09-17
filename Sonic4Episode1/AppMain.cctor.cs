@@ -440,6 +440,14 @@ internal partial class AppMain
         16,
         256
         };
+        // PC keeps a second one for stage 9 (0x57B298) and swaps phase 0 up to 448, which is what
+        // stops the 447/448 sized fuse events popping in late
+        gm_evemgr_create_size_ll2_tbl = new ushort[]
+        {
+        448,
+        16,
+        256
+        };
         g_gm_eve_mgr_work = null;
         gm_eve_mgr_tcb = null;
         gm_eve_data = null;
@@ -16617,6 +16625,10 @@ internal partial class AppMain
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/DECO/DECO_ZONE3.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostDeco, -1),
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_WATER_SF_MDL.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostWaterSurface, -1)
         };
+        gm_gamedat_tbl_map03_01_console = gmMapTableWithMotion(gm_gamedat_tbl_map03_01, "G_ZONE3/MAP/ZONE3_M_M.AMB", "G_ZONE3/MAP/ZONE3_M_V.AMB");
+        gm_gamedat_tbl_map03_02_console = gmMapTableWithMotion(gm_gamedat_tbl_map03_02, "G_ZONE3/MAP/ZONE3_M_M.AMB", "G_ZONE3/MAP/ZONE3_M_V.AMB");
+        gm_gamedat_tbl_map03_03_console = gmMapTableWithMotion(gm_gamedat_tbl_map03_03, "G_ZONE3/MAP/ZONE3_M_M.AMB", "G_ZONE3/MAP/ZONE3_M_V.AMB");
+        gm_gamedat_tbl_map03_BOSS_console = gmMapTableWithMotion(gm_gamedat_tbl_map03_BOSS, "G_ZONE3/MAP/ZONE3_M_M.AMB", "G_ZONE3/MAP/ZONE3_M_V.AMB");
         gm_gamedat_tbl_map04_01 = new GMS_GAMEDAT_LOAD_DATA[]
         {
         new GMS_GAMEDAT_LOAD_DATA("G_ZONE4/MAP/ZONE41_MAP.AMB", gmGameDatLoadAllocHeadSub, null, gmGameDatLoadProcPostMap, -1),
@@ -17573,6 +17585,24 @@ internal partial class AppMain
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/MSG/G_MSG_Z3.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 991),
             new GMS_GAMEDAT_LOAD_DATA(DMD_MANUAL_CMN_DATA_FILENAME, gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 992)
         };
+        // PC's stage 9 table, less its two GMK_PRESSWALL rows, which it loads and never builds or
+        // places, and plus our manual archive, which PC has no row for anywhere. The _TVX pair is
+        // the iPhone substitute for models the pc tier draws properly, and G_MSG_Z3 is the minecart
+        // brief for a stage that is no longer a minecart ride
+        gm_gamedat_tbl_gimmick03_02_pc = gm_gamedat_tbl_gimmick03_02.Where(row =>
+            !row.path.EndsWith("_TVX.AMB", StringComparison.OrdinalIgnoreCase) &&
+            row.path != "G_ZONE3/MSG/G_MSG_Z3.AMB").Concat(new GMS_GAMEDAT_LOAD_DATA[]
+        {
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_TORCH_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TORCH_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_TORCH_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_TORCH_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_CANDLE_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_CANDLE_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_CANDLE_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_CANDLE_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_RAILEND_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_RAILEND_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_RAILEND_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_RAILEND_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_DYNAMITE_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_DYNAMITE_MDL),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_DYNAMITE_TEX.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_DYNAMITE_TEX),
+            new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_DYNAMITE_MAT.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, GMD_DWORK_NO_GMK_DYNAMITE_MAT)
+        }).ToArray();
         gm_gamedat_tbl_gimmick03_03 = new GMS_GAMEDAT_LOAD_DATA[]
         {
             new GMS_GAMEDAT_LOAD_DATA("G_ZONE3/GMK/GMK_LAND_3_MDL.AMB", gmGameDatLoadAllocHead, null, gmGameDatLoadProcPostGimmick, 807),
@@ -31739,11 +31769,39 @@ internal partial class AppMain
         };
         gm_efct_zone02_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone02_create_param_tbl, 2);
         gm_efct_zone02_pc_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone02_pc_create_param_tbl, 8);
+        // PC's own 54-row table has ame_idx == row throughout, so these are its rows 0, 10-19, 43,
+        // 44-46 and 48-50 verbatim. They sit past our 36 rather than at PC's positions so that
+        // every existing zone 3 spawn keeps the row index it passes today
+        gm_efct_zone03_pc_extra_create_param_tbl = new GMS_EFCT_ZONE_CREATE_PARAM[]
+        {
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(0, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(10, 1U, 1U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(11, 1U, 3U, new NNS_VECTOR(0f, -16f, 16f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(12, 2U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(13, 2U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(14, 1U, 3U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(15, 2U, 17U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(16, 0U, 1U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(17, 0U, 18U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEndCopyDirZ), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(18, 2U, 1U, new NNS_VECTOR(0f, 0f, 32f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(19, 1U, 1U, new NNS_VECTOR(0f, 0f, 32f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(43, 1U, 65U, new NNS_VECTOR(0f, 0f, 64f), new NNS_ROTATE_A16(0, 0, 0), 1f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), -1), -1, -1),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(44, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 55), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_A, 58),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(45, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 56), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_B, 58),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(46, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 57), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_C, 58),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(48, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 55), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_A, 58),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(49, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 56), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_B, 58),
+        new GMS_EFCT_ZONE_CREATE_PARAM(new GMS_EFFECT_CREATE_PARAM(50, 1U, 65U, new NNS_VECTOR(0f, 0f, 0f), new NNS_ROTATE_A16(0, 0, 0), 2f, new MPP_VOID_OBS_OBJECT_WORK(GmEffectDefaultMainFuncDeleteAtEnd), 57), GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_C, 58)
+        };
+        gm_efct_zone03_pc_create_param_tbl = gmEfctZoneRemapAmeIndices(gm_efct_zone03_create_param_tbl, gm_efct_zone03_pc_ame_idx)
+            .Concat(gm_efct_zone03_pc_extra_create_param_tbl).ToArray();
+        gm_efct_zone03_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone03_create_param_tbl, 36);
+        gm_efct_zone03_pc_create_info = new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone03_pc_create_param_tbl, 54);
         gm_efct_zone_create_info = new GMS_EFCT_ZONE_CREATE_INFO[]
         {
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone01_create_param_tbl, 9),
         gm_efct_zone02_create_info,
-        new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone03_create_param_tbl, 36),
+        gm_efct_zone03_create_info,
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone04_create_param_tbl, 4),
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone_final_create_param_tbl, 1),
         new GMS_EFCT_ZONE_CREATE_INFO(gm_efct_zone_ss_create_param_tbl, 18)

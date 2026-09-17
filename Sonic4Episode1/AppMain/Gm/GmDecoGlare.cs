@@ -40,41 +40,67 @@
             default:
                 return;
         }
-        if (!amDrawIsRegistComplete(pIF.regId) || pIF.drawFlag != 1 || ((int)obj_work.disp_flag & 32) != 0)
+        if (((int)obj_work.disp_flag & 32) != 0)
             return;
-        VecFx32 vecFx32 = new VecFx32(obj_work.pos);
-        float num1 = vecFx32.x >> 12;
-        float num2 = -(vecFx32.y >> 12);
-        float Z = 256f;
+        VecFx32 pos = new VecFx32(obj_work.pos);
+        gmDecoGlareDrawSprite(gmsDecoglareParam, gmsDecoglareParam.color, pos.x >> 12, -(pos.y >> 12),
+            256f, OBD_DRAW_CMD_STATE_WATER, 1f, 1f, 1, 10f);
+    }
+
+    // the darkness draws the same quad from a synthetic preset: white, four times the size, the
+    // alpha the caller asks for, no z test because it lands in the light map rather than the scene,
+    // and no corner offset. Skipped once the stage is fully lit, where the composite is off anyway
+    public static void GmDarkLightSpriteDraw(
+      float x,
+      float y,
+      float z,
+      uint command_state,
+      float scale_x,
+      float scale_y,
+      byte alpha)
+    {
+        if (gm_dark_level >= 255)
+            return;
+
+        gmDecoGlareDrawSprite(gm_dark_light_sprite_param, 0xFFFFFF00U | alpha, x, y, z,
+            command_state, scale_x, scale_y, 0, 0.0f);
+    }
+
+    private static void gmDecoGlareDrawSprite(
+      GMS_DECOGLARE_PARAM param,
+      uint color,
+      float x,
+      float y,
+      float z,
+      uint command_state,
+      float scale_x,
+      float scale_y,
+      short ztest,
+      float corner_ofst)
+    {
+        if (!amDrawIsRegistComplete(pIF.regId) || pIF.drawFlag != 1)
+            return;
         AMS_PARAM_DRAW_PRIMITIVE setParam = GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Alloc();
         setParam.aTest = 0;
         setParam.zMask = 0;
-        setParam.zTest = 1;
+        setParam.zTest = ztest;
         setParam.ablend = 1;
-        switch (gmsDecoglareParam.ablend)
-        {
-            case 0:
-                amDrawGetPrimBlendParam(0, setParam);
-                break;
-            case 1:
-                amDrawGetPrimBlendParam(1, setParam);
-                break;
-        }
+        amDrawGetPrimBlendParam(param.ablend, setParam);
         NNS_PRIM3D_PCT_ARRAY nnsPriM3DPctArray = amDrawAlloc_NNS_PRIM3D_PCT(6);
         NNS_PRIM3D_PCT[] buffer = nnsPriM3DPctArray.buffer;
         int offset = nnsPriM3DPctArray.offset;
-        float num3 = gmsDecoglareParam.size * 0.5f;
-        float num4 = gmsDecoglareParam.size * 0.5f;
-        float num5 = num1 + 10f;
-        float num6 = num2 - 10f;
-        buffer[offset].Pos.Assign(num5 - num3, num6 + num4, Z);
-        buffer[offset + 1].Pos.Assign(num5 + num3, num6 + num4, Z);
-        buffer[offset + 2].Pos.Assign(num5 - num3, num6 - num4, Z);
-        buffer[offset + 5].Pos.Assign(num5 + num3, num6 - num4, Z);
-        buffer[offset].Col = gmsDecoglareParam.color;
-        buffer[offset + 1].Col = gmsDecoglareParam.color;
-        buffer[offset + 2].Col = gmsDecoglareParam.color;
-        buffer[offset + 5].Col = gmsDecoglareParam.color;
+        float half_w = param.size * 0.5f * scale_x;
+        float half_h = param.size * 0.5f * scale_y;
+        float cx = x + corner_ofst;
+        float cy = y - corner_ofst;
+        buffer[offset].Pos.Assign(cx - half_w, cy + half_h, z);
+        buffer[offset + 1].Pos.Assign(cx + half_w, cy + half_h, z);
+        buffer[offset + 2].Pos.Assign(cx - half_w, cy - half_h, z);
+        buffer[offset + 5].Pos.Assign(cx + half_w, cy - half_h, z);
+        buffer[offset].Col = color;
+        buffer[offset + 1].Col = color;
+        buffer[offset + 2].Col = color;
+        buffer[offset + 5].Col = color;
         buffer[offset].Tex.u = 0.0f;
         buffer[offset].Tex.v = 0.0f;
         buffer[offset + 1].Tex.u = 1f;
@@ -91,8 +117,8 @@
         setParam.texlist = pIF.texlist;
         setParam.texId = pIF.texId;
         setParam.count = 6;
-        setParam.sortZ = gmsDecoglareParam.sort_z;
-        amDrawPrimitive3D(4U, setParam);
+        setParam.sortZ = param.sort_z;
+        amDrawPrimitive3D(command_state, setParam);
         GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Release(setParam);
     }
 

@@ -14,39 +14,29 @@
     <NoWarn>1701;1702;CA1416;CS0649;CS0169;CS0414;</NoWarn>
     <UseMonoRuntime>false</UseMonoRuntime>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
-
-    <!-- nothing but code ships in the package now, so there is no asset pack and no reason for a
-         bundle. Content arrives at runtime, see BundleContentSource -->
-    <AndroidPackageFormat>apk</AndroidPackageFormat>
-    <DebugSymbols>true</DebugSymbols>
-    <AndroidIncludeDebugSymbols>true</AndroidIncludeDebugSymbols>
-    
+    <AndroidPackageFormat>apk</AndroidPackageFormat>    
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
     <PackageReference Include="NVorbis" Version="0.10.5" />
   </ItemGroup>
-
-  <!-- RelWithDebInfo arm64-v8a, 16 KB pages, built by the recipe in docs/android-fna-plan.md.
-       Device only, so there is no second abi -->
+  
   <ItemGroup>
     <AndroidNativeLibrary Include="..\Dependencies\FNA\lib-android\arm64-v8a\libSDL3.so" Abi="arm64-v8a" />
     <AndroidNativeLibrary Include="..\Dependencies\FNA\lib-android\arm64-v8a\libFNA3D.so" Abi="arm64-v8a" />
     <AndroidNativeLibrary Include="..\Dependencies\FNA\lib-android\arm64-v8a\libFAudio.so" Abi="arm64-v8a" />
   </ItemGroup>
-
-  <!-- SDL 3.4.16's own glue, vendored verbatim. Bound so Sonic4Activity can derive from SDLActivity
-       and override main() -->
+  
   <ItemGroup>
     <AndroidJavaSource Include="Java\**\*.java" Bind="true" />
     <TransformFile Include="Transforms\Metadata.xml" />
+    <ProguardConfiguration Include="proguard.cfg" />
+    <RdXmlFile Include="..\Sonic4Episode1\rd.xml" />
   </ItemGroup>
-
-  <!-- no Content.targets and no Shaders.targets: the shader blobs are in the set as well, packed
-       out of Shaders\FNA by Sonic4Episode1.Wasm\Pack-Content.ps1. Build them there -->
-
+  
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 </Project>

@@ -14,10 +14,13 @@ internal partial class AppMain
     private const ushort GMD_PLYGMK_TRUMP_ROAD_SUPER_DIR_Z = unchecked((ushort)-3072);
 
 
-    // Read out of PC's g_gm_ply_seq_state_data_tbl at 0x57F2B0, row 67 of all seven characters:
-    // check_attr = MTN_SPEED_NOSET, accept_attr = 0. Nothing transitions out of the ride by input.
-    // MTN_SPEED_NOSET is what stops GmPlySeqMain resetting obj_3d.speed to 1.0 every frame after
-    // the state function has set it to 2.5. Inert for mobile levels, which never enter state 67
+    // Read out of PC's g_gm_ply_seq_state_data_tbl at 0x57F2B0, rows 67 and 68 of all seven
+    // characters. 67 is check_attr = MTN_SPEED_NOSET, accept_attr = 0: nothing transitions out of
+    // the card ride by input, and MTN_SPEED_NOSET is what stops GmPlySeqMain resetting
+    // obj_3d.speed to 1.0 every frame after the state function has set it to 2.5. 68 is
+    // check_attr = MOVE_JUMP, accept_attr = 0, the minecart dismount: ballistic movement and no air
+    // steering, where the ordinary spring state 29 is MOVE_JUMP | MOVE_JUMP_DIR | DIRECT_TURN.
+    // Both are inert for mobile levels, which never enter either
     internal static void gmPlySeqExtendStateDataForPCLevels()
     {
         for (int char_id = 0; char_id < g_gm_ply_seq_state_data_tbl.Length; ++char_id)
@@ -29,6 +32,8 @@ internal partial class AppMain
             Array.Resize(ref states, GME_PLY_SEQ_STATE_MAX);
             states[GME_PLY_SEQ_STATE_GMK_TRUMP_ROAD] =
                 new GMS_PLY_SEQ_STATE_DATA(GMD_PLY_SEQ_STATE_CHECK_ATTR_MTN_SPEED_NOSET, 0U);
+            states[GME_PLY_SEQ_STATE_GMK_TRUCK_GET_OFF] =
+                new GMS_PLY_SEQ_STATE_DATA(GMD_PLY_SEQ_STATE_CHECK_ATTR_MOVE_JUMP, 0U);
             g_gm_ply_seq_state_data_tbl[char_id] = states;
         }
     }

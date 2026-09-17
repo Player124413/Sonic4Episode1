@@ -51,6 +51,7 @@
       <ForceLoad>True</ForceLoad>
     </NativeReference>
     
+    <RdXmlFile Include="..\Sonic4Episode1\rd.xml" />
   </ItemGroup>
 
   <!-- content comes from a built profile; see Content.targets and content-sources.toml -->
@@ -59,8 +60,12 @@
     <CodesignKey>Apple Development: Created via API (U5XH2XPN49)</CodesignKey>
     <CodesignProvision>VS: WildCard Development</CodesignProvision>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net11.0-ios'">
+    <CodesignKey>Apple Development: Created via API (U5XH2XPN49)</CodesignKey>
+    <CodesignProvision>VS: WildCard Development</CodesignProvision>
+  </PropertyGroup>
+  
   <Import Project="..\Content.targets" />
   <Import Project="..\Shaders\Shaders.targets" />
-
   <Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
 </Project>

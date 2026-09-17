@@ -1,17 +1,29 @@
-﻿internal partial class AppMain
+﻿using System;
+
+internal partial class AppMain
 {
     private static readonly int[] gm_efct_zone_texamb_index_tbl;
 
-    // first anim dwork per zone. Contiguous from 511 except zone 2, which lives past the end of
-    // the block because PC's 8 anims do not fit where mobile reserved 2. See GMD_DWORK_NO
+    // first anim dwork per zone. Contiguous from 511 except zones 2 and 3, which live past the end
+    // of the block because PC's anims do not fit where mobile reserved room. See GMD_DWORK_NO
     private static readonly int[] gm_efct_zone_ame_base_tbl =
     {
         511,
         GMD_DWORK_NO_EFFECT_ZONE2_AME_START,
-        522,
+        GMD_DWORK_NO_EFFECT_ZONE3_AME_START,
         558,
         562,
         563,
+    };
+
+    // EFF_ZONE3 is sorted by name, so PC's 18 extra anims land among the 36 mobile has rather than
+    // after them and every index moves. Keyed by mobile index, measured off both archives
+    internal static readonly int[] gm_efct_zone03_pc_ame_idx =
+    {
+         1,  2,  3,  4,  5,  6,  7,  8,  9, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+        31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+        41, 42, 47, 51, 52, 53,
     };
 
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone01_create_param_tbl;
@@ -19,7 +31,11 @@
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone02_pc_create_param_tbl;
     private static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone02_create_info;
     private static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone02_pc_create_info;
-    private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone03_create_param_tbl;
+    internal static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone03_create_param_tbl;
+    private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone03_pc_extra_create_param_tbl;
+    internal static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone03_pc_create_param_tbl;
+    private static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone03_create_info;
+    internal static GMS_EFCT_ZONE_CREATE_INFO gm_efct_zone03_pc_create_info;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone04_create_param_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone_final_create_param_tbl;
     private static readonly GMS_EFCT_ZONE_CREATE_PARAM[] gm_efct_zone_ss_create_param_tbl;
@@ -44,7 +60,7 @@
         AMS_AMB_HEADER amb = readAMBFile(ObjDataGetInc(ObjDataGet(6)));
         gmEfctZoneSelectVariant(amb);
         GMS_EFCT_ZONE_CREATE_INFO efctZoneCreateInfo = gm_efct_zone_create_info[gm_efct_zone_target_zone_no];
-        gm_efct_zone_model_reg_num = 1;
+        gm_efct_zone_model_reg_num = GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_END - GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START;
         if (gm_efct_zone_model_reg_num > 0)
         {
             gm_efct_zone_model_reg_id_list = new int[gm_efct_zone_model_reg_num];
@@ -256,22 +272,66 @@
     // every zone effect archive is its anims plus one texture, texture last, so the anim count and
     // the texture's member index are the same number. Taken from the archive rather than the table
     // so a zone reads correctly whichever variant resolved
+    // every zone's texture archive is EFF_ZONE<n>_TEX.AMB and every archive but one ends with it.
+    // PC's EFF_ZONE3 appends three effect models and their own EFF_ZONE3_TEX_MD_WALL.AMB after it,
+    // so the last member is the wrong archive there
     private static int gmEfctZoneTexAmbIndex(AMS_AMB_HEADER amb)
     {
+        for (int index = amb.file_num - 1; index >= 0; --index)
+        {
+            var name = mppAmbMemberBaseName(amb.files[index]);
+            if (name != null && name.EndsWith("_TEX", StringComparison.OrdinalIgnoreCase))
+                return index;
+        }
+
         return amb.file_num - 1;
     }
 
     // zone 2 ships two ways round: mobile's 2 anims or PC's 8. The rest of the table is the same
-    // either way, so this only has to pick how many of it are real
+    // either way, so this only has to pick how many of it are real.
+    // zone 3 is the other shape: the same 36 effects both ways, at different member indices,
+    // because EFF_ZONE3 is sorted by name and PC's 18 additions land among them
     private static void gmEfctZoneSelectVariant(AMS_AMB_HEADER amb)
     {
-        if (gm_efct_zone_target_zone_no != GSD_MAIN_ZONE_TYPE_2)
-            return;
+        if (gm_efct_zone_target_zone_no == GSD_MAIN_ZONE_TYPE_2)
+        {
+            gm_efct_zone_create_info[GSD_MAIN_ZONE_TYPE_2] =
+                gmEfctZoneTexAmbIndex(amb) >= gm_efct_zone02_pc_create_param_tbl.Length
+                    ? gm_efct_zone02_pc_create_info
+                    : gm_efct_zone02_create_info;
+        }
+        else if (gm_efct_zone_target_zone_no == GSD_MAIN_ZONE_TYPE_3)
+        {
+            // mobile's archive is exactly those 36 anims plus its texture; PC's carries 18 more
+            gm_efct_zone_create_info[GSD_MAIN_ZONE_TYPE_3] =
+                amb.file_num > gm_efct_zone03_create_param_tbl.Length + 1
+                    ? gm_efct_zone03_pc_create_info
+                    : gm_efct_zone03_create_info;
+        }
+    }
 
-        gm_efct_zone_create_info[GSD_MAIN_ZONE_TYPE_2] =
-            gmEfctZoneTexAmbIndex(amb) >= gm_efct_zone02_pc_create_param_tbl.Length
-                ? gm_efct_zone02_pc_create_info
-                : gm_efct_zone02_create_info;
+    // the PC table is the mobile one with every ame_idx moved to where PC's archive keeps that
+    // effect. Written out rather than transcribed so the two cannot drift apart
+    internal static GMS_EFCT_ZONE_CREATE_PARAM[] gmEfctZoneRemapAmeIndices(
+      GMS_EFCT_ZONE_CREATE_PARAM[] table,
+      int[] ame_idx_map)
+    {
+        var remapped = new GMS_EFCT_ZONE_CREATE_PARAM[table.Length];
+
+        for (int index = 0; index < table.Length; ++index)
+        {
+            var row = table[index];
+            var param = row.create_param;
+
+            remapped[index] = new GMS_EFCT_ZONE_CREATE_PARAM(
+                new GMS_EFFECT_CREATE_PARAM(
+                    ame_idx_map[param.ame_idx], param.pos_type, param.init_flag, param.disp_ofst,
+                    param.disp_rot, param.scale, param.main_func, param.model_idx),
+                row.model_dwork_no,
+                row.mdl_ambtex_idx);
+        }
+
+        return remapped;
     }
 
     private static int gmEfctZoneGetAmeDworkNo(int zone_no, int ame_amb_idx)
@@ -279,18 +339,21 @@
         return gm_efct_zone_ame_base_tbl[zone_no] + ame_amb_idx;
     }
 
-    private static int gmEfctZoneGetObjectDworkNo(int model_dwork_no)
+    internal static int gmEfctZoneGetObjectDworkNo(int model_dwork_no)
     {
-        return 584 + (model_dwork_no - 582);
+        return GMD_DWORK_NO_EFFECT_ZONE_OBJECT_START + (model_dwork_no - GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START);
     }
 
-    private static int gmEfctZoneGetMdlAmbtexDworkNo(int model_dwork_no)
+    // the leak subtracts this block's own start here and in the texlist one below, which returns
+    // model_dwork_no unchanged. PC does it right, and nothing ever caught it because no zone table
+    // in the mobile line has a model row
+    internal static int gmEfctZoneGetMdlAmbtexDworkNo(int model_dwork_no)
     {
-        return 586 + (model_dwork_no - 586);
+        return GMD_DWORK_NO_EFFECT_ZONE_MDL_AMBTEX_START + (model_dwork_no - GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START);
     }
 
-    private static int gmEfctZoneGetMdlTexlistDworkNo(int model_dwork_no)
+    internal static int gmEfctZoneGetMdlTexlistDworkNo(int model_dwork_no)
     {
-        return 588 + (model_dwork_no - 588);
+        return GMD_DWORK_NO_EFFECT_ZONE_MDL_TEXLIST_START + (model_dwork_no - GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START);
     }
 }

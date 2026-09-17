@@ -1,5 +1,20 @@
 ﻿internal partial class AppMain
 {
+    private const int GMD_GMK_TRUCK_ACT_ST = 3;
+    private const int GMD_GMK_TRUCK_ACT_START = 4;
+    private const int GMD_GMK_TRUCK_ROT_DIV_CONSOLE = 16384;
+    private const int GMD_GMK_TRUCK_ROT_DIV_MOBILE = 65536;
+    private const int GMD_GMK_TRUCK_GETOFF_TIME = 8;
+    private const int GMD_GMK_TRUCK_GETOFF_BRAKE = 256;
+    private const int GMD_GMK_TRUCK_ROCK_FRAMES = 16;
+    private const int GMD_GMK_TRUCK_ROCK_STEP = 768;
+    private const int GMD_GMK_TRUCK_GETOFF_JUMP = -32768;
+    private const int GMD_GMK_TRUCK_GETOFF_JUMP_MAX = -61440;
+    private const ushort GMD_GMK_TRUCK_RIDE_W = 64;
+    private const ushort GMD_GMK_TRUCK_RIDE_H = 40;
+    private const short GMD_GMK_TRUCK_RIDE_OFST_X = -32;
+    private const short GMD_GMK_TRUCK_RIDE_OFST_Y = -21;
+
     public static void GmGmkTruckBuild()
     {
         gm_gmk_truck_obj_3d_list = GmGameDBuildRegBuildModel(GmGameDatGetGimmickData(928), GmGameDatGetGimmickData(929), 0U);
@@ -45,7 +60,14 @@
         pRec.ppDef = new OBS_RECT_WORK_Delegate1(gmGmkTruckBodyDefFunc);
         pRec.ppHit = null;
         ObjRectAtkSet(pRec, 0, 0);
-        ObjRectWorkSet(pRec, -64, -64, 64, 64);
+        if (gmStageIsPCLevel())
+        {
+            ObjRectWorkSet(pRec, -16, -128, 16, 0);
+            gmGmkTruckSetRailEndRect(gmsEnemy3DWork);
+            gmGmkTruckSetRidePlatform(gmsEnemy3DWork, work);
+        }
+        else
+            ObjRectWorkSet(pRec, -64, -64, 64, 64);
         NNS_RGBA col = new NNS_RGBA(1f, 1f, 1f, 1f);
         NNS_VECTOR nnsVector = GlobalPool<NNS_VECTOR>.Alloc();
         nnsVector.x = -0.85f;
@@ -59,8 +81,33 @@
         truck_work.obj_3d_tire.use_light_flag |= 2U;
         gmGmkTruckCreateLightEfct(truck_work);
         gmsEnemy3DWork.ene_com.enemy_flag |= 65536U;
-        work.obj_3d.command_state = 16U;
+        // gmGmkTruck.cpp:408-412. Console names no such list in its draw order table, so leaving
+        // this set is what makes the cart invisible on the PC map
+        if (!gm_gmk_as_console)
+            work.obj_3d.command_state = 16U;
         return work;
+    }
+
+    // the nose sensor, PC-only. hit_flag 0 and def_flag 0xFFF7 leave it deaf to everything except
+    // a rail end, whose hit_flag is the one bit 0xFFF7 does not block
+    private static void gmGmkTruckSetRailEndRect(GMS_ENEMY_3D_WORK enemy)
+    {
+        OBS_RECT_WORK pRec = enemy.ene_com.rect_work[0];
+        ObjRectGroupSet(pRec, 0, 2);
+        ObjRectAtkSet(pRec, 0, 0);
+        ObjRectDefSet(pRec, 65527, 0);
+        ObjRectWorkSet(pRec, 0, -24, 50, 24);
+        pRec.ppDef = new OBS_RECT_WORK_Delegate1(gmGmkTruckRailEndDefFunc);
+        pRec.ppHit = null;
+    }
+
+    private static void gmGmkTruckSetRidePlatform(GMS_ENEMY_3D_WORK enemy, OBS_OBJECT_WORK work)
+    {
+        enemy.ene_com.col_work.obj_col.obj = work;
+        enemy.ene_com.col_work.obj_col.width = GMD_GMK_TRUCK_RIDE_W;
+        enemy.ene_com.col_work.obj_col.height = GMD_GMK_TRUCK_RIDE_H;
+        enemy.ene_com.col_work.obj_col.ofst_x = GMD_GMK_TRUCK_RIDE_OFST_X;
+        enemy.ene_com.col_work.obj_col.ofst_y = GMD_GMK_TRUCK_RIDE_OFST_Y;
     }
 
     public static OBS_OBJECT_WORK GmGmkTruckGravityInit(
@@ -134,11 +181,74 @@
     {
         UNREFERENCED_PARAMETER(ply_work);
         GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)obj_work;
-        obj_work.flag |= 2U;
+        GMS_ENEMY_3D_WORK enemy = (GMS_ENEMY_3D_WORK)obj_work;
         obj_work.move_flag |= 8448U;
-        obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckMain);
-        gmGmkTruckCreateSparkEfct(truck_work, 27);
+        if (gmStageIsPCLevel())
+        {
+            // ObjObjectRectRegist drops every rect of an OBD_OBJECT_NOHIT object, so the leak's
+            // flag |= NOHIT here (gmGmkTruck.cpp:628) would kill the nose sensor the moment you
+            // board. PC does not set it, which is the whole reason the dismount can fire
+            enemy.ene_com.rect_work[1].flag &= ~4U;
+            enemy.ene_com.rect_work[2].flag &= ~4U;
+            enemy.ene_com.col_work.obj_col.obj = null;
+            obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckBoardMain);
+        }
+        else
+        {
+            obj_work.flag |= 2U;
+            obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckMain);
+        }
+        gmGmkTruckCreateSparkEfct(truck_work, GME_EFCT_Z03_IDX_SPARK_S);
         truck_work.h_snd_lorry = GsSoundAllocSeHandle();
+    }
+
+    // PC gates the START motion on the player reaching act_state 78, its own boarding pose. That
+    // motion is in no archive we ship, so ours runs the cart's half off the ride itself
+    private static void gmGmkTruckBoardMain(OBS_OBJECT_WORK obj_work)
+    {
+        GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)obj_work;
+        if (truck_work.target_player == null || obj_work.obj_3d == null || obj_work.obj_3d.motion == null)
+        {
+            obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckMain);
+            gmGmkTruckMain(obj_work);
+            return;
+        }
+
+        // PC's rider is stood in the boarding animation while this runs, so its cart has nothing to
+        // follow. Ours is already riding, and a cart left behind for the 41 frames of START is worse
+        // than no boarding motion at all
+        gmGmkTruckFollowPlayer(obj_work, truck_work.target_player);
+
+        if (obj_work.obj_3d.act_id[0] != GMD_GMK_TRUCK_ACT_START)
+        {
+            ObjDrawObjectActionSet3DNNBlend(obj_work, GMD_GMK_TRUCK_ACT_START);
+            obj_work.disp_flag &= ~OBD_DISP_STOP;
+            return;
+        }
+
+        if ((obj_work.disp_flag & OBD_DISP_END) == 0U)
+            return;
+
+        obj_work.disp_flag |= OBD_DISP_STOP;
+        obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckMain);
+        GmSoundPlaySEForce("Lorry", truck_work.h_snd_lorry, true);
+    }
+
+    private static void gmGmkTruckFollowPlayer(
+      OBS_OBJECT_WORK obj_work,
+      GMS_PLAYER_WORK ply_work)
+    {
+        if (((int)ply_work.player_flag & 1024) != 0)
+            obj_work.pos.z = 983040;
+        obj_work.prev_pos = obj_work.pos;
+        obj_work.pos.x = ply_work.obj_work.pos.x;
+        obj_work.pos.y = ply_work.obj_work.pos.y;
+        obj_work.move.x = obj_work.pos.x - obj_work.prev_pos.x;
+        obj_work.move.y = obj_work.pos.y - obj_work.prev_pos.y;
+        obj_work.move.z = obj_work.pos.z - obj_work.prev_pos.z;
+        obj_work.dir = ply_work.obj_work.dir;
+        obj_work.dir.z += ply_work.obj_work.dir_fall;
+        obj_work.vib_timer = ply_work.obj_work.vib_timer;
     }
 
     public static void gmGmkTruckMain(OBS_OBJECT_WORK obj_work)
@@ -162,21 +272,12 @@
         }
         else
         {
-            if (((int)truck_work.target_player.player_flag & 1024) != 0)
-                obj_work.pos.z = 983040;
             GMS_PLAYER_WORK targetPlayer = truck_work.target_player;
-            obj_work.prev_pos = obj_work.pos;
-            obj_work.pos.x = targetPlayer.obj_work.pos.x;
-            obj_work.pos.y = targetPlayer.obj_work.pos.y;
-            obj_work.move.x = obj_work.pos.x - obj_work.prev_pos.x;
-            obj_work.move.y = obj_work.pos.y - obj_work.prev_pos.y;
-            obj_work.move.z = obj_work.pos.z - obj_work.prev_pos.z;
-            obj_work.dir = targetPlayer.obj_work.dir;
-            obj_work.dir.z += targetPlayer.obj_work.dir_fall;
-            obj_work.vib_timer = targetPlayer.obj_work.vib_timer;
+            gmGmkTruckFollowPlayer(obj_work, targetPlayer);
             obj_work.disp_flag &= 4294967279U;
             truck_work.tire_dir_spd = ((int)targetPlayer.obj_work.move_flag & 1) == 0 ? ObjSpdDownSet(truck_work.tire_dir_spd, 128) : targetPlayer.obj_work.spd_m;
-            truck_work.tire_dir += (ushort)FX_Div(truck_work.tire_dir_spd, 65536);
+            truck_work.tire_dir += (ushort)FX_Div(truck_work.tire_dir_spd,
+                gm_gmk_as_console ? GMD_GMK_TRUCK_ROT_DIV_CONSOLE : GMD_GMK_TRUCK_ROT_DIV_MOBILE);
             int id = -1;
             uint num = 0;
             if (0 <= targetPlayer.act_state && targetPlayer.act_state <= 7 || (targetPlayer.act_state == 69 || targetPlayer.act_state == 70) || (targetPlayer.act_state == 74 || targetPlayer.act_state == 76 || targetPlayer.act_state == 75))
@@ -249,7 +350,7 @@
                 GlobalPool<NNS_MATRIX>.Release(nnsMatrix);
             }
             if (((int)targetPlayer.obj_work.move_flag & 1) != 0 && MTM_MATH_ABS(targetPlayer.obj_work.spd_m) >= GMD_GMK_TRUCK_SPARK_EFCT_SMALL_MIN_SPD && (truck_work.efct_f_spark == null || truck_work.efct_b_spark == null))
-                gmGmkTruckCreateSparkEfct(truck_work, 27);
+                gmGmkTruckCreateSparkEfct(truck_work, gmGmkTruckSparkEfctIdx(targetPlayer.obj_work.spd_m));
             if (truck_work.h_snd_lorry.au_player.sound == null || truck_work.h_snd_lorry.au_player.sound[0] == null)
             {
                 truck_work.h_snd_lorry = GsSoundAllocSeHandle();
@@ -328,7 +429,7 @@
         truck_work.tire_dir_spd = ((int)obj_work.move_flag & 1) == 0 ? ObjSpdDownSet(truck_work.tire_dir_spd, 128) : obj_work.spd_m;
         truck_work.tire_dir += (ushort)FX_Div(truck_work.tire_dir_spd, 16384);
         if (((int)obj_work.move_flag & 1) != 0 && MTM_MATH_ABS(obj_work.spd_m) >= GMD_GMK_TRUCK_SPARK_EFCT_SMALL_MIN_SPD && (truck_work.efct_f_spark == null || truck_work.efct_b_spark == null))
-            gmGmkTruckCreateSparkEfct(truck_work, 27);
+            gmGmkTruckCreateSparkEfct(truck_work, gmGmkTruckSparkEfctIdx(obj_work.spd_m));
         gmGmkTruckSetMoveSeParam(obj_work, truck_work.h_snd_lorry, null, 1);
     }
 
@@ -398,6 +499,135 @@
         GmPlayerSetTruckRide(parentObj2, parentObj1.obj_work, parentObj1.obj_work.field_rect[0], parentObj1.obj_work.field_rect[1], parentObj1.obj_work.field_rect[2], parentObj1.obj_work.field_rect[3]);
         gmsGmkTruckWork.target_player = parentObj2;
         gmGmkTruckInitMain(parentObj1.obj_work, parentObj2);
+    }
+
+    // PC-only, the nose sensor against a rail end (298) or one of its blocker columns (299). The
+    // rail end's own ppHit runs first in the same pair and sinks its platform
+    private static void gmGmkTruckRailEndDefFunc(
+      OBS_RECT_WORK mine_rect,
+      OBS_RECT_WORK match_rect)
+    {
+        OBS_OBJECT_WORK mine_obj = mine_rect.parent_obj;
+        OBS_OBJECT_WORK match_obj = match_rect.parent_obj;
+        if (mine_obj == null || match_obj == null || match_obj.obj_type != 3)
+            return;
+
+        GMS_ENEMY_COM_WORK match_enemy = (GMS_ENEMY_COM_WORK)match_obj;
+        if (match_enemy.eve_rec == null)
+            return;
+
+        int id = match_enemy.eve_rec.id;
+        if (id != GMD_EVENT_ID_GMK_RAIL_END && id != GMD_EVENT_ID_GMK_RAIL_END_AREA)
+            return;
+
+        GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)mine_obj;
+        GMS_PLAYER_WORK ply_work = truck_work.target_player;
+        if (ply_work == null)
+            return;
+
+        GmPlayerSetEndTruckRide(ply_work);
+        if (id == GMD_EVENT_ID_GMK_RAIL_END)
+        {
+            gmGmkTruckInitGetOff(mine_obj, false);
+            GmPlySeqInitTruckGetOff(ply_work, GMD_GMK_TRUCK_GETOFF_JUMP);
+            return;
+        }
+
+        gmGmkTruckInitGetOff(mine_obj, true);
+        int spd_y = ply_work.obj_work.spd.y + GMD_GMK_TRUCK_GETOFF_JUMP;
+        if (spd_y < GMD_GMK_TRUCK_GETOFF_JUMP_MAX)
+            spd_y = GMD_GMK_TRUCK_GETOFF_JUMP_MAX;
+        GmPlySeqInitTruckGetOff(ply_work, spd_y);
+    }
+
+    private static void gmGmkTruckInitGetOff(OBS_OBJECT_WORK obj_work, bool is_area)
+    {
+        GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)obj_work;
+        gmGmkTruckInitFree(obj_work, truck_work.target_player);
+        obj_work.flag = obj_work.flag & 4294967277U | 2U;
+        if (is_area)
+        {
+            obj_work.move_flag = obj_work.move_flag & 4294966896U | 384U;
+            if (obj_work.spd.y < 0)
+                obj_work.spd.y >>= 1;
+            ObjDrawObjectActionSet3DNNBlend(obj_work, GMD_GMK_TRUCK_ACT_ST);
+        }
+        else
+        {
+            obj_work.move_flag &= ~OBD_MOVE_NOCOL;
+            ObjObjectFieldRectSet(obj_work, -32, -21, 32, 19);
+        }
+
+        obj_work.view_out_ofst = 64;
+        obj_work.user_timer = GMD_GMK_TRUCK_GETOFF_TIME;
+        if (truck_work.h_snd_lorry != null)
+        {
+            GmSoundStopSE(truck_work.h_snd_lorry);
+            GsSoundFreeSeHandle(truck_work.h_snd_lorry);
+            truck_work.h_snd_lorry = null;
+        }
+
+        GmSoundPlaySE("Lorry6");
+        obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckGetOffMain);
+    }
+
+    private static void gmGmkTruckGetOffMain(OBS_OBJECT_WORK obj_work)
+    {
+        GMS_ENEMY_3D_WORK enemy = (GMS_ENEMY_3D_WORK)obj_work;
+        GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)obj_work;
+        if (obj_work.user_timer > 0 && --obj_work.user_timer <= 0)
+            enemy.ene_com.col_work.obj_col.obj = obj_work;
+
+        if ((obj_work.move_flag & OBD_MOVE_NOMOVE) != 0U)
+            return;
+
+        obj_work.spd.x = ObjSpdDownSet(obj_work.spd.x, GMD_GMK_TRUCK_GETOFF_BRAKE);
+        obj_work.spd_m = ObjSpdDownSet(obj_work.spd_m, GMD_GMK_TRUCK_GETOFF_BRAKE);
+        if ((obj_work.move_flag & OBD_MOVE_NOCOL) != 0U || obj_work.spd.x != 0 || obj_work.spd_m != 0)
+            return;
+
+        obj_work.move_flag |= OBD_MOVE_NOMOVE | OBD_MOVE_NOCOL;
+        obj_work.spd.x = 0;
+        obj_work.spd.y = 0;
+        obj_work.spd.z = 0;
+        obj_work.spd_add.x = 0;
+        obj_work.spd_add.y = 0;
+        obj_work.spd_add.z = 0;
+        obj_work.spd_m = 0;
+        ObjDrawObjectActionSet3DNNBlend(obj_work, GMD_GMK_TRUCK_ACT_ST);
+        obj_work.disp_flag |= OBD_DISP_USERMTX_RIGHT;
+        obj_work.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkTruckGetOffEndMain);
+        truck_work.rock_timer = 0;
+    }
+
+    // the empty cart settling: sixteen frames of rock about X, pivoted eight units above the origin
+    private static void gmGmkTruckGetOffEndMain(OBS_OBJECT_WORK obj_work)
+    {
+        GMS_ENEMY_3D_WORK enemy = (GMS_ENEMY_3D_WORK)obj_work;
+        GMS_GMK_TRUCK_WORK truck_work = (GMS_GMK_TRUCK_WORK)obj_work;
+        if (obj_work.user_timer > 0 && --obj_work.user_timer <= 0)
+            enemy.ene_com.col_work.obj_col.obj = obj_work;
+
+        int t = ++truck_work.rock_timer;
+        if (t > GMD_GMK_TRUCK_ROCK_FRAMES)
+        {
+            obj_work.disp_flag &= ~OBD_DISP_USERMTX_RIGHT;
+            obj_work.ppFunc = null;
+            enemy.ene_com.col_work.obj_col.obj = obj_work;
+            return;
+        }
+
+        int dir_x = t >= GMD_GMK_TRUCK_ROCK_FRAMES / 2
+            ? GMD_GMK_TRUCK_ROCK_STEP * (GMD_GMK_TRUCK_ROCK_FRAMES - t)
+            : GMD_GMK_TRUCK_ROCK_STEP * t;
+        if (dir_x < 0)
+            dir_x = 0;
+
+        NNS_MATRIX mtx = obj_work.obj_3d.user_obj_mtx_r;
+        nnMakeUnitMatrix(mtx);
+        nnTranslateMatrix(mtx, mtx, 0.0f, -8f, 0.0f);
+        nnRotateXMatrix(mtx, mtx, (ushort)dir_x);
+        nnTranslateMatrix(mtx, mtx, 0.0f, 8f, 0.0f);
     }
 
     public static void gmGmkTruckMotionCallback(
@@ -626,6 +856,13 @@
         ObjDrawActionSummary(obj_work);
     }
 
+    private static int gmGmkTruckSparkEfctIdx(int spd_m)
+    {
+        return gm_gmk_as_console && MTM_MATH_ABS(spd_m) >= GMD_GMK_TRUCK_SPARK_EFCT_BIG_MIN_SPD
+            ? GME_EFCT_Z03_IDX_SPARK
+            : GME_EFCT_Z03_IDX_SPARK_S;
+    }
+
     public static void gmGmkTruckCreateSparkEfct(GMS_GMK_TRUCK_WORK truck_work, int efct_type)
     {
         if (truck_work.efct_f_spark == null)
@@ -667,7 +904,15 @@
             else
             {
                 obj_work.disp_flag &= 4294967263U;
-                if (MTM_MATH_ABS(obsObjectWork.spd_m) < GMD_GMK_TRUCK_SPARK_EFCT_SMALL_MIN_SPD)
+
+                // gmGmkTruck.cpp:2003-2067. Console has two spark sizes and swaps between them at
+                // BIG_MIN_SPD: the running one ends and creates the other. Mobile only ever has the
+                // small one, so it ends on the low speed alone
+                int spd = MTM_MATH_ABS(obsObjectWork.spd_m);
+                bool is_big = gm_gmk_as_console && obj_work.user_timer == GME_EFCT_Z03_IDX_SPARK;
+                bool over_big = gm_gmk_as_console && spd >= GMD_GMK_TRUCK_SPARK_EFCT_BIG_MIN_SPD;
+
+                if (is_big ? !over_big : over_big || spd < GMD_GMK_TRUCK_SPARK_EFCT_SMALL_MIN_SPD)
                 {
                     if (((int)dispFlag & 32) != 0)
                     {
@@ -682,6 +927,11 @@
                         parentObj.efct_f_spark = null;
                     else
                         parentObj.efct_b_spark = null;
+
+                    if (is_big)
+                        gmGmkTruckCreateSparkEfct(parentObj, GME_EFCT_Z03_IDX_SPARK_S);
+                    else if (over_big)
+                        gmGmkTruckCreateSparkEfct(parentObj, GME_EFCT_Z03_IDX_SPARK);
                 }
                 GmEffectDefaultMainFuncDeleteAtEnd(obj_work);
             }

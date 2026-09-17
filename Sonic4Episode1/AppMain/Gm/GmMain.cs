@@ -5,6 +5,20 @@ using mpp;
 
 internal partial class AppMain
 {
+    internal static bool mppShowPlayerPosition = false;
+
+    internal static string mppPlayerPositionText()
+    {
+        if (g_gm_main_system == null || g_gm_main_system.ply_work == null)
+            return null;
+
+        GMS_PLAYER_WORK ply_work = g_gm_main_system.ply_work[GSD_MAIN_PLAYER_1P];
+        if (ply_work == null)
+            return null;
+
+        return $"x {ply_work.obj_work.pos.x >> 12}  y {ply_work.obj_work.pos.y >> 12}";
+    }
+
     public const float GMD_CAMERA_SCALE = 0.2997259375f;    // gmMain.h:65, the !_IPHONE arm
 
     // gmMain.h:72-78, an iPhone-only feature with no console value
@@ -89,20 +103,21 @@ internal partial class AppMain
             SaveState.resumeStageState();
         if (((int)g_gs_main_sys_info.game_flag & 4) == 0)
             gmMainSysInit();
-        if (g_gs_main_sys_info.stage_id == 9)
+        // the bucket table forks, and this runs before gmMainLoad reaches GmGameDatLoadInit, so the
+        // arm has to be resolved here or it would still be the previous stage's. pure lookup, so
+        // resolving it twice costs nothing. it also has to be above the ObjInit below, which asks
+        // gmStageIsPCLevel
+        gmMapSelectVariant(g_gs_main_sys_info.stage_id);
+        gmDecoSelectVariant(g_gs_main_sys_info.stage_id);
+        gmGmkSelectVariant(g_gs_main_sys_info.stage_id);
+        gmMainSelectLightVariant(g_gs_main_sys_info.stage_id);
+        if (gmStageIsTruckRide())
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, (short)(GMD_OBJ_LCD_X * 1.42), (short)(GMD_OBJ_LCD_X * 1.42), GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
         else
             ObjInit(4, GMD_TASK_PRIO_OBJSYS, 0, GMD_OBJ_LCD_X, GMD_OBJ_LCD_Y, GSD_DISP_WIDTH, GSD_DISP_HEIGHT);
         ObjDataAlloc(GMD_DWORK_NO_MAX);
         ObjDrawESEffectSystemInit(0, 20480U, 5U);
         amTrailEFInitialize();
-        // the bucket table forks, and this runs before gmMainLoad reaches GmGameDatLoadInit, so the
-        // arm has to be resolved here or it would still be the previous stage's. pure lookup, so
-        // resolving it twice costs nothing
-        gmMapSelectVariant(g_gs_main_sys_info.stage_id);
-        gmDecoSelectVariant(g_gs_main_sys_info.stage_id);
-        gmGmkSelectVariant(g_gs_main_sys_info.stage_id);
-        gmMainSelectLightVariant(g_gs_main_sys_info.stage_id);
         gmMainSetNNCommandStateTbl();
         AoActSysClearPeak();
         if (((int)g_gs_main_sys_info.game_flag & 16) == 0)
@@ -757,7 +772,7 @@ internal partial class AppMain
         amIPhoneTouchCanceled();
         CPadVirtualPad.CreateInstance().Create(new float[4] { -120f, 166f, 232f, 340f });
         CPadPolarHandle instance = CPadPolarHandle.CreateInstance();
-        if (g_gs_main_sys_info.stage_id == 9)
+        if (gmStageIsTruckRide())
             instance.Create(0.0f, 0.0f, AOD_ACT_SCREEN_WIDTH * 4f / 5f, AOD_ACT_SCREEN_HEIGHT);
         else
             instance.Create();
@@ -769,7 +784,7 @@ internal partial class AppMain
             GsMainSysSetSleepFlag(false);
             GsMainSysSetAccelFlag(true);
         }
-        else if (((int)GsGetMainSysInfo().game_flag & 512) == 0 && (GsGetMainSysInfo().stage_id == 9 || GSM_MAIN_STAGE_IS_SPSTAGE()))
+        else if (((int)GsGetMainSysInfo().game_flag & 512) == 0 && (gmStageIsTruckRide() || GSM_MAIN_STAGE_IS_SPSTAGE()))
         {
             GsMainSysSetSleepFlag(false);
             GsMainSysSetAccelFlag(true);
@@ -823,6 +838,7 @@ internal partial class AppMain
         GmMapFarInit();
         GmDecoInit();
         GmWaterSurfaceInit();
+        GmPlyPostEffectInit();
         GmPlyEfctTrailSysInit();
         GmFix.GmFixInit();
         GmCameraInit();

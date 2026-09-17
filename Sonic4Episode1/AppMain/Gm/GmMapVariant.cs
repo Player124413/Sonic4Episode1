@@ -53,6 +53,20 @@ internal partial class AppMain
         return gm_map_variant == gm_map_variant_pc;
     }
 
+    // Zone 3 act 2 is a minecart ride start to finish on the mobile-era layouts, and the whole
+    // stage is built around it: a 1.42x wide camera, a steering-only pad region, no walking input
+    // and the truck HUD. PC's act 2 is a walking stage that happens to contain a minecart, so all
+    // of that has to be off there
+    internal static bool gmStageIsTruckRide()
+    {
+        return g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_3_2 && !gmStageIsPCLevel();
+    }
+
+    internal static bool gmStageIsLostLabyrinth2()
+    {
+        return g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_3_2 && gmStageIsPCLevel();
+    }
+
     // The two map motion sidecars are the console arm's: the leak guards their table rows with
     // `#if !defined GMD_GAMEDAT_NO_CREATE_MAP_MOTION` and defines that macro, so the mobile build
     // never had them. Console and pc are both console-grade art and both take them.

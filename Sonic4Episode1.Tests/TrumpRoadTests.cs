@@ -11,7 +11,7 @@ public class TrumpRoadTests
     [Fact]
     public void EveryCharacterHasARowForTheRideState()
     {
-        Assert.Equal(68, AppMain.GME_PLY_SEQ_STATE_MAX);
+        Assert.True(AppMain.GME_PLY_SEQ_STATE_GMK_TRUMP_ROAD < AppMain.GME_PLY_SEQ_STATE_MAX);
 
         foreach (var states in AppMain.g_gm_ply_seq_state_data_tbl)
         {

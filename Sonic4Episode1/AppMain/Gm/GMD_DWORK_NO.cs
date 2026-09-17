@@ -46,17 +46,29 @@
     // zone 2 does not fit the extent above. PC's EFF_ZONE2 holds 8 anims where mobile holds 2, and
     // growing 511..581 in place would move 419 ids plus the raw numbers the load tables pass, so
     // zone 2 sits past the end and every other zone keeps its numbering
-    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_START = 1012;
-    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_END = 1019;
+    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_START = 1021;
+    public const int GMD_DWORK_NO_EFFECT_ZONE2_AME_END = 1028;
 
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START = 582;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_END = 583;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_OBJECT_START = 584;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_OBJECT_END = 585;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_AMBTEX_START = 586;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_AMBTEX_END = 587;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_TEXLIST_START = 588;
-    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_TEXLIST_END = 589;
+    // and zone 3 for the same reason: PC's EFF_ZONE3 holds 54 anims where mobile holds 36, and the
+    // 522..557 the base table used to point at runs into zone 4 at 558. Both tiers use this block,
+    // so 520..557 came free, and the model block below took the first 28 of it
+    public const int GMD_DWORK_NO_EFFECT_ZONE3_AME_START = 1029;
+    public const int GMD_DWORK_NO_EFFECT_ZONE3_AME_END = 1082;
+
+    // one slot per block on mobile, where no zone table has a model row at all. PC's zone 3 has
+    // six, so the block is seven wide as PC's is, and it sits in the anim slots zones 2 and 3
+    // left behind rather than shifting the 400-odd ids above 589. 582..589 is dead space now
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_START = 520;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_A = 520;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_B = 521;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_WALL_C = 522;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MODELDAT_END = 527;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_OBJECT_START = 527;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_OBJECT_END = 534;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_AMBTEX_START = 534;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_AMBTEX_END = 541;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_TEXLIST_START = 541;
+    public const int GMD_DWORK_NO_EFFECT_ZONE_MDL_TEXLIST_END = 548;
     public const int GMD_DWORK_NO_EFFECT_ENE_START = 590;
     public const int GMD_DWORK_NO_EFFECT_ENE_AMBTEX_E02 = 590;
     public const int GMD_DWORK_NO_EFFECT_ENE_TEXLIST_E02 = 591;
@@ -468,8 +480,19 @@
     public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_TEX = 1008;
     public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_MTN = 1009;
     public const int GMD_DWORK_NO_GMK_TRUMPSTAGE_MAT = 1010;
-    public const int GMD_DWORK_NO_GMK_END = 1011;
-    public const int GMD_DWORK_NO_DEC_START = 1011;
-    public const int GMD_DWORK_NO_DEC_END = 1012;
-    public const int GMD_DWORK_NO_MAX = 1020;
+    // PC-only too, and they have to stay inside the gimmick block: g_gm_gamedat_gimmick is sized
+    // GMK_END - GMK_START and indexed data_no - GMK_START. PC's ordinals are 1058-1066
+    public const int GMD_DWORK_NO_GMK_TORCH_MDL = 1011;
+    public const int GMD_DWORK_NO_GMK_TORCH_TEX = 1012;
+    public const int GMD_DWORK_NO_GMK_CANDLE_MDL = 1013;
+    public const int GMD_DWORK_NO_GMK_CANDLE_TEX = 1014;
+    public const int GMD_DWORK_NO_GMK_RAILEND_MDL = 1015;
+    public const int GMD_DWORK_NO_GMK_RAILEND_TEX = 1016;
+    public const int GMD_DWORK_NO_GMK_DYNAMITE_MDL = 1017;
+    public const int GMD_DWORK_NO_GMK_DYNAMITE_TEX = 1018;
+    public const int GMD_DWORK_NO_GMK_DYNAMITE_MAT = 1019;
+    public const int GMD_DWORK_NO_GMK_END = 1020;
+    public const int GMD_DWORK_NO_DEC_START = 1020;
+    public const int GMD_DWORK_NO_DEC_END = 1021;
+    public const int GMD_DWORK_NO_MAX = 1083;
 }

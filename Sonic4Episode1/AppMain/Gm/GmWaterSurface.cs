@@ -23,6 +23,14 @@
         dwaterLoadObject(0U);
     }
 
+    // GMK_WATER_BASE_TEX is a nested archive only the mobile water archive has. Console and PC put
+    // their water textures loose and draw the shaded surface, so there is no base quad and nothing
+    // to wait for. AoTexBuild is what sets amb, so this is "did we build one"
+    private static bool gmWaterSurfaceHasBaseTexture()
+    {
+        return _dmap_water != null && _dmap_water.tex_base.amb != null;
+    }
+
     private static bool GmWaterSurfaceCheckLoading()
     {
         bool flag = true;
@@ -32,7 +40,7 @@
         {
             GMS_WATER_SURFACE_DATA info = gmWaterSurfaceDataGetInfo();
             // a missing texture must not stall loading; the draw falls back instead
-            if (!AoTexIsLoaded(_dmap_water.tex_base))
+            if (gmWaterSurfaceHasBaseTexture() && !AoTexIsLoaded(_dmap_water.tex_base))
                 flag = false;
             else if (_dmap_water.tex_color != null && _dmap_water.tex_color.texture == null)
                 flag = false;
@@ -87,7 +95,7 @@
         bool flag = true;
         if (gmWaterSurfaceGameSystemGetZoneType(gmWaterSurfaceGameSystemGetStageId()) == 2 && _dmap_water != null)
         {
-            if (!AoTexIsReleased(_dmap_water.tex_base))
+            if (gmWaterSurfaceHasBaseTexture() && !AoTexIsReleased(_dmap_water.tex_base))
                 flag = false;
             else if (_dmap_water.regist_index == -1)
             {
@@ -427,6 +435,9 @@
     // The _IPHONE flat surface quad (gmWaterSurface.cpp:1404), kept as the no-shader path.
     private static void gmWaterSurfaceDrawFallbackSurface(GMS_WATER_SURFACE_INFO work)
     {
+        if (!gmWaterSurfaceHasBaseTexture())
+            return;
+
         AMS_PARAM_DRAW_PRIMITIVE prim = GlobalPool<AMS_PARAM_DRAW_PRIMITIVE>.Alloc();
         prim.aTest = 0;
         prim.zMask = 1;

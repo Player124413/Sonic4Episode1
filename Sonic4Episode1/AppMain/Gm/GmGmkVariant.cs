@@ -1,3 +1,5 @@
+using System;
+
 internal partial class AppMain
 {
     // The gimmick archives are member for member identical between the two builds, which is why
@@ -18,6 +20,12 @@ internal partial class AppMain
         {
             var path = info.data_tbl[index].path;
             if (path == null || path.StartsWith("G_COM/"))
+                continue;
+
+            // the _TVX archives are the mobile substitute for a model console draws properly, so
+            // they exist on the base tier only and no console build ships a counterpart. Letting
+            // them vote would hold zone 3 on the mobile arm forever
+            if (path.EndsWith("_TVX.AMB", StringComparison.OrdinalIgnoreCase))
                 continue;
 
             found = true;

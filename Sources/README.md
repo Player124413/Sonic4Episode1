@@ -33,5 +33,8 @@ smaller set. The copy here was taken from a known-good FNA build output.
 TODO(wam): this is frozen rather than derived. The intent is to rebuild it from the `.CSB` with
 SonicAudioTools, at which point this directory becomes an output and stops being a source.
 
+The recipe for adding a single cue exists now, in [sound-from-csb.md](../docs/sound-from-csb.md);
+extraction needed two fixes to the vendored `CsbEditor` before it would read the bank at all.
+
 TODO(wam): where each of these came from originally is not written down here on purpose. Add the
 acquisition notes if you want them somewhere.

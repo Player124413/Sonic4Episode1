@@ -12,7 +12,6 @@ namespace Sonic4Episode1.Android
     [Activity(
         Label = "@string/app_name",
         MainLauncher = true,
-        Icon = "@drawable/icon",
         AlwaysRetainTaskState = true,
         LaunchMode = LaunchMode.SingleInstance,
         ScreenOrientation = ScreenOrientation.UserLandscape,
@@ -32,14 +31,10 @@ namespace Sonic4Episode1.Android
             base.OnCreate(savedInstanceState);
         }
 
-        // SDLThread. The default body dlopens libmain.so and hands SDL_main to SDL_RunApp, which is
-        // SDL_SetMainReady plus a call. Same thing, minus the dlopen.
-        //
-        // It has to block for as long as the game is up. SDLMain calls nativeCleanupMainThread and
-        // finishes the Activity the moment this returns, so an async body ends the app at its first
-        // await
         protected override void Main()
         {
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+
             SDL_SetMainReady();
 
             SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
@@ -47,10 +42,6 @@ namespace Sonic4Episode1.Android
             SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
             SDL_SetHint(SDL_HINT_PEN_TOUCH_EVENTS, "0");
 
-            // one tree per profile, so switching between them is a relaunch rather than a
-            // reinstall. The title location is what holds the tree, not the tree: the boot readers
-            // write the "Content\\" prefix themselves, and OpenStream lowercases the whole name,
-            // the directory included
             var home = Path.Combine(FilesDir.AbsolutePath, Profile);
             var root = Path.Combine(home, "content");
 
@@ -72,11 +63,13 @@ namespace Sonic4Episode1.Android
 
             RunOnUiThread(Dismiss);
 
-            // Content.RootDirectory stays the relative "Content" the ctor sets. An absolute one
-            // gets lowercased whole by OpenStream, application id included, and there is no
-            // /data/user/0/org.wamwoowam.sonic4episode1
             using var game = new Sonic4Ep1();
             game.Run();
+        }
+
+        private void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        {
+            Log.Warn(nameof(Sonic4Activity), $"first chance exception: {e.Exception}");
         }
 
         private string SetLocation()
@@ -89,6 +82,7 @@ namespace Sonic4Episode1.Android
 
         private void ShowProgress(double fraction)
         {
+            // 95% sure Progress<T> does SynchronizationContext.Post, but just to be sure
             RunOnUiThread(() =>
             {
                 _dialog ??= Show();

@@ -75,5 +75,9 @@
     // needs no remapping the way the event ids did. PC's list runs to 71; the other three are
     // states no stage we load enters
     internal const int GME_PLY_SEQ_STATE_GMK_TRUMP_ROAD = 67;
-    internal const int GME_PLY_SEQ_STATE_MAX = 68;
+
+    // the minecart dismount, one past the card road. PC's list runs to 71; the other two are states
+    // no stage we load enters
+    internal const int GME_PLY_SEQ_STATE_GMK_TRUCK_GET_OFF = 68;
+    internal const int GME_PLY_SEQ_STATE_MAX = 69;
 }

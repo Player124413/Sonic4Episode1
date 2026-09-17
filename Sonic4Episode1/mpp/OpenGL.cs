@@ -2143,6 +2143,42 @@ namespace mpp
             m_viewportSet = false;
         }
 
+        private static readonly BlendState m_multiplyBlend = new BlendState
+        {
+            ColorSourceBlend = Blend.Zero,
+            ColorDestinationBlend = Blend.SourceColor,
+            AlphaSourceBlend = Blend.Zero,
+            AlphaDestinationBlend = Blend.SourceColor,
+        };
+
+        // dst = dst * src over the whole surface, stretching src to fit. The light map is half res
+        public static void mppglBlitMultiply(Texture2D src)
+        {
+            flushDrawArrays();
+            if (m_blitBatch == null)
+                m_blitBatch = new SpriteBatch(m_graphicsDevice);
+
+            int surface_w, surface_h;
+            if (m_renderTarget != null)
+            {
+                surface_w = m_renderTarget.Width;
+                surface_h = m_renderTarget.Height;
+            }
+            else
+            {
+                PresentationParameters pp = m_graphicsDevice.PresentationParameters;
+                surface_w = pp.BackBufferWidth;
+                surface_h = pp.BackBufferHeight;
+            }
+            m_graphicsDevice.Viewport = new Viewport(0, 0, surface_w, surface_h);
+            m_graphicsDevice.ScissorRectangle = new Rectangle(0, 0, surface_w, surface_h);
+
+            m_blitBatch.Begin(SpriteSortMode.Immediate, m_multiplyBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+            m_blitBatch.Draw(src, new Rectangle(0, 0, surface_w, surface_h), Color.White);
+            m_blitBatch.End();
+            m_viewportSet = false;
+        }
+
         public static void glTexParameteri(uint target, uint pname, int param)
         {
             if (target != 3553U)

@@ -78,7 +78,9 @@
                 }
                 break;
         }
-        if (index1 == 2)
+        // gmGmkLand.cpp:327-336 sits inside #if _IPHONE. Console draws zone 3's platforms as the
+        // plain NN model every other zone uses; the TVX pair is the mobile substitute for it
+        if (index1 == 2 && !gm_gmk_as_console)
             rideWork.ppOut = index3 != 0 ? new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxRDrawFunc) : new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxDrawFunc);
         rideWork.pos.z = -131072;
         gmsEnemy3DWork.ene_com.col_work.obj_col.obj = rideWork;
@@ -155,7 +157,8 @@
         rideWork.disp_flag |= 4194304U;
         rideWork.flag |= 2U;
         rideWork.user_work = (uint)(short)(eve_rec.left << 8) / 10U;
-        rideWork.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxPulleyDrawFunc);
+        if (!gm_gmk_as_console)
+            rideWork.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxPulleyDrawFunc);
         return rideWork;
     }
 
@@ -169,6 +172,18 @@
         OBS_OBJECT_WORK rideWork = GMM_ENEMY_CREATE_RIDE_WORK(eve_rec, pos_x, pos_y, () => new GMS_ENEMY_3D_WORK(), "GMK_LAND_ROPE");
         GMS_ENEMY_3D_WORK gmsEnemy3DWork = (GMS_ENEMY_3D_WORK)rideWork;
         ObjObjectCopyAction3dNNModel(rideWork, gm_gmk_land_obj_3d_list[3], gmsEnemy3DWork.obj_3d);
+
+        // the rope scrolls by material motion on console. The TVX arm has no material to animate,
+        // so it drives obj_3d.mat_frame by hand against a hardcoded 120 frame loop instead
+        if (gm_gmk_as_console)
+        {
+            ObjAction3dNNMaterialMotionLoad(gmsEnemy3DWork.obj_3d, 0, null, null,
+                IDB_GMK_LAND_3_MAT_LAND_3_ROPE_ZNV,
+                (AMS_AMB_HEADER)ObjDataGet(GMD_DWORK_NO_GMK_LAND_3_ROPE_MAT).pData);
+            ObjDrawObjectActionSet3DNNMaterial(rideWork, 0);
+            rideWork.disp_flag |= 16U;
+        }
+
         rideWork.pos.z = -196608;
         rideWork.move_flag |= 8448U;
         rideWork.disp_flag |= 4194304U;
@@ -179,11 +194,22 @@
             rideWork.dir.z += 32768;
         if (eve_rec.left != 0)
             gmsEnemy3DWork.obj_3d.mat_speed = eve_rec.left / 10f;
-        rideWork.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxRopeMain);
-        float num1 = 120f;
-        float num2 = g_gm_main_system.sync_time / (num1 / gmsEnemy3DWork.obj_3d.mat_speed);
-        gmsEnemy3DWork.obj_3d.mat_frame = (num2 - (int)num2) * num1;
-        rideWork.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxRopeDrawFunc);
+
+        float frame_max;
+        if (gm_gmk_as_console)
+        {
+            frame_max = amMotionMaterialGetEndFrame(gmsEnemy3DWork.obj_3d.motion, gmsEnemy3DWork.obj_3d.mat_act_id)
+                - amMotionMaterialGetStartFrame(gmsEnemy3DWork.obj_3d.motion, gmsEnemy3DWork.obj_3d.mat_act_id);
+        }
+        else
+        {
+            frame_max = 120f;
+            rideWork.ppFunc = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxRopeMain);
+            rideWork.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkLand3TvxRopeDrawFunc);
+        }
+
+        float phase = g_gm_main_system.sync_time / (frame_max / gmsEnemy3DWork.obj_3d.mat_speed);
+        gmsEnemy3DWork.obj_3d.mat_frame = (phase - (int)phase) * frame_max;
         return rideWork;
     }
 

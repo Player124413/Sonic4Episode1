@@ -940,6 +940,35 @@
 		}
 	}
 
+	// PC hides the far background over four more stretches of act 1 than mobile does, and over nine
+	// stretches of act 2 where mobile hides it nowhere. Read out of gmMapFarSetCameraByStage
+	// (0x4CC3C0), which states them the other way round as the condition to draw
+	private static bool gmMapFarZone3Act1HidesBackground()
+	{
+		float z = g_map_far_data.pos.z;
+
+		return z <= -23.6f && z >= -28.98f
+			|| z <= -161.65f && z >= -171.15f
+			|| z <= -215.58f && z >= -250.7f
+			|| z <= -402.01f && z >= -412.85f;
+	}
+
+	private static bool gmMapFarZone3Act2HidesBackground()
+	{
+		float y = g_map_far_data.pos.y;
+		float z = g_map_far_data.pos.z;
+
+		return z >= -86.0f && y <= 20.88f
+			|| z <= -106.15f && z >= -144.4f
+			|| z <= -255.29f && z >= -304.07f && y >= 44.28f
+			|| z <= -257.44f && z >= -281.12f
+			|| z <= -304.85f && z >= -333.27f && y <= 60.0f
+			|| z <= -376.38f && z >= -386.16f
+			|| z <= -460.06f && z >= -475.78f && y <= 81.36f && y >= 29.05f
+			|| z <= -528.67f && z >= -553.59f
+			|| z <= -592.4f;
+	}
+
 	private static void gmMapFarSceneObjFuncDrawBg(OBS_OBJECT_WORK pWork)
 	{
 		OBS_ACTION3D_NN_WORK obj3d = pWork.obj_3d;
@@ -971,6 +1000,12 @@
 			{
 				case 8:
 					if (g_map_far_data.pos.z <= -312.5 && g_map_far_data.pos.z >= -333.0)
+						return;
+					if (gmStageIsPCLevel() && gmMapFarZone3Act1HidesBackground())
+						return;
+					break;
+				case 9:
+					if (gmStageIsPCLevel() && gmMapFarZone3Act2HidesBackground())
 						return;
 					break;
 				case 10:

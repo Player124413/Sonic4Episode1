@@ -296,7 +296,7 @@ internal static partial class GmFix
 
     private static bool gmFixIsStageTruck()
     {
-        return GsGetMainSysInfo().stage_id == 9;
+        return gmStageIsTruckRide();
     }
 
     // mobile-only: the console build has no GME_FIX_PLAN and no table indexed by one. only the

@@ -158,6 +158,9 @@ internal partial class AppMain
                     flag = !gmStageIsPCLevel() && !GsMainSysIsStageClear(5);
                     break;
                 case 9:
+                    // the minecart brief, and PC's act 2 is not a minecart ride
+                    if (gmStageIsPCLevel())
+                        break;
                     if (!GsMainSysIsStageClear(9))
                         flag = true;
                     else if ((512 & (int)mainSysInfo.game_flag) != 0)

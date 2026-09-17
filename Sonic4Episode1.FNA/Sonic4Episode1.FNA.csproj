@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Properties" />
-    <RdXmlFile Include="rd.xml" />
+    <RdXmlFile Include="..\Sonic4Episode1\rd.xml" />
   </ItemGroup>
 
   <PropertyGroup>

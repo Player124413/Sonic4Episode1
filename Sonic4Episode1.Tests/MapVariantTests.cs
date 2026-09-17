@@ -12,6 +12,8 @@ public class MapVariantTests
     private const int Stage1_Boss = 3;
     private const int Stage4_1 = 12;
 
+    private static readonly int[] Zone3Stages = { 8, 9, 10, 11 };
+
     private const string Zone1MapFar = "G_ZONE1/MAPFAR/ZONE1_MAPFAR.AMB";
 
     private static void Load(params string[] lines)
@@ -34,13 +36,18 @@ public class MapVariantTests
         return paths.ToArray();
     }
 
-    private static string[] DeclareConsole(params int[] stage_ids)
+    private static string[] Declare(string variant, params int[] stage_ids)
     {
         return stage_ids
             .SelectMany(GroupFor)
             .Distinct()
-            .Select(path => path + " console")
+            .Select(path => path + " " + variant)
             .ToArray();
+    }
+
+    private static string[] DeclareConsole(params int[] stage_ids)
+    {
+        return Declare(AppMain.AMD_FS_VARIANT_CONSOLE, stage_ids);
     }
 
     // the four map archives plus the background. deco is a separate subsystem with its own variant
@@ -436,6 +443,38 @@ public class MapVariantTests
 
         Load();
         Assert.False(AppMain.gmMapIsConsoleDataComplete(stage_id));
+    }
+
+    // ZONE3_M/_T/_ATTR and the background are shared by all four zone 3 acts, so dropping any one
+    // of them takes the whole zone off the pc tier rather than just the act that named it
+    [Fact]
+    public void ZoneThreeTakesThePcTierAsAWholeZone()
+    {
+        var whole = Declare(AppMain.AMD_FS_VARIANT_PC, Zone3Stages);
+
+        Load(whole);
+        foreach (int stage_id in Zone3Stages)
+            Assert.True(AppMain.gmMapIsPcLevelDataComplete(stage_id));
+
+        Load(whole.Where(line => !line.StartsWith("G_ZONE3/MAP/ZONE3_M.AMB ")).ToArray());
+        foreach (int stage_id in Zone3Stages)
+            Assert.False(AppMain.gmMapIsPcLevelDataComplete(stage_id));
+    }
+
+    // the pc tier is console-grade art on PC-era levels, so it answers both gates; console answers
+    // only the one. gmMapSelectVariant asks the narrow question first
+    [Fact]
+    public void ThePcTierIsConsoleGradeAndConsoleIsNotPc()
+    {
+        Load(Declare(AppMain.AMD_FS_VARIANT_PC, Zone3Stages));
+
+        Assert.True(AppMain.gmMapIsPcLevelDataComplete(9));
+        Assert.True(AppMain.gmMapIsConsoleDataComplete(9));
+
+        Load(DeclareConsole(Zone3Stages));
+
+        Assert.False(AppMain.gmMapIsPcLevelDataComplete(9));
+        Assert.True(AppMain.gmMapIsConsoleDataComplete(9));
     }
 
     // gmMap.cpp:3249-3259 pushes four, and NNM_MTX(m, row, col) is m[col][row] (nns.h:788), so

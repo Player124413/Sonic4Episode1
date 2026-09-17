@@ -29,7 +29,21 @@
             gmsEnemy3DWork.ene_com.enemy_flag |= 1U;
         }
         else
+        {
+            // gmGmkSwWall.cpp:270-283 is #if !_IPHONE. Zone 3's wall is three models on console,
+            // the block plus a stone facing and a glare the material motion scrolls; mobile ships
+            // only the block and draws it as TVX instead
+            if (gm_gmk_as_console)
+            {
+                ObjCopyAction3dNNModel(gm_gmk_sw_wall_obj_3d_list[IDB_GMK_SW_WALL3_MDL_GMK_SW_WALL_S_3_ZNO], gmsGmkSwwallWork.obj_3d_opt[0]);
+                ObjCopyAction3dNNModel(gm_gmk_sw_wall_obj_3d_list[IDB_GMK_SW_WALL3_MDL_GMK_SW_WALL_G_3_ZNO], gmsGmkSwwallWork.obj_3d_opt[1]);
+                ObjAction3dNNMaterialMotionLoad(gmsGmkSwwallWork.obj_3d_opt[1], 0,
+                    ObjDataGet(GMD_DWORK_NO_GMK_SW_WALL_MAT), null, 0, null, 1, 1);
+                gmsEnemy3DWork.ene_com.enemy_flag |= 2U;
+            }
+
             gmsGmkSwwallWork.h_snd = GsSoundAllocSeHandle();
+        }
         mtTaskChangeTcbDestructor(work.tcb, new GSF_TASK_PROCEDURE(gmGmkSwWallDest));
         work.pos.z = -655360;
         work.ppOut = new MPP_VOID_OBS_OBJECT_WORK(gmGmkSwWallDispFunc);
@@ -291,9 +305,16 @@
         uint dispFlag = obj_work.disp_flag;
         if (((int)gmsGmkSwwallWork.gmk_work.ene_com.enemy_flag & 2) != 0)
         {
+            uint glareDispFlag = dispFlag | OBD_DISP_REPEAT;
+            if (ObjObjectPauseCheck(0U) == 0U)
+                ObjDrawAction3DNNMaterialUpdate(gmsGmkSwwallWork.obj_3d_opt[1], ref glareDispFlag);
+            glareDispFlag |= OBD_DISP_NOUPDATE;
+
             while (num1 > 0)
             {
                 ObjDrawAction3DNN(obj_work.obj_3d, new VecFx32?(vecFx32), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref dispFlag);
+                ObjDrawAction3DNN(gmsGmkSwwallWork.obj_3d_opt[0], new VecFx32?(vecFx32), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref dispFlag);
+                ObjDrawAction3DNN(gmsGmkSwwallWork.obj_3d_opt[1], new VecFx32?(vecFx32), new AppMain.VecU16?(obj_work.dir), obj_work.scale, ref glareDispFlag);
                 --num1;
                 vecFx32.x += num3;
                 vecFx32.y += num2;
@@ -340,9 +361,14 @@
         }
     }
 
+    // gmGmkSwWall.cpp:1007 guards the whole body on stage 3-2, and PC's gmGmkSwWallSetCol
+    // (0x4FE520) drops both calls to it, so on PC's act 2 the buffer stays zeroed and every cell of
+    // a switch wall faces up. What this fills is the cart ride's box: only the interior of the top
+    // row faces up and the corners face sideways, which is what makes Sonic teeter on the edge of a
+    // wall he is supposed to be able to stand on
     public static void gmGmkSwWallSetColDir(byte[] buf, int width, int height, bool wall)
     {
-        if (g_gs_main_sys_info.stage_id != 9 || width <= 0 || height <= 0)
+        if (!gmStageIsTruckRide() || width <= 0 || height <= 0)
             return;
         int num1 = width >> 1;
         int num2 = height >> 1;

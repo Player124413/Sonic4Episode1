@@ -126,10 +126,11 @@ internal partial class AppMain
         lcd_rect[1] = MTM_MATH_CLIP(lcd_rect[1], 0, g_gm_eve_mgr_work.map_size[1] - 1);
         lcd_rect[2] = MTM_MATH_CLIP(lcd_rect[2], 0, g_gm_eve_mgr_work.map_size[0] - 1);
         lcd_rect[3] = MTM_MATH_CLIP(lcd_rect[3], 0, g_gm_eve_mgr_work.map_size[1] - 1);
+        ushort[] create_size_tbl = gmStageIsLostLabyrinth2() ? gm_evemgr_create_size_ll2_tbl : gm_evemgr_create_size_tbl;
         for (int index = 0; index < 3; ++index)
         {
             _eve_func_ eveFunc = gm_evemgr_create_eve_func_tbl[index];
-            int num5 = gm_evemgr_create_size_tbl[index];
+            int num5 = create_size_tbl[index];
             ev_rect[0] = lcd_rect[0];
             ev_rect[2] = lcd_rect[2];
             ev_rect[1] = lcd_rect[1];

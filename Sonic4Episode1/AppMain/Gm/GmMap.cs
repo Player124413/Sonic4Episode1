@@ -480,7 +480,9 @@ internal partial class AppMain
         DF_HEADER dfHeader = readDFFile((AmbChunk)g_gm_gamedat_map_attr_set[1]);
         DI_HEADER diHeader = readDIFile((AmbChunk)g_gm_gamedat_map_attr_set[2]);
         AT_HEADER atHeader = readATFile((AmbChunk)g_gm_gamedat_map_attr_set[0]);
-        if (g_gs_main_sys_info.stage_id == 9)
+        // the minecart ride clears attribute bit 1 across every cell in the stage. On PC's act 2
+        // you walk, and every other walking stage keeps its attributes
+        if (gmStageIsTruckRide())
         {
             for (int index1 = 0; index1 < atHeader.block_num; ++index1)
             {
@@ -576,7 +578,6 @@ internal partial class AppMain
     private static void GmMapInit()
     {
         ObjSetDiffCollision(g_gm_main_system.map_fcol);
-        gm_map_z32_share_frame = 0.0f;
         // port-original, no C++ origin: it shifts the TVX map one unit in x and makes
         // ObjDraw3DNNModel scale every NN model by 1.005 to close seams between batched quads.
         // console draws blocks as models and passes trans_x 0, so it has no business on that arm
@@ -1402,29 +1403,33 @@ internal partial class AppMain
             uint disp_flag = OBD_DISP_REPEAT;
 
             if (obj_3d.mtn[0] != null)
-            {
                 ObjDrawAction3DNNMotionUpdate(obj_3d, ref disp_flag);
 
-                if (g_gs_main_sys_info.stage_id == GSD_MAIN_STAGE_ID_3_2
-                    && obj_3d.command_state == OBD_DRAW_CMD_STATE_NEAR_MAP)
+            if (obj_3d.mat_mtn[0] != null)
+            {
+                ObjDrawAction3DNNMaterialUpdate(obj_3d, ref disp_flag);
+
+                // the near layer's lamps follow the darkness. gm_map_dark_mmtn_frame is
+                // 59 * brightness and gets clamped into whichever motion is being set, so the last
+                // model in the sweep decides what the global reads next frame, exactly as PC leaves
+                // it. This has to land after the material update, not before: the update advances
+                // and wraps mat_frame from wherever it finds it, so setting the frame first just
+                // hands it a starting point to drift from
+                if (gmStageIsLostLabyrinth2() && obj_3d.command_state == OBD_DRAW_CMD_STATE_NEAR_MAP)
                 {
-                    // TODO(port): the three nn frame accessors this uses were not recovered from the
-                    // binary; obj_3d.frame[0] against the action's end frame is the natural mapping
-                    float end_frame = amMotionGetEndFrame(obj_3d.motion, obj_3d.act_id[0]);
-                    if (gm_map_z32_share_frame < end_frame)
+                    float start_frame = amMotionMaterialGetStartFrame(obj_3d.motion, obj_3d.mat_act_id);
+                    float end_frame = amMotionMaterialGetEndFrame(obj_3d.motion, obj_3d.mat_act_id);
+                    if (gm_map_dark_mmtn_frame < end_frame)
                     {
-                        if (obj_3d.frame[0] >= gm_map_z32_share_frame)
-                            gm_map_z32_share_frame = obj_3d.frame[0];
+                        if (start_frame >= gm_map_dark_mmtn_frame)
+                            gm_map_dark_mmtn_frame = start_frame;
                     }
                     else
-                        gm_map_z32_share_frame = end_frame;
+                        gm_map_dark_mmtn_frame = end_frame;
 
-                    obj_3d.frame[0] = gm_map_z32_share_frame;
+                    obj_3d.mat_frame = gm_map_dark_mmtn_frame;
                 }
             }
-
-            if (obj_3d.mat_mtn[0] != null)
-                ObjDrawAction3DNNMaterialUpdate(obj_3d, ref disp_flag);
         }
     }
 
