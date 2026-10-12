@@ -9,10 +9,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   APP_ID: io.github.player124413.sonic4ep1
+  ANDROID_IMAGE: system-images;android-34;google_apis;x86_64
 
 jobs:
   android:
@@ -118,33 +119,15 @@ jobs:
             build.log
           if-no-files-found: ignore
 
-  # Boots an Android emulator, installs the freshly built APK and reports what logcat says.
-  # This is the only way to find out why the app closes on a phone without having the phone.
+  # Smoke test: boot an emulator, install the freshly built APK and fail if the app does not
+  # survive startup. Without a phone attached this is the only way to notice a crash like the Mono
+  # AOT abort that made the first version of this port close right after the launcher icon.
   emulator:
     name: Run APK on an emulator
     needs: android
     runs-on: ubuntu-latest
     if: needs.android.result == 'success'
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # The APK of the very first port (commit 05e8830) - the one that closes immediately on a
-          # real phone. Running it here tells us whether that crash can be reproduced at all.
-          - name: original-port-on-api34
-            run_id: "38280283357"
-            image: system-images;android-34;google_apis;x86_64
-            api: "34"
-          - name: original-port-on-api36
-            run_id: "38280283357"
-            image: system-images;android-36;google_apis;x86_64
-            api: "36"
-          # The current build on the newest Android.
-          - name: current-on-api36
-            run_id: ""
-            image: system-images;android-36;google_apis;x86_64
-            api: "36"
     steps:
       - uses: actions/checkout@v4
 
@@ -153,12 +136,6 @@ jobs:
         with:
           name: sonic4-android-apk
           path: apk
-          run-id: ${{ matrix.run_id || github.run_id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Show what was downloaded
-        run: ls -la apk || echo "no APK downloaded"
 
       - name: Setup Java (JDK 17, required by the Android SDK tools)
         uses: actions/setup-java@v5
@@ -178,12 +155,11 @@ jobs:
         run: |
           set +e
           SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
-          echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1
-          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "${{ matrix.image }}" > sdkmanager.log 2>&1
+          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
           code=$?
           echo "sdkmanager exit code: $code"
-          tail -20 sdkmanager.log
+          tail -5 sdkmanager.log
           if [ $code -ne 0 ]; then
             echo "::error title=sdkmanager failed::$(tail -c 1500 sdkmanager.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
             exit $code
@@ -198,46 +174,22 @@ jobs:
           mkdir -p "$ANDROID_AVD_HOME"
 
           AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager 2>/dev/null | head -1)
-
-          {
-            echo "--- env ---"; env | grep -iE 'android|home' | sort
-            echo "--- avdmanager: $AVDMANAGER"
-            echo "--- AVD list before ---"; "$AVDMANAGER" list avd 2>&1 | head -20
-            echo "--- create avd ---"
-            echo no | "$AVDMANAGER" create avd -n test -k "${{ matrix.image }}" --device pixel_5 --force 2>&1 | tail -25
-            echo "exit code of the pipeline: $?"
-            echo "--- ls $ANDROID_AVD_HOME ---"; ls -la "$ANDROID_AVD_HOME" 2>&1
-            echo "--- find test.ini ---"; find / -name 'test.ini' 2>/dev/null | head -5
-            echo "--- find *.avd directories ---"; find / -maxdepth 7 -type d -name 'test.avd' 2>/dev/null | head -5
-            echo "--- AVD list after ---"; "$AVDMANAGER" list avd 2>&1 | head -20
-          } > avd-setup.log 2>&1
-          tail -60 avd-setup.log
-
-          # If avdmanager put the AVD somewhere unexpected, point the emulator at it.
-          if [ ! -f "$ANDROID_AVD_HOME/test.ini" ]; then
-            AVDDIR=$(find / -maxdepth 7 -type d -name 'test.avd' 2>/dev/null | head -1)
-            echo "AVDDIR=$AVDDIR"
-            if [ -n "$AVDDIR" ]; then
-              printf 'avd.ini.encoding=UTF-8\npath=%s\npath.rel=test.avd\ntarget=android-${{ matrix.api }}\n' "$AVDDIR" > "$ANDROID_AVD_HOME/test.ini"
-              cp "$AVDDIR/config.ini" "$AVDDIR/config.ini.bak" 2>/dev/null
-            else
-              echo "::error title=Creating the AVD failed::avdmanager did not create an AVD anywhere on disk. See the report file attached to the branch."
-              exit 1
-            fi
-          fi
+          echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force > avd.log 2>&1
+          code=$?
+          echo "avdmanager exit code: $code"
           ls -la "$ANDROID_AVD_HOME"
+          if [ $code -ne 0 ] || [ ! -f "$ANDROID_AVD_HOME/test.ini" ]; then
+            echo "::error title=Creating the AVD failed::$(tail -c 1500 avd.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
 
-          echo "--- acceleration check ---"
-          emulator -accel-check 2>&1 | head -5
+          emulator -accel-check 2>&1 | head -3
 
           nohup emulator -avd test -no-window -no-audio -no-boot-anim -no-snapshot \
             -gpu swiftshader_indirect -camera-back none -camera-front none \
-            -memory 2048 -partition-size 4096 -verbose > emulator.log 2>&1 &
+            -memory 2048 -partition-size 4096 > emulator.log 2>&1 &
           EMU_PID=$!
-          echo "emulator started with pid $EMU_PID"
           sleep 25
-          head -40 emulator.log
-
           if ! kill -0 $EMU_PID 2>/dev/null; then
             echo "::error title=The emulator process died right after start::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
             exit 1
@@ -263,7 +215,6 @@ jobs:
             echo "::error title=The emulator did not finish booting::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
             exit 1
           fi
-          adb shell wm size
 
       - name: Install and run the APK
         timeout-minutes: 15
@@ -303,38 +254,15 @@ jobs:
 
           echo "::notice title=Emulator run finished::The app is still running after 45 seconds (pid $(cat pid.txt))."
 
-      # Belt and braces reporting: annotations are handy but rate limited and the job summary can
-      # not be read from everywhere, so everything is also collected into a file that is committed
-      # to the branch. This step runs no matter how the previous steps went.
-      - name: Attach the reports to the branch
-        if: always() && github.event_name == 'push'
-        env:
-          BRANCH: ${{ github.ref_name }}
-        run: |
-          set +e
-          mkdir -p ci-reports
-          OUT="ci-reports/emulator-${GITHUB_RUN_ID}-${{ matrix.name }}.txt"
-          {
-            echo "run: $GITHUB_RUN_ID  sha: $GITHUB_SHA  case: ${{ matrix.name }} (api ${{ matrix.api }})"
-            echo "apk files:"; ls -la apk 2>/dev/null
-            echo "=== app pid after the wait ==="; cat pid.txt 2>/dev/null
-            echo "=== interesting logcat lines ==="; cat interesting.txt 2>/dev/null
-            echo "=== install output ==="; cat install.log 2>/dev/null
-            echo "=== monkey output ==="; cat monkey.log 2>/dev/null
-            for f in *.log; do
-              echo "=== $f (first 40) ==="; head -40 "$f" 2>/dev/null
-              echo "=== $f (last 40) ==="; tail -40 "$f" 2>/dev/null
-            done
-          } > "$OUT" 2>&1
-          wc -l "$OUT"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ci-reports
-          if git diff --cached --quiet; then echo "nothing to report"; exit 0; fi
-          git commit -q -m "CI emulator report for run ${GITHUB_RUN_ID} [skip ci]"
-          for i in 1 2 3 4; do
-            if git push origin "HEAD:${BRANCH}"; then echo pushed; break; fi
-            git pull --rebase --autostash origin "${BRANCH}" || true
-            sleep 5
-          done
+      - name: Upload the emulator logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-logs
+          path: |
+            logcat.txt
+            emulator.log
+            avd.log
+            install.log
+            pid.txt
+          if-no-files-found: ignore

@@ -106,7 +106,58 @@ dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -c Release -
 
 There is also a GitHub Actions workflow (`.github/workflows/android.yml`) that builds an APK on every
 push and uploads it as a build artifact — that is the easiest way to get a binary without a local
-Android setup.
+Android setup. The same workflow then boots an emulator, installs the APK and fails if the app does
+not survive its first 45 seconds, so a regression like the one described below cannot slip through
+unnoticed again.
+
+### 3.1 Build switches that have to stay the way they are
+
+The project file switches off several .NET for Android optimisations. That is not laziness, it is
+what makes the app start at all:
+
+```xml
+<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+<RunAOTCompilation>false</RunAOTCompilation>
+<PublishTrimmed>false</PublishTrimmed>
+<AndroidLinkMode>None</AndroidLinkMode>
+<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+<TargetSdkVersion>34</TargetSdkVersion>
+```
+
+* **AOT.** Release builds enable profiled AOT by default. With MonoGame 3.8.4 — an assembly built
+  against API 34 — that combination aborts the process while the runtime loads the classes:
+
+  ```
+  F/monodroid: * Assertion at .../mono/metadata/class-init.c:2474,
+               condition `klass->instance_size == instance_size' not met
+  F/libc: Fatal signal 6 (SIGABRT) in tid ... (io.github.player124413.sonic4ep1)
+  ```
+
+  The process dies before `MainActivity.OnCreate` runs, so the player only sees the launcher icon
+  and then the home screen again. Turning profiled AOT (and AOT in general) off fixes it.
+* **Linking/trimming.** `XmlStorage` saves through `XmlSerializer` and the content pipeline output is
+  loaded through reflection; keep the linker away from both.
+* **`TargetSdkVersion 34`** matches the API level MonoGame 3.8.4 was built against and keeps newer
+  Android behaviour changes (edge to edge enforcement, receiver registration flags) out of the way.
+  Verified on Android 14 and Android 16 emulators.
+
+### 3.2 If the app still closes right after the launcher icon
+
+Everything the activity does during startup is traced (`Diagnostics.cs`):
+
+* logcat, tag `Sonic4Ep1`, errors on `Sonic4Ep1-Crash`
+* an on screen report with a **Share report** button (title screen → the app replaces its own content
+  view instead of dying)
+* `startup-trace.txt` and `crash-latest.txt` in the app's private files directory
+  (`/data/data/io.github.player124413.sonic4ep1/files/`) and in its external one
+  (`/sdcard/Android/data/io.github.player124413.sonic4ep1/files/`, readable with a file manager)
+
+If the process dies without drawing anything, the crash happens in native code (like the AOT abort
+above) and only logcat can show it:
+
+```bash
+adb logcat -d | grep -E 'Sonic4Ep1|monodroid|DEBUG|FATAL'
+```
 
 ## 4. Controls
 
