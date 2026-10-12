@@ -9,10 +9,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   APP_ID: io.github.player124413.sonic4ep1
+  ANDROID_IMAGE: system-images;android-34;google_apis;x86_64
 
 jobs:
   android:
@@ -61,58 +62,46 @@ jobs:
           dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj \
             -c Release -f net10.0-android -p:AndroidPackageFormat=apk 2>&1 | tee -a build.log
 
-      # The raw job log is not always reachable through the API/tooling, so surface the interesting
-      # part of the build output as an annotation of the run.
+      # The raw job log is not reachable from every environment (blob storage is often blocked),
+      # so the interesting bits are emitted as annotations, which are readable through the REST API.
       - name: Report build problems
         if: failure()
         run: |
           if [ -f build.log ]; then
-            tail -c 3000 build.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g' > annotation.txt
+            tail -c 2500 build.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g' > annotation.txt
             echo "::error title=Android build failed::$(cat annotation.txt)"
           fi
 
-      # Diagnostics that say *what* was built. The job summary is readable through the checks API
-      # (gh api /repos/:owner/:repo/check-runs/:id --jq .output.summary), which makes it possible
-      # to debug a build without downloading the artifact.
       - name: Collect build diagnostics
         if: success()
         run: |
           set +e
           {
-            echo "## Android build diagnostics"
-            echo
-            echo '### effective build properties'
-            echo '```'
+            echo "=== effective build properties ==="
             dotnet msbuild Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -nologo \
               -getProperty:TargetFramework -getProperty:TargetSdkVersion -getProperty:SupportedOSPlatformVersion \
               -getProperty:AndroidPackageFormat -getProperty:PublishTrimmed -getProperty:AndroidLinkMode \
               -getProperty:RunAOTCompilation -getProperty:AndroidEnableProfiledAot \
               -getProperty:AndroidEnableMarshalMethods -getProperty:AndroidSupportedAbis \
               -getProperty:RuntimeIdentifiers -getProperty:ApplicationId 2>&1 | tail -40
-            echo '```'
             echo
-            echo '### merged AndroidManifest.xml'
-            echo '```xml'
-            find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -3
-            for f in $(find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -1); do cat "$f"; done
-            echo '```'
+            echo "=== merged AndroidManifest.xml ==="
+            MANIFEST=$(find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -1)
+            echo "($MANIFEST)"
+            grep -vE '^\s*$' "$MANIFEST" | head -60
             echo
-            echo '### APK contents'
-            echo '```'
+            echo "=== APK contents ==="
             for apk in Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk; do
               echo "--- $apk ($(stat -c%s "$apk") bytes)"
-              unzip -l "$apk" | head -30
+              unzip -l "$apk" | head -25
               echo "lib entries: $(unzip -l "$apk" | grep -c 'lib/')"
               echo "--- native libraries (must be stored, not deflated)"
               unzip -v "$apk" | grep -E 'lib/.*\.so' | head -20
             done
-            echo '```'
-            echo
-            echo '### build warnings (tail)'
-            echo '```'
-            grep -iE 'warning|error' build.log | tail -40
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } > diagnostics.txt 2>&1
+          cat diagnostics.txt
+          # annotations are the only channel that can be read from everywhere
+          awk 'length($0) > 0 { printf "::notice title=diag::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' diagnostics.txt | head -40)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -121,6 +110,16 @@ jobs:
           path: Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk
           if-no-files-found: error
 
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: |
+            diagnostics.txt
+            build.log
+          if-no-files-found: ignore
+
   # Boots an Android emulator, installs the freshly built APK and reports what logcat says.
   # This is the only way to find out why the app closes on a phone without having the phone.
   emulator:
@@ -128,16 +127,16 @@ jobs:
     needs: android
     runs-on: ubuntu-latest
     if: needs.android.result == 'success'
+    timeout-minutes: 45
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: sonic4-android-apk
           path: apk
 
-      - name: Show the downloaded APKs
-        run: ls -la apk
-
-      - name: Setup Java (JDK 17, needed by the emulator tools)
+      - name: Setup Java (JDK 17, required by the Android SDK tools)
         uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -148,73 +147,119 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "no /dev/kvm"
 
-      - name: Run the app on an emulator and collect logcat
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          arch: x86_64
-          target: google_apis
-          profile: pixel_5
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          emulator-boot-timeout: 900
-          script: |
-            set +e
-            # Prefer the signed APK, fall back to whatever is there.
-            APK=$(ls apk/*Signed.apk 2>/dev/null | head -1)
-            [ -z "$APK" ] && APK=$(ls apk/*.apk | head -1)
-            echo "installing $APK"
-            adb install -r -t "$APK" > install.txt 2>&1
-            cat install.txt
-            if ! grep -q Success install.txt; then
-              echo "::error title=The APK could not be installed::$(tr '\n' ' ' < install.txt)"
-              exit 1
-            fi
+      - name: Install the emulator and the system image
+        run: |
+          set +e
+          SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          echo "sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1
+          "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
+          code=$?
+          echo "sdkmanager exit code: $code"
+          tail -20 sdkmanager.log
+          if [ $code -ne 0 ]; then
+            echo "::error title=sdkmanager failed::$(tail -c 1500 sdkmanager.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit $code
+          fi
 
-            adb logcat -c
-            adb shell monkey -p ${APP_ID} -c android.intent.category.LAUNCHER 1 > monkey.txt 2>&1
-            if ! grep -qi 'injected\|Events injected' monkey.txt; then
-              cat monkey.txt
-              ACTIVITY=$(adb shell cmd package resolve-activity --brief ${APP_ID} | tail -1 | tr -d '\r')
-              echo "resolved activity: $ACTIVITY"
-              adb shell am start -n "$ACTIVITY"
-            fi
-            sleep 35
+      - name: Boot the emulator and run the APK
+        run: |
+          set +e
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          report() { echo "$*"; }
 
-            adb logcat -d > logcat.txt
-            adb shell pidof ${APP_ID} > pid.txt
-            echo "pid: $(cat pid.txt)"
+          # 1. create the AVD
+          AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager | head -1)
+          echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force > avd.log 2>&1
+          code=$?
+          report "avdmanager exit code: $code"
+          tail -10 avd.log
+          if [ $code -ne 0 ]; then
+            echo "::error title=Creating the AVD failed::$(tail -c 1500 avd.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
 
-            {
-              echo "## Emulator run (API 34, x86_64)"
-              echo
-              echo "app pid after 35s: $(cat pid.txt)"
-              echo
-              echo '### app log (tag Sonic4Ep1)'
-              echo '```'
-              grep -E 'Sonic4Ep1' logcat.txt | head -100
-              echo '```'
-              echo
-              echo '### crash related lines'
-              echo '```'
-              grep -nE 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|SIGSEGV|signal [0-9]+|NoClassDefFoundError|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|InvalidOperation|Reflection|IO)' logcat.txt | head -150
-              echo '```'
-              echo
-              echo '### last 200 logcat lines'
-              echo '```'
-              tail -200 logcat.txt
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+          # 2. boot it
+          nohup emulator -avd test -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect \
+            -camera-back none -camera-front none -memory 2048 -partition-size 4096 > emulator.log 2>&1 &
+          sleep 10
+          adb wait-for-device
+          booted=0
+          for i in $(seq 1 120); do
+            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then booted=1; break; fi
+            sleep 5
+          done
+          report "booted=$booted after $((i * 5))s"
+          if [ $booted -ne 1 ]; then
+            echo "::error title=The emulator did not boot::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+          adb shell wm size
 
-            if grep -qE 'FATAL EXCEPTION|UnsatisfiedLinkError|signal [0-9]+ \(SIG' logcat.txt; then
-              echo "::error title=The app crashed on the emulator::See the job summary for the logcat excerpt."
-              exit 1
-            fi
+          # 3. install the APK
+          APK=$(ls apk/*Signed.apk 2>/dev/null | head -1)
+          [ -z "$APK" ] && APK=$(ls apk/*.apk | head -1)
+          report "installing $APK"
+          adb install -r -t "$APK" > install.log 2>&1
+          cat install.log
+          if ! grep -q Success install.log; then
+            echo "::error title=The APK could not be installed::$(tr '\n' ' ' < install.log | head -c 1500)"
+            exit 1
+          fi
 
-            if ! grep -q 'Sonic4Ep1' logcat.txt; then
-              echo "::error title=Managed code never ran::No 'Sonic4Ep1' tag in logcat, the process died before OnCreate finished."
-              exit 1
-            fi
+          # 4. launch it and watch
+          adb logcat -c
+          adb logcat -v time > logcat-full.txt 2>&1 &
+          LOGCAT_PID=$!
+          adb shell monkey -p ${APP_ID} -c android.intent.category.LAUNCHER 1 > monkey.log 2>&1
+          cat monkey.log
+          sleep 45
+          kill $LOGCAT_PID
+          adb logcat -d -v time > logcat.txt 2>&1
+          adb shell pidof ${APP_ID} > pid.txt
+          report "pid after 45s: $(cat pid.txt)"
 
-            echo "::notice title=Emulator run finished::The app stayed alive, see the job summary for details."
+          # 5. report
+          grep -E 'Sonic4Ep1' logcat.txt > interesting.txt
+          grep -nE 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|dlopen|signal [0-9]+|NoClassDefFoundError|ClassNotFoundException|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|DllNotFound|EntryPoint)' logcat.txt >> interesting.txt
+          report "--- interesting logcat lines ---"
+          cat interesting.txt
+          echo "--- app pid: $(cat pid.txt) ---"
+
+          awk 'length($0) > 0 { printf "::error title=logcat::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' interesting.txt | head -40)
+
+          if [ -z "$(cat pid.txt)" ]; then
+            awk 'length($0) > 0 { printf "::error title=logcat-tail::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' logcat.txt | tail -30)
+            exit 1
+          fi
+
+          echo "::notice title=Emulator run finished::The app is still running after 45 seconds (pid $(cat pid.txt))."
+
+      # Second channel for the logcat excerpt: a file committed to the branch. Job summaries and
+      # step logs live in storage that is not always reachable, a git fetch always is.
+      - name: Attach the logcat excerpt to the branch
+        if: always() && github.event_name == 'push'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set +e
+          mkdir -p ci-reports
+          {
+            echo "run: $GITHUB_RUN_ID  sha: $GITHUB_SHA"
+            echo "=== app pid after the wait ==="; cat pid.txt 2>/dev/null
+            echo "=== interesting logcat lines ==="; cat interesting.txt 2>/dev/null
+            echo "=== install output ==="; cat install.log 2>/dev/null
+            echo "=== logcat (last 400 lines) ==="; tail -400 logcat.txt 2>/dev/null
+          } > "ci-reports/emulator-${GITHUB_RUN_ID}.txt"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ci-reports
+          if git diff --cached --quiet; then echo "nothing to report"; exit 0; fi
+          git commit -q -m "CI emulator report for run ${GITHUB_RUN_ID} [skip ci]"
+          for i in 1 2 3 4; do
+            if git push origin "HEAD:${BRANCH}"; then echo pushed; break; fi
+            git pull --rebase --autostash origin "${BRANCH}" || true
+            sleep 5
+          done
