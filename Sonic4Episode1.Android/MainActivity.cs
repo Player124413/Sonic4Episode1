@@ -4,6 +4,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
+using AColor = Android.Graphics.Color;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -260,14 +261,14 @@ namespace Sonic4Episode1Android
                 {
                     Orientation = Orientation.Vertical
                 };
-                layout.SetBackgroundColor(Color.Black);
+                layout.SetBackgroundColor(AColor.Black);
                 layout.SetPadding(24, 24, 24, 24);
 
                 var title = new TextView(this)
                 {
                     Text = "Sonic 4: Episode I could not start"
                 };
-                title.SetTextColor(Color.Rgb(255, 216, 61));
+                title.SetTextColor(AColor.Rgb(255, 216, 61));
                 title.SetTextSize(Android.Util.ComplexUnitType.Sp, 16f);
                 layout.AddView(title);
 
@@ -275,7 +276,7 @@ namespace Sonic4Episode1Android
                 {
                     Text = context
                 };
-                reason.SetTextColor(Color.White);
+                reason.SetTextColor(AColor.White);
                 reason.SetTextSize(Android.Util.ComplexUnitType.Sp, 12f);
                 layout.AddView(reason);
 
@@ -289,7 +290,7 @@ namespace Sonic4Episode1Android
                 {
                     Text = Diagnostics.BuildReport()
                 };
-                text.SetTextColor(Color.LightGray);
+                text.SetTextColor(AColor.LightGray);
                 text.SetTextSize(Android.Util.ComplexUnitType.Sp, 9f);
                 text.SetTextIsSelectable(true);
                 scroll.AddView(text);
