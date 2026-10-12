@@ -15,6 +15,8 @@ A much better decompilation of Sonic 4 Episode 1 for Windows Phone 7
  - Editable XML-based save file with additional properties
 
 # Platforms
+[![Build Android APK](https://github.com/Player124413/Sonic4Episode1/actions/workflows/android.yml/badge.svg)](https://github.com/Player124413/Sonic4Episode1/actions/workflows/android.yml) — пре-собранный APK лежит в артефактах последнего запуска
+
  - **Windows / Linux / macOS** — `Sonic4Episode1.FNA` (FNA)
  - **Web (WASM)** — `Sonic4Episode1.Wasm`
  - **Android** — [`Sonic4Episode1.Android`](Sonic4Episode1.Android/README.md) (MonoGame 3.8.4, `net8.0-android`,

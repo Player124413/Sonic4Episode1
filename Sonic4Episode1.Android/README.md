@@ -1,5 +1,7 @@
 # Sonic 4: Episode I — Android port
 
+[![Build Android APK](https://github.com/Player124413/Sonic4Episode1/actions/workflows/android.yml/badge.svg)](https://github.com/Player124413/Sonic4Episode1/actions/workflows/android.yml)
+
 This is the Android front end of the decompilation. It compiles the whole shared game
 (`../Sonic4Episode1/Sonic4Episode1.projitems`) against **MonoGame 3.8.4 for Android** and adds the
 platform glue the game needs on a phone: a writable save directory, an Android replacement for the
