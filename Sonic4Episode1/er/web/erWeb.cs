@@ -14,6 +14,9 @@ namespace er.web
             Windows.System.Launcher.LaunchUriAsync(new System.Uri(url));
 #elif WINDOWSPHONE7_5 || WASM
             (new Microsoft.Phone.Tasks.WebBrowserTask() { Uri = new System.Uri(url) }).Show();
+#elif ANDROID || __ANDROID__
+            // System.Diagnostics.Process.Start does not exist on Android
+            Sonic4Ep1Android.OpenUrl(url);
 #else
             System.Diagnostics.Process.Start(url);
 #endif

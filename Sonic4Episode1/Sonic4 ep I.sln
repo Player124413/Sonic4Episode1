@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonic4Episode1.Win32", "..\Sonic4Episode1.Win32\Sonic4Episode1.Win32.csproj", "{A62267CF-9F86-45EE-9DAE-41555B2CB9A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sonic4Episode1.Android", "..\Sonic4Episode1.Android\Sonic4Episode1.Android.csproj", "{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sonic4Episode1.FNA", "..\Sonic4Episode1.FNA\Sonic4Episode1.FNA.csproj", "{2CB33C8C-7B27-411B-858E-8EF6DF340C1F}"
 EndProject
@@ -28,6 +30,18 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|x64.Build.0 = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Debug|x86.Build.0 = Debug|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|x64.ActiveCfg = Release|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|x64.Build.0 = Release|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|x86.ActiveCfg = Release|Any CPU
+		{3F5B9C7A-2E64-4A0B-9E2C-1D7A5B8C4F31}.Release|x86.Build.0 = Release|Any CPU
 		{A62267CF-9F86-45EE-9DAE-41555B2CB9A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A62267CF-9F86-45EE-9DAE-41555B2CB9A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A62267CF-9F86-45EE-9DAE-41555B2CB9A7}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -104,6 +118,7 @@ Global
 		Sonic4Episode1.projitems*{00c5c69d-0eb0-4bc6-b3cd-de00b86836e9}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{2bd24b24-8f74-4df7-a5f1-89eae8013c52}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{2cb33c8c-7b27-411b-858e-8ef6df340c1f}*SharedItemsImports = 5
+		Sonic4Episode1.projitems*{3f5b9c7a-2e64-4a0b-9e2c-1d7a5b8c4f31}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{361832f5-a6ba-4d32-a6dc-0f184e4f3487}*SharedItemsImports = 5
 		Sonic4Episode1.projitems*{d3af4b7a-1a34-492c-8753-9f1d843b36bd}*SharedItemsImports = 13
 	EndGlobalSection

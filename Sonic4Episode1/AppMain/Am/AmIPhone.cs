@@ -11,7 +11,19 @@ public partial class AppMain
     public void amIPhoneInitNN(PresentationParameters presParams)
     {
         OpenGL.init(m_game, m_graphicsDevice);
+#if ANDROID || __ANDROID__
+        // MonoGame's Android backend keeps the back buffer at the aspect ratio requested through
+        // GraphicsDeviceManager and letterboxes it inside the physical display (see
+        // GraphicsDeviceManager.ResetClientBounds). The game however renders centred inside
+        // whatever viewport it is given, so the letterbox offset has to be passed on or the
+        // image would end up off centre on screens that are wider than the back buffer.
+        var androidViewport = m_graphicsDevice.Viewport;
+        OpenGL.glViewport(androidViewport.X < 0 ? 0 : androidViewport.X,
+            androidViewport.Y < 0 ? -androidViewport.Y : androidViewport.Y,
+            androidViewport.Width, androidViewport.Height);
+#else
         OpenGL.glViewport(0, 0, presParams.BackBufferWidth, presParams.BackBufferHeight);
+#endif
         
         // TODO: 360.0f
         float num1 = 320.0f * ((float)presParams.BackBufferWidth / (presParams.BackBufferHeight));
@@ -42,6 +54,42 @@ public partial class AppMain
         amRenderInit();
         GlobalPool<NNS_MATRIX>.Release(mtx);
     }
+
+#if ANDROID || __ANDROID__
+    private static int _am_android_viewport_x = int.MinValue;
+    private static int _am_android_viewport_y = int.MinValue;
+    private static int _am_android_viewport_w = int.MinValue;
+    private static int _am_android_viewport_h = int.MinValue;
+
+    /// <summary>
+    /// Keeps the game's GL viewport in sync with the letterboxed viewport MonoGame
+    /// calculates for Android. The window can be resized at any time (immersive mode
+    /// hiding the navigation bar, rotation, split screen, ...) and the game only looks
+    /// at the viewport once during startup, which would leave the image misaligned.
+    /// </summary>
+    public static void amIPhoneAndroidSyncViewport()
+    {
+        if (m_graphicsDevice == null)
+            return;
+
+        var viewport = m_graphicsDevice.Viewport;
+        // MonoGame stores the vertical letterbox offset negated (the offset is measured from the
+        // bottom in GL terms), OpenGL wants the offset of the bottom edge, hence the abs.
+        int x = viewport.X < 0 ? 0 : viewport.X;
+        int y = viewport.Y < 0 ? -viewport.Y : viewport.Y;
+
+        if (x == _am_android_viewport_x && y == _am_android_viewport_y &&
+            viewport.Width == _am_android_viewport_w && viewport.Height == _am_android_viewport_h)
+            return;
+
+        _am_android_viewport_x = x;
+        _am_android_viewport_y = y;
+        _am_android_viewport_w = viewport.Width;
+        _am_android_viewport_h = viewport.Height;
+
+        OpenGL.glViewport(x, y, viewport.Width, viewport.Height);
+    }
+#endif
 
     public static void amIPhoneExitNN()
     {

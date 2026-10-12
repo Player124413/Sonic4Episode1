@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-android</TargetFramework>
+		<!-- MonoGame 3.8.4 supports Android 6.0 (API 23) and above. -->
+		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+		<OutputType>Exe</OutputType>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<!-- Sonic4Episode1.projitems ships its own AssemblyInfo.cs -->
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<!-- ASYNC_IO matches the FNA/desktop port: content is streamed in on background tasks. -->
+		<DefineConstants>TRACE;ASYNC_IO</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<ApplicationId>io.github.player124413.sonic4ep1</ApplicationId>
+		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>1.2.0</ApplicationDisplayVersion>
+		<ApplicationTitle>Sonic 4 Episode I</ApplicationTitle>
+		<!-- Produce a directly installable .apk instead of an .aab -->
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+		<!--
+			Background music is handed to Android's MediaPlayer through
+			AssetManager.openFd(), which rejects compressed assets, so keep the audio formats
+			the content uses stored uncompressed in the APK.
+		-->
+		<AndroidStoreUncompressedFileExtensions>.ogg;.mp3;.m4a;.wav;.adx</AndroidStoreUncompressedFileExtensions>
+		<!--
+			The game saves through XmlSerializer (XmlStorage.cs) and loads assets through
+			reflection heavy MonoGame code paths, so keep the linker away from the framework.
+			Switch this to SdkOnly if you want a smaller APK and verify saves still work.
+		-->
+		<AndroidLinkMode>None</AndroidLinkMode>
+	</PropertyGroup>
+
+	<Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />
+
+	<ItemGroup>
+		<PackageReference Include="MonoGame.Framework.Android" Version="3.8.4" />
+		<!-- Only needed if you want to run the MonoGame content pipeline (see README.md) -->
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
+	</ItemGroup>
+
+</Project>

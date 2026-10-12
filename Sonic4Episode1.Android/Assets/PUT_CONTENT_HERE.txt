@@ -1,0 +1,15 @@
+Sonic 4: Episode I - Android port
+=================================
+
+Drop the game content into this folder before building:
+
+    Assets/Content/...
+
+For example:
+
+    Assets/Content/DEMO/TITLE/D_TITLE.AMB
+    Assets/Content/SOUND/...
+
+The files are not part of this repository (they belong to SEGA), see ../README.md for
+where to get them and how the folder has to be laid out. Nothing in here is committed
+to git (.gitignore ignores Content/), so feel free to fill it up.

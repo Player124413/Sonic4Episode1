@@ -1,0 +1,63 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - master
+      - arena/**
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Java (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install the Android workload
+        run: dotnet workload install android
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # The game content (Assets/Content, several hundred MB, not redistributable) is optional for
+      # the build itself - without it the APK starts and tells the player that content is missing.
+      # If you keep your own copy somewhere that the runner can reach (a private release asset, a
+      # secret with a download url, ...) download/unpack it here into
+      # Sonic4Episode1.Android/Assets/Content before publishing.
+
+      - name: Restore
+        run: dotnet restore Sonic4Episode1.Android/Sonic4Episode1.Android.csproj
+
+      - name: Publish
+        run: >
+          dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj
+          -c Release -f net8.0-android -p:AndroidPackageFormat=apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonic4-android-apk
+          path: Sonic4Episode1.Android/bin/Release/net8.0-android/publish/*.apk
+          if-no-files-found: error
