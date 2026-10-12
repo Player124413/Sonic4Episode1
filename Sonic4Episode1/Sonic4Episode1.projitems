@@ -57,10 +57,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Ao\AoPresence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Delegates.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_DWORK_NO.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_GAME_FLAG.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_GAME_FLAG.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLF.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_PLY_SEQ_STATE.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)appmain\gm\GMD_TASK_PRIO.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppMain\Gm\GMD_TASK_PRIO.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive2DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnDrawPrimitive3DCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppMain\Types\_nnMakeRotateMatrixQuaternion.cs" />
@@ -1108,6 +1108,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)setting\file.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)setting\main.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShortBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sonic4Ep1.Android.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sonic4Ep1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StreamExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TripleType`3.cs" />

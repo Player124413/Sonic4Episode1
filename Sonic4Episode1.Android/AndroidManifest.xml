@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The game needs the original Sonic 4: Episode I content files which cannot be
+    redistributed with this source port. They are picked up from the "Assets/Content"
+    folder of this project (it is created by copying the "Content" folder of the
+    Windows Phone build / the "Content.asar" package there, see README.md).
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+  <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+  <application android:label="@string/app_name"
+               android:icon="@drawable/ic_launcher"
+               android:hardwareAccelerated="true"
+               android:allowBackup="false"
+               android:largeHeap="true" />
+</manifest>

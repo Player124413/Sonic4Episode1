@@ -1,0 +1,282 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - master
+      - arena/**
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP_ID: io.github.player124413.sonic4ep1
+  ANDROID_IMAGE: system-images;android-34;google_apis;x86_64
+
+jobs:
+  android:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Java (JDK 21)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install the Android workload
+        run: dotnet workload install android
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # The game content (Assets/Content, several hundred MB, not redistributable) is optional for
+      # the build itself - without it the APK starts and tells the player that content is missing.
+      # If you keep your own copy somewhere that the runner can reach (a private release asset, a
+      # secret with a download url, ...) download/unpack it here into
+      # Sonic4Episode1.Android/Assets/Content before publishing.
+
+      - name: Restore
+        run: |
+          set -o pipefail
+          dotnet restore Sonic4Episode1.Android/Sonic4Episode1.Android.csproj 2>&1 | tee -a build.log
+
+      - name: Publish
+        run: |
+          set -o pipefail
+          dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj \
+            -c Release -f net10.0-android -p:AndroidPackageFormat=apk 2>&1 | tee -a build.log
+
+      # The raw job log lives in storage that is not reachable from every environment, so the
+      # interesting bits are emitted as annotations (readable through the REST API) as well.
+      - name: Report build problems
+        if: failure()
+        run: |
+          if [ -f build.log ]; then
+            tail -c 2500 build.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g' > annotation.txt
+            echo "::error title=Android build failed::$(cat annotation.txt)"
+          fi
+
+      - name: Collect build diagnostics
+        if: success()
+        run: |
+          set +e
+          {
+            echo "=== effective build properties ==="
+            dotnet msbuild Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -nologo \
+              -getProperty:TargetFramework -getProperty:TargetSdkVersion -getProperty:SupportedOSPlatformVersion \
+              -getProperty:AndroidPackageFormat -getProperty:PublishTrimmed -getProperty:AndroidLinkMode \
+              -getProperty:RunAOTCompilation -getProperty:AndroidEnableProfiledAot \
+              -getProperty:AndroidEnableMarshalMethods -getProperty:AndroidSupportedAbis \
+              -getProperty:RuntimeIdentifiers -getProperty:ApplicationId 2>&1 | tail -40
+            echo
+            echo "=== merged AndroidManifest.xml ==="
+            MANIFEST=$(find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -1)
+            echo "($MANIFEST)"
+            grep -vE '^\s*$' "$MANIFEST" | head -60
+            echo
+            echo "=== APK contents ==="
+            for apk in Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk; do
+              echo "--- $apk ($(stat -c%s "$apk") bytes)"
+              unzip -l "$apk" | head -25
+              echo "lib entries: $(unzip -l "$apk" | grep -c 'lib/')"
+              echo "--- native libraries (must be stored, not deflated)"
+              unzip -v "$apk" | grep -E 'lib/.*\.so' | head -20
+            done
+          } > diagnostics.txt 2>&1
+          cat diagnostics.txt
+          awk 'length($0) > 0 { printf "::notice title=diag::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' diagnostics.txt | head -30)
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonic4-android-apk
+          path: Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk
+          if-no-files-found: error
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: |
+            diagnostics.txt
+            build.log
+          if-no-files-found: ignore
+
+      # Handy download link: a rolling pre-release that always carries the latest APK, so nobody
+      # has to dig through the artifact zip files. It contains no game content (the assets are not
+      # redistributable and are added locally when building).
+      - name: Update the rolling APK release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          gh release view android-latest > /dev/null 2>&1 ||             gh release create android-latest --title "Android build (rolling)" --prerelease \
+              --notes "Latest APK built from master. Contains no game content: copy the original Sonic 4 content into Sonic4Episode1.Android/Assets/Content and build the APK yourself (see Sonic4Episode1.Android/README.md)."
+          gh release upload android-latest --clobber Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*-Signed.apk
+          gh release view android-latest --json url --jq .url
+
+  # Smoke test: boot an emulator, install the freshly built APK and fail if the app does not
+  # survive startup. Without a phone attached this is the only way to notice a crash like the Mono
+  # AOT abort that made the first version of this port close right after the launcher icon.
+  emulator:
+    name: Run APK on an emulator
+    needs: android
+    runs-on: ubuntu-latest
+    if: needs.android.result == 'success'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the APK
+        uses: actions/download-artifact@v4
+        with:
+          name: sonic4-android-apk
+          path: apk
+
+      - name: Setup Java (JDK 17, required by the Android SDK tools)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm || echo "no /dev/kvm"
+
+      - name: Install the emulator and the system image
+        timeout-minutes: 15
+        run: |
+          set +e
+          SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1
+          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
+          code=$?
+          echo "sdkmanager exit code: $code"
+          tail -5 sdkmanager.log
+          if [ $code -ne 0 ]; then
+            echo "::error title=sdkmanager failed::$(tail -c 1500 sdkmanager.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit $code
+          fi
+
+      - name: Boot the emulator
+        timeout-minutes: 25
+        run: |
+          set +e
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          export ANDROID_AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
+
+          AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager 2>/dev/null | head -1)
+          echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force > avd.log 2>&1
+          code=$?
+          echo "avdmanager exit code: $code"
+          ls -la "$ANDROID_AVD_HOME"
+          if [ $code -ne 0 ] || [ ! -f "$ANDROID_AVD_HOME/test.ini" ]; then
+            echo "::error title=Creating the AVD failed::$(tail -c 1500 avd.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
+          emulator -accel-check 2>&1 | head -3
+
+          nohup emulator -avd test -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect -camera-back none -camera-front none \
+            -memory 2048 -partition-size 4096 > emulator.log 2>&1 &
+          EMU_PID=$!
+          sleep 25
+          if ! kill -0 $EMU_PID 2>/dev/null; then
+            echo "::error title=The emulator process died right after start::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
+          for i in $(seq 1 60); do
+            adb devices | grep -q emulator- && break
+            sleep 5
+          done
+          adb devices
+          if ! adb devices | grep -q emulator-; then
+            echo "::error title=adb never saw the emulator::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
+          booted=0
+          for i in $(seq 1 120); do
+            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then booted=1; break; fi
+            sleep 5
+          done
+          echo "booted=$booted after $((i * 5))s"
+          if [ $booted -ne 1 ]; then
+            echo "::error title=The emulator did not finish booting::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
+      - name: Install and run the APK
+        timeout-minutes: 15
+        run: |
+          set +e
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+
+          APK=$(ls apk/*Signed.apk 2>/dev/null | head -1)
+          [ -z "$APK" ] && APK=$(ls apk/*.apk | head -1)
+          echo "installing $APK"
+          adb install -r -t "$APK" > install.log 2>&1
+          cat install.log
+          if ! grep -q Success install.log; then
+            echo "::error title=The APK could not be installed::$(tr '\n' ' ' < install.log | head -c 1500)"
+            exit 1
+          fi
+
+          adb logcat -c
+          adb shell monkey -p ${APP_ID} -c android.intent.category.LAUNCHER 1 > monkey.log 2>&1
+          cat monkey.log
+          sleep 45
+          adb logcat -d -v time > logcat.txt 2>&1
+          adb shell pidof ${APP_ID} > pid.txt
+          echo "pid after 45s: $(cat pid.txt)"
+
+          grep -E 'Sonic4Ep1' logcat.txt > interesting.txt
+          grep -E 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|dlopen|signal [0-9]+|NoClassDefFoundError|ClassNotFoundException|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|DllNotFound|EntryPoint)' logcat.txt >> interesting.txt
+          echo "--- interesting logcat lines ---"
+          cat interesting.txt
+
+          awk 'length($0) > 0 { printf "::error title=logcat::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' interesting.txt | head -30)
+
+          if [ -z "$(cat pid.txt)" ]; then
+            awk 'length($0) > 0 { printf "::error title=logcat-tail::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' logcat.txt | tail -25)
+            exit 1
+          fi
+
+          echo "::notice title=Emulator run finished::The app is still running after 45 seconds (pid $(cat pid.txt))."
+
+      - name: Upload the emulator logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-logs
+          path: |
+            logcat.txt
+            emulator.log
+            avd.log
+            install.log
+            pid.txt
+          if-no-files-found: ignore

@@ -69,6 +69,9 @@ public class Sonic4Ep1 : Game
         AppMain.storePath = storePath = ""; // unused, works via IsolatedStorage
 #elif WINDOWS_UAP
         AppMain.storePath = storePath = Windows.Storage.ApplicationData.Current.RoamingFolder.Path;
+#elif ANDROID || __ANDROID__
+        // "/" is not writable on Android, saves live in the app private files directory
+        AppMain.storePath = storePath = Sonic4Ep1Android.StoragePath;
 #else
         AppMain.storePath = storePath = System.IO.Directory.GetCurrentDirectory();
 #endif

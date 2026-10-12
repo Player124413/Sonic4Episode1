@@ -17406,6 +17406,9 @@ public partial class AppMain
 
     public void AppMainDraw()
     {
+#if ANDROID || __ANDROID__
+        amIPhoneAndroidSyncViewport();
+#endif
         amDrawExecRegist();
         amDrawExecCommand(16777216U);
         amDrawExecute();
