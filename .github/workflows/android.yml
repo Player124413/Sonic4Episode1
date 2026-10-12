@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   APP_ID: io.github.player124413.sonic4ep1
@@ -118,6 +118,20 @@ jobs:
             diagnostics.txt
             build.log
           if-no-files-found: ignore
+
+      # Handy download link: a rolling pre-release that always carries the latest APK, so nobody
+      # has to dig through the artifact zip files. It contains no game content (the assets are not
+      # redistributable and are added locally when building).
+      - name: Update the rolling APK release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          gh release view android-latest > /dev/null 2>&1 ||             gh release create android-latest --title "Android build (rolling)" --prerelease \
+              --notes "Latest APK built from master. Contains no game content: copy the original Sonic 4 content into Sonic4Episode1.Android/Assets/Content and build the APK yourself (see Sonic4Episode1.Android/README.md)."
+          gh release upload android-latest --clobber Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*-Signed.apk
+          gh release view android-latest --json url --jq .url
 
   # Smoke test: boot an emulator, install the freshly built APK and fail if the app does not
   # survive startup. Without a phone attached this is the only way to notice a crash like the Mono
