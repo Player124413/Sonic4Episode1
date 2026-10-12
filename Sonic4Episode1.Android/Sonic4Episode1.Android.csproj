@@ -10,6 +10,12 @@
 		<TargetFramework>net10.0-android</TargetFramework>
 		<!-- MonoGame 3.8.4 supports Android 6.0 (API 23) and above. -->
 		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+		<!--
+			MonoGame 3.8.4 is built against API 34. Targeting a newer API level switches on
+			behaviour changes (edge to edge enforcement, receiver registration flags, ...) that
+			the framework was never tested with, so stay on the level it was built for.
+		-->
+		<TargetSdkVersion>34</TargetSdkVersion>
 		<OutputType>Exe</OutputType>
 		<Nullable>disable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
@@ -39,6 +45,16 @@
 			Switch this to SdkOnly if you want a smaller APK and verify saves still work.
 		-->
 		<AndroidLinkMode>None</AndroidLinkMode>
+		<PublishTrimmed>false</PublishTrimmed>
+		<!--
+			Startup safety. MonoGame's Android backend plus the .NET for Android AOT / marshal
+			method combinations are a known source of "the app closes right after the launcher
+			icon" reports, so the release build keeps all of that switched off: the APK is a bit
+			bigger, the app starts reliably.
+		-->
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+		<AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
 	</PropertyGroup>
 
 	<Import Project="..\Sonic4Episode1\Sonic4Episode1.projitems" Label="Shared" />

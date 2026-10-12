@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  APP_ID: io.github.player124413.sonic4ep1
+
 jobs:
   android:
     name: Build APK
@@ -68,9 +71,150 @@ jobs:
             echo "::error title=Android build failed::$(cat annotation.txt)"
           fi
 
+      # Diagnostics that say *what* was built. The job summary is readable through the checks API
+      # (gh api /repos/:owner/:repo/check-runs/:id --jq .output.summary), which makes it possible
+      # to debug a build without downloading the artifact.
+      - name: Collect build diagnostics
+        if: success()
+        run: |
+          set +e
+          {
+            echo "## Android build diagnostics"
+            echo
+            echo '### effective build properties'
+            echo '```'
+            dotnet msbuild Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -nologo \
+              -getProperty:TargetFramework -getProperty:TargetSdkVersion -getProperty:SupportedOSPlatformVersion \
+              -getProperty:AndroidPackageFormat -getProperty:PublishTrimmed -getProperty:AndroidLinkMode \
+              -getProperty:RunAOTCompilation -getProperty:AndroidEnableProfiledAot \
+              -getProperty:AndroidEnableMarshalMethods -getProperty:AndroidSupportedAbis \
+              -getProperty:RuntimeIdentifiers -getProperty:ApplicationId 2>&1 | tail -40
+            echo '```'
+            echo
+            echo '### merged AndroidManifest.xml'
+            echo '```xml'
+            find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -3
+            for f in $(find obj -name 'AndroidManifest.xml' -path '*net10.0-android*' | head -1); do cat "$f"; done
+            echo '```'
+            echo
+            echo '### APK contents'
+            echo '```'
+            for apk in Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk; do
+              echo "--- $apk ($(stat -c%s "$apk") bytes)"
+              unzip -l "$apk" | head -30
+              echo "lib entries: $(unzip -l "$apk" | grep -c 'lib/')"
+              echo "--- native libraries (must be stored, not deflated)"
+              unzip -v "$apk" | grep -E 'lib/.*\.so' | head -20
+            done
+            echo '```'
+            echo
+            echo '### build warnings (tail)'
+            echo '```'
+            grep -iE 'warning|error' build.log | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: sonic4-android-apk
           path: Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk
           if-no-files-found: error
+
+  # Boots an Android emulator, installs the freshly built APK and reports what logcat says.
+  # This is the only way to find out why the app closes on a phone without having the phone.
+  emulator:
+    name: Run APK on an emulator
+    needs: android
+    runs-on: ubuntu-latest
+    if: needs.android.result == 'success'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sonic4-android-apk
+          path: apk
+
+      - name: Show the downloaded APKs
+        run: ls -la apk
+
+      - name: Setup Java (JDK 17, needed by the emulator tools)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run the app on an emulator and collect logcat
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_5
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: |
+            set +e
+            # Prefer the signed APK, fall back to whatever is there.
+            APK=$(ls apk/*Signed.apk 2>/dev/null | head -1)
+            [ -z "$APK" ] && APK=$(ls apk/*.apk | head -1)
+            echo "installing $APK"
+            adb install -r -t "$APK" > install.txt 2>&1
+            cat install.txt
+            if ! grep -q Success install.txt; then
+              echo "::error title=The APK could not be installed::$(tr '\n' ' ' < install.txt)"
+              exit 1
+            fi
+
+            adb logcat -c
+            adb shell monkey -p ${APP_ID} -c android.intent.category.LAUNCHER 1 > monkey.txt 2>&1
+            if ! grep -qi 'injected\|Events injected' monkey.txt; then
+              cat monkey.txt
+              ACTIVITY=$(adb shell cmd package resolve-activity --brief ${APP_ID} | tail -1 | tr -d '\r')
+              echo "resolved activity: $ACTIVITY"
+              adb shell am start -n "$ACTIVITY"
+            fi
+            sleep 35
+
+            adb logcat -d > logcat.txt
+            adb shell pidof ${APP_ID} > pid.txt
+            echo "pid: $(cat pid.txt)"
+
+            {
+              echo "## Emulator run (API 34, x86_64)"
+              echo
+              echo "app pid after 35s: $(cat pid.txt)"
+              echo
+              echo '### app log (tag Sonic4Ep1)'
+              echo '```'
+              grep -E 'Sonic4Ep1' logcat.txt | head -100
+              echo '```'
+              echo
+              echo '### crash related lines'
+              echo '```'
+              grep -nE 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|SIGSEGV|signal [0-9]+|NoClassDefFoundError|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|InvalidOperation|Reflection|IO)' logcat.txt | head -150
+              echo '```'
+              echo
+              echo '### last 200 logcat lines'
+              echo '```'
+              tail -200 logcat.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if grep -qE 'FATAL EXCEPTION|UnsatisfiedLinkError|signal [0-9]+ \(SIG' logcat.txt; then
+              echo "::error title=The app crashed on the emulator::See the job summary for the logcat excerpt."
+              exit 1
+            fi
+
+            if ! grep -q 'Sonic4Ep1' logcat.txt; then
+              echo "::error title=Managed code never ran::No 'Sonic4Ep1' tag in logcat, the process died before OnCreate finished."
+              exit 1
+            fi
+
+            echo "::notice title=Emulator run finished::The app stayed alive, see the job summary for details."
