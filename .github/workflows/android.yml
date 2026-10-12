@@ -62,8 +62,8 @@ jobs:
           dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj \
             -c Release -f net10.0-android -p:AndroidPackageFormat=apk 2>&1 | tee -a build.log
 
-      # The raw job log is not reachable from every environment (blob storage is often blocked),
-      # so the interesting bits are emitted as annotations, which are readable through the REST API.
+      # The raw job log lives in storage that is not reachable from every environment, so the
+      # interesting bits are emitted as annotations (readable through the REST API) as well.
       - name: Report build problems
         if: failure()
         run: |
@@ -100,8 +100,7 @@ jobs:
             done
           } > diagnostics.txt 2>&1
           cat diagnostics.txt
-          # annotations are the only channel that can be read from everywhere
-          awk 'length($0) > 0 { printf "::notice title=diag::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' diagnostics.txt | head -40)
+          awk 'length($0) > 0 { printf "::notice title=diag::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' diagnostics.txt | head -30)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -150,12 +149,13 @@ jobs:
           ls -l /dev/kvm || echo "no /dev/kvm"
 
       - name: Install the emulator and the system image
+        timeout-minutes: 15
         run: |
           set +e
           SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
           echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1
-          "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
+          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
           code=$?
           echo "sdkmanager exit code: $code"
           tail -20 sdkmanager.log
@@ -164,44 +164,69 @@ jobs:
             exit $code
           fi
 
-      - name: Boot the emulator and run the APK
+      - name: Boot the emulator
+        timeout-minutes: 25
         run: |
           set +e
           export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
-          report() { echo "$*"; }
 
-          # 1. create the AVD
           AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager | head -1)
           echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force > avd.log 2>&1
           code=$?
-          report "avdmanager exit code: $code"
+          echo "avdmanager exit code: $code"
           tail -10 avd.log
           if [ $code -ne 0 ]; then
             echo "::error title=Creating the AVD failed::$(tail -c 1500 avd.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
             exit 1
           fi
 
-          # 2. boot it
-          nohup emulator -avd test -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect \
-            -camera-back none -camera-front none -memory 2048 -partition-size 4096 > emulator.log 2>&1 &
-          sleep 10
-          adb wait-for-device
+          echo "--- acceleration check ---"
+          emulator -accel-check 2>&1 | head -5
+
+          nohup emulator -avd test -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect -camera-back none -camera-front none \
+            -memory 2048 -partition-size 4096 -verbose > emulator.log 2>&1 &
+          EMU_PID=$!
+          echo "emulator started with pid $EMU_PID"
+          sleep 25
+          head -40 emulator.log
+
+          if ! kill -0 $EMU_PID 2>/dev/null; then
+            echo "::error title=The emulator process died right after start::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
+          for i in $(seq 1 60); do
+            adb devices | grep -q emulator- && break
+            sleep 5
+          done
+          adb devices
+          if ! adb devices | grep -q emulator-; then
+            echo "::error title=adb never saw the emulator::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            exit 1
+          fi
+
           booted=0
           for i in $(seq 1 120); do
             if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then booted=1; break; fi
             sleep 5
           done
-          report "booted=$booted after $((i * 5))s"
+          echo "booted=$booted after $((i * 5))s"
           if [ $booted -ne 1 ]; then
-            echo "::error title=The emulator did not boot::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+            echo "::error title=The emulator did not finish booting::$(tail -c 1500 emulator.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
             exit 1
           fi
           adb shell wm size
 
-          # 3. install the APK
+      - name: Install and run the APK
+        timeout-minutes: 15
+        run: |
+          set +e
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+
           APK=$(ls apk/*Signed.apk 2>/dev/null | head -1)
           [ -z "$APK" ] && APK=$(ls apk/*.apk | head -1)
-          report "installing $APK"
+          echo "installing $APK"
           adb install -r -t "$APK" > install.log 2>&1
           cat install.log
           if ! grep -q Success install.log; then
@@ -209,50 +234,53 @@ jobs:
             exit 1
           fi
 
-          # 4. launch it and watch
           adb logcat -c
-          adb logcat -v time > logcat-full.txt 2>&1 &
-          LOGCAT_PID=$!
           adb shell monkey -p ${APP_ID} -c android.intent.category.LAUNCHER 1 > monkey.log 2>&1
           cat monkey.log
           sleep 45
-          kill $LOGCAT_PID
           adb logcat -d -v time > logcat.txt 2>&1
           adb shell pidof ${APP_ID} > pid.txt
-          report "pid after 45s: $(cat pid.txt)"
+          echo "pid after 45s: $(cat pid.txt)"
 
-          # 5. report
           grep -E 'Sonic4Ep1' logcat.txt > interesting.txt
-          grep -nE 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|dlopen|signal [0-9]+|NoClassDefFoundError|ClassNotFoundException|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|DllNotFound|EntryPoint)' logcat.txt >> interesting.txt
-          report "--- interesting logcat lines ---"
+          grep -E 'FATAL EXCEPTION|AndroidRuntime|UnsatisfiedLinkError|dlopen|signal [0-9]+|NoClassDefFoundError|ClassNotFoundException|monodroid|mono-rt|System\.(Exception|NullReference|MissingMethod|TypeInitialization|NotSupported|DllNotFound|EntryPoint)' logcat.txt >> interesting.txt
+          echo "--- interesting logcat lines ---"
           cat interesting.txt
-          echo "--- app pid: $(cat pid.txt) ---"
 
-          awk 'length($0) > 0 { printf "::error title=logcat::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' interesting.txt | head -40)
+          awk 'length($0) > 0 { printf "::error title=logcat::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' interesting.txt | head -30)
 
           if [ -z "$(cat pid.txt)" ]; then
-            awk 'length($0) > 0 { printf "::error title=logcat-tail::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' logcat.txt | tail -30)
+            awk 'length($0) > 0 { printf "::error title=logcat-tail::%s\n", $0 }' < <(sed -e 's/%/%25/g' -e 's/\r//g' logcat.txt | tail -25)
             exit 1
           fi
 
           echo "::notice title=Emulator run finished::The app is still running after 45 seconds (pid $(cat pid.txt))."
 
-      # Second channel for the logcat excerpt: a file committed to the branch. Job summaries and
-      # step logs live in storage that is not always reachable, a git fetch always is.
-      - name: Attach the logcat excerpt to the branch
+      # Belt and braces reporting: annotations are handy but rate limited and the job summary can
+      # not be read from everywhere, so everything is also collected into a file that is committed
+      # to the branch. This step runs no matter how the previous steps went.
+      - name: Attach the reports to the branch
         if: always() && github.event_name == 'push'
         env:
           BRANCH: ${{ github.ref_name }}
         run: |
           set +e
           mkdir -p ci-reports
+          OUT="ci-reports/emulator-${GITHUB_RUN_ID}.txt"
           {
             echo "run: $GITHUB_RUN_ID  sha: $GITHUB_SHA"
             echo "=== app pid after the wait ==="; cat pid.txt 2>/dev/null
             echo "=== interesting logcat lines ==="; cat interesting.txt 2>/dev/null
             echo "=== install output ==="; cat install.log 2>/dev/null
-            echo "=== logcat (last 400 lines) ==="; tail -400 logcat.txt 2>/dev/null
-          } > "ci-reports/emulator-${GITHUB_RUN_ID}.txt"
+            echo "=== monkey output ==="; cat monkey.log 2>/dev/null
+            echo "=== avdmanager ==="; tail -20 avd.log 2>/dev/null
+            echo "=== sdkmanager ==="; tail -20 sdkmanager.log 2>/dev/null
+            echo "=== emulator.log (first 80) ==="; head -80 emulator.log 2>/dev/null
+            echo "=== emulator.log (last 80) ==="; tail -80 emulator.log 2>/dev/null
+            echo "=== logcat (last 500 lines) ==="; tail -500 logcat.txt 2>/dev/null
+          } > "$OUT" 2>&1
+          wc -l "$OUT"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ci-reports
