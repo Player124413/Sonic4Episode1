@@ -169,16 +169,38 @@ jobs:
         run: |
           set +e
           export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          export ANDROID_AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
 
-          AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager | head -1)
-          echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force > avd.log 2>&1
-          code=$?
-          echo "avdmanager exit code: $code"
-          tail -10 avd.log
-          if [ $code -ne 0 ]; then
-            echo "::error title=Creating the AVD failed::$(tail -c 1500 avd.log | tr -d '\r' | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
-            exit 1
+          AVDMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/avdmanager 2>/dev/null | head -1)
+
+          {
+            echo "--- env ---"; env | grep -iE 'android|home' | sort
+            echo "--- avdmanager: $AVDMANAGER"
+            echo "--- AVD list before ---"; "$AVDMANAGER" list avd 2>&1 | head -20
+            echo "--- create avd ---"
+            echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force 2>&1 | tail -25
+            echo "exit code of the pipeline: $?"
+            echo "--- ls $ANDROID_AVD_HOME ---"; ls -la "$ANDROID_AVD_HOME" 2>&1
+            echo "--- find test.ini ---"; find / -name 'test.ini' 2>/dev/null | head -5
+            echo "--- find *.avd directories ---"; find / -maxdepth 7 -type d -name 'test.avd' 2>/dev/null | head -5
+            echo "--- AVD list after ---"; "$AVDMANAGER" list avd 2>&1 | head -20
+          } > avd-setup.log 2>&1
+          tail -60 avd-setup.log
+
+          # If avdmanager put the AVD somewhere unexpected, point the emulator at it.
+          if [ ! -f "$ANDROID_AVD_HOME/test.ini" ]; then
+            AVDDIR=$(find / -maxdepth 7 -type d -name 'test.avd' 2>/dev/null | head -1)
+            echo "AVDDIR=$AVDDIR"
+            if [ -n "$AVDDIR" ]; then
+              printf 'avd.ini.encoding=UTF-8\npath=%s\npath.rel=test.avd\ntarget=android-34\n' "$AVDDIR" > "$ANDROID_AVD_HOME/test.ini"
+              cp "$AVDDIR/config.ini" "$AVDDIR/config.ini.bak" 2>/dev/null
+            else
+              echo "::error title=Creating the AVD failed::avdmanager did not create an AVD anywhere on disk. See the report file attached to the branch."
+              exit 1
+            fi
           fi
+          ls -la "$ANDROID_AVD_HOME"
 
           echo "--- acceleration check ---"
           emulator -accel-check 2>&1 | head -5
@@ -273,11 +295,10 @@ jobs:
             echo "=== interesting logcat lines ==="; cat interesting.txt 2>/dev/null
             echo "=== install output ==="; cat install.log 2>/dev/null
             echo "=== monkey output ==="; cat monkey.log 2>/dev/null
-            echo "=== avdmanager ==="; tail -20 avd.log 2>/dev/null
-            echo "=== sdkmanager ==="; tail -20 sdkmanager.log 2>/dev/null
-            echo "=== emulator.log (first 80) ==="; head -80 emulator.log 2>/dev/null
-            echo "=== emulator.log (last 80) ==="; tail -80 emulator.log 2>/dev/null
-            echo "=== logcat (last 500 lines) ==="; tail -500 logcat.txt 2>/dev/null
+            for f in *.log; do
+              echo "=== $f (first 40) ==="; head -40 "$f" 2>/dev/null
+              echo "=== $f (last 40) ==="; tail -40 "$f" 2>/dev/null
+            done
           } > "$OUT" 2>&1
           wc -l "$OUT"
 
