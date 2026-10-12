@@ -13,7 +13,6 @@ permissions:
 
 env:
   APP_ID: io.github.player124413.sonic4ep1
-  ANDROID_IMAGE: system-images;android-34;google_apis;x86_64
 
 jobs:
   android:
@@ -127,13 +126,39 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.android.result == 'success'
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The APK of the very first port (commit 05e8830) - the one that closes immediately on a
+          # real phone. Running it here tells us whether that crash can be reproduced at all.
+          - name: original-port-on-api34
+            run_id: "38280283357"
+            image: system-images;android-34;google_apis;x86_64
+            api: "34"
+          - name: original-port-on-api36
+            run_id: "38280283357"
+            image: system-images;android-36;google_apis;x86_64
+            api: "36"
+          # The current build on the newest Android.
+          - name: current-on-api36
+            run_id: ""
+            image: system-images;android-36;google_apis;x86_64
+            api: "36"
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
+      - name: Download the APK
+        uses: actions/download-artifact@v4
         with:
           name: sonic4-android-apk
           path: apk
+          run-id: ${{ matrix.run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Show what was downloaded
+        run: ls -la apk || echo "no APK downloaded"
 
       - name: Setup Java (JDK 17, required by the Android SDK tools)
         uses: actions/setup-java@v5
@@ -155,7 +180,7 @@ jobs:
           SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
           echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1
-          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "$ANDROID_IMAGE" > sdkmanager.log 2>&1
+          timeout 600 "$SDKMANAGER" "platform-tools" "emulator" "${{ matrix.image }}" > sdkmanager.log 2>&1
           code=$?
           echo "sdkmanager exit code: $code"
           tail -20 sdkmanager.log
@@ -179,7 +204,7 @@ jobs:
             echo "--- avdmanager: $AVDMANAGER"
             echo "--- AVD list before ---"; "$AVDMANAGER" list avd 2>&1 | head -20
             echo "--- create avd ---"
-            echo no | "$AVDMANAGER" create avd -n test -k "$ANDROID_IMAGE" --device pixel_5 --force 2>&1 | tail -25
+            echo no | "$AVDMANAGER" create avd -n test -k "${{ matrix.image }}" --device pixel_5 --force 2>&1 | tail -25
             echo "exit code of the pipeline: $?"
             echo "--- ls $ANDROID_AVD_HOME ---"; ls -la "$ANDROID_AVD_HOME" 2>&1
             echo "--- find test.ini ---"; find / -name 'test.ini' 2>/dev/null | head -5
@@ -193,7 +218,7 @@ jobs:
             AVDDIR=$(find / -maxdepth 7 -type d -name 'test.avd' 2>/dev/null | head -1)
             echo "AVDDIR=$AVDDIR"
             if [ -n "$AVDDIR" ]; then
-              printf 'avd.ini.encoding=UTF-8\npath=%s\npath.rel=test.avd\ntarget=android-34\n' "$AVDDIR" > "$ANDROID_AVD_HOME/test.ini"
+              printf 'avd.ini.encoding=UTF-8\npath=%s\npath.rel=test.avd\ntarget=android-${{ matrix.api }}\n' "$AVDDIR" > "$ANDROID_AVD_HOME/test.ini"
               cp "$AVDDIR/config.ini" "$AVDDIR/config.ini.bak" 2>/dev/null
             else
               echo "::error title=Creating the AVD failed::avdmanager did not create an AVD anywhere on disk. See the report file attached to the branch."
@@ -288,9 +313,10 @@ jobs:
         run: |
           set +e
           mkdir -p ci-reports
-          OUT="ci-reports/emulator-${GITHUB_RUN_ID}.txt"
+          OUT="ci-reports/emulator-${GITHUB_RUN_ID}-${{ matrix.name }}.txt"
           {
-            echo "run: $GITHUB_RUN_ID  sha: $GITHUB_SHA"
+            echo "run: $GITHUB_RUN_ID  sha: $GITHUB_SHA  case: ${{ matrix.name }} (api ${{ matrix.api }})"
+            echo "apk files:"; ls -la apk 2>/dev/null
             echo "=== app pid after the wait ==="; cat pid.txt 2>/dev/null
             echo "=== interesting logcat lines ==="; cat interesting.txt 2>/dev/null
             echo "=== install output ==="; cat install.log 2>/dev/null
