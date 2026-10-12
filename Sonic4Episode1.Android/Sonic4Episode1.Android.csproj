@@ -1,7 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0-android</TargetFramework>
+		<!--
+			Any supported .NET Android target framework works (net8.0-android, net9.0-android,
+			net10.0-android, ...), older ones only need a matching SDK + workload installed.
+			MonoGame.Framework.Android ships a net8.0-android assembly which newer projects
+			consume through the normal platform framework rules.
+		-->
+		<TargetFramework>net10.0-android</TargetFramework>
 		<!-- MonoGame 3.8.4 supports Android 6.0 (API 23) and above. -->
 		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
 		<OutputType>Exe</OutputType>

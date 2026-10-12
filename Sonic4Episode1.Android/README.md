@@ -7,20 +7,21 @@ Xbox LIVE `Guide` message box, the back button, immutable landscape fullscreen a
 
 | | |
 |---|---|
-| Target framework | `net8.0-android` (Android 6.0 / API 23 and newer) |
+| Target framework | `net10.0-android` (Android 6.0 / API 23 and newer) |
 | Framework | `MonoGame.Framework.Android` 3.8.4 (NuGet) |
 | Output | `.apk` (`dotnet build`/`publish`) |
 | Application id | `io.github.player124413.sonic4ep1` |
 
 ## 1. Requirements
 
-* **.NET SDK 8** (`dotnet --version` → 8.x)
-* The Android workload: `dotnet workload install android`
-* **JDK 17** (set `JAVA_HOME`, .NET for Android does not support JDK 21 yet)
+* **A supported .NET SDK with the Android workload**: `dotnet workload install android`
+  (the project targets `net10.0-android`; change `<TargetFramework>` to `net9.0-android` or
+  `net8.0-android` if your SDK is older — MonoGame 3.8.4 works with all of them)
+* **JDK 21** (JDK 17 also works with the .NET 9/10 Android SDKs; set `JAVA_HOME`)
 * The Android SDK + build tools — installed automatically by the SDK, or by running
 
   ```bash
-  dotnet build -t:InstallAndroidDependencies -f net8.0-android \
+  dotnet build -t:InstallAndroidDependencies -f net10.0-android \
       -p:AcceptAndroidSDKLicenses=True \
       -p:AndroidSdkDirectory="$ANDROID_SDK_ROOT" \
       -p:JavaSdkDirectory="$JAVA_HOME"
@@ -86,17 +87,17 @@ assets are there.
 
 ```bash
 # debug build + install on a connected device/emulator
-dotnet build Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -t:Install -f net8.0-android
+dotnet build Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -t:Install -f net10.0-android
 
 # release apk (unsigned/debug-signed, directly installable)
-dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -c Release -f net8.0-android
-# -> Sonic4Episode1.Android/bin/Release/net8.0-android/publish/*.apk
+dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -c Release -f net10.0-android
+# -> Sonic4Episode1.Android/bin/Release/net10.0-android/publish/*.apk
 ```
 
 For a store release add your own signing information:
 
 ```bash
-dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -c Release -f net8.0-android \
+dotnet publish Sonic4Episode1.Android/Sonic4Episode1.Android.csproj -c Release -f net10.0-android \
     -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=my.keystore \
     -p:AndroidSigningKeyAlias=mykey -p:AndroidSigningKeyPass=… -p:AndroidSigningStorePass=…
 ```
