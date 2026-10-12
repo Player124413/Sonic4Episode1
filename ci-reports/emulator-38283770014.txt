@@ -1,0 +1,5 @@
+run: 38283770014  sha: b1fa1b25a7a86c7ca3600099b66ce23695085e77
+=== app pid after the wait ===
+=== interesting logcat lines ===
+=== install output ===
+=== logcat (last 400 lines) ===
